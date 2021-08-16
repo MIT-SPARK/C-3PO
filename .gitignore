@@ -1,6 +1,9 @@
+# other
+.idea/
 
 # Dataset folders
 datasets/
+data/
 
 # Dependencies
 third_party/
