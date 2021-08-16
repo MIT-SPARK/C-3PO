@@ -36,15 +36,15 @@ This file contains various code snippets that shows you how to meaningfully use 
 
 
 
+""" CODE TO GENERATE AND SAVE DEPTH IMAGES OF A SHAPENET OBJECT """
+import utils.dataset_utils as du
+import os
 
-
-
-# """ CODE TO GENERATE AND SAVE DEPTH IMAGES OF A SHAPENET OBJECT """
-# import utils.dataset_utils as du
-#
-# # idx=9 is the 9th object in the dataset of the ShapeNet object
-# # Following code will store files in the location 'depth_images/9/' folder
-# du.generateDepthData(idx=9, num_of_points=100000, location='../data/depth_images/')
+# idx=9 is the 9th object in the dataset of the ShapeNet object
+# Following code will store files in the location 'depth_images/9/' folder
+location = '../data/depth_images/'
+os.mkdir(path=location)
+du.generateDepthData(idx=9, num_of_points=100000, location=location)
 
 
 
@@ -57,7 +57,7 @@ This file contains various code snippets that shows you how to meaningfully use 
 # import utils.general_utils as gu
 #
 # gu.test_rendering_depth_images()
-# # The output image and depth images should be saved in the temp/ folder
+# # The output image and depth images should be saved in the ../data/tmp/ folder
 
 
 
