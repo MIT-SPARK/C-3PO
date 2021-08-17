@@ -101,6 +101,7 @@ def visualize_model_n_keypoints(model_list, keypoints_xyz, camera_locations=o3d.
         new_mesh.paint_uniform_color([0.8, 0.0, 0.0])
         keypoint_markers.append(new_mesh)
 
+    camera_locations.paint_uniform_color([0.1, 0.5, 0.1])
     o3d.visualization.draw_geometries(keypoint_markers + model_list + [camera_locations])
 
     return keypoint_markers
@@ -148,8 +149,8 @@ def generate_depth_data(class_id, model_id, radius_multiple = np.array([1.2, 3.0
     # generating radius for view sampling
     gu.sample_depth_pcd(centered_pcd=model_pcd, camera_locations=camera_locations, radius=radius, folder_name=location)
 
-    # generate depth pcd
-    # store in ../data/depth_images/class_id/model_id/
+    # save keypoints_xyz at location
+    np.save(file=location+'keypoints_xyz.npy', arr=keypoints_xyz)
 
 
 
@@ -159,4 +160,35 @@ class Dataset(torch.utils.data.Dataset):
 
 
 class DepthPointCloud(torch.utils.data.Dataset):
-    """ Defines the dataset of depth images for ob"""
+    """
+    This creates the dataset for depth point clouds of CAD models.
+    It outputs the depth point clouds stored in a given file location.
+    It is to be used with dataset loader in Pytorch.
+    """
+    def __init__(self, dir_name, class_id, model_id, object_file='object.pcd', camera_locations_file='camera_locations.pcd', metadata_file='metadata.csv', keypoint_numpy_file='keypoints_xyz.npy'):
+        # instead of object_file, have to work with class_id and model_id
+        self.metadata_file = metadata_file
+        self.class_id = class_id
+        self.model_id = model_id
+        self.dir_name = dir_name + str(self.class_id) + '/' +str(self.model_id) + '/'
+        self.object_file = object_file
+        self.camera_locations_file = camera_locations_file
+
+        self.metadata = pd.read_csv(self.dir_name + self.metadata_file)
+        self.object = o3d.io.read_point_cloud(self.dir_name + self.object_file)
+        self.camera_locations = o3d.io.read_point_cloud(self.dir_name + self.camera_locations_file)
+
+        self.keypoints_xyz = np.load(file=self.dir_name + str(keypoint_numpy_file))
+
+    def __len__(self):
+        return len(self.metadata)
+
+    def __getitem__(self, idx):
+        depth_pcd_file_name = self.metadata.iloc[idx, 0]
+        depth_pcd_file = os.path.join(self.dir_name, depth_pcd_file_name)
+
+        depth_pcd = o3d.io.read_point_cloud(depth_pcd_file)
+        depth_pcd.estimate_normals()
+        depth_pcd.paint_uniform_color([0.5, 0.5, 0.5])
+
+        return depth_pcd
