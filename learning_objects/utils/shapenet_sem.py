@@ -11,7 +11,7 @@ NUM_POINTS_PER_CAD_MODEL: int = 100000
 functions:
 process --> process
 get_model ----------> get_model
-visualizePCD ---------> visualize_model
+visualize_model ---------> visualize_model
 get_sample ---> get_sample
 generate_depth_data ----> generate_depth_data
 
@@ -32,7 +32,6 @@ import pandas as pd
 import open3d as o3d
 import numpy as np
 import learning_objects.utils.general_utils as gu
-# import general_utils as gu
 
 
 def process(metadata_file=METADATA_FILE, synset_file=SYNSET_FILE):

@@ -2,6 +2,51 @@
 """
 This file contains various code snippets that shows you how to meaningfully use the functions in this library.
 """
+# MESH_FOLDER_NAME: str = '../../../datasets/KeypointNet/ShapeNetCore.v2.ply/'
+
+
+# """ Test """
+# import csv
+# import torch
+# import os
+# import pandas as pd
+# import open3d as o3d
+# import json
+# import numpy as np
+# import learning_objects.utils.general_utils as gu
+#
+# class_id = "02958343"
+# model_id = "1b94aad142e6c2b8af9f38a1ee687286"
+# object_mesh_file = MESH_FOLDER_NAME + str(class_id) + '/' + str(model_id) + '.ply'
+# mesh = o3d.io.read_triangle_mesh(filename=object_mesh_file)
+# mesh.paint_uniform_color([0.5, 0.5, 0.5])
+# mesh.compute_vertex_normals()
+# o3d.visualization.draw_geometries([mesh])
+# pcd = mesh.sample_points_uniformly(number_of_points=100000)
+# o3d.visualization.draw_geometries([pcd])
+
+
+# """ CODE TO GENERATE AND SAVE DEPTH IMAGES OF A KEYPOINTNET-SHAPENETCORE OBJECT """
+# # import learning_objects.utils.shapenet_sem as sn_sem
+# import learning_objects.utils.keypointnet as kp_net
+# import os
+#
+# # idx=9 is the 9th object in the dataset of the ShapeNet object
+# # Following code will store files in the location 'depth_images/9/' folder
+# location = '../data/depth_images/'
+# # os.mkdir(path=location)
+# class_id = "02958343"                           # car
+# model_id = "1b94aad142e6c2b8af9f38a1ee687286"   # a particular car model
+# os.mkdir(path=location + class_id + '/')
+# os.mkdir(path=location + class_id + '/' + model_id + '/')
+# location = location + class_id + '/' + model_id + '/'
+# kp_net.generate_depth_data(class_id=class_id, model_id=model_id, num_of_points=100000, location=location)
+
+
+
+
+
+
 
 
 # """ CODE THAT CREATES A DATASET AND VISUALIZES THE DEPTH IMAGES GENERATED """
