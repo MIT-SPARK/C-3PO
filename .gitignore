@@ -3,7 +3,7 @@
 
 # Dataset folders
 datasets/
-data/
+learning_objects/data/
 
 # Dependencies
 third_party/
@@ -77,7 +77,7 @@ instance/
 .scrapy
 
 # Sphinx documentation
-docs/_build/
+learning_objects/docs/_build/
 
 # PyBuilder
 target/

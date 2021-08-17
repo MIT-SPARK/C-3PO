@@ -1,5 +1,6 @@
 import copy
 import csv
+import os
 import random
 import string
 import numpy as np
@@ -52,7 +53,7 @@ def get_extrinsic(view_dir, up, location):
     return extrinsic
 
 
-def get_cameraLocations(camera_distance_vector, color=np.array([1.0, 0.0, 0.0])):
+def get_camera_locations(camera_distance_vector, color=np.array([1.0, 0.0, 0.0])):
     """ generating sphere of points around the object """
     camera_locations = o3d.geometry.PointCloud()
     for i in range(len(camera_distance_vector)):
@@ -100,7 +101,7 @@ def get_depth_pcd(centered_pcd, camera, radius, method='1'):
 
 
 
-def createTestObject(visualize=False):
+def create_test_object(visualize=False):
     """ This function outputs a test 3D object that is placed at origin """
 
     cyl = o3d.geometry.TriangleMesh.create_cylinder(.05, 3)
@@ -223,7 +224,7 @@ def test_get_depth_pcd():
     o3d.visualization.draw_geometries([pcd, coordinate_frame])
 
 
-def test_rendering_depth_images():
+def test_rendering_depth_images(save_to_folder='../data/tmp/'):
     """ This code tests rendering depth images from 3D Objects """
     render = rendering.OffscreenRenderer(640, 480)
 
@@ -270,7 +271,7 @@ def test_rendering_depth_images():
     render.scene.show_axes(True)
 
     img = render.render_to_image()
-    o3d.io.write_image("../data/tmp/test.png", img, 9)
+    o3d.io.write_image(save_to_folder+"test.png", img, 9)
 
     # camera setup using (intrinsic, extrinsic)
     # intrinsic = ()
@@ -287,17 +288,17 @@ def test_rendering_depth_images():
 
     img = render.render_to_image()
     depth = render.render_to_depth_image()
-    o3d.io.write_image("../data/tmp/test2.png", img)
+    o3d.io.write_image(save_to_folder+"test2.png", img)
     # plt.imshow(depth)
     # plt.show()
     # o3d.io.write_image("tmp/test2_depth.png", depth, 9)
-    plt.imsave("../data/tmp/test2_depth.png", depth)
+    plt.imsave(save_to_folder+"test2_depth.png", depth)
 
     # generate and save point cloud from the depth image
     pcd = o3d.geometry.PointCloud.create_from_depth_image(depth, intrinsic=intrinsic, depth_scale=0.01, depth_trunc=0.9,
                                                           stride=10)
     pcd.paint_uniform_color([0.5, 0.5, 0.5])
-    o3d.io.write_point_cloud("../data/tmp/test2_depth.pcd", pcd)
+    o3d.io.write_point_cloud(save_to_folder+"test2_depth.pcd", pcd)
     o3d.visualization.draw_geometries([pcd])
 
     # removing hidden points

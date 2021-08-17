@@ -1,10 +1,29 @@
 
 # Global Variables:
-METADATA_FILE: str = "../../datasets/ShapeNetSem.v0/metadata.csv"
-SYNSET_FILE: str = "../../datasets/ShapeNetSem.v0/categories.synset.csv"
-DIR_NAME: str = "../../datasets/ShapeNetSem.v0/models-OBJ/models/"
+METADATA_FILE: str = "../../../datasets/ShapeNetSem.v0/metadata.csv"
+SYNSET_FILE: str = "../../../datasets/ShapeNetSem.v0/categories.synset.csv"
+DIR_NAME: str = "../../../datasets/ShapeNetSem.v0/models-OBJ/models/"
 NUM_POINTS_PER_CAD_MODEL: int = 100000
 #
+
+
+"""CHANGES TO BE MADE: RENAMING: 
+functions:
+process --> process
+get_model ----------> get_model
+visualizePCD ---------> visualize_model
+get_sample ---> get_sample
+generate_depth_data ----> generate_depth_data
+
+classes:
+Dataset3dModels ----------> Dataset3dModels
+DepthPointCloud ------> DepthPointCloud
+
+
+folder name:
+dataset_utils --------> shapenet_sem (short would be sn_sem when importing)
+"""
+
 
 import csv
 import torch
@@ -12,10 +31,11 @@ import os
 import pandas as pd
 import open3d as o3d
 import numpy as np
-import utils.general_utils as gu
+import learning_objects.utils.general_utils as gu
+# import general_utils as gu
 
 
-def process_shapeNetSem(metadata_file=METADATA_FILE, synset_file=SYNSET_FILE):
+def process(metadata_file=METADATA_FILE, synset_file=SYNSET_FILE):
 
     """
     This function takes in the csv files of the ShapeNetSem.v0 and outputs
@@ -97,7 +117,7 @@ def process_shapeNetSem(metadata_file=METADATA_FILE, synset_file=SYNSET_FILE):
     return category_list, category2synset, category2objFilename
 
 
-def getCADmodel(file_name):
+def get_model(file_name):
     """
     This code outputs PCD from a ShapeNet object file_name (.obj)
     """
@@ -119,7 +139,7 @@ def getCADmodel(file_name):
 
 
 
-def visualizePCD(pcd_example):
+def visualize_model(pcd_example):
     """
     The function outputs a 3D visualization of the CAD model
     pcd_example - is an o3d.geometry.PointCloud data type
@@ -158,7 +178,7 @@ def visualizePCD(pcd_example):
     o3d.visualization.draw_geometries([origin_pose, pcd_example, sphere_points])
 
 
-class ShapeNetSem(torch.utils.data.Dataset):
+class Dataset3dModels(torch.utils.data.Dataset):
     """
     This creates the dataset for ShapeNetSem.
     It outputs ShapeNet models
@@ -194,9 +214,9 @@ class ShapeNetSem(torch.utils.data.Dataset):
         return object_data
 
 
-def getSample_ShapeNet(idx=9, num_of_points=100000, need_mesh=False):
+def get_sample(idx=9, num_of_points=100000, need_mesh=False):
 
-    dataset = ShapeNetSem(number_of_points=num_of_points)
+    dataset = Dataset3dModels(number_of_points=num_of_points)
     object_data = dataset[idx]
     pcd = object_data['pcd']
     points = object_data['points']
@@ -208,11 +228,11 @@ def getSample_ShapeNet(idx=9, num_of_points=100000, need_mesh=False):
 
 
 
-def generateDepthData(idx=9, num_of_points=100000, location='depth_images/'):
+def generate_depth_data(idx=9, num_of_points=100000, location='depth_images/'):
     """ Generates depth images for a ShapeNet CAD model """
 
     # generating the model
-    model_pcd = getSample_ShapeNet(idx=idx, num_of_points=num_of_points)
+    model_pcd = get_sample(idx=idx, num_of_points=num_of_points)
     center = model_pcd.get_center()
     model_pcd.translate(-center)
     model_pcd.paint_uniform_color([0.5, 0.5, 0.5])
@@ -225,7 +245,7 @@ def generateDepthData(idx=9, num_of_points=100000, location='depth_images/'):
 
     # determining camera locations and radius
     camera_distance_vector = [2 * diameter, 5 * diameter]
-    camera_locations = gu.get_cameraLocations(camera_distance_vector)
+    camera_locations = gu.get_camera_locations(camera_distance_vector)
     radius = gu.get_radius(object_diameter=diameter, cam_location=np.max(camera_distance_vector))
 
     # visualizing 3D object and all the camera locations

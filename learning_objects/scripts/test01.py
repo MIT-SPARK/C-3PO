@@ -4,18 +4,15 @@ This file contains various code snippets that shows you how to meaningfully use 
 """
 
 
-
-
-
 # """ CODE THAT CREATES A DATASET AND VISUALIZES THE DEPTH IMAGES GENERATED """
-# import utils.dataset_utils as du
+# import learning_objects.utils.shapenet_sem as sn_sem
 # import open3d as o3d
 # import numpy as np
 # import random
 #
 # # comment this out if already generated
-# # du.generateDepthData(idx=9, num_of_points=100000, location='../data/depth_images/')
-# dataset = du.DepthPointCloud(dir_name='../data/depth_images/9/', object_file='object.pcd', camera_locations_file='camera_locations.pcd', metadata_file='metadata.csv')
+# # sn_sem.generate_depth_data(idx=9, num_of_points=100000, location='../data/depth_images/')
+# dataset = sn_sem.DepthPointCloud(dir_name='../data/depth_images/9/', object_file='object.pcd', camera_locations_file='camera_locations.pcd', metadata_file='metadata.csv')
 # cad_model = dataset.object
 #
 # # r = list(range(len(dataset)))
@@ -36,15 +33,18 @@ This file contains various code snippets that shows you how to meaningfully use 
 
 
 
-""" CODE TO GENERATE AND SAVE DEPTH IMAGES OF A SHAPENET OBJECT """
-import utils.dataset_utils as du
-import os
 
-# idx=9 is the 9th object in the dataset of the ShapeNet object
-# Following code will store files in the location 'depth_images/9/' folder
-location = '../data/depth_images/'
-os.mkdir(path=location)
-du.generateDepthData(idx=9, num_of_points=100000, location=location)
+
+
+# """ CODE TO GENERATE AND SAVE DEPTH IMAGES OF A SHAPENET OBJECT """
+# import learning_objects.utils.shapenet_sem as sn_sem
+# import os
+#
+# # idx=9 is the 9th object in the dataset of the ShapeNet object
+# # Following code will store files in the location 'depth_images/9/' folder
+# location = '../data/depth_images/'
+# os.mkdir(path=location)
+# sn_sem.generate_depth_data(idx=9, num_of_points=100000, location=location)
 
 
 
@@ -54,7 +54,7 @@ du.generateDepthData(idx=9, num_of_points=100000, location=location)
 
 
 # """ TEST: RENDERING DEPTH IMAGES FROM 3D OBJECTS """
-# import utils.general_utils as gu
+# import learning_objects.utils.general_utils as gu
 #
 # gu.test_rendering_depth_images()
 # # The output image and depth images should be saved in the ../data/tmp/ folder
@@ -67,13 +67,13 @@ du.generateDepthData(idx=9, num_of_points=100000, location=location)
 
 
 # """ VISUALIZE A MODEL IN SHAPENET """
-# import utils.dataset_utils as du
+# import learning_objects.utils.shapenet_sem as sn_sem
 #
 # """ getting a point cloud data (pcd) from ShapeNet dataset """
-# pcd_example = du.getSample_ShapeNet(idx=3572, num_of_points=100000)
+# pcd_example = sn_sem.get_sample(idx=300, num_of_points=100000)
 #
 # """ visualizing the data """
-# du.visualizePCD(pcd_example)
+# sn_sem.visualize_model(pcd_example)
 
 
 
@@ -83,9 +83,9 @@ du.generateDepthData(idx=9, num_of_points=100000, location=location)
 
 
 # """ VISUALIZE MODELS IN A GIVEN CATEGORY """
-# import utils.dataset_utils as du
+# import learning_objects.utils.shapenet_sem as sn_sem
 #
-# categoryList, category2synset, category2objFilename = du.process_shapeNetSem()
+# categoryList, category2synset, category2objFilename = sn_sem.process()
 # # print(categoryList)
 # # print(category2objFilename)
 #
@@ -96,5 +96,5 @@ du.generateDepthData(idx=9, num_of_points=100000, location=location)
 # print(f"Displaying {num} objects of Category: {aCategory}")
 #
 # for i in range(min(num, len(category2objFilename[aCategory]))):
-#     model_pcd = du.getCADmodel(category2objFilename[aCategory][i])
-#     du.visualizePCD(model_pcd)
+#     model_pcd = sn_sem.get_model(category2objFilename[aCategory][i])
+#     sn_sem.visualize_model(model_pcd)
