@@ -1,3 +1,6 @@
 [submodule "ddn"]
 	path = ddn
 	url = https://github.com/anucvml/ddn.git
+[submodule "pointnet.pytorch"]
+	path = pointnet.pytorch
+	url = https://github.com/fxia22/pointnet.pytorch.git
