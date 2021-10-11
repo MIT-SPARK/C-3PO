@@ -9,7 +9,40 @@ import open3d.visualization.rendering as rendering
 import matplotlib.pyplot as plt
 
 
+import torch
+import open3d as o3d
+from torch_geometric.data import Data
+from time import time
 
+
+class Timer:
+    def __init__(self, tag, print=False):
+        self.tag = tag
+        self.ts = None
+        self.print = print
+
+    def tic(self):
+        self.ts = time()
+
+    def toc(self):
+        if self.print:
+            print("{}: {}s".format(self.tag, time() - self.ts))
+        return time()
+
+def tensor_to_o3d(normals, pos):
+    """
+    :param pos: position of points torch.Tensor Nx3
+    :param normals: surface normals torch.Tensor Nx3
+    :return: open3d PointCloud
+    """
+    pos_o3d = o3d.utility.Vector3dVector(pos.numpy())
+    normals_o3d = o3d.utility.Vector3dVector(normals.numpy())
+
+    object = o3d.geometry.PointCloud()
+    object.points = pos_o3d
+    object.normals = normals_o3d
+
+    return object
 
 def generate_filename(chars=string.ascii_uppercase + string.digits, N=10):
     """function generates random strings of length N"""

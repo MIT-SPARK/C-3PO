@@ -1,10 +1,15 @@
 
 # Global Variables:
-METADATA_FILE: str = "../../../datasets/ShapeNetSem.v0/metadata.csv"
-SYNSET_FILE: str = "../../../datasets/ShapeNetSem.v0/categories.synset.csv"
-DIR_NAME: str = "../../../datasets/ShapeNetSem.v0/models-OBJ/models/"
+METADATA_FILE: str = "../datasets/ShapeNetSem.v0/metadata.csv"
+SYNSET_FILE: str = "../datasets/ShapeNetSem.v0/categories.synset.csv"
+DIR_NAME: str = "../datasets/ShapeNetSem.v0/models-OBJ/models/"
 NUM_POINTS_PER_CAD_MODEL: int = 100000
 #
+# METADATA_FILE: str = "../../../datasets/ShapeNetSem.v0/metadata.csv"
+# SYNSET_FILE: str = "../../../datasets/ShapeNetSem.v0/categories.synset.csv"
+# DIR_NAME: str = "../../../datasets/ShapeNetSem.v0/models-OBJ/models/"
+# NUM_POINTS_PER_CAD_MODEL: int = 100000
+# #
 
 
 """CHANGES TO BE MADE: RENAMING: 
@@ -24,14 +29,13 @@ folder name:
 dataset_utils --------> shapenet_sem (short would be sn_sem when importing)
 """
 
-
 import csv
 import torch
 import os
 import pandas as pd
 import open3d as o3d
 import numpy as np
-import learning_objects.utils.general_utils as gu
+import learning_objects.utils.general as gu
 
 
 def process(metadata_file=METADATA_FILE, synset_file=SYNSET_FILE):

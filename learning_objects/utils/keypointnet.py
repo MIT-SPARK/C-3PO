@@ -1,8 +1,8 @@
 import copy
 
-ANNOTATIONS_FOLDER: str = '../../../datasets/KeypointNet/KeypointNet/annotations/'
-PCD_FOLDER_NAME: str = '../../../datasets/KeypointNet/KeypointNet/pcds/'
-MESH_FOLDER_NAME: str = '../../../datasets/KeypointNet/ShapeNetCore.v2.ply/'
+ANNOTATIONS_FOLDER: str = '../datasets/KeypointNet/KeypointNet/annotations/'
+PCD_FOLDER_NAME: str = '../datasets/KeypointNet/KeypointNet/pcds/'
+MESH_FOLDER_NAME: str = '../datasets/KeypointNet/ShapeNetCore.v2.ply/'
 OBJECT_CATEGORIES: list = ['airplane', 'bathtub', 'bed', 'bottle',
                            'cap', 'car', 'chair', 'guitar',
                            'helmet', 'knife', 'laptop', 'motorcycle',
@@ -49,7 +49,7 @@ import pandas as pd
 import open3d as o3d
 import json
 import numpy as np
-import learning_objects.utils.general_utils as gu
+import learning_objects.utils.general as gu
 
 
 def get_model_and_keypoints(class_id, model_id):
