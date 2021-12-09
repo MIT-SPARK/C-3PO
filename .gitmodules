@@ -10,3 +10,9 @@
 [submodule "cvxpylayers"]
 	path = cvxpylayers
 	url = https://github.com/cvxgrp/cvxpylayers.git
+[submodule "equi-pose"]
+	path = equi-pose
+	url = https://github.com/dragonlong/equi-pose.git
+[submodule "WyPR"]
+	path = WyPR
+	url = https://github.com/facebookresearch/WyPR.git
