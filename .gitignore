@@ -2,7 +2,7 @@
 .idea/
 
 # Dataset folders
-datasets/
+data/
 learning_objects/data/
 
 # Dependencies
