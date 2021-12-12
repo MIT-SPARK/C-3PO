@@ -5,7 +5,6 @@ from cvxpylayers.torch import CvxpyLayer
 
 import os
 import sys
-
 sys.path.append("../../")
 
 from learning_objects.models.point_transformer import PointTransformerSegment
@@ -43,6 +42,7 @@ class SegmentBackground(nn.Module):
                 d = input feature dimension
                 pointcloud[..., 0:3] = positions
                 pointcloud[..., 3:]  = feature
+
         Outputs:
         -------
             pointcloud_inlier: (B, N, 3+d)

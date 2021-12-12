@@ -22,20 +22,44 @@ from learning_objects.utils.sdp_data import get_rotation_relaxation_constraints,
 from learning_objects.utils.category_gnc import solve_3dcat_with_sdp
 
 
-def test():
-    u = np.random.rand(3, 1)
-    A = np.matmul(u, np.transpose(u))
-    print(u)
-    print(A)
 
-    u, s, vh = np.linalg.svd(A)
-    u[:, 1:] = np.zeros((3, 2))
-    vh[1:, :] = np.zeros((2, 3))
-    print(s)
-    print(u)
-    print(vh)
-    Astar = np.matmul(np.matmul(u, np.diag(s)), vh)
-    print(Astar)
+def shape_error(c, c_):
+    """
+    inputs:
+    c: torch.tensor of shape (K, 1)
+    c_: torch.tensor of shape (K, 1)
+
+    output:
+    c_err: torch.tensor of shape (1, 1)
+    """
+
+    return torch.norm(c - c_, p=2)/c.shape[0]
+
+def translation_error(t, t_):
+    """
+    inputs:
+    t: torch.tensor of shape (3, 1)
+    t_: torch.tensor of shape (3, 1)
+
+    output:
+    t_err: torch.tensor of shape (1, 1)
+    """
+
+    return torch.norm(t - t_, p=2)/3.0
+
+
+def rotation_error(R, R_):
+    """
+    inputs:
+    R: torch.tensor of shape (3, 3)
+    R_: torch.tensor of shape (3, 3)
+
+    output:
+    R_err: torch.tensor of shape (1, 1)
+    """
+
+    return transforms.matrix_to_euler_angles(torch.matmul(R.T, R_), "XYZ").abs().sum()/3.0
+
 
 
 def check_rot_mat(R, tol=0.001):
@@ -202,9 +226,9 @@ def simple_testPACE():
 
     est_y = get_shape(model_keypoints=model_keypoints, R=est_R, t=est_t, c=est_c)
 
-    shape_err = torch.norm(c - est_c, p=2)
-    translation_err = torch.norm(t - est_t, p=2)
-    rotation_err = torch.norm(R - est_R, p='fro')
+    shape_err =  shape_error(c, est_c)
+    translation_err =  translation_error(t, est_t)
+    rotation_err =  rotation_error(R, est_R)
     rot_matrix_error = torch.norm(torch.matmul(R.T, R) - torch.eye(3), p='fro')
     y = y.squeeze(0)
     keypoint_error = torch.norm(y - est_y, p=2)
@@ -296,42 +320,7 @@ def exptPACE():
     print("keypoint error (std & mean): ", keypoint_err)
 
 
-def shape_error(c, c_):
-    """
-    inputs:
-    c: torch.tensor of shape (K, 1)
-    c_: torch.tensor of shape (K, 1)
 
-    output:
-    c_err: torch.tensor of shape (1, 1)
-    """
-
-    return torch.norm(c - c_, p=2)/c.shape[0]
-
-def translation_error(t, t_):
-    """
-    inputs:
-    t: torch.tensor of shape (3, 1)
-    t_: torch.tensor of shape (3, 1)
-
-    output:
-    t_err: torch.tensor of shape (1, 1)
-    """
-
-    return torch.norm(t - t_, p=2)/3.0
-
-
-def rotation_error(R, R_):
-    """
-    inputs:
-    R: torch.tensor of shape (3, 3)
-    R_: torch.tensor of shape (3, 3)
-
-    output:
-    R_err: torch.tensor of shape (1, 1)
-    """
-
-    return transforms.matrix_to_euler_angles(torch.matmul(R.T, R_), "XYZ").abs().sum()/3.0
 
 
 
@@ -435,7 +424,6 @@ def compare_testPACE():
     print("Error in Q: ", torch.norm(Q_us - Q_ji, p=2))
 
 if __name__ == '__main__':
-    # test()
 
     # test_cvxpylayers()
 

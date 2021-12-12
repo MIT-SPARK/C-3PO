@@ -1,8 +1,8 @@
 import copy
 
-ANNOTATIONS_FOLDER: str = '../datasets/KeypointNet/KeypointNet/annotations/'
-PCD_FOLDER_NAME: str = '../datasets/KeypointNet/KeypointNet/pcds/'
-MESH_FOLDER_NAME: str = '../datasets/KeypointNet/ShapeNetCore.v2.ply/'
+ANNOTATIONS_FOLDER: str = '../../data/KeypointNet/KeypointNet/annotations/'
+PCD_FOLDER_NAME: str = '../../data/KeypointNet/KeypointNet/pcds/'
+MESH_FOLDER_NAME: str = '../../data/KeypointNet/ShapeNetCore.v2.ply/'
 OBJECT_CATEGORIES: list = ['airplane', 'bathtub', 'bed', 'bottle',
                            'cap', 'car', 'chair', 'guitar',
                            'helmet', 'knife', 'laptop', 'motorcycle',
@@ -44,11 +44,15 @@ CLASS_NAME: dict = {"02691156": 'airplane',
 
 import csv
 import torch
-import os
 import pandas as pd
 import open3d as o3d
 import json
 import numpy as np
+
+import os
+import sys
+sys.path.append("../../")
+
 import learning_objects.utils.general as gu
 
 
@@ -120,7 +124,7 @@ def visualize_model(class_id, model_id):
 
 
 
-def generate_depth_data(class_id, model_id, radius_multiple = np.array([1.2, 3.0]), num_of_points=100000, location='../data/depth_images/tmp/tmp/'):
+def generate_depth_data(class_id, model_id, radius_multiple = np.array([1.2, 3.0]), num_of_points=100000, location='../../data/learning-objects/depth_images/tmp/'):
     """ Generates depth point clouds of the CAD model """
 
     # get model
