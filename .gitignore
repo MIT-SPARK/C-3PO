@@ -4,6 +4,7 @@
 # Dataset folders
 data/
 learning_objects/data/
+example_package/
 
 # Dependencies
 third_party/

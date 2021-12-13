@@ -2,6 +2,8 @@
 This is an implementation of point net.
 
 Source: https://github.com/fxia22/pointnet.pytorch
+
+Paper:
 """
 
 from __future__ import print_function

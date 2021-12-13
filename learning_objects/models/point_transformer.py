@@ -1,9 +1,9 @@
 """
-This is an  implementation of point transformer from:
+This is an  implementation of point transformer.
 
-* https://github.com/lucidrains/point-transformer-pytorch
+Source: https://github.com/lucidrains/point-transformer-pytorch
 
-* Point Transformer Paper https://arxiv.org/abs/2012.09164
+Paper: https://arxiv.org/abs/2012.09164
 """
 
 from typing import List, Optional, Tuple

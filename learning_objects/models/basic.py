@@ -73,7 +73,7 @@ class SegmentBackground(nn.Module):
 
 
 
-class Keypoints(nn.Module):
+class HeatmapKeypoints(nn.Module):
     def __init__(self, k=64, method='point_transformer', dim=[6, 32, 64]):
         super().__init__()
         """
@@ -129,7 +129,7 @@ class Keypoints(nn.Module):
             _, idx = torch.max(heatmap, dim=1)
 
         else:
-            raise IOError
+            raise ValueError
 
 
         y = torch.zeros(size=(pointcloud.size(0), self.k, pointcloud.size(2))).cuda()
@@ -138,6 +138,9 @@ class Keypoints(nn.Module):
 
         return y
 
+
+
+class Keypoints(nn.Module):
 
 
 
@@ -570,6 +573,117 @@ class PACE(nn.Module):
         return P
 
 
+class get_model_from_shape(nn.Module):
+    def __init__(self, cad_models):
+        super().__init__()
+        """
+        cad_models: torch.tensor of shape (K, 3, n)
+        
+        where 
+        K = number of cad models
+        n = number of points in each cad model
+        
+        Assumption:
+        I am assuming that each CAD model is a point cloud of n points: (3, n)
+        I am assuming that the intermediate shape can be obtained from 
+            the shape parameter c and the cad models 
+            by just weighted average 
+        """
+        self.cad_models = cad_models.unsqueeze(0) # (1, K, 3, 1)
+
+    def forward(self, shape):
+        """
+        shape: torch.tensor of shape (B, K, 1)
+
+        where
+        B = batch size
+        K = number of cad models
+
+        intermediate:
+        self.cad_models: torch.tensor of shape (1, K, 3, n)
+
+        output:
+        model: torch.tensor of shape (B, 3, n)
+        """
+        shape = shape.unsqueeze(-1) # (B, K, 1, 1)
+
+        return torch.einsum('bkmn,ukij->bij', shape, self.cad_models)
+
+
+
+
+class HallucinatedKeyPoints(nn.Module):
+    def __init__(self, model_keypoints, cad_models, weights=None, lambda_constant=None, hallucinate=True):
+        super().__init__()
+        """
+        model_keypoints: torch.tensor of shape (K, 3, N) 
+        cad_models: torch.tensor of shape (K, 3, n)
+        weights: torch.tensor of shape (N, 1) or None
+        lambda_constant: torch.tensor of shape (1, 1) or None
+        hallucinate: bool: True or False
+        heatmap: bool: True or False
+        
+        
+        where 
+        N = number of semantic keypoints
+        K = number of cad models
+        n = number of points in each cad model
+        
+        hallucinate: True if the keypoint module addes hallucinated keypoints
+        heatmap: True if the keypoint module detects keypoints using heatmap, i.e. it detects keypoints only on the 
+            visible surface of the pointcloud 
+        
+        Assumption:
+        We are assuming that each CAD model is a point cloud of n points: (3, n)
+        We are assuming that given K point clouds (K, 3, n) and a shape parameter c (K, 1) 
+            there is a differentiable function "get_model_from_shape(nn.Module)" which 
+            can be used to generate intermediate shape from the cad models and the shape 
+            parameter
+        
+        Note: 
+        We do not allow for (hallucination=False && heatmap=True) as we need all the semantic keypoints to register 
+        """
+        self.b = model_keypoints  # (K, 3, N)
+
+        self.N = self.b.shape[-1]  # (1, 1)
+        self.K = self.b.shape[0]  # (1, 1)
+
+        if weights == None:
+            self.w = torch.ones(N, 1)
+        else:
+            self.w = weights
+        self.w = weights.unsqueeze(0)  # (1, N, 1)
+
+        if lambda_constant == None:
+            self.lambda_constant = torch.tensor([float(self.K)/float(self.N)])
+        else:
+            self.lambda_constant = lambda_constant # (1, 1)
+
+        self.cad_models = cad_models
+
+        self.hallucinate = hallucinate
+
+        #Todo: implement optim_for_hallucination() as a declarative model using ddn. This is non-convex so don't use cvxpylayers.
+
+
+    def forward(self, detected_keypoints):
+        """
+        detected_keypoints: torch.tensor of shape (B, 3, N)
+
+        where
+        N = number of keypoints
+        B = batch size
+        """
+        keypoints = detected_keypoints
+
+        if self.hallucinate:
+            alpha, hallucinated_keypoints, _ = optim_for_hallucination(detected_keypoints)
+            keypoints =  hallucinated_keypoints + torch.einsum('bin, bdn->bdn', alpha, detected_keypoints - hallucinated_keypoints)
+
+        return keypoints
+
+
+
 
 
 
@@ -600,24 +714,24 @@ if __name__ == '__main__':
     print(num_out.size())
     print('-'*20)
 
-    # Test: Keypoints() with method='pointnet'
-    print('Test: Keypoints() with method=\'pointnet\'')
+    # Test: HeatmapKeypoints() with method='pointnet'
+    print('Test: HeatmapKeypoints() with method=\'pointnet\'')
 
     pc = torch.rand(4, 1000, 11)
     pc = pc.to(device=device)
-    kp = Keypoints(method='pointnet', k=63).to(device=device)
-    # kp = Keypoints(method='point_transformer', dim=[8, 32, 64], k=63).to(device=device)
+    kp = HeatmapKeypoints(method='pointnet', k=63).to(device=device)
+    # kp = HeatmapKeypoints(method='point_transformer', dim=[8, 32, 64], k=63).to(device=device)
     y = kp(pointcloud=pc)
     print(y.size())
     print('-' * 20)
 
-    # Test: Keypoints() with method='point_transformer'
-    print('Test: Keypoints() with method=\'point_transformer\'')
+    # Test: HeatmapKeypoints() with method='point_transformer'
+    print('Test: HeatmapKeypoints() with method=\'point_transformer\'')
 
     pc = torch.rand(4, 1000, 11)
     pc = pc.to(device=device)
-    # kp = Keypoints(method='pointnet', k=63).to(device=device)
-    kp = Keypoints(method='point_transformer', dim=[8, 32, 64], k=63).to(device=device)
+    # kp = HeatmapKeypoints(method='pointnet', k=63).to(device=device)
+    kp = HeatmapKeypoints(method='point_transformer', dim=[8, 32, 64], k=63).to(device=device)
     y = kp(pointcloud=pc)
     print(y.size())
     print('-' * 20)

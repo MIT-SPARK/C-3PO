@@ -16,3 +16,15 @@
 [submodule "WyPR"]
 	path = WyPR
 	url = https://github.com/facebookresearch/WyPR.git
+[submodule "KeypointNet"]
+	path = KeypointNet
+	url = https://github.com/qq456cvb/KeypointNet.git
+[submodule "EPN_PointCloud"]
+	path = EPN_PointCloud
+	url = https://github.com/nintendops/EPN_PointCloud.git
+[submodule "se3-transformer-public"]
+	path = se3-transformer-public
+	url = https://github.com/FabianFuchsML/se3-transformer-public.git
+[submodule "vnn"]
+	path = vnn
+	url = https://github.com/FlyingGiraffe/vnn.git

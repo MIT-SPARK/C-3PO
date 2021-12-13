@@ -8,36 +8,36 @@ sys.path.append("../../")
 
 
 
-# """ CODE THAT VISUALIZES THE DEPTH IMAGES GENERATED FROM THE KEYPOINTNET DATASET """
-#
-#
-# import learning_objects.utils.shapenet_sem as sn_sem
-# import learning_objects.utils.keypointnet as kp_net
-# import open3d as o3d
-# import numpy as np
-# import random
-#
-# class_id = "03001627"                           # chair
-# model_id = "1e3fba4500d20bb49b9f2eb77f5e247e"   # chair model
-# dataset = kp_net.DepthPointCloud(dir_name='../data/depth_images/', class_id=class_id, model_id=model_id)
-# model_pcd = dataset.object
-# keypoints_xyz = dataset.keypoints_xyz
-# camera_locations = dataset.camera_locations
-# # r = list(range(len(dataset)))
-# # random.shuffle(r)
-#
-# for idx, depth_pcd in enumerate(dataset):
-#    print(idx)
-#    depth_pcd.remove_non_finite_points()
-#    depth_pcd_points = depth_pcd.points
-#    print(np.shape(depth_pcd_points))
-#    if idx % 10 == 0:
-#       depth_pcd.paint_uniform_color([0.0, 0.0, 0.8])
-#       model_pcd.paint_uniform_color([0.5, 0.5, 0.5])
-#       _ = kp_net.visualize_model_n_keypoints(model_list=[depth_pcd], keypoints_xyz=dataset.keypoints_xyz, camera_locations=dataset.camera_locations)
-#
-#
-#
+""" CODE THAT VISUALIZES THE DEPTH IMAGES GENERATED FROM THE KEYPOINTNET DATASET """
+
+
+import learning_objects.datasets.shapenet_sem as sn_sem
+import learning_objects.datasets.keypointnet as kp_net
+import open3d as o3d
+import numpy as np
+import random
+
+class_id = "03001627"                           # chair
+model_id = "1e3fba4500d20bb49b9f2eb77f5e247e"   # chair model
+dataset = kp_net.DepthPointCloud(dir_name='../data/depth_images/', class_id=class_id, model_id=model_id)
+model_pcd = dataset.object
+keypoints_xyz = dataset.keypoints_xyz
+camera_locations = dataset.camera_locations
+# r = list(range(len(dataset)))
+# random.shuffle(r)
+
+for idx, depth_pcd in enumerate(dataset):
+   print(idx)
+   depth_pcd.remove_non_finite_points()
+   depth_pcd_points = depth_pcd.points
+   print(np.shape(depth_pcd_points))
+   if idx % 10 == 0:
+      depth_pcd.paint_uniform_color([0.0, 0.0, 0.8])
+      model_pcd.paint_uniform_color([0.5, 0.5, 0.5])
+      _ = kp_net.visualize_model_n_keypoints(model_list=[depth_pcd], keypoints_xyz=dataset.keypoints_xyz, camera_locations=dataset.camera_locations)
+
+
+
 
 
 
@@ -78,24 +78,24 @@ sys.path.append("../../")
 
 
 
-
-""" CODE TO GENERATE AND SAVE DEPTH IMAGES OF A KEYPOINTNET-SHAPENETCORE OBJECT """
-""" CREATES IT FOR A CAR MODEL """
-# import learning_objects.utils.shapenet_sem as sn_sem
-import learning_objects.utils.keypointnet as kp_net
-import os
-
-# idx=9 is the 9th object in the dataset of the ShapeNet object
-# Following code will store files in the location 'depth_images/9/' folder
-location = '../data/depth_images/'
-# os.mkdir(path=location)
-class_id = "02958343"                           # car
-model_id = "1b94aad142e6c2b8af9f38a1ee687286"   # a particular car model
-os.mkdir(path=location + class_id + '/')
-os.mkdir(path=location + class_id + '/' + model_id + '/')
-location = location + class_id + '/' + model_id + '/'
-kp_net.generate_depth_data(class_id=class_id, model_id=model_id, num_of_points=100000, location=location)
-
+#
+# """ CODE TO GENERATE AND SAVE DEPTH IMAGES OF A KEYPOINTNET-SHAPENETCORE OBJECT """
+# """ CREATES IT FOR A CAR MODEL """
+# # import learning_objects.utils.shapenet_sem as sn_sem
+# import learning_objects.utils.keypointnet as kp_net
+# import os
+#
+# # idx=9 is the 9th object in the dataset of the ShapeNet object
+# # Following code will store files in the location 'depth_images/9/' folder
+# location = '../data/depth_images/'
+# # os.mkdir(path=location)
+# class_id = "02958343"                           # car
+# model_id = "1b94aad142e6c2b8af9f38a1ee687286"   # a particular car model
+# os.mkdir(path=location + class_id + '/')
+# os.mkdir(path=location + class_id + '/' + model_id + '/')
+# location = location + class_id + '/' + model_id + '/'
+# kp_net.generate_depth_data(class_id=class_id, model_id=model_id, num_of_points=100000, location=location)
+#
 
 
 
