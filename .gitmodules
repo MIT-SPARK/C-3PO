@@ -28,3 +28,6 @@
 [submodule "vnn"]
 	path = vnn
 	url = https://github.com/FlyingGiraffe/vnn.git
+[submodule "DeepSDF"]
+	path = DeepSDF
+	url = https://github.com/facebookresearch/DeepSDF.git

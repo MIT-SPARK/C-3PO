@@ -135,7 +135,7 @@ class PointNetfeat(nn.Module):
             return torch.cat([x, pointfeat], 1), trans, trans_feat
 
 class PointNetCls(nn.Module):
-    def __init__(self, k=2, feature_transform=False):
+    def __init__(self, k=20, feature_transform=False):
         super(PointNetCls, self).__init__()
         self.feature_transform = feature_transform
         self.feat = PointNetfeat(global_feat=True, feature_transform=feature_transform)
@@ -156,7 +156,7 @@ class PointNetCls(nn.Module):
 
 
 class PointNetDenseCls(nn.Module):
-    def __init__(self, k = 2, feature_transform=False):
+    def __init__(self, k=20, feature_transform=False):
         super(PointNetDenseCls, self).__init__()
         self.k = k
         self.feature_transform=feature_transform
@@ -212,7 +212,7 @@ if __name__ == '__main__':
     out, _, _ = pointfeat(sim_data)
     print('point feat', out.size())
 
-    cls = PointNetCls(k = 5)
+    cls = PointNetCls(k=5)
     out, _, _ = cls(sim_data)
     print('class', out.size())
 

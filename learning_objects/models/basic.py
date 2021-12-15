@@ -7,8 +7,8 @@ import os
 import sys
 sys.path.append("../../")
 
-from learning_objects.models.point_transformer import PointTransformerSegment
-from learning_objects.models.pointnet import PointNetDenseCls
+from learning_objects.models.point_transformer import PointTransformerSegment, PointTransformerCls
+from learning_objects.models.pointnet import PointNetDenseCls, PointNetCls
 
 
 
@@ -74,7 +74,14 @@ class SegmentBackground(nn.Module):
 
 
 class HeatmapKeypoints(nn.Module):
-    def __init__(self, k=64, method='point_transformer', dim=[6, 32, 64]):
+    """
+    This module generates keypoints of an input point cloud using heatmaps.
+
+    Note:
+    The output keypoints, by definition, are a subset of the input point cloud.
+    This method uses point cloud segmentation architecture.
+    """
+    def __init__(self, k=20, method='point_transformer'):
         super().__init__()
         """
         Inputs: 
@@ -86,7 +93,7 @@ class HeatmapKeypoints(nn.Module):
         self.method = method
 
         if self.method == 'point_transformer':
-            self.keypoint_heatmap = PointTransformerSegment(dim=dim, output_dim=self.k)
+            self.keypoint_heatmap = PointTransformerSegment(output_dim=self.k)
         elif self.method == 'pointnet':
             self.keypoint_heatmap = PointNetDenseCls(k=self.k)
         else:
@@ -140,7 +147,72 @@ class HeatmapKeypoints(nn.Module):
 
 
 
-class Keypoints(nn.Module):
+class GlobalStKeypoints(nn.Module):
+    """
+    This module generates keypoints as a regression of the input point cloud.
+
+    Note:
+    The output keypoints may not be a subset of the input point cloud.
+    This method uses point cloud classification architecture.
+    """
+    def __init__(self, k=20, method='point_transformer'):
+        super().__init__()
+        """
+        Inputs: 
+        ------
+            k       : int32   : number of keypoints 
+            method  : string  : takes values: {'point_transformer', 'pointnet'}
+        """
+        self.k = k
+        self.method = method
+
+        if self.method == 'point_transformer':
+            self.keypoint = PointTransformerCls(output_dim=3*self.k)
+        elif self.method == 'pointnet':
+            self.keypoint = PointNetCls(k=3*self.k)
+        else:
+            raise NotImplementedError
+
+    def _break_up_pc(self, pc):
+        xyz = pc[..., 0:3].contiguous()
+        features = pc[..., 3:].transpose(1, 2).contiguous() if pc.size(-1) > 3 else None
+
+        return xyz, features
+
+    def forward(self, pointcloud):
+        """
+        Inputs:
+        ------
+            pointcloud: (B, N, 3+d) torch.Tensor
+                    B = batch size
+                    N = number of points per point cloud
+                    d = input feature dimension
+                    pointcloud[..., 0:3] = locations
+                    pointcloud[..., 3:] = input features
+
+        Outputs:
+        -------
+            y: (B, self.k, 3) torch.Tensor
+                    B = batch size
+                    self.k = number of keypoints
+                    y[..., 0:3] = location of keypoints
+        """
+
+        if self.method == 'point_transformer':
+
+            keypoints = self.keypoint(pointcloud)
+
+        elif self.method == 'pointnet':
+
+            pos, _ = self._break_up_pc(pointcloud)
+            keypoints = self.keypoint(pos.transpose(1, 2))
+
+        else:
+            raise ValueError
+
+        return torch.reshape(keypoints, (keypoints.shape[0], self.k, 3))
+
+
 
 
 
@@ -184,6 +256,8 @@ class PACE(nn.Module):
         assert problem.is_dpp()
 
         self.sdp_for_rotation = CvxpyLayer(problem, parameters=[Q], variables=[X])
+
+
 
 
     def forward(self, y):
@@ -615,7 +689,7 @@ class get_model_from_shape(nn.Module):
 class HallucinatedKeyPoints(nn.Module):
     def __init__(self, model_keypoints, cad_models, weights=None, lambda_constant=None, hallucinate=True):
         super().__init__()
-        """
+        """ 
         model_keypoints: torch.tensor of shape (K, 3, N) 
         cad_models: torch.tensor of shape (K, 3, n)
         weights: torch.tensor of shape (N, 1) or None
@@ -657,13 +731,13 @@ class HallucinatedKeyPoints(nn.Module):
         if lambda_constant == None:
             self.lambda_constant = torch.tensor([float(self.K)/float(self.N)])
         else:
-            self.lambda_constant = lambda_constant # (1, 1)
+            self.lambda_constant = lambda_constant  # (1, 1)
 
         self.cad_models = cad_models
 
         self.hallucinate = hallucinate
 
-        #Todo: implement optim_for_hallucination() as a declarative model using ddn. This is non-convex so don't use cvxpylayers.
+        #Todo: implement self.optim_for_hallucination() as a declarative model using ddn. This is non-convex so don't use cvxpylayers.
 
 
     def forward(self, detected_keypoints):
@@ -677,7 +751,7 @@ class HallucinatedKeyPoints(nn.Module):
         keypoints = detected_keypoints
 
         if self.hallucinate:
-            alpha, hallucinated_keypoints, _ = optim_for_hallucination(detected_keypoints)
+            alpha, hallucinated_keypoints, _ = self.optim_for_hallucination(detected_keypoints)
             keypoints =  hallucinated_keypoints + torch.einsum('bin, bdn->bdn', alpha, detected_keypoints - hallucinated_keypoints)
 
         return keypoints

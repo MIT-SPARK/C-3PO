@@ -10,7 +10,10 @@ import matplotlib.pyplot as plt
 
 
 import torch
+import torch.nn as nn
+import torch.nn.functional as F
 import open3d as o3d
+from pytorch3d import ops
 from torch_geometric.data import Data
 from time import time
 
@@ -28,6 +31,69 @@ class Timer:
         if self.print:
             print("{}: {}s".format(self.tag, time() - self.ts))
         return time()
+
+
+
+def chamfer_half_distance(X, Y):
+    """
+    inputs:
+    X: torch.tensor of shape (B, 3, n)
+    Y: torch.tensor of shape (B, 3, m)
+
+    where
+    B = batch size
+    n, m = number of points in the point cloud
+
+    outputs:
+    loss: torch.tensor of shape (B, 1)
+
+    Note:
+    Output is the mean distance from every point in X to its closest point in Y
+    """
+
+    dist, _ = ops.knn_points(torch.transpose(X, -1, -2), torch.transpose(Y, -1, -2), K=1)
+    # dist (B, n, 1): distance from point in X to the nearest point in Y
+
+    return dist.mean(dim=1)
+
+
+
+
+def soft_chamfer_half_distance(X, Y, radius, K = 10, theta=10.0):
+    """
+    inputs:
+    X: torch.tensor of shape (B, 3, n)
+    Y: torch.tensor of shape (B, 3, m)
+    radius: float
+    theta: float
+
+    where
+    B = batch size
+    n, m = number of points in the point cloud
+
+    outputs:
+    loss: torch.tensor of shape (B, 1)
+    """
+
+    dist, idx = ops.ball_query(torch.transpose(X, -1, -2), torch.transpose(Y, -1, -2), radius=radius, K=K)
+    # dist (B, n, K): distance from point in X to the nearest point in Y
+    # idx (B, n, K): indices of the K closest points in Y, for every point in X
+
+    prob = F.softmax(-theta*dist, dim=-1)
+    # prob is of shape (B, n, K)
+
+    return (dist*prob).sum(-1).unsqueeze(-1).mean(dim=1)
+
+
+
+
+
+
+
+
+
+
+
 
 def tensor_to_o3d(normals, pos):
     """
