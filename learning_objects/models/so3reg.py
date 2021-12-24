@@ -34,6 +34,7 @@ class so3reg(AbstractDeclarativeNode):
         y: torch.tensor of shape (B, 3, N)
         """
 
+        #ToDo: over-write their gradient to project on SO(3)
 
 
     def solve(self, y):

@@ -40,6 +40,7 @@ def three_interpolate(p, p_old, x):
     * This function operates entirely on the cpu
     """
 
+    input_device = p.device
     device = 'cpu'
     p = p.to(device=device)
     p_old = p_old.to(device=device)
@@ -56,7 +57,7 @@ def three_interpolate(p, p_old, x):
     _interpolated_feats = knn_interpolate(x=_x, pos_x=_p, pos_y=_p_old, batch_x=batch, batch_y=batch_old, k=3)
 
     interpolated_feats = torch.reshape(_interpolated_feats, (p_old.size(0), -1, x.size(-1)))
-    interpolated_feats = interpolated_feats.cuda()
+    interpolated_feats = interpolated_feats.to(input_device)
 
     return interpolated_feats
 
@@ -64,6 +65,7 @@ def three_interpolate(p, p_old, x):
     # a = torch.rand(5, 10, 4)
     # b = torch.rand(5, 5, 4)
     # c = torch.stack(tuple(torch.vstack((a[i, ...], b[i, ...])) for i in range(a.size(0))))
+
 
 
 
@@ -87,17 +89,19 @@ def farthest_point_sampling(xyz, npoints):
     * This function operates entirely on the cpu
     """
 
+    input_device = xyz.device
     device = 'cpu'
     xyz = xyz.to(device=device)
 
-    _xyz = torch.vstack(tuple(xyz[i, ...] for i in range(xyz.size(0))))
+    _xyz = xyz.view(-1, xyz.shape[-1])
+    # _xyz = torch.vstack(tuple(xyz[i, ...] for i in range(xyz.size(0))))
     batch = torch.kron(torch.arange(start=0, end=xyz.size(0)), torch.ones(xyz.size(1)))
     batch = batch.long()
     ratio = npoints/xyz.size(-2)
     index = fps(_xyz, batch, ratio=ratio, random_start=True)
     _xyz_out = _xyz[index]
     out = torch.reshape(_xyz_out, (xyz.size(0), -1, 3))
-    out = out.cuda()
+    out = out.to(input_device)
     return out
 
 
@@ -130,7 +134,12 @@ def kNN(query, dataset, k):
         neighbors: (B * N0, k) shaped torch Tensor.
                    Each row is the indices of a neighboring points.
                    It is flattened along batch dimension.
+
+    Note:
+        We do not use this function in this project. Can be removed.
     """
+
+
     assert query.is_cuda and dataset.is_cuda, "Input tensors should be gpu tensors."
     assert query.dim() == 3 and dataset.dim() == 3, "Input tensors should be 3D."
     assert (
@@ -170,11 +179,10 @@ def kNN_torch(query, dataset, k):
         dataset: (B, N1, D) shaped torch gpu Tensor.
         k: int
     outputs
-        neighbors: (B * N0, k) shaped torch Tensor.
+        neighbors: (B, N0, k) shaped torch Tensor.
                    Each row is the indices of a neighboring points.
-                   It is flattened along batch dimension.
     """
-    assert query.is_cuda and dataset.is_cuda, "Input tensors should be gpu tensors."
+    # assert query.is_cuda and dataset.is_cuda, "Input tensors should be gpu tensors."                                  #Change: 22 Dec 2021: Commented this line out.
     assert query.dim() == 3 and dataset.dim() == 3, "Input tensors should be 3D."
     assert (
         query.shape[0] == dataset.shape[0]
@@ -185,7 +193,7 @@ def kNN_torch(query, dataset, k):
 
     dists = square_distance(query, dataset)  # dists: [B, N0, N1]
     neighbors = dists.argsort()[:, :, :k]  # neighbors: [B, N0, k]
-    torch.cuda.empty_cache()
+    #torch.cuda.empty_cache()
     return neighbors
 
 
@@ -300,7 +308,8 @@ class TransitionDown(nn.Module):
         # )  # p_out: (B, M, 3)
 
         # 2: kNN & MLP
-        knn_fn = kNN_torch if self.fast else kNN
+        # knn_fn = kNN_torch if self.fast else kNN  # commented this out because we don't want to use kNN. RT: 23-Dec-21
+        knn_fn = kNN_torch
         neighbors = knn_fn(p_out, p, self.k)  # neighbors: (B, M, k)
 
         # 2-1: Apply MLP onto each feature

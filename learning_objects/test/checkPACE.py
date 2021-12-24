@@ -20,61 +20,9 @@ sys.path.append("../../")
 from learning_objects.models.basic import PACE
 from learning_objects.utils.sdp_data import get_rotation_relaxation_constraints, get_vectorization_permutation
 from learning_objects.utils.category_gnc import solve_3dcat_with_sdp
+from learning_objects.utils.general import shape_error, rotation_error, translation_error, check_rot_mat
 
 
-
-def shape_error(c, c_):
-    """
-    inputs:
-    c: torch.tensor of shape (K, 1)
-    c_: torch.tensor of shape (K, 1)
-
-    output:
-    c_err: torch.tensor of shape (1, 1)
-    """
-
-    return torch.norm(c - c_, p=2)/c.shape[0]
-
-def translation_error(t, t_):
-    """
-    inputs:
-    t: torch.tensor of shape (3, 1)
-    t_: torch.tensor of shape (3, 1)
-
-    output:
-    t_err: torch.tensor of shape (1, 1)
-    """
-
-    return torch.norm(t - t_, p=2)/3.0
-
-
-def rotation_error(R, R_):
-    """
-    inputs:
-    R: torch.tensor of shape (3, 3)
-    R_: torch.tensor of shape (3, 3)
-
-    output:
-    R_err: torch.tensor of shape (1, 1)
-    """
-
-    return transforms.matrix_to_euler_angles(torch.matmul(R.T, R_), "XYZ").abs().sum()/3.0
-
-
-
-def check_rot_mat(R, tol=0.001):
-    """
-    This checks if the matrix R is a 3x3 rotation matrix
-    R: rotation matrix: numpy.ndarray of size (3, 3)
-
-    Output:
-    True/False: determining if R is a rotation matrix/ or not
-    """
-    tol = tol
-    if torch.norm( torch.matmul(R.T, R) - np.eye(3), ord='fro') < tol:
-        return True
-    else:
-        return False
 
 
 def test_cvxpylayers():

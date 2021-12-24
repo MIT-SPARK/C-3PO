@@ -1,3 +1,8 @@
+"""
+This implements various generic classes and functions that are used in our code.
+
+"""
+
 import copy
 import csv
 import os
@@ -14,6 +19,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import open3d as o3d
 from pytorch3d import ops
+from pytorch3d import transforms
 from torch_geometric.data import Data
 from time import time
 
@@ -31,7 +37,6 @@ class Timer:
         if self.print:
             print("{}: {}s".format(self.tag, time() - self.ts))
         return time()
-
 
 
 def chamfer_half_distance(X, Y):
@@ -57,9 +62,7 @@ def chamfer_half_distance(X, Y):
     return dist.mean(dim=1)
 
 
-
-
-def soft_chamfer_half_distance(X, Y, radius, K = 10, theta=10.0):
+def soft_chamfer_half_distance(X, Y, radius, K=10, theta=10.0):
     """
     inputs:
     X: torch.tensor of shape (B, 3, n)
@@ -85,14 +88,103 @@ def soft_chamfer_half_distance(X, Y, radius, K = 10, theta=10.0):
     return (dist*prob).sum(-1).unsqueeze(-1).mean(dim=1)
 
 
+def generate_random_keypoints(batch_size, model_keypoints):
+    """
+    input:
+    batch_size      : int
+    model_keypoints : torch.tensor of shape (K, 3, N)
+
+    where
+    K = number of cad models in a shape category
+    N = number of keypoints
+
+    output:
+    keypoints   : torch.tensor of shape (batch_size, 3, N)
+    rotation    : torch.tensor of shape (batch_size, 3, 3)
+    translation : torch.tensor of shape (batch_size, 3, 1)
+    shape       : torch.tensor of shape (batch_size, K, 1)
+    """
+
+    K = model_keypoints.shape[0]
+    N = model_keypoints.shape[-1]
+
+    rotation = transforms.random_rotations(n=batch_size)
+    translation = torch.rand(batch_size, 3, 1)
+
+    shape = torch.rand(batch_size, K, 1)
+    shape = shape/shape.sum(1).unsqueeze(1) # (batch_size, K, 1)
+    shape = shape.unsqueeze(-1) # (batch_size, K, 1, 1)
+    keypoints = torch.einsum('bkij,ukdn->bdn', shape, model_keypoints.unsqueeze(0))
+    keypoints = rotation @ keypoints + translation
+
+    return keypoints, rotation, translation, shape.squeeze(-1)
 
 
+def shape_error(c, c_):
+    """
+    inputs:
+    c: torch.tensor of shape (K, 1) or (B, K, 1)
+    c_: torch.tensor of shape (K, 1) or (B, K, 1)
+
+    output:
+    c_err: torch.tensor of shape (1, 1) or (B, 1)
+    """
+    if c.dim() == 2:
+        return torch.norm(c - c_, p=2)/c.shape[0]
+    elif c.dim() == 3:
+        return torch.norm(c - c_, p=2, dim=1)/c.shape[1]
+    else:
+        return ValueError
 
 
+def translation_error(t, t_):
+    """
+    inputs:
+    t: torch.tensor of shape (3, 1) or (B, 3, 1)
+    t_: torch.tensor of shape (3, 1) or (B, 3, 1)
+
+    output:
+    t_err: torch.tensor of shape (1, 1) or (B, 1)
+    """
+    if t.dim() == 2:
+        return torch.norm(t - t_, p=2)/3.0
+    elif t.dim() == 3:
+        return torch.norm(t-t_, p=2, dim=1)/3.0
+    else:
+        return ValueError
 
 
+def rotation_error(R, R_):
+    """
+    inputs:
+    R: torch.tensor of shape (3, 3) or (B, 3, 3)
+    R_: torch.tensor of shape (3, 3) or (B, 3, 3)
+
+    output:
+    R_err: torch.tensor of shape (1, 1) or (B, 1)
+    """
+
+    if R.dim() == 2:
+        return transforms.matrix_to_euler_angles(torch.matmul(R.T, R_), "XYZ").abs().sum()/3.0
+    elif R.dim() == 3:
+        return transforms.matrix_to_euler_angles(torch.transpose(R, 1, 2) @ R_, "XYZ").abs().mean(1).unsqueeze(1)
+    else:
+        return ValueError
 
 
+def check_rot_mat(R, tol=0.001):
+    """
+    This checks if the matrix R is a 3x3 rotation matrix
+    R: rotation matrix: numpy.ndarray of size (3, 3)
+
+    Output:
+    True/False: determining if R is a rotation matrix/ or not
+    """
+    tol = tol
+    if torch.norm(torch.matmul(R.T, R) - np.eye(3), ord='fro') < tol:
+        return True
+    else:
+        return False
 
 
 def tensor_to_o3d(normals, pos):
@@ -109,6 +201,7 @@ def tensor_to_o3d(normals, pos):
     object.normals = normals_o3d
 
     return object
+
 
 def generate_filename(chars=string.ascii_uppercase + string.digits, N=10):
     """function generates random strings of length N"""
@@ -199,7 +292,6 @@ def get_depth_pcd(centered_pcd, camera, radius, method='1'):
         return pcd_visible
 
 
-
 def create_test_object(visualize=False):
     """ This function outputs a test 3D object that is placed at origin """
 
@@ -243,7 +335,6 @@ def save_metadata(file_name_with_location, dict_data, dict_data_columns):
                 writer.writerow(data)
     except IOError:
         print("I/O error")
-
 
 
 def sample_depth_pcd(centered_pcd, camera_locations, radius, folder_name):
@@ -402,3 +493,19 @@ def test_rendering_depth_images(save_to_folder='../data/tmp/'):
 
     # removing hidden points
     # render.scene.hidden_point_removal()
+
+
+
+if __name__ == '__main__':
+
+    print("Testing generate_random_keypoints:")
+    B = 10
+    K = 5
+    N = 7
+    model_keypoints = torch.rand(K, 3, N)
+    y, rot, trans, shape = generate_random_keypoints(batch_size=B, model_keypoints=model_keypoints)
+    print(y.shape)
+    print(rot.shape)
+    print(trans.shape)
+    print(shape.shape)
+
