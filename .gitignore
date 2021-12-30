@@ -6,6 +6,7 @@ data/
 learning_objects/data/
 example_package/
 DeepSDF/
+learning_objects/discard/
 
 # Dependencies
 third_party/

@@ -1,33 +1,26 @@
 import torch
 import torch.nn as nn
-import cvxpy as cp
 
-import os
 import sys
 sys.path.append("../../")
 
 
-from learning_objects.utils.ddn.node import AbstractDeclarativeNode
+from learning_objects.utils.ddn.node import ParamDeclarativeFunction
 
-from learning_objects.utils.general import chamfer_half_distance, soft_chamfer_half_distance
 from learning_objects.utils.general import generate_random_keypoints
-from learning_objects.utils.general import shape_error, translation_error, rotation_error
 
-
-from learning_objects.models.background_segmentor import SegmentBackground
 from learning_objects.models.keypoint_detector import HeatmapKeypoints, RegressionKeypoints
-from learning_objects.models.pace import PACE, PACEmodule, PACEddn
+from learning_objects.models.pace_ddn import PACEbp
 from learning_objects.models.modelgen import ModelFromShape
-from learning_objects.models.keypoint_corrector import PACEwKeypointCorrectionModule
+from learning_objects.models.keypoint_corrector import PACEwKeypointCorrection, from_y
 
 
 
 class ProposedModel(nn.Module):
-    def __init__(self, model_keypoints, cad_models, num_keypoints=44, keypoint_type='regression',
-                 keypoint_method='point_transformer', weights=None, lambda_constant=None, keypoint_correction=False):
+    def __init__(self, model_keypoints, cad_models, keypoint_type='regression',
+                 keypoint_method='pointnet', weights=None, lambda_constant=None, keypoint_correction=False):
         super().__init__()
         """
-        num_keypoints   : int
         keypoint_type   : 'heatmap' or 'regression'
         keypoint_method : 'pointnet' or 'point_transformer'
         model_keypoints : torch.tensor of shape (K, 3, N)
@@ -36,7 +29,6 @@ class ProposedModel(nn.Module):
         lambda_constant : torch.tensor of shape (1, 1) or None
         keypoint_correction     : True or False
         """
-        self.num_keypoints = num_keypoints
         self.keypoint_type = keypoint_type
         self.keypoint_correction = keypoint_correction
         self.keypoint_method = keypoint_method
@@ -53,22 +45,24 @@ class ProposedModel(nn.Module):
         if lambda_constant == None:
             self.lambda_constant = torch.sqrt(torch.tensor([self.N/self.K]))
 
-        # Keypoint detector
-        self.keypoint_detector = RegressionKeypoints(k=num_keypoints, method=keypoint_type)
-        if keypoint_type=='heatmap':
-            self.keypoint_detector = HeatmapKeypoints(k=num_keypoints, method=keypoint_type)
+        # Keypoint Detector
+        self.keypoint_detector = RegressionKeypoints(k=self.N, method=keypoint_method)
+        if keypoint_type == 'heatmap':
+            self.keypoint_detector = HeatmapKeypoints(k=self.N, method=keypoint_method)
 
         # PACE
-        self.PACE = PACEmodule(weights=self.weights, model_keypoints=self.model_keypoints,
-                               lambda_constant=self.lambda_constant)
+        self.pace_fn = PACEbp(weights=self.weights, model_keypoints=self.model_keypoints, lambda_constant=self.lambda_constant)
+
+        # PACE + Keypoint Corrector
         if self.keypoint_correction:
-            self.PACEwKeypointCorrection = PACEwKeypointCorrectionModule(model_keypoints=self.model_keypoints,
+            self.pace_and_correction_node = PACEwKeypointCorrection(model_keypoints=self.model_keypoints,
                                                                          cad_models=self.cad_models,
                                                                          weights=self.weights,
                                                                          lambda_constant=self.lambda_constant)
+            self.pace_and_correction_fn = ParamDeclarativeFunction(self.pace_and_correction_node)
 
         # Model Generator
-        self.generate_model = ModelFromShape(cad_models=self.cad_models, model_keypoints=self.model_keypoints)
+        self.generate_model_fn = ModelFromShape(cad_models=self.cad_models, model_keypoints=self.model_keypoints)
 
 
     def forward(self, input_point_cloud, train=True):
@@ -85,27 +79,27 @@ class ProposedModel(nn.Module):
         predicted_model: torch.tensor of shape (B, 3, n)
         """
 
+        # detect keypoints
         detected_keypoints = torch.transpose(
-            self.keypoint_detector(point_cloud=torch.transpose(input_point_cloud, -1, -2)), -1, -2)
+            self.keypoint_detector(torch.transpose(input_point_cloud, -1, -2)), -1, -2)
+
+        print(detected_keypoints.shape)
 
         if train or (not self.keypoint_correction):
             # During training or when not using keypoint_correction
             #           keypoints = detected_keypoints
             #
-            R, t, c = self.PACE(y=detected_keypoints)
+            R, t, c = self.pace_fn.forward(y=detected_keypoints)
             keypoints = detected_keypoints
         else:
             # During testing and when using keypoint_correction
             #           keypoints = corrected_keypoints from the bi-level optimization.
             #
-            R, t, c, correction, keypoints = self.PACEwKeypointCorrection.forward(
-                input_point_cloud=input_point_cloud, detected_keypoints=detected_keypoints)
+            y = self.pace_and_correction_fn.forward(input_point_cloud, detected_keypoints)
+            R, t, c, correction = from_y(y=y, K=self.K, N=self.N)
+            keypoints = detected_keypoints + correction
 
-        target_keypoints, target_point_cloud = self.generate_model(shape=c)
-        target_keypoints = R @ target_keypoints + t
-        target_point_cloud = R @ target_point_cloud + t
-
-        return keypoints, target_keypoints, target_point_cloud
+        return R, t, c, keypoints
 
 
 
@@ -121,79 +115,50 @@ class ProposedModel(nn.Module):
 if __name__ == '__main__':
 
     # Device
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    # device = 'cpu'
+    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = 'cpu'
     print('device is ', device)
     print('-' * 20)
 
 
-    # Test: SegmentBackground()
-    print('Test: SegmentBackground()')
-    pc = torch.rand(4, 1000, 9)
-    pc = pc.to(device)
-    print(pc.is_cuda)
+    #
+    B = 2   # batch size
+    N = 8   # number of keypoints
+    K = 2   # number of cad models in the shape category
+    n = 10  # number of points in the model_point_cloud
+    m = 10  # number of points in the input_point_cloud
 
-    segback = SegmentBackground().to(device=device)
+    cad_models = torch.rand(K, 3, n).to(device=device)
+    model_keypoints = cad_models[:, :, 0:N]
+    weights = torch.rand(N, 1).to(device=device)
+    lambda_constant = torch.tensor([1.0]).to(device=device)
 
-    pc_out, num_in, num_out = segback(pointcloud=pc)
+    # initializing model
+    proposed_model = ProposedModel(model_keypoints=model_keypoints,
+                                   cad_models=cad_models,
+                                   weights=weights,
+                                   lambda_constant=lambda_constant,
+                                   keypoint_correction=False)
 
-    print(pc_out.size())
-    print(num_in.size())
-    print(num_out.size())
-    print('-'*20)
+    detected_keypoints, rotation, translation, shape = generate_random_keypoints(batch_size=B,
+                                                                                 model_keypoints=model_keypoints.cpu())
 
-    # Test: HeatmapKeypoints() with method='pointnet'
-    print('Test: HeatmapKeypoints() with method=\'pointnet\'')
+    model_gen_for_data = ModelFromShape(cad_models=cad_models.cpu(), model_keypoints=model_keypoints.cpu())
+    _, input_point_cloud = model_gen_for_data.forward(shape=shape)
+    input_point_cloud = rotation @ input_point_cloud + translation
 
-    pc = torch.rand(4, 1000, 11)
-    pc = pc.to(device=device)
-    kp = HeatmapKeypoints(method='pointnet', k=63).to(device=device)
-    # kp = HeatmapKeypoints(method='point_transformer', dim=[8, 32, 64], k=63).to(device=device)
-    y = kp(pointcloud=pc)
-    print(y.size())
-    print('-' * 20)
-
-    # Test: HeatmapKeypoints() with method='point_transformer'
-    print('Test: HeatmapKeypoints() with method=\'point_transformer\'')
-
-    pc = torch.rand(4, 1000, 6)
-    pc = pc.to(device=device)
-    # kp = HeatmapKeypoints(method='pointnet', k=63).to(device=device)
-    kp = HeatmapKeypoints(method='point_transformer', dim=[3, 16, 24], k=63).to(device=device)
-    y = kp(pointcloud=pc)
-    print(y.size())
-    print('-' * 20)
+    # transferring generated data to device
+    input_point_cloud = input_point_cloud.to(device=device)
+    detected_keypoints = detected_keypoints.to(device=device)
+    rotation = rotation.to(device=device)
+    translation = translation.to(device=device)
+    shape = shape.to(device=device)
 
 
-    # Test: PACE Module
-    print('Test: PACE()')
-    N = 10
-    K = 4
-    n = 40
-    weights = torch.rand(N, 1)
-    model_keypoints = torch.rand(K, 3, N)
-    lambda_constant = torch.tensor([1.0])
-    cad_models = torch.rand(K, 3, n)
+    # applying model
+    R, t, c, kp = proposed_model(input_point_cloud)
 
-    pace_model = PACEmodule(weights=weights, model_keypoints=model_keypoints, lambda_constant=lambda_constant).to(device=device)
 
-    B = 20
-    keypoints, rotations, translations, shape = generate_random_keypoints(batch_size=B, model_keypoints=model_keypoints)
-    keypoints.requires_grad = True
-    rot_est, trans_est, shape_est = pace_model(keypoints)
-
-    er_shape = shape_error(shape, shape_est)
-    er_trans = translation_error(translations, trans_est)
-    er_rot = rotation_error(rotations, rot_est)
-
-    print("rotation error: ", er_rot.mean())
-    print("translation error: ", er_trans.mean())
-    print("shape error: ", er_shape.mean())
-
-    loss = er_shape.mean() + er_trans.mean() + er_rot.mean()
-    loss.backward()
-
-    print(keypoints.grad)
 
 
 

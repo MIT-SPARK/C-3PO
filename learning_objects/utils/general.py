@@ -56,7 +56,7 @@ def chamfer_half_distance(X, Y):
     Output is the mean distance from every point in X to its closest point in Y
     """
 
-    dist, _ = ops.knn_points(torch.transpose(X, -1, -2), torch.transpose(Y, -1, -2), K=1)
+    dist, _, _ = ops.knn_points(torch.transpose(X, -1, -2), torch.transpose(Y, -1, -2), K=1)
     # dist (B, n, 1): distance from point in X to the nearest point in Y
 
     return dist.mean(dim=1)
@@ -78,7 +78,7 @@ def soft_chamfer_half_distance(X, Y, radius, K=10, theta=10.0):
     loss: torch.tensor of shape (B, 1)
     """
 
-    dist, idx = ops.ball_query(torch.transpose(X, -1, -2), torch.transpose(Y, -1, -2), radius=radius, K=K)
+    dist, idx, _ = ops.ball_query(torch.transpose(X, -1, -2), torch.transpose(Y, -1, -2), radius=radius, K=K)
     # dist (B, n, K): distance from point in X to the nearest point in Y
     # idx (B, n, K): indices of the K closest points in Y, for every point in X
 
@@ -118,6 +118,23 @@ def generate_random_keypoints(batch_size, model_keypoints):
     keypoints = rotation @ keypoints + translation
 
     return keypoints, rotation, translation, shape.squeeze(-1)
+
+
+def keypoint_error(kp, kp_):
+    """
+    inputs:
+    kp: torch.tensor of shape (3, N) or (B, 3, N)
+    kp_: torch.tensor of shape (3, N) or (B, 3, N)
+
+    output:
+    kp_err: torch.tensor of shape (1, 1) or (B, 1)
+    """
+    if kp.dim() == 2:
+        return torch.norm(kp - kp_, p=2, dim=0).mean()/3.0
+    elif kp.dim() == 3:
+        return torch.norm(kp - kp_, p=2, dim=1).mean(1).unsqueeze(-1)/3.0
+    else:
+        return ValueError
 
 
 def shape_error(c, c_):

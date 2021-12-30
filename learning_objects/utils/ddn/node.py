@@ -292,17 +292,18 @@ class AbstractDeclarativeNode(AbstractNode):
         if len(B.size()) == 2:
             B = B.unsqueeze(-1)
         try:  # Batchwise Cholesky solve
-            A_decomp = torch.cholesky(A, upper=False)
+            A_decomp = torch.linalg.cholesky(A, upper=False)
             X = torch.cholesky_solve(B, A_decomp, upper=False)  # bxmxn
         except:  # Revert to loop if batchwise solve fails
             X = torch.zeros_like(B)
             for i in range(A.size(0)):
                 try:  # Cholesky solve
-                    A_decomp = torch.cholesky(A[i, ...], upper=False)
+                    A_decomp = torch.linalg.cholesky(A[i, ...], upper=False)
                     X[i, ...] = torch.cholesky_solve(B[i, ...], A_decomp,
                                                      upper=False)  # mxn
                 except:  # Revert to LU solve
-                    X[i, ...], _ = torch.solve(B[i, ...], A[i, ...])  # mxn
+                    # X[i, ...], _ = torch.solve(B[i, ...], A[i, ...])  # mxn
+                    X[i, ...] = torch.linalg.solve(A[i, ...], B[i, ...])
         if B_sizes is not None:
             X = X.split(B_sizes, dim=-1)
         return X
@@ -525,8 +526,12 @@ class EqConstDeclarativeNode(AbstractDeclarativeNode):
         p = hY.size(1)
         nu = fY.new_zeros(self.b, p)
         for i in range(self.b):  # loop over batch
-            solution, _ = torch.lstsq(fY[i, :].unsqueeze(-1), hY[i, :, :].t())
+            solution, _ = torch.lstsq(fY[i, :].unsqueeze(-1), hY[i, :, :].t())      #ToDo: This function has been replaced with torch.linalg.lstsq
+            # Htemp = hY[i, :, :].t()
+            # ftemp = fY[i, :].unsqueeze(-1)
+            # solution = torch.linalg.lstsq(Htemp, ftemp).solution
             nu[i, :] = solution[:p, :].squeeze()  # extract first p values
+            # nu[i, :] = solution.squeeze()
         return nu
 
     def _check_equality_constraints(self, h):
@@ -858,6 +863,7 @@ class DeclarativeFunction(torch.autograd.Function):
 
     @staticmethod
     def forward(ctx, problem, *inputs):
+        # print(inputs.shape)
         output, solve_ctx = torch.no_grad()(problem.solve)(*inputs)
         ctx.save_for_backward(output, *inputs)
         ctx.problem = problem
@@ -871,6 +877,8 @@ class DeclarativeFunction(torch.autograd.Function):
         solve_ctx = ctx.solve_ctx
         output.requires_grad = True
         inputs = tuple(inputs)
+        # print(inputs[0].shape)
+        # print(output.shape)
         grad_inputs = problem.gradient(*inputs, y=output, v=grad_output,
                                        ctx=solve_ctx)
         return (None, *grad_inputs)
@@ -896,3 +904,19 @@ class DeclarativeLayer(torch.nn.Module):
     def forward(self, *inputs):
         return DeclarativeFunction.apply(self.problem, *inputs)
 
+
+
+# Addition by Rajat Talak 27 Dec 2021
+class ParamDeclarativeFunction():
+    """
+    Parameterized declarative function.
+
+    This will help us implement declarative nodes as torch.autograd.Function.
+    """
+
+    def __init__(self, problem):
+        super(ParamDeclarativeFunction, self).__init__()
+        self.problem = problem
+
+    def forward(self, *inputs):
+        return DeclarativeFunction.apply(self.problem, *inputs)
