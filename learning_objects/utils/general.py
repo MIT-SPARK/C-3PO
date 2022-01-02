@@ -58,6 +58,7 @@ def chamfer_half_distance(X, Y):
 
     dist, _, _ = ops.knn_points(torch.transpose(X, -1, -2), torch.transpose(Y, -1, -2), K=1)
     # dist (B, n, 1): distance from point in X to the nearest point in Y
+    dist = dist**2
 
     return dist.mean(dim=1)
 
@@ -81,11 +82,11 @@ def soft_chamfer_half_distance(X, Y, radius, K=10, theta=10.0):
     dist, idx, _ = ops.ball_query(torch.transpose(X, -1, -2), torch.transpose(Y, -1, -2), radius=radius, K=K)
     # dist (B, n, K): distance from point in X to the nearest point in Y
     # idx (B, n, K): indices of the K closest points in Y, for every point in X
-
     prob = F.softmax(-theta*dist, dim=-1)
     # prob is of shape (B, n, K)
 
-    return (dist*prob).sum(-1).unsqueeze(-1).mean(dim=1)
+
+    return ((dist**2)*prob).sum(-1).unsqueeze(-1).mean(dim=1)
 
 
 def generate_random_keypoints(batch_size, model_keypoints):
@@ -204,6 +205,9 @@ def check_rot_mat(R, tol=0.001):
         return False
 
 
+
+## These were written for shapenet and keypointnet datasets.
+
 def tensor_to_o3d(normals, pos):
     """
     :param pos: position of points torch.Tensor Nx3
@@ -218,6 +222,59 @@ def tensor_to_o3d(normals, pos):
     object.normals = normals_o3d
 
     return object
+
+
+def pos_tensor_to_o3d(pos):
+    """
+    inputs:
+    pos: torch.tensor of shape (3, N)
+
+    output:
+    open3d PointCloud
+    """
+    pos_o3d = o3d.utility.Vector3dVector(pos.transpose(0, 1).to('cpu').numpy())
+
+    object = o3d.geometry.PointCloud()
+    object.points = pos_o3d
+    object.estimate_normals()
+
+    return object
+
+
+def display_results(input_point_cloud, detected_keypoints, target_point_cloud, target_keypoints):
+    """
+    inputs:
+    input_point_cloud   :   torch.tensor of shape (B, 3, m)
+    detected_keypoints  :   torch.tensor of shape (B, 3, N)
+    target_point_cloud  :   torch.tensor of shape (B, 3, n)
+    target_keypoints    :   torch.tensor of shape (B, 3, N)
+
+    where
+    B = batch size
+    N = number of keypoints
+    m = number of points in the input point cloud
+    n = number of points in the target point cloud
+    """
+
+    # displaying only the first item in the batch
+    input_point_cloud = input_point_cloud[0, ...].to('cpu')
+    detected_keypoints = detected_keypoints[0, ...].to('cpu')
+    target_point_cloud = target_point_cloud[0, ...].to('cpu')
+    target_keypoints = target_keypoints[0, ...].to('cpu')
+
+    input_point_cloud = pos_tensor_to_o3d(input_point_cloud)
+    detected_keypoints = pos_tensor_to_o3d(detected_keypoints)
+    target_point_cloud = pos_tensor_to_o3d(target_point_cloud)
+    target_keypoints = pos_tensor_to_o3d(target_keypoints)
+
+    input_point_cloud.paint_uniform_color([0.7, 0.7, 0.7])
+    detected_keypoints.paint_uniform_color([0.8, 0.0, 0.0])
+    target_keypoints.paint_uniform_color([0.0, 0.8, 0.0])
+    target_point_cloud.paint_uniform_color([0.0, 0.0, 0.7])
+
+    o3d.visualization.draw_geometries([input_point_cloud, detected_keypoints, target_keypoints, target_point_cloud])
+
+    return None
 
 
 def generate_filename(chars=string.ascii_uppercase + string.digits, N=10):
@@ -262,12 +319,12 @@ def get_extrinsic(view_dir, up, location):
     return extrinsic
 
 
-def get_camera_locations(camera_distance_vector, color=np.array([1.0, 0.0, 0.0])):
+def get_camera_locations(camera_distance_vector, color=np.array([1.0, 0.0, 0.0]), number_of_locations=200):
     """ generating sphere of points around the object """
     camera_locations = o3d.geometry.PointCloud()
     for i in range(len(camera_distance_vector)):
         sphere_mesh = o3d.geometry.TriangleMesh.create_sphere(radius=camera_distance_vector[i], resolution=20)
-        sphere_points_new = sphere_mesh.sample_points_uniformly(number_of_points=100)
+        sphere_points_new = sphere_mesh.sample_points_uniformly(number_of_points=number_of_locations)
 
         tempPoints = np.concatenate((sphere_points_new.points, camera_locations.points), axis=0)
         camera_locations.points = o3d.utility.Vector3dVector(tempPoints)

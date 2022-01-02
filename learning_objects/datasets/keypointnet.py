@@ -48,6 +48,8 @@ import pandas as pd
 import open3d as o3d
 import json
 import numpy as np
+import pytorch3d
+from pytorch3d import transforms
 
 import os
 import sys
@@ -124,9 +126,14 @@ def visualize_model(class_id, model_id):
 
 
 
-def generate_depth_data(class_id, model_id, radius_multiple = np.array([1.2, 3.0]), num_of_points=100000, location='../../data/learning-objects/depth_images/tmp/'):
+def generate_depth_data(class_id, model_id, radius_multiple = [1.2, 3.0],
+                        num_of_points=100000, num_of_depth_images_per_radius=200,
+                        dir_location='../../data/learning-objects/keypointnet_datasets/'):
     """ Generates depth point clouds of the CAD model """
 
+    radius_multiple = np.asarray(radius_multiple)
+
+    location = dir_location + str(class_id) + '/' + str(model_id) + '/'
     # get model
     model_mesh, pcd, keypoints_xyz = get_model_and_keypoints(class_id, model_id)
     model_pcd = model_mesh.sample_points_uniformly(number_of_points=num_of_points)
@@ -143,7 +150,7 @@ def generate_depth_data(class_id, model_id, radius_multiple = np.array([1.2, 3.0
 
     # determining camera locations and radius
     camera_distance_vector = diameter*radius_multiple
-    camera_locations = gu.get_camera_locations(camera_distance_vector)
+    camera_locations = gu.get_camera_locations(camera_distance_vector, number_of_locations=num_of_depth_images_per_radius)
     radius = gu.get_radius(object_diameter=diameter, cam_location=np.max(camera_distance_vector))
 
     # visualizing 3D object and all the camera locations
@@ -158,18 +165,34 @@ def generate_depth_data(class_id, model_id, radius_multiple = np.array([1.2, 3.0
 
 
 
-
-class Dataset(torch.utils.data.Dataset):
-    """ Defines the pytorch dataset of the Keypointnet"""
-
-
 class DepthPointCloud(torch.utils.data.Dataset):
     """
-    This creates the dataset for depth point clouds of CAD models.
-    It outputs the depth point clouds stored in a given file location.
-    It is to be used with dataset loader in Pytorch.
+    This creates the dataset for a given CAD model (class_id, model_id).
+
+    It outputs various depth point clouds of the given CAD model.
     """
-    def __init__(self, dir_name, class_id, model_id, object_file='object.pcd', camera_locations_file='camera_locations.pcd', metadata_file='metadata.csv', keypoint_numpy_file='keypoints_xyz.npy'):
+    def __init__(self, class_id, model_id, dir_name='../../data/learning_objects/keypointnet_datasets/',
+                 radius_multiple=[1.2, 3.0], num_of_depth_images_per_radius=500, num_of_points=1000, torch_out=False):
+
+        # Generating Data
+        if not os.path.isdir(dir_name + class_id + '/'):
+            os.mkdir(path=dir_name + class_id + '/')
+            os.mkdir(path=dir_name + class_id + '/' + model_id + '/')
+
+            location = dir_name + class_id + '/' + model_id + '/'
+            generate_depth_data(class_id=class_id, model_id=model_id,
+                                       radius_multiple=radius_multiple,
+                                       num_of_points=num_of_points,
+                                       dir_location=dir_name,
+                                       num_of_depth_images_per_radius=num_of_depth_images_per_radius)
+        else:
+            print("It appears that the data was either already generated or the path specified is not empty.")
+
+        object_file = 'object.pcd'
+        camera_locations_file = 'camera_locations.pcd'
+        metadata_file = 'metadata.csv'
+        keypoint_numpy_file = 'keypoints_xyz.npy'
+
         # instead of object_file, have to work with class_id and model_id
         self.metadata_file = metadata_file
         self.class_id = class_id
@@ -177,6 +200,7 @@ class DepthPointCloud(torch.utils.data.Dataset):
         self.dir_name = dir_name + str(self.class_id) + '/' +str(self.model_id) + '/'
         self.object_file = object_file
         self.camera_locations_file = camera_locations_file
+        self.torch_out = torch_out
 
         self.metadata = pd.read_csv(self.dir_name + self.metadata_file)
         self.object = o3d.io.read_point_cloud(self.dir_name + self.object_file)
@@ -195,4 +219,125 @@ class DepthPointCloud(torch.utils.data.Dataset):
         depth_pcd.estimate_normals()
         depth_pcd.paint_uniform_color([0.5, 0.5, 0.5])
 
-        return depth_pcd
+        if self.torch_out:
+            return torch.from_numpy(np.asarray(depth_pcd.points)).transpose(1, 2).to(torch.float)
+        else:
+            return depth_pcd
+
+    def _get_cad_models(self):
+
+        return torch.from_numpy(np.asarray(self.object.points)).transpose(0, 1).unsqueeze(0).to(torch.float)
+
+    def _get_model_keypoints(self):
+
+        return torch.from_numpy(self.keypoints_xyz).transpose(0, 1).unsqueeze(0).to(torch.float)
+
+
+class SE3PointCloud(torch.utils.data.Dataset):
+    """
+    This creates the dataset for a given CAD model (class_id, model_id).
+
+    It outputs various SE(3) transformations of the given input point cloud.
+    """
+    def __init__(self, class_id, model_id, num_of_points=1000, dataset_len=10000,
+                 dir_location='../../data/learning-objects/keypointnet_datasets/'):
+
+        self.class_id = class_id
+        self.model_id = model_id
+
+        # get model
+        self.model_mesh, _, self.keypoints_xyz = get_model_and_keypoints(class_id, model_id)
+        self.model_pcd = self.model_mesh.sample_points_uniformly(number_of_points=num_of_points)
+        center = self.model_pcd.get_center()
+        self.model_pcd.translate(-center)
+        self.model_mesh.translate(-center)
+        self.keypoints_xyz = self.keypoints_xyz - center
+        self.model_pcd.paint_uniform_color([0.5, 0.5, 0.5])
+
+        self.model_pcd_torch = torch.from_numpy(np.asarray(self.model_pcd.points)).transpose(0, 1)  # (3, m)
+        self.model_pcd_torch = self.model_pcd_torch.to(torch.float)
+
+        # size of the model
+        self.diameter = np.linalg.norm(np.asarray(self.model_pcd.get_max_bound()) - np.asarray(self.model_pcd.get_min_bound()))
+
+        # length of the dataset
+        self.len = dataset_len
+
+    def __len__(self):
+        return self.len
+
+    def __getitem__(self, idx):
+
+        R = transforms.random_rotation()
+        t = torch.rand(3, 1)
+
+        return R @ self.model_pcd_torch + t, R, t
+
+    def _get_cad_models(self):
+
+        return self.model_pcd_torch.unsqueeze(0)
+
+    def _get_model_keypoints(self):
+
+        return torch.from_numpy(self.keypoints_xyz).transpose(0, 1).unsqueeze(0).to(torch.float)
+
+
+def get_dataset(class_id, model_id, dir_location, batch_size=4):
+    """
+    This function shows how to obtain depth and SE3 datasets.
+    """
+    # Parameters for depth dataset:
+    radius_multiple = [1.2, 3.0]
+    num_of_depth_images_per_radius = 500
+    num_of_points = 1000
+
+    # Depth Dataset
+    depth_dataset = DepthPointCloud(class_id=class_id, model_id=model_id,
+                                           radius_multiple=radius_multiple,
+                                           num_of_depth_images_per_radius=num_of_depth_images_per_radius,
+                                           num_of_points=num_of_points,
+                                           dir_name=dir_location,
+                                           torch_out=True)
+
+    # Depth Dataset Loader
+    depth_dataset_loader = torch.utils.data.DataLoader(depth_dataset, batch_size=batch_size, shuffle=True)
+
+
+
+
+    # Parameters for SE3 dataset:
+    num_of_points = 1000
+    dataset_len = len(radius_multiple) * num_of_depth_images_per_radius
+
+    # SE3 Dataset
+    se3_dataset = SE3PointCloud(class_id=class_id, model_id=model_id, num_of_points=num_of_points,
+                                       dataset_len=dataset_len)
+
+    # SE3 Dataset Loader
+    se3_dataset_loader = torch.utils.data.DataLoader(se3_dataset, batch_size=batch_size, shuffle=False)
+
+
+    return depth_dataset, depth_dataset_loader, se3_dataset, se3_dataset_loader
+
+
+
+if __name__ == "__main__":
+
+    # Testing the workings of DepthPointCloud(torch.utils.data.Dataset) and SE3PointCloud(torch.utils.data.Dataset)
+    dir_location = '../../data/learning_objects/keypointnet_datasets/'
+    class_id = "03001627"  # chair
+    model_id = "1e3fba4500d20bb49b9f2eb77f5e247e"  # a particular chair model
+    batch_size = 5
+
+    depth_dataset, depth_dataset_loader, se3_dataset, se3_dataset_loader = get_dataset(class_id=class_id,
+                                                                                       model_id=model_id,
+                                                                                       dir_location=dir_location,
+                                                                                       batch_size=batch_size)
+
+    cad_models = depth_dataset._get_cad_models()
+    model_keypoints = depth_dataset._get_model_keypoints()
+
+    print("CAD models shape: ", cad_models.shape)
+    print("Model keypoints shape: ", model_keypoints.shape)
+
+
