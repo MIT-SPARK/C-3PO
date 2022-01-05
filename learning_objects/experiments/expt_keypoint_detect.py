@@ -95,7 +95,7 @@ class ProposedModel(nn.Module):
 
 
         # Keypoint Detector
-        self.keypoint_detector = RegressionKeypoints(N=self.N, method=self.keypoint_method)
+        self.keypoint_detector = RegressionKeypoints(N=self.N, method=self.keypoint_method, dim=[3, 16, 32, 64, 128])
 
 
         # PACE
@@ -137,8 +137,6 @@ class ProposedModel(nn.Module):
             return detected_keypoints
 
 
-
-
 # loss function
 def loss(input_point_cloud, detected_keypoints, target_point_cloud, target_keypoints):
     """
@@ -151,10 +149,11 @@ def loss(input_point_cloud, detected_keypoints, target_point_cloud, target_keypo
     output:
     loss                : torch.tensor of shape (B, 1)
     """
-    theta = 5.0
+    theta = 25.0
 
     # pc_loss = soft_chamfer_half_distance(input_point_cloud, target_point_cloud, radius=1000.0)
     pc_loss = chamfer_half_distance(input_point_cloud, target_point_cloud)
+    pc_loss = pc_loss.mean()
 
     # kp_loss = keypoint_error(detected_keypoints, target_keypoints)
     lossMSE = torch.nn.MSELoss()
@@ -164,13 +163,7 @@ def loss(input_point_cloud, detected_keypoints, target_point_cloud, target_keypo
     # print("PC loss: ", pc_loss.mean())
     # print("KP loss: ", kp_loss.mean())
 
-    return pc_loss.mean() + theta*kp_loss.mean()
-
-
-
-
-
-
+    return pc_loss + theta*kp_loss
 
 
 # Train the keypoint detector with PACE.
@@ -209,7 +202,7 @@ def train_one_epoch(epoch_index, tb_writer, training_loader, model, optimizer, l
 
         # Gather data and report
         running_loss += loss.item()
-        if i % 1000 == 999:
+        if i % 500 == 0:
             last_loss = running_loss / 1000 # loss per batch
             print('  batch {} loss: {}'.format(i + 1, last_loss))
             tb_x = epoch_index * len(training_loader) + i + 1
@@ -236,10 +229,10 @@ save_location = '../../data/learning_objects/runs/'
 def train(training_loader, validation_loader, model, optimizer, loss_fn):
 
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    writer = SummaryWriter(save_location + 'expt_keypoint_detect_wPACE_{}'.format(timestamp))
+    writer = SummaryWriter(save_location + 'expt_keypoint_detect_{}'.format(timestamp))
     epoch_number = 0
 
-    EPOCHS = 5
+    EPOCHS = 100
 
     best_vloss = 1_000_000.
 
@@ -306,7 +299,7 @@ def train(training_loader, validation_loader, model, optimizer, loss_fn):
             # Track best performance, and save the model's state
             if avg_vloss < best_vloss:
                 best_vloss = avg_vloss
-                model_path = save_location + 'expt_keypoint_detect_wPACE_' + 'model_{}_{}'.format(timestamp, epoch_number)
+                model_path = save_location + 'expt_keypoint_detect_' + 'model_{}_{}'.format(timestamp, epoch_number)
                 torch.save(model.state_dict(), model_path)
 
             epoch_number += 1
@@ -316,8 +309,6 @@ def train(training_loader, validation_loader, model, optimizer, loss_fn):
 
 
     return None
-
-
 
 
 # Test the keypoint detector with PACE. See if you can learn the keypoints.
@@ -358,6 +349,9 @@ def visual_test(test_loader, model, loss_fn):
 
 if __name__ == "__main__":
 
+    print('-' * 20)
+    print("Running expt_keypoint_detect.py")
+    print('-' * 20)
     # device
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     # device = 'cpu'
@@ -376,48 +370,43 @@ if __name__ == "__main__":
     class_id = "03001627"  # chair
     model_id = "1e3fba4500d20bb49b9f2eb77f5e247e"  # a particular chair model
     dataset_dir = '../../data/learning_objects/'
-    dataset_len = 4000
-    batch_size = 12
-    lr = 0.02
-    momentum = 0.9
+    dataset_len = 12000
+    batch_size = 120
+    lr_sgd = 0.02
+    momentum_sgd = 0.9
+    lr_adam = 0.001
+    num_of_points = 500
 
-    # se3_dataset100 = SE3PointCloud(class_id=class_id, model_id=model_id, num_of_points=100, dataset_len=dataset_len)
-    se3_dataset500 = SE3PointCloud(class_id=class_id, model_id=model_id, num_of_points=500, dataset_len=dataset_len)
-    # se3_dataset1k = SE3PointCloud(class_id=class_id, model_id=model_id, num_of_points=1000, dataset_len=dataset_len)
-    # se3_dataset10k = SE3PointCloud(class_id=class_id, model_id=model_id, num_of_points=10000, dataset_len=dataset_len)
-
-    # se3_dataset100_loader = torch.utils.data.DataLoader(se3_dataset100, batch_size=batch_size, shuffle=False)
-    se3_dataset500_loader = torch.utils.data.DataLoader(se3_dataset500, batch_size=batch_size, shuffle=False)
-    # se3_dataset1k_loader = torch.utils.data.DataLoader(se3_dataset1k, batch_size=batch_size, shuffle=False)
-    # se3_dataset10k_loader = torch.utils.data.DataLoader(se3_dataset10k, batch_size=batch_size, shuffle=False)
+    se3_dataset = SE3PointCloud(class_id=class_id, model_id=model_id, num_of_points=num_of_points, dataset_len=dataset_len)
+    se3_dataset_loader = torch.utils.data.DataLoader(se3_dataset, batch_size=batch_size, shuffle=False)
 
 
     # Generate a shape category, CAD model objects, etc.
-    cad_models = se3_dataset500._get_cad_models().to(torch.float).to(device=device)
-    model_keypoints = se3_dataset500._get_model_keypoints().to(torch.float).to(device=device)
+    cad_models = se3_dataset._get_cad_models().to(torch.float).to(device=device)
+    model_keypoints = se3_dataset._get_model_keypoints().to(torch.float).to(device=device)
 
 
     # model
     model = ProposedModel(model_keypoints=model_keypoints, cad_models=cad_models).to(device)
+    num_parameters = sum(param.numel() for param in model.parameters() if param.requires_grad)
+    print("Number of trainable parameters: ", num_parameters)
 
     # loss function
     loss_fn = loss
 
     # optimizer
-    optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=momentum)
-    num_parameters = sum(param.numel() for param in model.parameters() if param.requires_grad)
-    print("Number of trainable parameters: ", num_parameters)
+    optimizer = torch.optim.SGD(model.parameters(), lr=lr_sgd, momentum=momentum_sgd)
+    # optimizer = torch.optim.Adam(model.parameters(), lr=lr_adam)
+
 
     # training
-    train(training_loader=se3_dataset500_loader, validation_loader=se3_dataset500_loader,
+    train(training_loader=se3_dataset_loader, validation_loader=se3_dataset_loader,
           model=model, optimizer=optimizer, loss_fn=loss_fn)
 
 
     # test
-    visual_test(test_loader=se3_dataset500_loader, model=model, loss_fn=loss_fn)
+    print("Visualizing the trained model.")
+    visual_test(test_loader=se3_dataset_loader, model=model, loss_fn=loss_fn)
 
 
 
-
-
-# Note: If this works, do it with occlusions at input.

@@ -20,7 +20,7 @@ from learning_objects.utils.general import rotation_error, translation_error, sh
 
 
 
-# class PACEwKeypointCorrection(EqConstDeclarativeNode):
+
 class PACEwKeypointCorrection(AbstractDeclarativeNode):
     """
     This implements PACE + Keypoint Correction.

@@ -244,24 +244,27 @@ class SE3PointCloud(torch.utils.data.Dataset):
 
         self.class_id = class_id
         self.model_id = model_id
+        self.num_of_points = num_of_points
+        self.len = dataset_len
 
         # get model
         self.model_mesh, _, self.keypoints_xyz = get_model_and_keypoints(class_id, model_id)
-        self.model_pcd = self.model_mesh.sample_points_uniformly(number_of_points=num_of_points)
-        center = self.model_pcd.get_center()
-        self.model_pcd.translate(-center)
+        center = self.model_mesh.get_center()
         self.model_mesh.translate(-center)
         self.keypoints_xyz = self.keypoints_xyz - center
-        self.model_pcd.paint_uniform_color([0.5, 0.5, 0.5])
 
-        self.model_pcd_torch = torch.from_numpy(np.asarray(self.model_pcd.points)).transpose(0, 1)  # (3, m)
-        self.model_pcd_torch = self.model_pcd_torch.to(torch.float)
+        # self.model_pcd = self.model_mesh.sample_points_uniformly(number_of_points=num_of_points)
+        # center = self.model_pcd.get_center()
+        # self.model_pcd.translate(-center)
+        self.model_mesh.translate(-center)
+        self.keypoints_xyz = self.keypoints_xyz - center
+
+        # self.model_pcd_torch = torch.from_numpy(np.asarray(self.model_pcd.points)).transpose(0, 1)  # (3, m)
+        # self.model_pcd_torch = self.model_pcd_torch.to(torch.float)
 
         # size of the model
-        self.diameter = np.linalg.norm(np.asarray(self.model_pcd.get_max_bound()) - np.asarray(self.model_pcd.get_min_bound()))
+        self.diameter = np.linalg.norm(np.asarray(self.model_mesh.get_max_bound()) - np.asarray(self.model_mesh.get_min_bound()))
 
-        # length of the dataset
-        self.len = dataset_len
 
     def __len__(self):
         return self.len
@@ -271,15 +274,115 @@ class SE3PointCloud(torch.utils.data.Dataset):
         R = transforms.random_rotation()
         t = torch.rand(3, 1)
 
-        return R @ self.model_pcd_torch + t, R, t
+        model_pcd = self.model_mesh.sample_points_uniformly(number_of_points=self.num_of_points)
+        model_pcd_torch = torch.from_numpy(np.asarray(model_pcd.points)).transpose(0, 1)  # (3, m)
+        model_pcd_torch = model_pcd_torch.to(torch.float)
+
+
+        return R @ model_pcd_torch + t, R, t
 
     def _get_cad_models(self):
 
-        return self.model_pcd_torch.unsqueeze(0)
+        model_pcd = self.model_mesh.sample_points_uniformly(number_of_points=self.num_of_points)
+        model_pcd_torch = torch.from_numpy(np.asarray(model_pcd.points)).transpose(0, 1)  # (3, m)
+        model_pcd_torch = model_pcd_torch.to(torch.float)
+
+        return model_pcd_torch.unsqueeze(0)
 
     def _get_model_keypoints(self):
 
         return torch.from_numpy(self.keypoints_xyz).transpose(0, 1).unsqueeze(0).to(torch.float)
+
+
+
+
+
+class SE3nShapePointCloud(torch.utils.data.Dataset):
+    """
+    This creates the dataset for a given CAD model (class_id, model_id).
+
+    It outputs various SE(3) transformations and Shape by isotropic scaling of the given input point cloud.
+    """
+    def __init__(self, class_id, model_id, num_of_points=1000, dataset_len=10000,
+                 shape_scaling=torch.tensor([0.5, 2.0]),
+                 dir_location='../../data/learning-objects/keypointnet_datasets/'):
+
+        self.class_id = class_id
+        self.model_id = model_id
+        self.num_of_points = num_of_points
+        self.len = dataset_len
+        self.shape_scaling = shape_scaling
+
+        # get model
+        self.model_mesh, _, self.keypoints_xyz = get_model_and_keypoints(class_id, model_id)
+        center = self.model_mesh.get_center()
+        self.model_mesh.translate(-center)
+        self.keypoints_xyz = self.keypoints_xyz - center
+
+        # self.model_pcd = self.model_mesh.sample_points_uniformly(number_of_points=num_of_points)
+        # center = self.model_pcd.get_center()
+        # self.model_pcd.translate(-center)
+        self.model_mesh.translate(-center)
+        self.keypoints_xyz = self.keypoints_xyz - center
+
+        # self.model_pcd_torch = torch.from_numpy(np.asarray(self.model_pcd.points)).transpose(0, 1)  # (3, m)
+        # self.model_pcd_torch = self.model_pcd_torch.to(torch.float)
+
+        # size of the model
+        self.diameter = np.linalg.norm(np.asarray(self.model_mesh.get_max_bound()) - np.asarray(self.model_mesh.get_min_bound()))
+
+
+    def __len__(self):
+        return self.len
+
+    def __getitem__(self, idx):
+
+        R = transforms.random_rotation()
+        t = torch.rand(3, 1)
+        c = torch.rand(1, 1)*(self.shape_scaling[1] - self.shape_scaling[0]) + self.shape_scaling[0]
+
+        model_pcd = self.model_mesh.sample_points_uniformly(number_of_points=self.num_of_points)
+        model_pcd_torch = c*torch.from_numpy(np.asarray(model_pcd.points)).transpose(0, 1)  # (3, m)
+        model_pcd_torch = model_pcd_torch.to(torch.float)
+
+        shape = torch.tensor(2, 1)
+        shape[0] = 1 - c
+        shape[1] = c
+
+        return R @ model_pcd_torch + t, R, t, shape
+
+    def _get_cad_models(self):
+
+        model_pcd = self.model_mesh.sample_points_uniformly(number_of_points=self.num_of_points)
+        model_pcd_torch = torch.from_numpy(np.asarray(model_pcd.points)).transpose(0, 1)  # (3, m)
+        model_pcd_torch = model_pcd_torch.to(torch.float)
+
+        cad_models = torch.zeros_like(model_pcd_torch).unsqueeze(0)
+        cad_models = cad_models.repeat(2, 1, 1)
+
+        cad_models[0, ...] = self.shape_scaling[0]*model_pcd_torch
+        cad_models[1, ...] = self.shape_scaling[1]*model_pcd_torch
+
+        return cad_models
+
+    def _get_model_keypoints(self):
+
+        keypoints = torch.from_numpy(self.keypoints_xyz).transpose(0, 1).to(torch.float) # (3, N)
+
+        model_keypoints = torch.zeros_like(keypoints).unsqueeze(0)
+        model_keypoints = model_keypoints.repeat(2, 1, 1)
+
+        model_keypoints[0, ...] = self.shape_scaling[0]*keypoints
+        model_keypoints[1, ...] = self.shape_scaling[1]*keypoints
+
+        return model_keypoints
+
+
+
+
+
+
+
 
 
 def get_dataset(class_id, model_id, dir_location, batch_size=4):

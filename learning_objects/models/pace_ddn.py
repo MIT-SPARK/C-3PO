@@ -1,18 +1,6 @@
 """
 This code is an attempt to implement ddn as a torch.autograd.Function
 
-We do this by defining ParamDeclaratriveFunction
-And use it to convert a DDN Node - defined using EqConstDeclarativeNode - into a parameterized forward-packward propagating function
-
-Once done, this can then be used in developing the PACE + Correction Module
-
-
-Note:
-    I get an error currently because I am using the batch dimension in my code, which was not needed.
-    The EqConstDeclarativeNode takes care of this.
-
-    I am now planning to remove it and write things again, without the batch dimension. This, hopefully, should work.
-
 """
 
 import torch
@@ -110,7 +98,7 @@ class PACErotation(EqConstDeclarativeNode):
         """
         input:
         keypoints: torch.tensor of shape (B, 3*N), where B = batch size
-        r: torch.tensor of shape (B, 10), where B = batch size
+        y=r: torch.tensor of shape (B, 10), where B = batch size
 
         intermediate:
         self.A = torch.tensor of shape (16, 10, 10)
@@ -337,19 +325,26 @@ class PACErotation(EqConstDeclarativeNode):
 
         # Defining the SDP Layer
         Xvar = cp.Variable((10, 10), symmetric=True)
-        Qparam = cp.Parameter((10, 10), symmetric=True)
+        Qparam = Q.detach().cpu().numpy()
+        # Qparam = cp.Parameter((10, 10), symmetric=True)
         constraints = [Xvar >> 0]
         constraints += [
             cp.trace(self.A[i, :, :].detach().cpu().numpy() @ Xvar) == self.d[i].detach().cpu().numpy() for i in range(16)
         ]
-        self.sdp_for_rotation = cp.Problem(cp.Minimize(cp.trace(Qparam @ Xvar)), constraints=constraints)
-        assert self.sdp_for_rotation.is_dpp()
+        sdp_for_rotation = cp.Problem(cp.Minimize(cp.trace(Qparam @ Xvar)), constraints=constraints)
+        assert sdp_for_rotation.is_dpp()
 
         # self.sdp_for_rotation = CvxpyLayer(self.sdp_for_rotation, parameters=[Q], variables=[X])
 
         # Step (1)
-        Qparam.value = Q.detach().cpu().numpy()
-        sol = self.sdp_for_rotation.solve()
+        # Qparam.value = Q.detach().cpu().numpy()
+        sol = sdp_for_rotation.solve()
+        print("-"*40)
+        print("Problem status: ", sdp_for_rotation.status)
+        print("Optimal value: ", sdp_for_rotation.value)
+        # print("Optimal variable: ", Xvar.value)
+        # print("Qparam: ", Qparam)
+        print("-"*40)
         X = torch.from_numpy(Xvar.value)
         X = X.to(device=self.device_)
 
@@ -1499,6 +1494,9 @@ class PACEbp():
         P[7, 5] = 1
 
         return P
+
+
+
 
 
 
