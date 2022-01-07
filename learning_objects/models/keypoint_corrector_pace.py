@@ -19,11 +19,11 @@ from learning_objects.models.point_set_registration import point_set_registratio
 from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPointCloud, SE3nIsotorpicShapePointCloud
 
 from learning_objects.utils.general import pos_tensor_to_o3d
-from learning_objects.utils.general import chamfer_distance, chamfer_half_distance, rotation_error, translation_error, shape_error
+from learning_objects.utils.general import chamfer_distance, chamfer_half_distance, rotation_error, \
+    translation_error, shape_error
 
 from learning_objects.models.pace_ddn import PACEbp
 from learning_objects.models.modelgen import ModelFromShape
-
 
 
 def display_two_pcs(pc1, pc2):
@@ -43,6 +43,7 @@ def display_two_pcs(pc1, pc2):
     o3d.visualization.draw_geometries([object1, object2])
 
     return None
+
 
 def chamfer_loss_with_surface_normals(pc, pc_):
     """
@@ -107,6 +108,29 @@ def pace_eval(R, R_, t, t_, c, c_):
     return rotation_error(R, R_) + translation_error(t, t_) + shape_error(c, c_)
 
 
+def keypoint_perturbation(keypoints_true, var=0.8, type='uniform', fra=0.2):
+    """
+    inputs:
+    keypoints_true  :  torch.tensor of shape (B, 3, N)
+    var             :  float
+    type            : 'uniform' or 'sporadic'
+    fra             :  float    : used if type == 'sporadic'
+
+    output:
+    detected_keypoints  : torch.tensor of shape (B, 3, N)
+    """
+
+    if type=='uniform':
+        detected_keypoints = keypoints_true + var*torch.rand(size=keypoints_true.shape)
+
+    elif type=='sporadic':
+        mask = (torch.rand(size=keypoints_true.shape) < fra).int().float()
+        detected_keypoints = keypoints_true + var*torch.rand(size=keypoints_true.shape)*mask
+
+    return detected_keypoints
+
+
+
 class kp_corrector_pace():
     def __init__(self, cad_models, model_keypoints, weights, batch_size):
         super().__init__()
@@ -149,8 +173,8 @@ class kp_corrector_pace():
         theta = 10.0
         kappa = 50.0    #Note: it is critical to tune theta, kappa properly.
 
-        R, t, c = pace.forward(y=detected_keypoints + correction)
-        keypoint_estimate, model_estimate = modelgen.forward(shape=c)
+        R, t, c = self.pace.forward(y=detected_keypoints + correction)
+        keypoint_estimate, model_estimate = self.modelgen.forward(shape=c)
         model_estimate = R @ model_estimate + t
         keypoint_estimate = R @ keypoint_estimate + t
 
@@ -252,31 +276,9 @@ class kp_corrector_pace():
         return correction.clone().detach()
 
 
-def keypoint_perturbation(keypoints_true, var=0.8, type='uniform', fra=0.2):
-    """
-    inputs:
-    keypoints_true  :  torch.tensor of shape (B, 3, N)
-    var             :  float
-    type            : 'uniform' or 'sporadic'
-    fra             :  float    : used if type == 'sporadic'
 
-    output:
-    detected_keypoints  : torch.tensor of shape (B, 3, N)
-    """
-
-    if type=='uniform':
-        detected_keypoints = keypoints_true + var*torch.rand(size=keypoints_true.shape)
-
-    elif type=='sporadic':
-        mask = (torch.rand(size=keypoints_true.shape) < fra).int().float()
-        detected_keypoints = keypoints_true + var*torch.rand(size=keypoints_true.shape)*mask
-
-    return detected_keypoints
-
-
-
-
-
+#ToDo: Add the above functions moved to keypoint_corrector.py
+#ToDo: This file has to be moved to the experiment section.
 
 if __name__ == "__main__":
 
