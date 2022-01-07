@@ -1,5 +1,5 @@
 """
-This implements PACE with keypoint correction as a function and a torch.nn.Module.
+This implements SE(3) registration with keypoint correction as a function and a torch.nn.Module.
 
 """
 
@@ -7,6 +7,8 @@ import torch
 import open3d as o3d
 import numpy as np
 from scipy import optimize
+from pytorch3d import ops
+from pytorch3d.loss import chamfer_distance as pyt_chamfer_distance
 import torch.nn as nn
 import cvxpy as cp
 import os
@@ -14,16 +16,10 @@ import sys
 sys.path.append("../../")
 
 from learning_objects.models.point_set_registration import point_set_registration
-from learning_objects.datasets.keypointnet import SE3PointCloud
+from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPointCloud
 
 from learning_objects.utils.general import pos_tensor_to_o3d
-from learning_objects.utils.general import chamfer_distance, chamfer_half_distance
-
-
-#ToDo: test with depth-point clouds and half-chamfer loss
-#ToDo: test with chamfer loss with the component of surface normals
-
-#ToDo: replace registration with PACE
+from learning_objects.utils.general import chamfer_distance, chamfer_half_distance, rotation_error, translation_error
 
 
 def display_two_pcs(pc1, pc2):
@@ -45,7 +41,7 @@ def display_two_pcs(pc1, pc2):
     return None
 
 
-def chamfer_loss_wsurface_normals(pc, pc_):
+def chamfer_loss_with_surface_normals(pc, pc_):
     """
     inputs:
     pc  : torch.tensor of shape (B, 3, n)
@@ -54,6 +50,17 @@ def chamfer_loss_wsurface_normals(pc, pc_):
     output:
     loss    :
     """
+
+    normals = ops.estimate_pointcloud_normals(pc.transpose(-1, -2))
+    normals_ = ops.estimate_pointcloud_normals(pc_.transpose(-1, -2))
+
+    loss, loss_normals = pyt_chamfer_distance(x=pc.transpose(-1, -2),
+                                              y=pc_.transpose(-1, -2),
+                                              x_normals=normals, y_normals=normals_)
+
+    # Using surface normals in the loss function, takes a long time, but
+    # converges correctly. Not much orientation errors; provided you weigh the loss_normals correctly.
+    return loss + 0.01*loss_normals
 
 
 def chamfer_loss(pc, pc_):
@@ -82,7 +89,22 @@ def keypoints_loss(kp, kp_):
 
     return lossMSE(kp, kp_)
 
-class kp_corrector():
+
+
+def registration_eval(R, R_, t, t_):
+    """
+    inputs:
+    R, R_   : torch.tensor of shape (B, 3, 3)
+    t, t_   : torch.tensor of shape (B, 3, 1)
+
+    output:
+    loss    : torch.tensor of shape (B, 1)
+    """
+
+    return rotation_error(R, R_) + translation_error(t, t_)
+
+
+class kp_corrector_reg():
     def __init__(self, cad_models, model_keypoints):
         super().__init__()
         """
@@ -128,6 +150,8 @@ class kp_corrector():
         keypoint_estimate = R @ self.model_keypoints + t
 
         loss_pc = chamfer_loss(pc=input_point_cloud, pc_=model_estimate)
+        # loss_pc = chamfer_loss_with_surface_normals(pc=input_point_cloud, pc_=model_estimate)
+
         loss_kp = keypoints_loss(kp=detected_keypoints+correction, kp_=keypoint_estimate)
         # loss_kp = 0.0
 
@@ -221,6 +245,30 @@ class kp_corrector():
         return correction.clone().detach()
 
 
+def keypoint_perturbation(keypoints_true, var=0.8, type='uniform', fra=0.2):
+    """
+    inputs:
+    keypoints_true  :  torch.tensor of shape (B, 3, N)
+    var             :  float
+    type            : 'uniform' or 'sporadic'
+    fra             :  float    : used if type == 'sporadic'
+
+    output:
+    detected_keypoints  : torch.tensor of shape (B, 3, N)
+    """
+
+    if type=='uniform':
+        detected_keypoints = keypoints_true + var*torch.rand(size=keypoints_true.shape)
+
+    elif type=='sporadic':
+        mask = (torch.rand(size=keypoints_true.shape) < fra).int().float()
+        detected_keypoints = keypoints_true + var*torch.rand(size=keypoints_true.shape)*mask
+
+    return detected_keypoints
+
+
+
+
 
 
 if __name__ == "__main__":
@@ -228,6 +276,10 @@ if __name__ == "__main__":
 
     class_id = "03001627"  # chair
     model_id = "1e3fba4500d20bb49b9f2eb77f5e247e"  # a particular chair model
+
+    print("-"*40)
+    print("Verifying keypoint corrector with SE3PointCloud dataset and keypoint_perturbation(): ")
+
     se3_dataset = SE3PointCloud(class_id=class_id, model_id=model_id, num_of_points=500, dataset_len=100)
     se3_dataset_loader = torch.utils.data.DataLoader(se3_dataset, batch_size=1, shuffle=False)
 
@@ -235,7 +287,7 @@ if __name__ == "__main__":
     cad_models = se3_dataset._get_cad_models()              # (1, 3, m)
 
     # define the keypoint corrector
-    corrector = kp_corrector(cad_models=cad_models, model_keypoints=model_keypoints)
+    corrector = kp_corrector_reg(cad_models=cad_models, model_keypoints=model_keypoints)
 
     for i, data in enumerate(se3_dataset_loader):
 
@@ -244,11 +296,11 @@ if __name__ == "__main__":
         # generating perturbed keypoints
         keypoints_true = rotation_true @ model_keypoints + translation_true
         # detected_keypoints = keypoints_true
-        detected_keypoints = keypoints_true + torch.rand(size=keypoints_true.shape)
+        detected_keypoints = keypoint_perturbation(keypoints_true=keypoints_true, type='sporadic')
 
         # estimate model: using point set registration on perturbed keypoints
-        R, t = point_set_registration(source_points=model_keypoints, target_points=detected_keypoints)
-        model_estimate = R @ cad_models + t
+        R_naive, t_naive = point_set_registration(source_points=model_keypoints, target_points=detected_keypoints)
+        model_estimate = R_naive @ cad_models + t_naive
         display_two_pcs(pc1=input_point_cloud.squeeze(0), pc2=model_estimate.squeeze(0))
 
         # estimate model: using the keypoint corrector
@@ -258,12 +310,61 @@ if __name__ == "__main__":
         model_estimate = R @ cad_models + t
         display_two_pcs(pc1=input_point_cloud.squeeze(0), pc2=model_estimate.squeeze(0))
 
+        # evaluate the two metrics
+        print("Evaluation error (wo correction): ", registration_eval(R_naive, rotation_true, t_naive, translation_true))
+        print("Evaluation error (w correction): ", registration_eval(R, rotation_true, t, translation_true))
         # the claim is that with the correction we can
 
         if i >= 5:
             break
 
+    print("-" * 40)
 
+
+    print("-"*40)
+    print("Verifying keypoint corrector with DepthPointCloud dataset and keypoint_perturbation(): ")
+
+    depth_dataset = DepthPointCloud(class_id=class_id, model_id=model_id, num_of_points=500)
+    depth_dataset_loader = torch.utils.data.DataLoader(depth_dataset, batch_size=1, shuffle=False)
+
+    model_keypoints = depth_dataset._get_model_keypoints()    # (1, 3, N)
+    cad_models = depth_dataset._get_cad_models()              # (1, 3, m)
+
+    # define the keypoint corrector
+    corrector = kp_corrector_reg(cad_models=cad_models, model_keypoints=model_keypoints)
+
+    for i, data in enumerate(depth_dataset_loader):
+
+        input_point_cloud = data
+
+        # generating perturbed keypoints
+        keypoints_true = model_keypoints
+        rotation_true = torch.eye(3)
+        translation_true = torch.zeros(3, 1)
+        # detected_keypoints = keypoints_true
+        detected_keypoints = keypoint_perturbation(keypoints_true=keypoints_true, type='sporadic')
+
+        # estimate model: using point set registration on perturbed keypoints
+        R_naive, t_naive = point_set_registration(source_points=model_keypoints, target_points=detected_keypoints)
+        model_estimate = R_naive @ cad_models + t_naive
+        display_two_pcs(pc1=input_point_cloud.squeeze(0), pc2=model_estimate.squeeze(0))
+
+        # estimate model: using the keypoint corrector
+        correction = corrector.forward(detected_keypoints=detected_keypoints, input_point_cloud=input_point_cloud)
+        # correction = torch.zeros_like(correction)
+        R, t = point_set_registration(source_points=model_keypoints, target_points=detected_keypoints+correction)
+        model_estimate = R @ cad_models + t
+        display_two_pcs(pc1=input_point_cloud.squeeze(0), pc2=model_estimate.squeeze(0))
+
+        # evaluate the two metrics
+        print("Evaluation error (wo correction): ", registration_eval(R_naive, rotation_true, t_naive, translation_true))
+        print("Evaluation error (w correction): ", registration_eval(R, rotation_true, t, translation_true))
+        # the claim is that with the correction we can
+
+        if i >= 5:
+            break
+
+    print("-" * 40)
 
 
 
