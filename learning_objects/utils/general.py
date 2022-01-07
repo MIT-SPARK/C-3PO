@@ -85,7 +85,6 @@ def chamfer_half_distance(X, Y):
     return sq_dist.mean(dim=1)
 
 
-
 def max_chamfer_distance(X, Y):
     """
     inputs:

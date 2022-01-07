@@ -27,7 +27,6 @@ from learning_objects.models.keypoint_detector import HeatmapKeypoints, Regressi
 from learning_objects.models.pace_ddn import PACEbp, PACEddn
 from learning_objects.models.pace import PACE, PACEmodule
 from learning_objects.models.modelgen import ModelFromShape, ModelFromShapeModule
-from learning_objects.models.keypoint_corrector import PACEwKeypointCorrection, from_y
 
 from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPointCloud
 
