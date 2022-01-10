@@ -24,6 +24,26 @@ from torch_geometric.data import Data
 from time import time
 
 
+
+def scatter_bar_plot(plt, x, y, label, color='orangered'):
+    """
+    x   : torch.tensor of shape (n)
+    y   : torch.tensor of shape (n, k)
+
+    """
+    n, k = y.shape
+    width = 0.2*torch.abs(x[1]-x[0])
+
+    x_points = x.unsqueeze(-1).repeat(1, k)
+    x_points += width*(torch.rand(size=x_points.shape)-1)
+    y_points = y
+
+    plt.scatter(x_points, y_points, s=20.0, c=color, alpha=0.5, label=label)
+
+    return plt
+
+
+
 class Timer:
     def __init__(self, tag, print=False):
         self.tag = tag

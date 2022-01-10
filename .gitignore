@@ -4,6 +4,13 @@
 # Dataset folders
 data/
 learning_objects/data/
+
+# Temporary experimental data
+learning_objects/expt_keypoint_corrector_analysis/expt_with_pace_se3isopc
+learning_objects/expt_keypoint_corrector_analysis/expt_with_reg_se3pc
+learning_objects/expt_keypoint_corrector_analysis/expt_with_reg_depthpc
+
+# Misc folders
 example_package/
 DeepSDF/
 learning_objects/discard/

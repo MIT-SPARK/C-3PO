@@ -51,11 +51,11 @@ def completeness(pc, pc_, radius=0.3):
 
 
 class certifiability():
-    def __init__(self, epsilon, delta):
+    def __init__(self, epsilon, delta, radius=0.3):
         super().__init__()
         self.epsilon = epsilon
         self.delta = delta
-        self.radius = 0.3
+        self.radius = radius
 
 
     def forward(self, X, Z):

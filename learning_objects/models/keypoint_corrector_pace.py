@@ -288,7 +288,7 @@ if __name__ == "__main__":
     batch_size = 1
 
     print("-"*40)
-    print("Verifying keypoint corrector with SE3PointCloud dataset and keypoint_perturbation(): ")
+    print("Verifying keypoint corrector with SE3nIsotropicShapePointCloud dataset and keypoint_perturbation(): ")
 
     dataset = SE3nIsotorpicShapePointCloud(class_id=class_id, model_id=model_id,
                                                num_of_points=500, shape_scaling=torch.tensor([0.5, 2.0]))

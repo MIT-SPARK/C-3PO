@@ -136,17 +136,17 @@ def keypoint_perturbation(keypoints_true, var=0.8, type='uniform', fra=0.2):
     """
 
     if type=='uniform':
-        detected_keypoints = keypoints_true + var*torch.rand(size=keypoints_true.shape)
+        detected_keypoints = keypoints_true + var*torch.randn_like(keypoints_true)
 
     elif type=='sporadic':
         mask = (torch.rand(size=keypoints_true.shape) < fra).int().float()
-        detected_keypoints = keypoints_true + var*torch.rand(size=keypoints_true.shape)*mask
+        detected_keypoints = keypoints_true + var*torch.randn_like(keypoints_true)*mask
 
     return detected_keypoints
 
 
 class kp_corrector_reg():
-    def __init__(self, cad_models, model_keypoints):
+    def __init__(self, cad_models, model_keypoints, theta=50.0, kappa=10.0):
         super().__init__()
         """
         cad_models      : torch.tensor of shape (1, 3, m)
@@ -154,6 +154,8 @@ class kp_corrector_reg():
         """
         self.cad_models = cad_models
         self.model_keypoints = model_keypoints
+        self.theta = theta
+        self.kappa = kappa
 
 
     def forward(self, detected_keypoints, input_point_cloud):
@@ -181,8 +183,7 @@ class kp_corrector_reg():
         loss    : torch.tensor of shape (B, 1)
 
         """
-        theta = 50.0
-        kappa = 10.0
+
 
         #Note: kappa = 100.0 and theta = 1.0 showed promising results. It resuled in no orientation errors in registration.
 
@@ -196,7 +197,7 @@ class kp_corrector_reg():
         loss_kp = keypoints_loss(kp=detected_keypoints+correction, kp_=keypoint_estimate)
         # loss_kp = 0.0
 
-        return kappa*loss_pc + theta*loss_kp
+        return self.kappa*loss_pc + self.theta*loss_kp
 
     def objective_numpy(self, detected_keypoints, input_point_cloud, correction):
         """
@@ -287,7 +288,7 @@ class kp_corrector_reg():
 
 
 class kp_corrector_pace():
-    def __init__(self, cad_models, model_keypoints, weights, batch_size):
+    def __init__(self, cad_models, model_keypoints, weights, batch_size, theta=10.0, kappa=50.0):
         super().__init__()
         """
         cad_models      : torch.tensor of shape (K, 3, m)
@@ -295,6 +296,8 @@ class kp_corrector_pace():
         """
         self.cad_models = cad_models
         self.model_keypoints = model_keypoints
+        self.theta = theta
+        self.kappa = kappa
         self.pace = PACEbp(weights=weights,
                            model_keypoints=self.model_keypoints, batch_size=batch_size)
         self.modelgen = ModelFromShape(cad_models=self.cad_models, model_keypoints=self.model_keypoints)
@@ -325,8 +328,7 @@ class kp_corrector_pace():
         loss    : torch.tensor of shape (B, 1)
 
         """
-        theta = 10.0
-        kappa = 50.0    #Note: it is critical to tune theta, kappa properly.
+
 
         R, t, c = self.pace.forward(y=detected_keypoints + correction)
         keypoint_estimate, model_estimate = self.modelgen.forward(shape=c)
@@ -339,7 +341,7 @@ class kp_corrector_pace():
         loss_kp = keypoints_loss(kp=detected_keypoints+correction, kp_=keypoint_estimate)
         # loss_kp = 0.0
 
-        return kappa*loss_pc + theta*loss_kp
+        return self.kappa*loss_pc + self.theta*loss_kp
 
 
 
