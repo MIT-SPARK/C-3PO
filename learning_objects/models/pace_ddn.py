@@ -1,18 +1,6 @@
 """
 This code is an attempt to implement ddn as a torch.autograd.Function
 
-We do this by defining ParamDeclaratriveFunction
-And use it to convert a DDN Node - defined using EqConstDeclarativeNode - into a parameterized forward-packward propagating function
-
-Once done, this can then be used in developing the PACE + Correction Module
-
-
-Note:
-    I get an error currently because I am using the batch dimension in my code, which was not needed.
-    The EqConstDeclarativeNode takes care of this.
-
-    I am now planning to remove it and write things again, without the batch dimension. This, hopefully, should work.
-
 """
 
 import torch
@@ -21,7 +9,7 @@ import pymanopt as pym
 import torch.nn as nn
 import torch.nn.functional as F
 from cvxpylayers.torch import CvxpyLayer
-
+import numpy as np
 
 import os
 import sys
@@ -110,7 +98,7 @@ class PACErotation(EqConstDeclarativeNode):
         """
         input:
         keypoints: torch.tensor of shape (B, 3*N), where B = batch size
-        r: torch.tensor of shape (B, 10), where B = batch size
+        y=r: torch.tensor of shape (B, 10), where B = batch size
 
         intermediate:
         self.A = torch.tensor of shape (16, 10, 10)
@@ -337,19 +325,26 @@ class PACErotation(EqConstDeclarativeNode):
 
         # Defining the SDP Layer
         Xvar = cp.Variable((10, 10), symmetric=True)
-        Qparam = cp.Parameter((10, 10), symmetric=True)
+        Qparam = Q.detach().cpu().numpy()
+        # Qparam = cp.Parameter((10, 10), symmetric=True)
         constraints = [Xvar >> 0]
         constraints += [
             cp.trace(self.A[i, :, :].detach().cpu().numpy() @ Xvar) == self.d[i].detach().cpu().numpy() for i in range(16)
         ]
-        self.sdp_for_rotation = cp.Problem(cp.Minimize(cp.trace(Qparam @ Xvar)), constraints=constraints)
-        assert self.sdp_for_rotation.is_dpp()
+        sdp_for_rotation = cp.Problem(cp.Minimize(cp.trace(Qparam @ Xvar)), constraints=constraints)
+        assert sdp_for_rotation.is_dpp()
 
         # self.sdp_for_rotation = CvxpyLayer(self.sdp_for_rotation, parameters=[Q], variables=[X])
 
         # Step (1)
-        Qparam.value = Q.detach().cpu().numpy()
-        sol = self.sdp_for_rotation.solve()
+        # Qparam.value = Q.detach().cpu().numpy()
+        sol = sdp_for_rotation.solve()
+        # print("-"*40)
+        # print("Problem status: ", sdp_for_rotation.status)
+        # print("Optimal value: ", sdp_for_rotation.value)
+        # print("Optimal variable: ", Xvar.value)
+        # print("Qparam: ", Qparam)
+        # print("-"*40)
         X = torch.from_numpy(Xvar.value)
         X = X.to(device=self.device_)
 
@@ -624,7 +619,7 @@ class PACEddn(nn.Module):
 
         Make sure that this runs on cpu, and not on gpu.
     """
-    def __init__(self, weights, model_keypoints, lambda_constant=torch.tensor(1.0), batch_size=32):
+    def __init__(self, weights, model_keypoints, batch_size=32):
         super().__init__()
         """
         weights: torch.tensor of shape (N, 1)
@@ -634,12 +629,12 @@ class PACEddn(nn.Module):
 
         self.w = weights.unsqueeze(0)               # (1, N, 1)
         self.model_keypoints = model_keypoints                    # (K, 3, N)
-        self.lambda_constant = lambda_constant      # (1, 1)
-        self.device_ = self.lambda_constant.device
+        self.device_ = self.model_keypoints.device
 
         self.N = self.model_keypoints.shape[-1]                   # (1, 1)
         self.K = self.model_keypoints.shape[0]                    # (1, 1)
         self.batch_size = batch_size
+        self.lambda_constant = torch.tensor(np.sqrt(self.K/self.N)).float()
 
         self.b_w = self._get_b_w()                  # (1, K, 3)
         self.bar_B = self._get_bar_B()              # (1, 3N, K)
@@ -1069,7 +1064,7 @@ class PACEbp():
 
         Make sure that this runs on cpu, and not on gpu.
     """
-    def __init__(self, weights, model_keypoints, lambda_constant=torch.tensor(1.0), batch_size=32):
+    def __init__(self, weights, model_keypoints, batch_size=32):
         super().__init__()
         """
         weights: torch.tensor of shape (N, 1)
@@ -1079,12 +1074,12 @@ class PACEbp():
 
         self.w = weights.unsqueeze(0)               # (1, N, 1)
         self.model_keypoints = model_keypoints                    # (K, 3, N)
-        self.lambda_constant = lambda_constant      # (1, 1)
-        self.device_ = self.lambda_constant.device
+        self.device_ = self.model_keypoints.device
 
         self.N = self.model_keypoints.shape[-1]                   # (1, 1)
         self.K = self.model_keypoints.shape[0]                    # (1, 1)
         self.batch_size = batch_size
+        self.lambda_constant = torch.tensor([np.sqrt(self.K/self.N)]).float()
 
         self.b_w = self._get_b_w()                  # (1, K, 3)
         self.bar_B = self._get_bar_B()              # (1, 3N, K)
@@ -1100,8 +1095,8 @@ class PACEbp():
 
 
         # Rotation ddn layer
-        pace_rotation_ddn = PACErotation(weights=weights, model_keypoints=model_keypoints,
-                                         lambda_constant=lambda_constant, batch_size=self.batch_size)
+        pace_rotation_ddn = PACErotation(weights=weights, model_keypoints=self.model_keypoints,
+                                         lambda_constant=self.lambda_constant, batch_size=self.batch_size)
         # self.pace_rotation_ddn_layer = DeclarativeLayer(pace_rotation_ddn)
         self.pace_rotation_ddn_fn = ParamDeclarativeFunction(pace_rotation_ddn)
 
@@ -1499,6 +1494,9 @@ class PACEbp():
         P[7, 5] = 1
 
         return P
+
+
+
 
 
 

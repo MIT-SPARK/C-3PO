@@ -12,7 +12,7 @@ from learning_objects.utils.general import generate_random_keypoints
 from learning_objects.models.keypoint_detector import HeatmapKeypoints, RegressionKeypoints
 from learning_objects.models.pace_ddn import PACEbp
 from learning_objects.models.modelgen import ModelFromShape
-from learning_objects.models.keypoint_corrector import PACEwKeypointCorrection, from_y
+from learning_objects.models.keypoint_corrector_old import PACEwKeypointCorrection, from_y
 
 
 
@@ -51,7 +51,7 @@ class ProposedModel(nn.Module):
             self.keypoint_detector = HeatmapKeypoints(k=self.N, method=keypoint_method)
 
         # PACE
-        self.pace_fn = PACEbp(weights=self.weights, model_keypoints=self.model_keypoints, lambda_constant=self.lambda_constant)
+        self.pace_fn = PACEbp(weights=self.weights, model_keypoints=self.model_keypoints)
 
         # PACE + Keypoint Corrector
         if self.keypoint_correction:

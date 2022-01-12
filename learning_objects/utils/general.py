@@ -24,6 +24,26 @@ from torch_geometric.data import Data
 from time import time
 
 
+
+def scatter_bar_plot(plt, x, y, label, color='orangered'):
+    """
+    x   : torch.tensor of shape (n)
+    y   : torch.tensor of shape (n, k)
+
+    """
+    n, k = y.shape
+    width = 0.2*torch.abs(x[1]-x[0])
+
+    x_points = x.unsqueeze(-1).repeat(1, k)
+    x_points += width*(torch.rand(size=x_points.shape)-1)
+    y_points = y
+
+    plt.scatter(x_points, y_points, s=20.0, c=color, alpha=0.5, label=label)
+
+    return plt
+
+
+
 class Timer:
     def __init__(self, tag, print=False):
         self.tag = tag
@@ -37,6 +57,29 @@ class Timer:
         if self.print:
             print("{}: {}s".format(self.tag, time() - self.ts))
         return time()
+
+
+def chamfer_distance(X, Y):
+    """
+    inputs:
+    X: torch.tensor of shape (B, 3, n)
+    Y: torch.tensor of shape (B, 3, m)
+
+    where
+    B = batch size
+    n, m = number of points in the point cloud
+
+    outputs:
+    loss: torch.tensor of shape (B, 1)
+    """
+
+    sq_dist_xy, _, _ = ops.knn_points(torch.transpose(X, -1, -2), torch.transpose(Y, -1, -2), K=1)
+    # dist (B, n, 1): distance from point in X to the nearest point in Y
+
+    sq_dist_yx, _, _ = ops.knn_points(torch.transpose(Y, -1, -2), torch.transpose(X, -1, -2), K=1)
+    # dist (B, n, 1): distance from point in Y to the nearest point in X
+
+    return sq_dist_xy.mean(dim=1) + sq_dist_yx.mean(dim=1)
 
 
 def chamfer_half_distance(X, Y):
@@ -56,11 +99,56 @@ def chamfer_half_distance(X, Y):
     Output is the mean distance from every point in X to its closest point in Y
     """
 
-    dist, _, _ = ops.knn_points(torch.transpose(X, -1, -2), torch.transpose(Y, -1, -2), K=1)
+    sq_dist, _, _ = ops.knn_points(torch.transpose(X, -1, -2), torch.transpose(Y, -1, -2), K=1)
     # dist (B, n, 1): distance from point in X to the nearest point in Y
-    dist = dist**2
 
-    return dist.mean(dim=1)
+    return sq_dist.mean(dim=1)
+
+
+def max_chamfer_distance(X, Y):
+    """
+    inputs:
+    X: torch.tensor of shape (B, 3, n)
+    Y: torch.tensor of shape (B, 3, m)
+
+    where
+    B = batch size
+    n, m = number of points in the point cloud
+
+    outputs:
+    loss: torch.tensor of shape (B, 1)
+    """
+
+    sq_dist_xy, _, _ = ops.knn_points(torch.transpose(X, -1, -2), torch.transpose(Y, -1, -2), K=1)
+    # dist (B, n, 1): distance from point in X to the nearest point in Y
+
+    sq_dist_yx, _, _ = ops.knn_points(torch.transpose(Y, -1, -2), torch.transpose(X, -1, -2), K=1)
+    # dist (B, n, 1): distance from point in Y to the nearest point in X
+
+    return sq_dist_xy.max(dim=1)[0] + sq_dist_yx.max(dim=1)[0]
+
+
+def max_chamfer_half_distance(X, Y):
+    """
+    inputs:
+    X: torch.tensor of shape (B, 3, n)
+    Y: torch.tensor of shape (B, 3, m)
+
+    where
+    B = batch size
+    n, m = number of points in the point cloud
+
+    outputs:
+    loss: torch.tensor of shape (B, 1)
+
+    Note:
+    Output is the mean distance from every point in X to its closest point in Y
+    """
+
+    sq_dist, _, _ = ops.knn_points(torch.transpose(X, -1, -2), torch.transpose(Y, -1, -2), K=1)
+    # dist (B, n, 1): distance from point in X to the nearest point in Y
+
+    return sq_dist.max(dim=1)[0]
 
 
 def soft_chamfer_half_distance(X, Y, radius, K=10, theta=10.0):
