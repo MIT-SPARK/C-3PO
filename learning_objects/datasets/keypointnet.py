@@ -60,8 +60,6 @@ from learning_objects.utils.general import pos_tensor_to_o3d
 import learning_objects.utils.general as gu
 
 
-
-
 def display_two_pcs(pc1, pc2):
     """
     pc1 : torch.tensor of shape (3, n)
@@ -155,7 +153,6 @@ def visualize_model(class_id, model_id):
     return mesh, pcd, keypoints_xyz, keypoint_markers
 
 
-
 def visualize_torch_model_n_keypoints(cad_models, model_keypoints):
     """
     inputs:
@@ -178,7 +175,6 @@ def visualize_torch_model_n_keypoints(cad_models, model_keypoints):
         visualize_model_n_keypoints([point_cloud], keypoints_xyz=keypoints)
 
     return 0
-
 
 
 def generate_depth_data(class_id, model_id, radius_multiple = [1.2, 3.0],
@@ -219,6 +215,242 @@ def generate_depth_data(class_id, model_id, radius_multiple = [1.2, 3.0],
     np.save(file=location+'keypoints_xyz.npy', arr=keypoints_xyz)
 
 
+class DepthAndIsotorpicShapePointCloud(torch.utils.data.Dataset):
+    def __init__(self, class_id, model_id, shape_scaling=torch.tensor([0.5, 2.0]), radius_multiple=[1.2, 3.0],
+                 num_of_points=1000, dataset_len=10000):
+        super().__init__()
+
+        self.class_id = class_id
+        self.model_id = model_id
+        self.shape_scaling = shape_scaling
+        self.radius_multiple = radius_multiple
+        self.num_of_points = num_of_points
+        self.len = dataset_len
+
+        # get model
+        self.model_mesh, _, self.keypoints_xyz = get_model_and_keypoints(class_id, model_id)
+        center = self.model_mesh.get_center()
+        self.model_mesh.translate(-center)
+
+        self.keypoints_xyz = self.keypoints_xyz - center
+        self.keypoints_xyz = torch.from_numpy(self.keypoints_xyz).transpose(0, 1).unsqueeze(0).to(torch.float)
+
+        # size of the model
+        self.diameter = np.linalg.norm(
+            np.asarray(self.model_mesh.get_max_bound()) - np.asarray(self.model_mesh.get_min_bound()))
+
+        #
+        self.camera_location = torch.tensor([1.0, 0.0, 0.0]).unsqueeze(-1) #set a camera location, with respect to the origin
+
+    def __len__(self):
+        return self.len
+
+    def __getitem__(self, idx):
+        """
+        output:
+        point_cloud : torch.tensor of shape (3, m)
+        R           : torch.tensor of shape (3, 3)
+        t           : torch.tensor of shape (3, 1)
+        """
+
+        # Randomly rotate the self.model_mesh
+        model_mesh = copy.deepcopy(self.model_mesh)
+        R = transforms.random_rotation()
+        # Rnumpy = R.detach()
+        # Rnumpy = Rnumpy.numpy()
+        model_mesh = model_mesh.rotate(R=R.numpy())
+
+        # Sample a point cloud from the self.model_mesh
+        pcd = model_mesh.sample_points_uniformly(number_of_points=self.num_of_points)
+
+        # Take a depth image from a distance of the rotated self.model_mesh from self.camera_location
+        beta = torch.rand(1, 1)
+        camera_lcation_factor = beta*(self.radius_multiple[1]-self.radius_multiple[0]) + self.radius_multiple[0]
+        radius = gu.get_radius(cam_location=camera_lcation_factor*self.camera_location.numpy(),
+                               object_diameter=self.diameter)
+        depth_pcd = gu.get_depth_pcd(centered_pcd=pcd, camera=self.camera_location.numpy(), radius=radius)
+
+
+        # Scale the depth point cloud, by a random quantity, bounded within the self.radius_multiple
+        alpha = torch.rand(1, 1)
+        scaling_factor = alpha * (self.shape_scaling[1] - self.shape_scaling[0]) + self.shape_scaling[0]
+
+        depth_pcd_torch = torch.from_numpy(np.asarray(depth_pcd.points)).transpose(0, 1)  # (3, m)
+        depth_pcd_torch = depth_pcd_torch.to(torch.float)
+        depth_pcd_torch = scaling_factor * depth_pcd_torch
+
+        keypoints_xyz = R @ self.keypoints_xyz
+        keypoints_xyz = scaling_factor * keypoints_xyz
+
+        # Translate by a random t
+        t = torch.rand(3, 1)
+
+        depth_pcd_torch = depth_pcd_torch + t
+        keypoints_xyz = keypoints_xyz + t
+
+        # shape parameter
+        shape = torch.zeros(2, 1)
+        shape[0] = 1 - alpha
+        shape[1] = alpha
+
+        # model_pcd = self.model_mesh.sample_points_uniformly(number_of_points=self.num_of_points)
+        model_pcd_torch = torch.from_numpy(np.asarray(pcd.points)).transpose(0, 1)  # (3, m)
+        model_pcd_torch = model_pcd_torch.to(torch.float)
+        model_pcd_torch = scaling_factor * model_pcd_torch + t
+
+        return depth_pcd_torch, keypoints_xyz.squeeze(0), R, t, shape, model_pcd_torch
+
+
+    def _get_cad_models(self):
+
+        model_pcd = self.model_mesh.sample_points_uniformly(number_of_points=self.num_of_points)
+        model_pcd_torch = torch.from_numpy(np.asarray(model_pcd.points)).transpose(0, 1)  # (3, m)
+        model_pcd_torch = model_pcd_torch.to(torch.float)
+
+        cad_models = torch.zeros_like(model_pcd_torch).unsqueeze(0)
+        cad_models = cad_models.repeat(2, 1, 1)
+
+        cad_models[0, ...] = self.shape_scaling[0]*model_pcd_torch
+        cad_models[1, ...] = self.shape_scaling[1]*model_pcd_torch
+
+        return cad_models
+
+    def _get_model_keypoints(self):
+
+        keypoints = self.keypoints_xyz  # (3, N)
+
+        model_keypoints = torch.zeros_like(keypoints)
+        model_keypoints = model_keypoints.repeat(2, 1, 1)
+
+        model_keypoints[0, ...] = self.shape_scaling[0]*keypoints
+        model_keypoints[1, ...] = self.shape_scaling[1]*keypoints
+
+        return model_keypoints
+
+    def _get_diameter(self):
+        """
+        returns the diameter of the mid-sized object.
+        """
+        return self.diameter*(self.shape_scaling[0] + self.shape_scaling[1])*0.5
+
+    def _visualize(self):
+
+        cad_models = self._get_cad_models()
+        model_keypoints = self._get_model_keypoints()
+        visualize_torch_model_n_keypoints(cad_models=cad_models, model_keypoints=model_keypoints)
+
+        return 0
+
+
+class DepthPointCloud2(torch.utils.data.Dataset):
+    def __init__(self, class_id, model_id, radius_multiple=[1.2, 3.0], num_of_points=1000, dataset_len=10000):
+        super().__init__()
+
+        self.class_id = class_id
+        self.model_id = model_id
+        self.radius_multiple = radius_multiple
+        self.num_of_points = num_of_points
+        self.len = dataset_len
+
+        # get model
+        self.model_mesh, _, self.keypoints_xyz = get_model_and_keypoints(class_id, model_id)
+        center = self.model_mesh.get_center()
+        self.model_mesh.translate(-center)
+
+        self.keypoints_xyz = self.keypoints_xyz - center
+        self.keypoints_xyz = torch.from_numpy(self.keypoints_xyz).transpose(0, 1).unsqueeze(0).to(torch.float)
+
+        # size of the model
+        self.diameter = np.linalg.norm(
+            np.asarray(self.model_mesh.get_max_bound()) - np.asarray(self.model_mesh.get_min_bound()))
+
+        #
+        self.camera_location = torch.tensor([1.0, 0.0, 0.0]).unsqueeze(-1) #set a camera location, with respect to the origin
+
+    def __len__(self):
+        return self.len
+
+    def __getitem__(self, idx):
+        """
+        output:
+        point_cloud : torch.tensor of shape (3, m)
+        R           : torch.tensor of shape (3, 3)
+        t           : torch.tensor of shape (3, 1)
+        """
+
+        # Randomly rotate the self.model_mesh
+        model_mesh = copy.deepcopy(self.model_mesh)
+        R = transforms.random_rotation()
+        # Rnumpy = R.detach()
+        # Rnumpy = Rnumpy.numpy()
+        model_mesh = model_mesh.rotate(R=R.numpy())
+
+        # Sample a point cloud from the self.model_mesh
+        pcd = model_mesh.sample_points_uniformly(number_of_points=self.num_of_points)
+
+        # Take a depth image from a distance of the rotated self.model_mesh from self.camera_location
+        beta = torch.rand(1, 1)
+        camera_lcation_factor = beta*(self.radius_multiple[1]-self.radius_multiple[0]) + self.radius_multiple[0]
+        radius = gu.get_radius(cam_location=camera_lcation_factor*self.camera_location.numpy(),
+                               object_diameter=self.diameter)
+        depth_pcd = gu.get_depth_pcd(centered_pcd=pcd, camera=self.camera_location.numpy(), radius=radius)
+
+        depth_pcd_torch = torch.from_numpy(np.asarray(depth_pcd.points)).transpose(0, 1)  # (3, m)
+        depth_pcd_torch = depth_pcd_torch.to(torch.float)
+
+        keypoints_xyz = R @ self.keypoints_xyz
+
+        # Translate by a random t
+        t = torch.rand(3, 1)
+
+        depth_pcd_torch = depth_pcd_torch + t
+        keypoints_xyz = keypoints_xyz + t
+
+
+        # model_pcd = self.model_mesh.sample_points_uniformly(number_of_points=self.num_of_points)
+        model_pcd_torch = torch.from_numpy(np.asarray(pcd.points)).transpose(0, 1)  # (3, m)
+        model_pcd_torch = model_pcd_torch.to(torch.float)
+        model_pcd_torch = model_pcd_torch + t
+
+        return depth_pcd_torch, keypoints_xyz.squeeze(0), R, t, model_pcd_torch
+
+
+    def _get_cad_models_as_point_clouds(self):
+
+        model_pcd = self.model_mesh.sample_points_uniformly(number_of_points=self.num_of_points)
+        model_pcd_torch = torch.from_numpy(np.asarray(model_pcd.points)).transpose(0, 1)  # (3, m)
+        model_pcd_torch = model_pcd_torch.to(torch.float)
+
+        return model_pcd_torch.unsqueeze(0)
+
+    def _get_cad_models_as_mesh(self):
+
+        return self.model_mesh
+
+    def _get_cad_models(self):
+        #Depreciated. Use _get_cad_models_as_point_clouds().
+
+        model_pcd = self.model_mesh.sample_points_uniformly(number_of_points=self.num_of_points)
+        model_pcd_torch = torch.from_numpy(np.asarray(model_pcd.points)).transpose(0, 1)  # (3, m)
+        model_pcd_torch = model_pcd_torch.to(torch.float)
+
+        return model_pcd_torch.unsqueeze(0)
+
+    def _get_model_keypoints(self):
+
+        return self.keypoints_xyz
+
+    def _get_diameter(self):
+
+        return self.diameter
+
+    def _visualize(self):
+
+        cad_models = self._get_cad_models()
+        model_keypoints = self._get_model_keypoints()
+        visualize_torch_model_n_keypoints(cad_models=cad_models, model_keypoints=model_keypoints)
+
+        return 0
 
 
 class DepthPointCloud(torch.utils.data.Dataset):
@@ -491,8 +723,10 @@ class SE3nIsotorpicShapePointCloud(torch.utils.data.Dataset):
         return model_keypoints
 
     def _get_diameter(self):
-
-        return self.diameter
+        """
+        returns the diameter of the mid-sized object.
+        """
+        return self.diameter*(self.shape_scaling[0] + self.shape_scaling[1])*0.5
 
     def _visualize(self):
 
@@ -501,8 +735,6 @@ class SE3nIsotorpicShapePointCloud(torch.utils.data.Dataset):
         visualize_torch_model_n_keypoints(cad_models=cad_models, model_keypoints=model_keypoints)
 
         return 0
-
-
 
 
 if __name__ == "__main__":
@@ -647,3 +879,42 @@ if __name__ == "__main__":
             break
 
 
+
+
+    #
+    print("Test: DepthPoiontCloud2(torch.utils.data.Dataset)")
+    dataset = DepthAndIsotorpicShapePointCloud(class_id=class_id, model_id=model_id)
+
+    model = dataset.model_mesh
+    length = dataset.len
+    class_id = dataset.class_id
+    model_id = dataset.model_id
+
+    diameter = dataset._get_diameter()
+    model_keypoints = dataset._get_model_keypoints()
+    cad_models = dataset._get_cad_models()
+
+    print("diameter: ", diameter)
+    print("shape of model keypoints: ", model_keypoints.shape)
+    print("shape of cad models: ", cad_models.shape)
+
+    #
+    print("Test: visualize_torch_model_n_keypoints()")
+    visualize_torch_model_n_keypoints(cad_models=cad_models, model_keypoints=model_keypoints)
+    dataset._visualize()
+
+    loader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)  #Note: the batch size has to be one!
+
+    for i, data in enumerate(loader):
+        depth_pcd_torch, keypoints_xyz, R, t, shape, model_pcd_torch = data
+        pc = depth_pcd_torch
+        kp = keypoints_xyz
+        print(pc.shape)
+        print(kp.shape)
+        print(R.shape)
+        print(t.shape)
+        print(shape.shape)
+        print(model_pcd_torch.shape)
+        visualize_torch_model_n_keypoints(cad_models=pc, model_keypoints=kp)
+        if i >= 2:
+            break

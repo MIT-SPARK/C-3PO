@@ -1,6 +1,6 @@
 
 import torch
-from pytorch3d import ops
+from pytorch3d import ops, transforms
 
 from datetime import datetime
 import pickle
@@ -10,14 +10,13 @@ import os
 import sys
 sys.path.append("../../")
 
-from learning_objects.datasets.keypointnet import SE3PointCloud
+from learning_objects.datasets.keypointnet import SE3PointCloud, visualize_torch_model_n_keypoints, DepthPointCloud2
 
 from learning_objects.models.keypoint_corrector import kp_corrector_reg
-from learning_objects.models.keypoint_corrector import keypoint_perturbation, registration_eval, display_two_pcs
 from learning_objects.models.point_set_registration import point_set_registration
 from learning_objects.models.certifiability import certifiability
 
-from learning_objects.utils.general import translation_error, rotation_error
+from learning_objects.utils.general import display_two_pcs
 
 
 def get_sq_distances(X, Y):
@@ -38,6 +37,74 @@ def get_sq_distances(X, Y):
     # dist (B, n, 1): distance from point in Y to the nearest point in X
 
     return sq_dist_xy, sq_dist_yx
+
+
+def keypoint_perturbation(keypoints_true, var=0.8, type='uniform', fra=0.2):
+    """
+    inputs:
+    keypoints_true  :  torch.tensor of shape (B, 3, N)
+    var             :  float
+    type            : 'uniform' or 'sporadic'
+    fra             :  float    : used if type == 'sporadic'
+
+    output:
+    detected_keypoints  : torch.tensor of shape (B, 3, N)
+    """
+
+    if type=='uniform':
+        # detected_keypoints = keypoints_true + var*torch.randn_like(keypoints_true)
+        detected_keypoints = keypoints_true + var * (torch.rand(size=keypoints_true.shape) - 0.5)
+
+    elif type=='sporadic':
+        mask = (torch.rand(size=keypoints_true.shape) < fra).int().float()
+        # detected_keypoints = keypoints_true + var*torch.randn_like(keypoints_true)*mask
+        detected_keypoints = keypoints_true + var * (torch.rand(size=keypoints_true.shape) - 0.5) * mask
+    else:
+        return ValueError
+
+    return detected_keypoints
+
+
+def translation_error(t, t_):
+    """
+    inputs:
+    t: torch.tensor of shape (3, 1) or (B, 3, 1)
+    t_: torch.tensor of shape (3, 1) or (B, 3, 1)
+
+    output:
+    t_err: torch.tensor of shape (1, 1) or (B, 1)
+    """
+    if t.dim() == 2:
+        return torch.norm(t - t_, p=2)/3.0
+    elif t.dim() == 3:
+        return torch.norm(t-t_, p=2, dim=1)/3.0
+    else:
+        return ValueError
+
+
+def rotation_error(R, R_):
+    """
+    inputs:
+    R: torch.tensor of shape (3, 3) or (B, 3, 3)
+    R_: torch.tensor of shape (3, 3) or (B, 3, 3)
+
+    output:
+    R_err: torch.tensor of shape (1, 1) or (B, 1)
+    """
+
+    if R.dim() == 2:
+        return transforms.matrix_to_euler_angles(torch.matmul(R.T, R_), "XYZ").abs().sum()/3.0
+        # return torch.abs(0.5*(torch.trace(R.T @ R_) - 1).unsqueeze(-1))
+        # return 1 - 0.5*(torch.trace(R.T @ R_) - 1).unsqueeze(-1)
+        # return torch.norm(R.T @ R_ - torch.eye(3, device=R.device), p='fro')
+    elif R.dim() == 3:
+        return transforms.matrix_to_euler_angles(torch.transpose(R, 1, 2) @ R_, "XYZ").abs().mean(1).unsqueeze(1)
+        # return torch.abs(0.5*(torch.einsum('bii->b', torch.transpose(R, 1, 2) @ R_) - 1).unsqueeze(-1))
+        # return 1 - 0.5 * (torch.einsum('bii->b', torch.transpose(R, 1, 2) @ R_) - 1).unsqueeze(-1)
+        # return torch.norm(R.transpose(-1, -2) @ R_ - torch.eye(3, device=R.device), p='fro', dim=[1, 2])
+    else:
+        return ValueError
+
 
 
 class experiment():
@@ -68,16 +135,17 @@ class experiment():
         self.kappa = kappa
 
         # experiment name
-        self.name = 'Analyzing keypoint corrector with simple registration on DepthPointCloud dataset'
+        self.name = 'Analyzing keypoint corrector with simple registration on SE3PointCloud dataset'
 
 
         # setting up data
-        self.se3_dataset = SE3PointCloud(class_id=self.class_id, model_id=self.model_id, num_of_points=self.num_points,
+        self.se3_dataset = DepthPointCloud2(class_id=self.class_id, model_id=self.model_id, num_of_points=self.num_points,
                                     dataset_len=self.num_iterations)
         self.se3_dataset_loader = torch.utils.data.DataLoader(self.se3_dataset, batch_size=1, shuffle=False)
 
         self.model_keypoints = self.se3_dataset._get_model_keypoints()  # (1, 3, N)
         self.cad_models = self.se3_dataset._get_cad_models()  # (1, 3, m)
+        self.diameter = self.se3_dataset._get_diameter()
 
         # defining the keypoint corrector
         self.corrector = kp_corrector_reg(cad_models=self.cad_models, model_keypoints=self.model_keypoints,
@@ -100,7 +168,7 @@ class experiment():
         self.parameters['name'] = self.name
 
 
-    def _single_loop(self, kp_noise_var):
+    def _single_loop(self, kp_noise_var, visualization=False):
 
         # experiment data
         rotation_err_naive = torch.zeros(self.num_iterations, 1)
@@ -120,25 +188,31 @@ class experiment():
             print("Testing at kp_noise_var: ", kp_noise_var, ". Iteration: ", i)
 
             # extracting data
-            input_point_cloud, rotation_true, translation_true = data
+            input_point_cloud, keypoints_true, rotation_true, translation_true, _ = data
 
             # generating perturbed keypoints
-            keypoints_true = rotation_true @ self.model_keypoints + translation_true
+            # keypoints_true = rotation_true @ self.model_keypoints + translation_true
             # detected_keypoints = keypoints_true
             detected_keypoints = keypoint_perturbation(keypoints_true=keypoints_true, type=self.kp_noise_type,
-                                                       fra=self.kp_noise_fra, var=kp_noise_var)
+                                                       fra=self.kp_noise_fra, var=kp_noise_var*self.diameter)
+            if visualization:
+                visualize_torch_model_n_keypoints(cad_models=input_point_cloud, model_keypoints=detected_keypoints)
 
             # estimate model: using point set registration on perturbed keypoints
             R_naive, t_naive = point_set_registration(source_points=self.model_keypoints, target_points=detected_keypoints)
             model_estimate_naive = R_naive @ self.cad_models + t_naive
-            # display_two_pcs(pc1=input_point_cloud.squeeze(0), pc2=model_estimate.squeeze(0))
+            if visualization:
+                print("Displaying input and naive model estimate: ")
+                display_two_pcs(pc1=input_point_cloud.squeeze(0), pc2=model_estimate_naive.squeeze(0))
 
             # estimate model: using the keypoint corrector
             correction = self.corrector.forward(detected_keypoints=detected_keypoints, input_point_cloud=input_point_cloud)
             # correction = torch.zeros_like(correction)
             R, t = point_set_registration(source_points=self.model_keypoints, target_points=detected_keypoints + correction)
             model_estimate = R @ self.cad_models + t
-            # display_two_pcs(pc1=input_point_cloud.squeeze(0), pc2=model_estimate.squeeze(0))
+            if visualization:
+                print("Displaying input and corrector model estimate: ")
+                display_two_pcs(pc1=input_point_cloud.squeeze(0), pc2=model_estimate.squeeze(0))
 
             # evaluate the two metrics
             rotation_err_naive[i] = rotation_error(rotation_true, R_naive)
@@ -158,6 +232,10 @@ class experiment():
 
             certi, _ = self.certify.forward(X=input_point_cloud, Z=model_estimate)
             certi_corrector[i] = certi
+
+            if visualization and i >= 5:
+                break
+
 
         return rotation_err_naive, rotation_err_corrector, translation_err_naive, translation_err_corrector, \
                certi_naive, certi_corrector, sqdist_input_naiveest, sqdist_input_correctorest
@@ -215,7 +293,7 @@ class experiment():
         self.execute()
 
         # saving the experiment and data
-        location = './expt_with_reg_se3pc/'
+        location = './expt_with_reg_depthpc/'
         if not os.path.isdir(location):
             os.mkdir(location)
 
@@ -229,7 +307,7 @@ class experiment():
         return location + filemane
 
 
-def run_experiments_on(class_id, model_id, kp_noise_type, kp_noise_fra=0.2):
+def run_experiments_on(class_id, model_id, kp_noise_type, kp_noise_fra=0.2, only_visualize=False):
 
     # model parameters
     num_points = 500
@@ -238,12 +316,12 @@ def run_experiments_on(class_id, model_id, kp_noise_type, kp_noise_fra=0.2):
     num_iterations = 100
 
     # kp_noise parameters
-    kp_noise_var_range = torch.arange(0.1, 0.9, 0.1)
+    kp_noise_var_range = torch.arange(0.1, 0.9, 0.05)
 
     # certification parameters
     epsilon = 0.98
-    delta = 0.98
-    radius = 0.1
+    delta = 0.5
+    radius = 0.05
     certify = certifiability(epsilon=epsilon, delta=delta, radius=radius)
 
     # loss function parameters
@@ -262,28 +340,39 @@ def run_experiments_on(class_id, model_id, kp_noise_type, kp_noise_fra=0.2):
                       num_iterations=num_iterations, kp_noise_var_range=kp_noise_var_range,
                       kp_noise_type=kp_noise_type, kp_noise_fra=kp_noise_fra,
                       certify=certify, theta=theta, kappa=kappa)
-    filename = expt.execute_n_save()
 
-    # experiment data
-    expt = dict()
-    expt['class_id'] = class_id
-    expt['model_id'] = model_id
-    expt['kp_noise_type'] = kp_noise_type
-    expt['kp_noise_fra'] = kp_noise_fra
-    expt['filename'] = filename
+    if only_visualize:
+        while True:
+            kp_noise_var = float(input('Enter noise variance parameter: '))
+            expt._single_loop(kp_noise_var=kp_noise_var, visualization=True)
+            flag = input('Do you want to try another variance? (y/n): ')
+            if flag == 'n':
+                break
+    else:
+        filename = expt.execute_n_save()
 
-    expt_filename = './expt_with_reg_depthpc/experiments.csv'
-    field_names = ['class_id', 'model_id', 'kp_noise_type', 'kp_noise_fra', 'filename']
+        # experiment data
+        expt = dict()
+        expt['class_id'] = class_id
+        expt['model_id'] = model_id
+        expt['kp_noise_type'] = kp_noise_type
+        expt['kp_noise_fra'] = kp_noise_fra
+        expt['filename'] = filename
+        expt['num_iterations'] = num_iterations
 
-    fp = open(expt_filename, 'a')
-    dict_writer = csv.DictWriter(fp, field_names)
-    dict_writer.writerow(expt)
-    fp.close()
+        expt_filename = './expt_with_reg_depthpc/experiments.csv'
+        field_names = ['class_id', 'model_id', 'kp_noise_type', 'kp_noise_fra', 'filename', 'num_iterations']
+
+        fp = open(expt_filename, 'a')
+        dict_writer = csv.DictWriter(fp, field_names)
+        dict_writer.writerow(expt)
+        fp.close()
 
 
+
+#ToDo: Write the code to run this experiment for 10 models in each of the 16 model categories. The result will be the average error.
 
 if __name__ == "__main__":
-
 
     # model parameters
     class_id = "03001627"  # chair
@@ -291,7 +380,18 @@ if __name__ == "__main__":
 
     run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='sporadic', kp_noise_fra=0.2)
     run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='sporadic', kp_noise_fra=0.8)
-    run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='uniform')
+    # run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='uniform')
 
+    # run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='sporadic', kp_noise_fra=0.2,
+    #                    only_visualize=True)
+    # run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='sporadic', kp_noise_fra=0.8,
+    #                    only_visualize=True)
+    # run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='uniform')
 
-
+    # model parameters
+    # class_id = "04379243"
+    # model_id = "1c814f977bcda5b79a87002a4eeaf610"
+    # run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='sporadic', kp_noise_fra=0.2,
+    #                    only_visualize=True)
+    # run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='sporadic', kp_noise_fra=0.8,
+    #                    only_visualize=True)

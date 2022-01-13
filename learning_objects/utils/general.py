@@ -25,6 +25,25 @@ from time import time
 
 
 
+def display_two_pcs(pc1, pc2):
+    """
+    pc1 : torch.tensor of shape (3, n)
+    pc2 : torch.tensor of shape (3, m)
+    """
+    pc1 = pc1.to('cpu')
+    pc2 = pc2.to('cpu')
+
+    object1 = pos_tensor_to_o3d(pos=pc1)
+    object2 = pos_tensor_to_o3d(pos=pc2)
+
+    object1.paint_uniform_color([0.8, 0.0, 0.0])
+    object2.paint_uniform_color([0.0, 0.0, 0.8])
+
+    o3d.visualization.draw_geometries([object1, object2])
+
+    return None
+
+
 def scatter_bar_plot(plt, x, y, label, color='orangered'):
     """
     x   : torch.tensor of shape (n)

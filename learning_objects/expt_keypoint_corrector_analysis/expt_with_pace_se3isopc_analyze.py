@@ -12,29 +12,29 @@ plt.style.use('seaborn-whitegrid')
 import os
 import sys
 sys.path.append("../../")
-from learning_objects.utils.general import generate_filename
+from learning_objects.utils.general import generate_filename, scatter_bar_plot
 from learning_objects.datasets.keypointnet import CLASS_NAME
 
 COLORS = dict(mcolors.BASE_COLORS, **mcolors.CSS4_COLORS)
 
 
-def masked_var_mean(data, mask):
-    """
-    inputs:
-    data    : torch.tensor of shape (B, n)
-    mask    : torch.tensor of shape (B, n). dtype=torch.bool
-
-    outputs:
-    mean    : torch.tensor of shape (B, 1)
-    var     : torch.tensor of shape (B, 1)
-    """
-
-    mean = (torch.sum(data*mask.float(), dim=1)/torch.sum(mask.float(), dim=1)).unsqueeze(-1)
-
-    data_centered = data - mean
-    var = (torch.sum((data_centered**2)*mask.float(), dim=1)/(torch.sum(mask.float(), dim=1)-1)).unsqueeze(-1)
-
-    return var.squeeze(-1), mean.squeeze(-1)
+# def masked_var_mean(data, mask):
+#     """
+#     inputs:
+#     data    : torch.tensor of shape (B, n)
+#     mask    : torch.tensor of shape (B, n). dtype=torch.bool
+#
+#     outputs:
+#     mean    : torch.tensor of shape (B, 1)
+#     var     : torch.tensor of shape (B, 1)
+#     """
+#
+#     mean = (torch.sum(data*mask.float(), dim=1)/torch.sum(mask.float(), dim=1)).unsqueeze(-1)
+#
+#     data_centered = data - mean
+#     var = (torch.sum((data_centered**2)*mask.float(), dim=1)/(torch.sum(mask.float(), dim=1)-1)).unsqueeze(-1)
+#
+#     return var.squeeze(-1), mean.squeeze(-1)
 
 def masked_varul_mean(data, mask):
     """
@@ -50,21 +50,29 @@ def masked_varul_mean(data, mask):
     mean    : torch.tensor of shape (B,)
 
     """
+    device_ = data.device
+    batch_size = data.shape[0]
 
-    mean = (torch.sum(data*mask.float(), dim=1)/torch.sum(mask.float(), dim=1)).unsqueeze(-1)
+    var = torch.zeros(batch_size, 2).to(device_)
+    mean = torch.zeros(batch_size).to(device_)
 
-    data_centered = data - mean
-    data_pos = data_centered * (data_centered > 0) * mask
-    data_neg = data_centered * (data_centered < 0) * mask
+    for batch, (d, m) in enumerate(zip(data, mask)):
+        dm = torch.masked_select(d, m)
 
-    var_up = torch.sum(data_pos ** 2, dim=1) / (torch.sum(data_centered*mask > 0, dim=1) + 0.001)
-    var_low = torch.sum(data_neg ** 2, dim=1) / (torch.sum(data_centered*mask < 0, dim=1) + 0.001)
+        dm_mean = dm.mean()
+        dm_centered = dm - dm_mean
+        dm_centered_up = dm_centered*(dm_centered >= 0)
+        dm_centered_lo = dm_centered*(dm_centered < 0)
+        len = dm_centered.shape[0]
 
-    var_up = var_up.unsqueeze(-1)
-    var_low = var_low.unsqueeze(-1)
-    var = torch.cat([var_low, var_up], dim=1)
+        dm_var_up = torch.sum(dm_centered_up**2)/(len + 0.001)
+        dm_var_lo = torch.sum(dm_centered_lo**2)/(len + 0.001)
 
-    return var, mean.squeeze(-1)
+        mean[batch] = dm_mean
+        var[batch, 0] = dm_var_lo
+        var[batch, 1] = dm_var_up
+
+    return var, mean
 
 
 def varul_mean(data):
@@ -86,9 +94,10 @@ def varul_mean(data):
     data_centered = data - mean
     data_pos = data_centered*(data_centered >= 0)
     data_neg = data_centered*(data_centered < 0)
+    len = data_centered.shape[1]
 
-    var_up = torch.sum(data_pos**2, dim=1)/(torch.sum(data_centered >= 0, dim=1) + 0.001)
-    var_low = torch.sum(data_neg**2, dim=1)/(torch.sum(data_centered < 0, dim=1) + 0.001)
+    var_up = torch.sum(data_pos**2, dim=1)/(len + 0.001)
+    var_low = torch.sum(data_neg**2, dim=1)/(len + 0.001)
 
     var_up = var_up.unsqueeze(-1)
     var_low = var_low.unsqueeze(-1)
@@ -99,8 +108,8 @@ def varul_mean(data):
 
 if __name__ == '__main__':
 
-    file_names = ["./expt_with_pace_se3isopc/20220109_184944_experiment.pickle",
-                  "./expt_with_pace_se3isopc/20220109_185923_experiment.pickle"]
+    file_names = ["./expt_with_pace_se3isopc/20220110_142015_experiment.pickle",
+                  "./expt_with_pace_se3isopc/20220110_181843_experiment.pickle"]
 
     for name in file_names:
 
@@ -127,6 +136,22 @@ if __name__ == '__main__':
         class_id = parameters['class_id']
         model_id = parameters['model_id']
         cad_model_name = CLASS_NAME[class_id]
+
+        # Plotting rotation distribution
+        fig = plt.figure()
+        plt = scatter_bar_plot(plt, x=kp_noise_var_range, y=Rerr_naive, label='naive', color='lightgray')
+        plt = scatter_bar_plot(plt, x=kp_noise_var_range, y=Rerr_naive * certi_naive, label='naive + certification',
+                               color='royalblue')
+        plt.show()
+        plt.close(fig)
+
+        fig = plt.figure()
+        plt = scatter_bar_plot(plt, x=kp_noise_var_range, y=Rerr_corrector, label='corrector', color='lightgray')
+        plt = scatter_bar_plot(plt, x=kp_noise_var_range, y=Rerr_corrector * certi_corrector,
+                               label='corrector + certification',
+                               color='orangered')
+        plt.show()
+        plt.close(fig)
 
         # Rerr_naive_var, Rerr_naive_mean = torch.var_mean(Rerr_naive, dim=1, unbiased=False)
         # Rerr_corrector_var, Rerr_corrector_mean = torch.var_mean(Rerr_corrector, dim=1, unbiased=False)

@@ -20,7 +20,7 @@ from learning_objects.utils.ddn.node import AbstractDeclarativeNode
 from learning_objects.models.point_set_registration import point_set_registration
 from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPointCloud, SE3nIsotorpicShapePointCloud
 
-from learning_objects.utils.general import pos_tensor_to_o3d
+from learning_objects.utils.general import pos_tensor_to_o3d, display_two_pcs
 from learning_objects.utils.general import chamfer_distance, chamfer_half_distance, rotation_error, \
     translation_error, shape_error
 
@@ -29,23 +29,23 @@ from learning_objects.models.modelgen import ModelFromShape
 
 
 
-def display_two_pcs(pc1, pc2):
-    """
-    pc1 : torch.tensor of shape (3, n)
-    pc2 : torch.tensor of shape (3, m)
-    """
-    pc1 = pc1.to('cpu')
-    pc2 = pc2.to('cpu')
-
-    object1 = pos_tensor_to_o3d(pos=pc1)
-    object2 = pos_tensor_to_o3d(pos=pc2)
-
-    object1.paint_uniform_color([0.8, 0.0, 0.0])
-    object2.paint_uniform_color([0.0, 0.0, 0.8])
-
-    o3d.visualization.draw_geometries([object1, object2])
-
-    return None
+# def display_two_pcs(pc1, pc2):
+#     """
+#     pc1 : torch.tensor of shape (3, n)
+#     pc2 : torch.tensor of shape (3, m)
+#     """
+#     pc1 = pc1.to('cpu')
+#     pc2 = pc2.to('cpu')
+#
+#     object1 = pos_tensor_to_o3d(pos=pc1)
+#     object2 = pos_tensor_to_o3d(pos=pc2)
+#
+#     object1.paint_uniform_color([0.8, 0.0, 0.0])
+#     object2.paint_uniform_color([0.0, 0.0, 0.8])
+#
+#     o3d.visualization.draw_geometries([object1, object2])
+#
+#     return None
 
 
 def chamfer_loss_with_surface_normals(pc, pc_):
@@ -136,11 +136,13 @@ def keypoint_perturbation(keypoints_true, var=0.8, type='uniform', fra=0.2):
     """
 
     if type=='uniform':
-        detected_keypoints = keypoints_true + var*torch.randn_like(keypoints_true)
+        # detected_keypoints = keypoints_true + var*torch.randn_like(keypoints_true)
+        detected_keypoints = keypoints_true + var * (torch.rand(size=keypoints_true.shape)-0.5)
 
     elif type=='sporadic':
         mask = (torch.rand(size=keypoints_true.shape) < fra).int().float()
-        detected_keypoints = keypoints_true + var*torch.randn_like(keypoints_true)*mask
+        # detected_keypoints = keypoints_true + var*torch.randn_like(keypoints_true)*mask
+        detected_keypoints = keypoints_true + var * (torch.rand(size=keypoints_true.shape)-0.5) * mask
 
     return detected_keypoints
 

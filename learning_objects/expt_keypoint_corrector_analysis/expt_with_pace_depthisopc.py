@@ -10,7 +10,8 @@ import os
 import sys
 sys.path.append("../../")
 
-from learning_objects.datasets.keypointnet import SE3nIsotorpicShapePointCloud, visualize_torch_model_n_keypoints
+from learning_objects.datasets.keypointnet import SE3nIsotorpicShapePointCloud, visualize_torch_model_n_keypoints, \
+    DepthAndIsotorpicShapePointCloud
 
 from learning_objects.models.keypoint_corrector import kp_corrector_reg, kp_corrector_pace
 from learning_objects.models.point_set_registration import point_set_registration
@@ -161,9 +162,10 @@ class experiment():
 
 
         # setting up data
-        self.se3_dataset = SE3nIsotorpicShapePointCloud(class_id=self.class_id, model_id=self.model_id,
-                                                        num_of_points=self.num_points, dataset_len=self.num_iterations,
-                                                        shape_scaling=self.shape_scaling)
+        self.se3_dataset = DepthAndIsotorpicShapePointCloud(class_id=self.class_id, model_id=self.model_id,
+                                                            num_of_points=self.num_points,
+                                                            dataset_len=self.num_iterations,
+                                                            shape_scaling=self.shape_scaling)
         self.se3_dataset_loader = torch.utils.data.DataLoader(self.se3_dataset, batch_size=1, shuffle=False)
 
         self.model_keypoints = self.se3_dataset._get_model_keypoints()  # (2, 3, N)
@@ -225,7 +227,7 @@ class experiment():
             print("Testing at kp_noise_var: ", kp_noise_var, ". Iteration: ", i)
 
             # extracting data
-            input_point_cloud, keypoints_true, rotation_true, translation_true, shape_true = data
+            input_point_cloud, keypoints_true, rotation_true, translation_true, shape_true, _ = data
 
             # generating perturbed keypoints
             detected_keypoints = keypoint_perturbation(keypoints_true=keypoints_true, type=self.kp_noise_type,
@@ -340,7 +342,7 @@ class experiment():
         self.execute()
 
         # saving the experiment and data
-        location = './expt_with_pace_se3isopc/'
+        location = './expt_with_pace_depthisopc/'
         if not os.path.isdir(location):
             os.mkdir(location)
 
@@ -408,7 +410,7 @@ def run_experiments_on(class_id, model_id, kp_noise_type, kp_noise_fra=0.2, only
         expt['filename'] = filename
         expt['num_iterations'] = num_iterations
 
-        expt_filename = 'expt_with_pace_se3isopc/experiments.csv'
+        expt_filename = 'expt_with_pace_depthisopc/experiments.csv'
         field_names = ['class_id', 'model_id', 'kp_noise_type', 'kp_noise_fra', 'filename', 'num_iterations']
 
         fp = open(expt_filename, 'a')
