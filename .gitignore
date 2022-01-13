@@ -2,6 +2,7 @@
 .idea/
 
 # Dataset folders
+dataset/
 data/
 learning_objects/data/
 
