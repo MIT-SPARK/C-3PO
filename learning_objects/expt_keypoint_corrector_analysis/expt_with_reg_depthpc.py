@@ -188,7 +188,7 @@ class experiment():
             print("Testing at kp_noise_var: ", kp_noise_var, ". Iteration: ", i)
 
             # extracting data
-            input_point_cloud, keypoints_true, rotation_true, translation_true, _ = data
+            input_point_cloud, keypoints_true, rotation_true, translation_true = data
 
             # generating perturbed keypoints
             # keypoints_true = rotation_true @ self.model_keypoints + translation_true
@@ -316,12 +316,12 @@ def run_experiments_on(class_id, model_id, kp_noise_type, kp_noise_fra=0.2, only
     num_iterations = 100
 
     # kp_noise parameters
-    kp_noise_var_range = torch.arange(0.1, 0.9, 0.05)
+    kp_noise_var_range = torch.arange(0.1, 1.55, 0.1)
 
     # certification parameters
-    epsilon = 0.98
+    epsilon = 0.995
     delta = 0.5
-    radius = 0.05
+    radius = 0.01
     certify = certifiability(epsilon=epsilon, delta=delta, radius=radius)
 
     # loss function parameters

@@ -31,6 +31,8 @@ from learning_objects.models.modelgen import ModelFromShape, ModelFromShapeModul
 from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPointCloud
 
 
+SAVE_LOCATION = '../../data/learning_objects/runs/'
+
 
 # # Given ShapeNet class_id, model_id, this generates a dataset and a dataset loader with
 # # various transformations of the object point cloud.
@@ -224,11 +226,54 @@ def train_one_epoch(epoch_index, tb_writer, training_loader, model, optimizer, l
     return last_loss
 
 
-save_location = '../../data/learning_objects/runs/'
+# Validation code
+def validate(writer, validation_loader, model, loss_fn):
+    with torch.no_grad():
+
+        running_vloss = 0.0
+
+        for i, vdata in enumerate(validation_loader):
+            input_point_cloud, R_target, t_target = vdata
+            input_point_cloud = input_point_cloud.to(device)
+            R_target = R_target.to(device)
+            t_target = t_target.to(device)
+
+            # Make predictions for this batch
+            # detected_keypoints, target_keypoints, target_point_cloud, _, _, _ = model(input_point_cloud)
+            detected_keypoints = model(input_point_cloud, pre_train=True)
+            batch_size = detected_keypoints.shape[0]
+            target_keypoints = model.model_keypoints.repeat(batch_size, 1, 1)
+            target_point_cloud = model.cad_models.repeat(batch_size, 1, 1)
+
+            target_point_cloud = R_target @ target_point_cloud + t_target
+            target_keypoints = R_target @ target_keypoints + t_target
+
+            vloss = loss_fn(input_point_cloud, detected_keypoints, target_point_cloud, target_keypoints)
+            running_vloss += vloss
+
+            # if i==0:
+            #     # Display results for validation
+            #     pc = input_point_cloud.clone().detach().to('cpu')
+            #     pc_t = target_point_cloud.clone().detach().to('cpu')
+            #     kp = detected_keypoints.clone().detach().to('cpu')
+            #     kp_t = target_keypoints.clone().detach().to('cpu')
+            #     display_results(input_point_cloud=pc, detected_keypoints=kp, target_point_cloud=pc_t,
+            #                     target_keypoints=kp_t)
+            #     del pc, pc_t, kp, kp_t
+
+            del input_point_cloud, R_target, t_target, detected_keypoints, target_point_cloud, target_keypoints
+
+        avg_vloss = running_vloss / (i + 1)
+
+    return avg_vloss
+
+
+
+
 def train(training_loader, validation_loader, model, optimizer, loss_fn):
 
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    writer = SummaryWriter(save_location + 'expt_keypoint_detect_{}'.format(timestamp))
+    writer = SummaryWriter(SAVE_LOCATION + 'expt_keypoint_detect_{}'.format(timestamp))
     epoch_number = 0
 
     EPOCHS = 100
@@ -242,67 +287,26 @@ def train(training_loader, validation_loader, model, optimizer, loss_fn):
         model.train(True)
         avg_loss = train_one_epoch(epoch_number, writer, training_loader, model, optimizer, loss_fn)
 
-
-        # Display results
-
-
         # Validation. We don't need gradients on to do reporting.
         model.train(False)
-        with torch.no_grad():
+        avg_vloss = validate(writer, validation_loader, model, loss_fn)
 
-            running_vloss = 0.0
+        print('LOSS train {} valid {}'.format(avg_loss, avg_vloss))
 
-            for i, vdata in enumerate(validation_loader):
+        # Log the running loss averaged per batch
+        # for both training and validation
+        writer.add_scalars('Training vs. Validation Loss',
+                           {'Training': avg_loss, 'Validation': avg_vloss},
+                           epoch_number + 1)
+        writer.flush()
 
-                input_point_cloud, R_target, t_target = vdata
-                input_point_cloud = input_point_cloud.to(device)
-                R_target = R_target.to(device)
-                t_target = t_target.to(device)
+        # Track best performance, and save the model's state
+        if avg_vloss < best_vloss:
+            best_vloss = avg_vloss
+            model_path = SAVE_LOCATION + 'expt_keypoint_detect_' + 'model_{}_{}'.format(timestamp, epoch_number)
+            torch.save(model.state_dict(), model_path)
 
-                # Make predictions for this batch
-                # detected_keypoints, target_keypoints, target_point_cloud, _, _, _ = model(input_point_cloud)
-                detected_keypoints = model(input_point_cloud, pre_train=True)
-                batch_size = detected_keypoints.shape[0]
-                target_keypoints = model.model_keypoints.repeat(batch_size, 1, 1)
-                target_point_cloud = model.cad_models.repeat(batch_size, 1, 1)
-
-                target_point_cloud = R_target @ target_point_cloud + t_target
-                target_keypoints = R_target @ target_keypoints + t_target
-
-                vloss = loss_fn(input_point_cloud, detected_keypoints, target_point_cloud, target_keypoints)
-                running_vloss += vloss
-
-                # if i==0:
-                #     # Display results for validation
-                #     pc = input_point_cloud.clone().detach().to('cpu')
-                #     pc_t = target_point_cloud.clone().detach().to('cpu')
-                #     kp = detected_keypoints.clone().detach().to('cpu')
-                #     kp_t = target_keypoints.clone().detach().to('cpu')
-                #     display_results(input_point_cloud=pc, detected_keypoints=kp, target_point_cloud=pc_t,
-                #                     target_keypoints=kp_t)
-                #     del pc, pc_t, kp, kp_t
-
-                del input_point_cloud, R_target, t_target, detected_keypoints, target_point_cloud, target_keypoints
-
-
-            avg_vloss = running_vloss / (i + 1)
-            print('LOSS train {} valid {}'.format(avg_loss, avg_vloss))
-
-            # Log the running loss averaged per batch
-            # for both training and validation
-            writer.add_scalars('Training vs. Validation Loss',
-                               {'Training': avg_loss, 'Validation': avg_vloss},
-                               epoch_number + 1)
-            writer.flush()
-
-            # Track best performance, and save the model's state
-            if avg_vloss < best_vloss:
-                best_vloss = avg_vloss
-                model_path = save_location + 'expt_keypoint_detect_' + 'model_{}_{}'.format(timestamp, epoch_number)
-                torch.save(model.state_dict(), model_path)
-
-            epoch_number += 1
-
+        epoch_number += 1
 
         torch.cuda.empty_cache()
 
@@ -376,7 +380,8 @@ if __name__ == "__main__":
     lr_adam = 0.001
     num_of_points = 500
 
-    se3_dataset = SE3PointCloud(class_id=class_id, model_id=model_id, num_of_points=num_of_points, dataset_len=dataset_len)
+    se3_dataset = SE3PointCloud(class_id=class_id, model_id=model_id, num_of_points=num_of_points,
+                                dataset_len=dataset_len)
     se3_dataset_loader = torch.utils.data.DataLoader(se3_dataset, batch_size=batch_size, shuffle=False)
 
 
