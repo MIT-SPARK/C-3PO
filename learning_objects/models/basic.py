@@ -12,7 +12,7 @@ from learning_objects.utils.general import generate_random_keypoints
 from learning_objects.models.keypoint_detector import HeatmapKeypoints, RegressionKeypoints
 from learning_objects.models.pace_ddn import PACEbp
 from learning_objects.models.modelgen import ModelFromShape
-from learning_objects.models.keypoint_corrector_old import PACEwKeypointCorrection, from_y
+from learning_objects.discard.keypoint_corrector_old import PACEwKeypointCorrection, from_y
 
 
 

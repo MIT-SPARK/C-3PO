@@ -1,9 +1,9 @@
 """
-This code is to use PACE for training a keypoint detector in a self-supervised manner.
+This code implements supervised and self-supervised training, and validation, for keypoint detector with pace.
+It uses pace during supervised training. It uses pace plus corrector during self-supervised training.
 
-We are given a CAD model with keypoints.
-4.
 """
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -30,6 +30,8 @@ from learning_objects.models.modelgen import ModelFromShape, ModelFromShapeModul
 
 from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPointCloud
 
+
+SAVE_LOCATION = '../../data/learning_objects/expt_pace/runs/'
 
 
 # # Given ShapeNet class_id, model_id, this generates a dataset and a dataset loader with
@@ -61,7 +63,7 @@ from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPointCloud
 
 # Proposed Model
 class ProposedModel(nn.Module):
-    def __init__(self, model_keypoints, cad_models, weights=None, lambda_constant=torch.tensor([1.0]), batch_size=32):
+    def __init__(self, model_keypoints, cad_models, weights=None, lambda_constant=torch.tensor([1.0])):
         super().__init__()
         """
         keypoint_type   : 'heatmap' or 'regression'
@@ -77,7 +79,6 @@ class ProposedModel(nn.Module):
         self.model_keypoints = model_keypoints
         self.cad_models = cad_models
         self.device_ = self.cad_models.device
-        self.batch_size = batch_size
 
         self.N = self.model_keypoints.shape[-1]  # (1, 1)
         self.K = self.model_keypoints.shape[0]  # (1, 1)
@@ -99,13 +100,8 @@ class ProposedModel(nn.Module):
 
 
         # PACE
-        # self.pace = PACEmodule(weights=self.weights, model_keypoints=self.model_keypoints,
-        #                        lambda_constant=self.lambda_constant).to(device=self.device_)
-
-        self.pace_fn = PACEbp(weights=self.weights.clone().to('cpu'),
-                              model_keypoints=self.model_keypoints.clone().to('cpu'),
-                              lambda_constant=self.lambda_constant.clone().to('cpu'),
-                              batch_size=self.batch_size)
+        self.pace = PACEmodule(weights=self.weights, model_keypoints=self.model_keypoints,
+                               lambda_constant=self.lambda_constant).to(device=self.device_)
 
 
         # Model Generator
@@ -133,20 +129,13 @@ class ProposedModel(nn.Module):
         # detect keypoints
         detected_keypoints = self.keypoint_detector(input_point_cloud)
         if not pre_train:
-            # R, t, c = self.pace(detected_keypoints)
-            y = detected_keypoints.clone().to('cpu')
-            R, t, c = self.pace_fn.forward(y=y)
-            R = R.to(device=self.device_)
-            t = t.to(device=self.device_)
-            c = c.to(device=self.device_)
+            R, t, c = self.pace(detected_keypoints)
             target_keypoints, target_point_cloud = self.generate_model(shape=c)
             target_point_cloud = R @ target_point_cloud + t
 
             return detected_keypoints, target_keypoints, target_point_cloud, R, t, c
         else:
             return detected_keypoints
-
-
 
 
 # loss function
@@ -162,9 +151,6 @@ def loss(input_point_cloud, detected_keypoints, target_point_cloud, target_keypo
     loss                : torch.tensor of shape (B, 1)
     """
     theta = 25.0
-    kappa = 1.0
-    # theta = 1.0
-    # kappa = 100.0
 
     # pc_loss = soft_chamfer_half_distance(input_point_cloud, target_point_cloud, radius=1000.0)
     pc_loss = chamfer_half_distance(input_point_cloud, target_point_cloud)
@@ -178,14 +164,11 @@ def loss(input_point_cloud, detected_keypoints, target_point_cloud, target_keypo
     # print("PC loss: ", pc_loss.mean())
     # print("KP loss: ", kp_loss.mean())
 
-    return kappa*pc_loss + theta*kp_loss
+    return pc_loss + theta*kp_loss
 
 
-
-
-
-# Train the keypoint detector without PACE.
-def train_one_epoch_withoutPACE(epoch_index, tb_writer, training_loader, model, optimizer, loss_fn):
+# Train the keypoint detector with PACE.
+def train_one_epoch(epoch_index, tb_writer, training_loader, model, optimizer, loss_fn):
     running_loss = 0.
     last_loss = 0.
 
@@ -243,71 +226,54 @@ def train_one_epoch_withoutPACE(epoch_index, tb_writer, training_loader, model, 
     return last_loss
 
 
+# Validation code
+def validate(writer, validation_loader, model, loss_fn):
+    with torch.no_grad():
 
-# Train the keypoint detector with PACE.
-def train_one_epoch_withPACE(epoch_index, tb_writer, training_loader, model, optimizer, loss_fn):
-    running_loss = 0.
-    last_loss = 0.
+        running_vloss = 0.0
 
-    # Here, we use enumerate(training_loader) instead of
-    # iter(training_loader) so that we can track the batch
-    # index and do some intra-epoch reporting
-    for i, data in enumerate(training_loader):
-        print("Training batch: ", i)
-        # Every data instance is an input + label pair
-        input_point_cloud, _, _ = data
-        input_point_cloud = input_point_cloud.to(device)
-
-        for iter in range(20):
-
-            print("iter: ", iter)
-            # Zero your gradients for every batch!
-            optimizer.zero_grad()
+        for i, vdata in enumerate(validation_loader):
+            input_point_cloud, R_target, t_target = vdata
+            input_point_cloud = input_point_cloud.to(device)
+            R_target = R_target.to(device)
+            t_target = t_target.to(device)
 
             # Make predictions for this batch
-            detected_keypoints, target_keypoints, target_point_cloud, _, _, _ = model(input_point_cloud, pre_train=False)
+            # detected_keypoints, target_keypoints, target_point_cloud, _, _, _ = model(input_point_cloud)
+            detected_keypoints = model(input_point_cloud, pre_train=True)
+            batch_size = detected_keypoints.shape[0]
+            target_keypoints = model.model_keypoints.repeat(batch_size, 1, 1)
+            target_point_cloud = model.cad_models.repeat(batch_size, 1, 1)
+
+            target_point_cloud = R_target @ target_point_cloud + t_target
+            target_keypoints = R_target @ target_keypoints + t_target
+
+            vloss = loss_fn(input_point_cloud, detected_keypoints, target_point_cloud, target_keypoints)
+            running_vloss += vloss
+
+            # if i==0:
+            #     # Display results for validation
+            #     pc = input_point_cloud.clone().detach().to('cpu')
+            #     pc_t = target_point_cloud.clone().detach().to('cpu')
+            #     kp = detected_keypoints.clone().detach().to('cpu')
+            #     kp_t = target_keypoints.clone().detach().to('cpu')
+            #     display_results(input_point_cloud=pc, detected_keypoints=kp, target_point_cloud=pc_t,
+            #                     target_keypoints=kp_t)
+            #     del pc, pc_t, kp, kp_t
+
+            del input_point_cloud, R_target, t_target, detected_keypoints, target_point_cloud, target_keypoints
+
+        avg_vloss = running_vloss / (i + 1)
+
+    return avg_vloss
 
 
-            # Compute the loss and its gradients
-            loss = loss_fn(input_point_cloud, detected_keypoints, target_point_cloud, target_keypoints)
-            loss.backward()
-            print("Loss: ", loss)
-
-            # Adjust learning weights
-            optimizer.step()
-
-            # Gather data and report
-            running_loss += loss.item()
-
-        if i % 500 == 0:
-            #ToDo: need to update this batch loss
-            last_loss = running_loss / 1000 # loss per batch
-            print('  batch {} loss: {}'.format(i + 1, last_loss))
-            tb_x = epoch_index * len(training_loader) + i + 1
-            tb_writer.add_scalar('Loss/train', last_loss, tb_x)
-            running_loss = 0.
-
-            # # Disply results after each 1000 training iterations
-            # pc = input_point_cloud.clone().detach().to('cpu')
-            # pc_t = target_point_cloud.clone().detach().to('cpu')
-            # kp = detected_keypoints.clone().detach().to('cpu')
-            # kp_t = target_keypoints.clone().detach().to('cpu')
-            # display_results(input_point_cloud=pc, detected_keypoints=kp, target_point_cloud=pc_t, target_keypoints=kp_t)
-            #
-            # del pc, pc_t, kp, kp_t
-
-        del input_point_cloud, detected_keypoints, target_point_cloud, target_keypoints
-
-        torch.cuda.empty_cache()
-
-    return last_loss
 
 
-save_location = '../../data/learning_objects/runs/'
 def train(training_loader, validation_loader, model, optimizer, loss_fn):
 
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    writer = SummaryWriter(save_location + 'expt_keypoint_detect_wPACE_noShape{}'.format(timestamp))
+    writer = SummaryWriter(SAVE_LOCATION + 'expt_keypoint_detect_{}'.format(timestamp))
     epoch_number = 0
 
     EPOCHS = 100
@@ -319,66 +285,28 @@ def train(training_loader, validation_loader, model, optimizer, loss_fn):
 
         # Make sure gradient tracking is on, and do a pass over the data
         model.train(True)
-        if epoch < 0:
-            avg_loss = train_one_epoch_withoutPACE(epoch_number, writer, training_loader, model, optimizer, loss_fn)
-        else:
-            avg_loss = train_one_epoch_withPACE(epoch_number, writer, training_loader, model, optimizer, loss_fn)
-
-
-
-        # Display results
-
+        avg_loss = train_one_epoch(epoch_number, writer, training_loader, model, optimizer, loss_fn)
 
         # Validation. We don't need gradients on to do reporting.
-        print('EPOCH {}:'.format(epoch_number + 1) + ' validation')
         model.train(False)
-        with torch.no_grad():
+        avg_vloss = validate(writer, validation_loader, model, loss_fn)
 
-            running_vloss = 0.0
+        print('LOSS train {} valid {}'.format(avg_loss, avg_vloss))
 
-            for i, vdata in enumerate(validation_loader):
+        # Log the running loss averaged per batch
+        # for both training and validation
+        writer.add_scalars('Training vs. Validation Loss',
+                           {'Training': avg_loss, 'Validation': avg_vloss},
+                           epoch_number + 1)
+        writer.flush()
 
-                input_point_cloud, _, _ = vdata
-                input_point_cloud = input_point_cloud.to(device)
+        # Track best performance, and save the model's state
+        if avg_vloss < best_vloss:
+            best_vloss = avg_vloss
+            model_path = SAVE_LOCATION + 'expt_keypoint_detect_' + 'model_{}_{}'.format(timestamp, epoch_number)
+            torch.save(model.state_dict(), model_path)
 
-                # Make predictions for this batch
-                detected_keypoints, target_keypoints, target_point_cloud, _, _, _ = model(input_point_cloud,
-                                                                                          pre_train=False)
-
-                vloss = loss_fn(input_point_cloud, detected_keypoints, target_point_cloud, target_keypoints)
-                running_vloss += vloss
-
-                # if i==0:
-                #     # Display results for validation
-                #     pc = input_point_cloud.clone().detach().to('cpu')
-                #     pc_t = target_point_cloud.clone().detach().to('cpu')
-                #     kp = detected_keypoints.clone().detach().to('cpu')
-                #     kp_t = target_keypoints.clone().detach().to('cpu')
-                #     display_results(input_point_cloud=pc, detected_keypoints=kp, target_point_cloud=pc_t,
-                #                     target_keypoints=kp_t)
-                #     del pc, pc_t, kp, kp_t
-
-                del input_point_cloud, detected_keypoints, target_point_cloud, target_keypoints
-
-
-            avg_vloss = running_vloss / (i + 1)
-            print('LOSS train {} valid {}'.format(avg_loss, avg_vloss))
-
-            # Log the running loss averaged per batch
-            # for both training and validation
-            writer.add_scalars('Training vs. Validation Loss',
-                               {'Training': avg_loss, 'Validation': avg_vloss},
-                               epoch_number + 1)
-            writer.flush()
-
-            # Track best performance, and save the model's state
-            if avg_vloss < best_vloss:
-                best_vloss = avg_vloss
-                model_path = save_location + 'expt_keypoint_detect_wPACE_noShape_' + 'model_{}_{}'.format(timestamp, epoch_number)
-                torch.save(model.state_dict(), model_path)
-
-            epoch_number += 1
-
+        epoch_number += 1
 
         torch.cuda.empty_cache()
 
@@ -386,23 +314,8 @@ def train(training_loader, validation_loader, model, optimizer, loss_fn):
     return None
 
 
-
-
-# Evaluation. Use the fact that you know rotation, translation, and shape of the generated data.
-def evaluation(rotation, rotation_target, translation, translation_target, shape, shape_target):
-    """
-    rotation, rotation_target       :   torch.tensor of shape (B, 3, 3)
-    translation, translation_target :   torch.tensor of shape (B, 3, 1)
-    shape, shape_target             :   torch.tensor of shpae (B, K, 1)
-    """
-
-    print("Rotation error: ", rotation_error(rotation, rotation_target))
-    print("Translation error: ", translation_error(translation, translation_target))
-    print("Shape error: ", shape_error(shape, shape_target))
-
-
 # Test the keypoint detector with PACE. See if you can learn the keypoints.
-def visual_test_withPACE(test_loader, model, loss_fn):
+def visual_test(test_loader, model, loss_fn):
 
     for i, vdata in enumerate(test_loader):
         input_point_cloud, R_target, t_target = vdata
@@ -411,14 +324,14 @@ def visual_test_withPACE(test_loader, model, loss_fn):
         t_target = t_target.to(device)
 
         # Make predictions for this batch
-        detected_keypoints, target_keypoints, target_point_cloud, R, t, c = model(input_point_cloud, pre_train=False)
-        # detected_keypoints = model(input_point_cloud, pre_train=False)
-        # batch_size = detected_keypoints.shape[0]
-        # target_keypoints = model.model_keypoints.repeat(batch_size, 1, 1)
-        # target_point_cloud = model.cad_models.repeat(batch_size, 1, 1)
+        # detected_keypoints, target_keypoints, target_point_cloud, _, _, _ = model(input_point_cloud)
+        detected_keypoints = model(input_point_cloud, pre_train=True)
+        batch_size = detected_keypoints.shape[0]
+        target_keypoints = model.model_keypoints.repeat(batch_size, 1, 1)
+        target_point_cloud = model.cad_models.repeat(batch_size, 1, 1)
 
-        # target_point_cloud = R_target @ target_point_cloud + t_target
-        # target_keypoints = R_target @ target_keypoints + t_target
+        target_point_cloud = R_target @ target_point_cloud + t_target
+        target_keypoints = R_target @ target_keypoints + t_target
 
         pc = input_point_cloud.clone().detach().to('cpu')
         pc_t = target_point_cloud.clone().detach().to('cpu')
@@ -426,11 +339,6 @@ def visual_test_withPACE(test_loader, model, loss_fn):
         kp_t = target_keypoints.clone().detach().to('cpu')
         display_results(input_point_cloud=pc, detected_keypoints=kp, target_point_cloud=pc_t,
                         target_keypoints=kp_t)
-
-        evaluation(rotation=R, rotation_target=R_target,
-                   translation=t, translation_target=t_target,
-                   shape=c, shape_target=torch.ones_like(c))
-
         del pc, pc_t, kp, kp_t
         del input_point_cloud, R_target, t_target, detected_keypoints, target_point_cloud, target_keypoints
 
@@ -438,16 +346,15 @@ def visual_test_withPACE(test_loader, model, loss_fn):
             break
 
 
-
+# Evaluation. Use the fact that you know rotation, translation, and shape of the generated data.
 
 
 
 if __name__ == "__main__":
 
     print('-' * 20)
-    print("Running expt_keypoint_detectPACE_noShape.py")
+    print("Running expt_keypoint_detect.py")
     print('-' * 20)
-
     # device
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     # device = 'cpu'
@@ -470,10 +377,11 @@ if __name__ == "__main__":
     batch_size = 120
     lr_sgd = 0.02
     momentum_sgd = 0.9
-    lr_adam = 0.02
+    lr_adam = 0.001
     num_of_points = 500
 
-    se3_dataset = SE3PointCloud(class_id=class_id, model_id=model_id, num_of_points=num_of_points, dataset_len=dataset_len)
+    se3_dataset = SE3PointCloud(class_id=class_id, model_id=model_id, num_of_points=num_of_points,
+                                dataset_len=dataset_len)
     se3_dataset_loader = torch.utils.data.DataLoader(se3_dataset, batch_size=batch_size, shuffle=False)
 
 
@@ -483,7 +391,7 @@ if __name__ == "__main__":
 
 
     # model
-    model = ProposedModel(model_keypoints=model_keypoints, cad_models=cad_models, batch_size=batch_size).to(device)
+    model = ProposedModel(model_keypoints=model_keypoints, cad_models=cad_models).to(device)
     num_parameters = sum(param.numel() for param in model.parameters() if param.requires_grad)
     print("Number of trainable parameters: ", num_parameters)
 
@@ -491,7 +399,7 @@ if __name__ == "__main__":
     loss_fn = loss
 
     # optimizer
-    optimizer = torch.optim.SGD(model.parameters(), lr=lr_sgd, momentum=momentum_sgd, weight_decay=0.01)
+    optimizer = torch.optim.SGD(model.parameters(), lr=lr_sgd, momentum=momentum_sgd)
     # optimizer = torch.optim.Adam(model.parameters(), lr=lr_adam)
 
 
@@ -502,6 +410,7 @@ if __name__ == "__main__":
 
     # test
     print("Visualizing the trained model.")
-    visual_test_withPACE(test_loader=se3_dataset_loader, model=model, loss_fn=loss_fn)
+    visual_test(test_loader=se3_dataset_loader, model=model, loss_fn=loss_fn)
+
 
 
