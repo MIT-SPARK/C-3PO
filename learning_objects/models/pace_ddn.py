@@ -2,6 +2,7 @@
 This code is an attempt to implement ddn as a torch.autograd.Function
 
 """
+import time
 
 import torch
 import cvxpy as cp
@@ -1517,10 +1518,10 @@ if __name__ == "__main__":
     print('device is ', device)
     print('-' * 20)
 
+    B = 200
     N = 10
     K = 4
     n = 40
-    B = 20
     weights = torch.rand(N, 1).to(device=device)
     model_keypoints = torch.rand(K, 3, N).to(device=device)
     lambda_constant = torch.tensor([1.0]).to(device=device)
@@ -1540,7 +1541,9 @@ if __name__ == "__main__":
     keypoints.requires_grad = True
     z = keypoints.view(B, -1).to(device=device)
     print(z.shape)
+    start = time.process_time()
     rot_estX = pace_rotation(z)
+    print("Time for PACErotation: ", 1000*(time.process_time()-start)/B, ' ms')
     batch_size = rot_estX.shape[0]
     rot_est = torch.transpose(torch.reshape(rot_estX[:, 1:], (batch_size, 3, 3)), -1, -2).to(device=device) # (B, 3, 3)
     print(rot_est.shape)
@@ -1585,7 +1588,7 @@ if __name__ == "__main__":
     print('device is ', device)
     print('-' * 20)
 
-    B = 20
+    B = 200
     N = 10
     K = 4
     n = 40
@@ -1603,7 +1606,9 @@ if __name__ == "__main__":
     shape = shape.to(device=device)
 
     keypoints.requires_grad = True
+    start = time.process_time()
     rot_est, trans_est, shape_est = pace_model(keypoints)
+    print("Time for PACEddn: ", 1000*(time.process_time()-start)/B, ' ms')
 
     er_shape = shape_error(shape, shape_est)
     er_trans = translation_error(translations, trans_est)
@@ -1628,7 +1633,7 @@ if __name__ == "__main__":
     print('device is ', device)
     print('-' * 20)
 
-    B = 20
+    B = 200
     N = 10
     K = 4
     n = 40
@@ -1646,7 +1651,9 @@ if __name__ == "__main__":
     shape = shape.to(device=device)
 
     keypoints.requires_grad = True
+    start = time.process_time()
     rot_est, trans_est, shape_est = pace_model.forward(y=keypoints)
+    print("Time for PACEbp: ", 1000*(time.process_time()-start)/B, ' ms')
 
     er_shape = shape_error(shape, shape_est)
     er_trans = translation_error(translations, trans_est)

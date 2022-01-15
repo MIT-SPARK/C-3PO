@@ -2,6 +2,8 @@
 This code implements outlier-free point set registration as torch function
 
 """
+import time
+
 import torch
 import cvxpy as cp
 import pymanopt as pym
@@ -116,7 +118,14 @@ class PointSetRegistration():
 
 if __name__ == '__main__':
 
-    B = 10
+
+    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = 'cpu'
+    print('device is ', device)
+    print('-' * 20)
+
+
+    B = 1000
     N = 20
     d = 3
 
@@ -130,14 +139,16 @@ if __name__ == '__main__':
     print('-' * 40)
     print("Testing wahba()")
     print('-' * 40)
+    start = time.process_time()
     rotation_est = wahba(source_points=source_points - source_points.mean(-1).unsqueeze(-1),
-                                      target_points=target_points-target_points.mean(-1).unsqueeze(-1))
-
+                         target_points=target_points-target_points.mean(-1).unsqueeze(-1),
+                         device_=device)
+    end = time.process_time()
     print("Output shape: ", rotation_est.shape)
 
     err = rotation_error(rotation, rotation_est)
     print("Rotation error: ", err.mean())
-
+    print("Time for wahba: ", 1000*(end-start)/B, ' ms')
 
 
     print('-'*40)
@@ -155,8 +166,11 @@ if __name__ == '__main__':
     target_points = rotation @ source_points + translation
     target_points += 0.01*torch.rand(size=target_points.shape)
 
-
-    rotation_est, translation_est = point_set_registration(source_points=source_points, target_points=target_points)
+    start = time.process_time()
+    rotation_est, translation_est = point_set_registration(source_points=source_points,
+                                                           target_points=target_points,
+                                                           device_=device)
+    end = time.process_time()
 
     print("Output rotation shape: ", rotation.shape)
     print("Output translation shape: ", translation.shape)
@@ -165,5 +179,6 @@ if __name__ == '__main__':
     err_trans = translation_error(translation, translation_est)
     print("Rotation error: ", err_rot.mean())
     print("Translation error: ", err_trans.mean())
+    print("Time for point_set_registration: ", 1000*(end-start)/B, ' ms')
 
 
