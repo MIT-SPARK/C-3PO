@@ -1591,7 +1591,7 @@ if __name__ == "__main__":
     lambda_constant = torch.tensor([1.0]).to(device=device)
     cad_models = torch.rand(K, 3, n).to(device=device)
 
-    pace_model = PACEddn(weights=weights, model_keypoints=model_keypoints, lambda_constant=lambda_constant, batch_size=B).to(device=device)
+    pace_model = PACEddn(weights=weights, model_keypoints=model_keypoints, batch_size=B).to(device=device)
 
     keypoints, rotations, translations, shape = generate_random_keypoints(batch_size=B, model_keypoints=model_keypoints.to('cpu'))
     keypoints = keypoints.to(device=device)
@@ -1634,7 +1634,7 @@ if __name__ == "__main__":
     lambda_constant = torch.tensor([1.0]).to(device=device)
     cad_models = torch.rand(K, 3, n).to(device=device)
 
-    pace_model = PACEbp(weights=weights, model_keypoints=model_keypoints, lambda_constant=lambda_constant, batch_size=B)
+    pace_model = PACEbp(weights=weights, model_keypoints=model_keypoints)
 
     keypoints, rotations, translations, shape = generate_random_keypoints(batch_size=B, model_keypoints=model_keypoints.to('cpu'))
     keypoints = keypoints.to(device=device)
