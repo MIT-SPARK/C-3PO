@@ -568,7 +568,7 @@ if __name__ == "__main__":
     dataset_dir = '../../data/learning_objects/'
     supervised_train_dataset_len = 12000
     supervised_train_batch_size = 120
-    self_supervised_train_dataset_len = 10
+    self_supervised_train_dataset_len = 500
     self_supervised_train_batch_size = 1
     lr_sgd = 0.02
     momentum_sgd = 0.9

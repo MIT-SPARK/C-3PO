@@ -327,7 +327,7 @@ class PACErotation(EqConstDeclarativeNode):
 
         # Defining the SDP Layer
         Xvar = cp.Variable((10, 10), symmetric=True)
-        Qparam = Q.detach().cpu().numpy()
+        Qparam = Q.cpu().numpy()
         # Qparam = cp.Parameter((10, 10), symmetric=True)
         constraints = [Xvar >> 0]
         constraints += [
@@ -341,12 +341,12 @@ class PACErotation(EqConstDeclarativeNode):
         # Step (1)
         # Qparam.value = Q.detach().cpu().numpy()
         sol = sdp_for_rotation.solve()
-        # print("-"*40)
-        # print("Problem status: ", sdp_for_rotation.status)
-        # print("Optimal value: ", sdp_for_rotation.value)
-        # print("Optimal variable: ", Xvar.value)
-        # print("Qparam: ", Qparam)
-        # print("-"*40)
+        print("-"*40)
+        print("Problem status: ", sdp_for_rotation.status)
+        print("Optimal value: ", sdp_for_rotation.value)
+        print("Optimal variable: ", Xvar.value)
+        print("Qparam: ", Qparam)
+        print("-"*40)
         X = torch.from_numpy(Xvar.value)
         X = X.to(device=self.device_)
 

@@ -259,7 +259,7 @@ def supervised_loss(input, output):
     t_loss = translation_loss(input[3], output[3]).mean()
     c_loss = shape_loss(input[4], output[4]).mean()
 
-    return pc_loss + kp_loss + R_loss + t_loss + c_loss
+    return 10*pc_loss + 50*kp_loss + R_loss + t_loss + c_loss
 
 
 def validation_loss(input, output):
@@ -367,6 +367,7 @@ def supervised_train_one_epoch(epoch_index, tb_writer, training_loader, model, o
         keypoints_target = keypoints_target.to(device)
         R_target = R_target.to(device)
         t_target = t_target.to(device)
+        c_target = c_target.to(device)
 
         # Zero your gradients for every batch!
         optimizer.zero_grad()
@@ -421,6 +422,7 @@ def validate(writer, validation_loader, model):
             keypoints_target = keypoints_target.to(device)
             R_target = R_target.to(device)
             t_target = t_target.to(device)
+            c_target = c_target.to(device)
 
             # Make predictions for this batch
             predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted, c_predicted, _ \
@@ -609,8 +611,8 @@ if __name__ == "__main__":
     model_id = "1e3fba4500d20bb49b9f2eb77f5e247e"  # a particular chair model
     dataset_dir = '../../data/learning_objects/'
     supervised_train_dataset_len = 1200
-    supervised_train_batch_size = 120
-    self_supervised_train_dataset_len = 10
+    supervised_train_batch_size = 1
+    self_supervised_train_dataset_len = 100
     self_supervised_train_batch_size = 1
     lr_sgd = 0.02
     momentum_sgd = 0.9

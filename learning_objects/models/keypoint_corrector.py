@@ -18,8 +18,8 @@ sys.path.append("../../")
 
 from learning_objects.utils.ddn.node import AbstractDeclarativeNode
 
-from learning_objects.models.point_set_registration import point_set_registration
-from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPointCloud, SE3nIsotorpicShapePointCloud
+from learning_objects.models.point_set_registration import point_set_registration, PointSetRegistration
+from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPointCloud2, SE3nIsotorpicShapePointCloud
 
 from learning_objects.utils.general import pos_tensor_to_o3d, display_two_pcs
 from learning_objects.utils.general import chamfer_distance, chamfer_half_distance, rotation_error, \
@@ -488,7 +488,8 @@ if __name__ == "__main__":
     print("-"*40)
     print("Verifying keypoint corrector with SE3PointCloud dataset and keypoint_perturbation(): ")
 
-    se3_dataset = SE3PointCloud(class_id=class_id, model_id=model_id, num_of_points=500, dataset_len=100)
+    B = 100
+    se3_dataset = SE3PointCloud(class_id=class_id, model_id=model_id, num_of_points=500, dataset_len=B)
     se3_dataset_loader = torch.utils.data.DataLoader(se3_dataset, batch_size=1, shuffle=False)
 
     model_keypoints = se3_dataset._get_model_keypoints()    # (1, 3, N)
@@ -496,27 +497,31 @@ if __name__ == "__main__":
 
     # define the keypoint corrector
     corrector = kp_corrector_reg(cad_models=cad_models, model_keypoints=model_keypoints)
+    point_set_reg = PointSetRegistration(source_points=model_keypoints)
 
     for i, data in enumerate(se3_dataset_loader):
 
-        input_point_cloud, rotation_true, translation_true = data
+        input_point_cloud, keypoints_true, rotation_true, translation_true = data
 
         # generating perturbed keypoints
-        keypoints_true = rotation_true @ model_keypoints + translation_true
+        # keypoints_true = rotation_true @ model_keypoints + translation_true
         # detected_keypoints = keypoints_true
         detected_keypoints = keypoint_perturbation(keypoints_true=keypoints_true, type='sporadic')
 
         # estimate model: using point set registration on perturbed keypoints
-        R_naive, t_naive = point_set_registration(source_points=model_keypoints, target_points=detected_keypoints)
+        R_naive, t_naive = point_set_reg.forward(target_points=detected_keypoints)
         model_estimate = R_naive @ cad_models + t_naive
-        display_two_pcs(pc1=input_point_cloud.squeeze(0), pc2=model_estimate.squeeze(0))
+        display_two_pcs(pc1=input_point_cloud[0, ...], pc2=model_estimate[0, ...])
 
         # estimate model: using the keypoint corrector
+        start = time.process_time()
         correction = corrector.forward(detected_keypoints=detected_keypoints, input_point_cloud=input_point_cloud)
+        end = time.process_time()
+        print("Corrector time: ", 1000*(end-start)/B, ' ms')
         # correction = torch.zeros_like(correction)
-        R, t = point_set_registration(source_points=model_keypoints, target_points=detected_keypoints+correction)
+        R, t = point_set_reg.forward(target_points=detected_keypoints+correction)
         model_estimate = R @ cad_models + t
-        display_two_pcs(pc1=input_point_cloud.squeeze(0), pc2=model_estimate.squeeze(0))
+        display_two_pcs(pc1=input_point_cloud[0, ...], pc2=model_estimate[0, ...])
 
         # evaluate the two metrics
         print("Evaluation error (wo correction): ", registration_eval(R_naive, rotation_true, t_naive, translation_true))
@@ -532,7 +537,7 @@ if __name__ == "__main__":
     print("-"*40)
     print("Verifying keypoint corrector with DepthPointCloud dataset and keypoint_perturbation(): ")
 
-    depth_dataset = DepthPointCloud(class_id=class_id, model_id=model_id, num_of_points=500)
+    depth_dataset = DepthPointCloud2(class_id=class_id, model_id=model_id, num_of_points=500)
     depth_dataset_loader = torch.utils.data.DataLoader(depth_dataset, batch_size=1, shuffle=False)
 
     model_keypoints = depth_dataset._get_model_keypoints()    # (1, 3, N)
@@ -540,29 +545,30 @@ if __name__ == "__main__":
 
     # define the keypoint corrector
     corrector = kp_corrector_reg(cad_models=cad_models, model_keypoints=model_keypoints)
+    point_set_reg = PointSetRegistration(source_points=model_keypoints)
 
     for i, data in enumerate(depth_dataset_loader):
 
-        input_point_cloud = data
+        input_point_cloud, keypoints_true, rotation_true, translation_true = data
 
         # generating perturbed keypoints
-        keypoints_true = model_keypoints
-        rotation_true = torch.eye(3)
-        translation_true = torch.zeros(3, 1)
         # detected_keypoints = keypoints_true
         detected_keypoints = keypoint_perturbation(keypoints_true=keypoints_true, type='sporadic')
 
         # estimate model: using point set registration on perturbed keypoints
-        R_naive, t_naive = point_set_registration(source_points=model_keypoints, target_points=detected_keypoints)
+        R_naive, t_naive = point_set_reg.forward(target_points=detected_keypoints)
         model_estimate = R_naive @ cad_models + t_naive
-        display_two_pcs(pc1=input_point_cloud.squeeze(0), pc2=model_estimate.squeeze(0))
+        display_two_pcs(pc1=input_point_cloud[0, ...], pc2=model_estimate[0, ...])
 
         # estimate model: using the keypoint corrector
+        start = time.process_time()
         correction = corrector.forward(detected_keypoints=detected_keypoints, input_point_cloud=input_point_cloud)
+        end = time.process_time()
+        print("Corrector time: ", 1000 * (end - start) / B, ' ms')
         # correction = torch.zeros_like(correction)
-        R, t = point_set_registration(source_points=model_keypoints, target_points=detected_keypoints+correction)
+        R, t = point_set_reg.forward(target_points=detected_keypoints+correction)
         model_estimate = R @ cad_models + t
-        display_two_pcs(pc1=input_point_cloud.squeeze(0), pc2=model_estimate.squeeze(0))
+        display_two_pcs(pc1=input_point_cloud[0, ...], pc2=model_estimate[0, ...])
 
         # evaluate the two metrics
         print("Evaluation error (wo correction): ", registration_eval(R_naive, rotation_true, t_naive, translation_true))
