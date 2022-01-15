@@ -92,12 +92,25 @@ def point_set_registration(source_points, target_points, weights=None, device_=N
 class PointSetRegistration():
     def __init__(self, source_points):
         super().__init__()
+        """
+        source_points   : torch.tensor of shape (1, 3, N)
+        
+        """
 
         self.source_points = source_points
 
     def forward(self, target_points):
+        """
+        inputs:
+        target_points   : torch.tensor of shape (B, 3, N)
 
-        return point_set_registration(self.source_points, target_points)
+        output:
+        R   : torch.tensor of shape (B, 3, 3)
+        t   : torch.tensor of shape (B, 3, 1)
+        """
+        batch_size = target_points.shape[0]
+
+        return point_set_registration(self.source_points.repeat(batch_size, 1, 1), target_points)
 
 
 
