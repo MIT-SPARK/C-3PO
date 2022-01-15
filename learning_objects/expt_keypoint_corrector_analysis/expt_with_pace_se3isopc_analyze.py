@@ -108,8 +108,8 @@ def varul_mean(data):
 
 if __name__ == '__main__':
 
-    file_names = ["./expt_with_pace_se3isopc/20220110_142015_experiment.pickle",
-                  "./expt_with_pace_se3isopc/20220110_181843_experiment.pickle"]
+    file_names = ["./expt_with_pace_se3isopc/20220112_222311_experiment.pickle",
+                  "./expt_with_pace_se3isopc/20220113_042722_experiment.pickle"]
 
     for name in file_names:
 

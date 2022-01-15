@@ -89,6 +89,16 @@ def point_set_registration(source_points, target_points, weights=None, device_=N
     return rotation, translation
 
 
+class PointSetRegistration():
+    def __init__(self, source_points):
+        super().__init__()
+
+        self.source_points = source_points
+
+    def forward(self, target_points):
+
+        return point_set_registration(self.source_points, target_points)
+
 
 
 if __name__ == '__main__':

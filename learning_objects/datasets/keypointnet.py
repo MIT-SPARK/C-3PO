@@ -216,10 +216,32 @@ def generate_depth_data(class_id, model_id, radius_multiple = [1.2, 3.0],
 
 
 class DepthAndIsotorpicShapePointCloud(torch.utils.data.Dataset):
-    def __init__(self, class_id, model_id, shape_scaling=torch.tensor([0.5, 2.0]), radius_multiple=[1.2, 3.0],
+    """
+    Given class id, model id, and number of points, it generates various depth point clouds and
+    SE3 transformations of the ShapeNetCore object. The object is scaled isotropically by a quantity in the
+    range determined by shape_scaling.
+
+    Note:
+        The output depth point clouds will not contain the same number of points. Therefore, when using with a
+        dataloader, fix the batch_size=1.
+
+    Returns
+        input_point_cloud, keypoints, rotation, translation, shape
+    """
+    def __init__(self, class_id, model_id, shape_scaling=torch.tensor([0.5, 2.0]),
+                 radius_multiple=torch.tensor([1.2, 3.0]),
                  num_of_points=1000, dataset_len=10000):
         super().__init__()
+        """
+        class_id        : str   : class id of a ShapeNetCore object
+        model_id        : str   : model id of a ShapeNetCore object
+        shape_scaling   : torch.tensor of shape (2) : lower and upper limit of isotropic shape scaling
+        radius_multiple : torch.tensor of shape (2) : lower and upper limit of the distance from which depth point 
+                                                        cloud is constructed
+        num_of_points   : int   : max. number of points the depth point cloud will contain
+        dataset_len     : int   : size of the dataset  
 
+        """
         self.class_id = class_id
         self.model_id = model_id
         self.shape_scaling = shape_scaling
@@ -248,9 +270,12 @@ class DepthAndIsotorpicShapePointCloud(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         """
         output:
-        point_cloud : torch.tensor of shape (3, m)
-        R           : torch.tensor of shape (3, 3)
-        t           : torch.tensor of shape (3, 1)
+        depth_pcd_torch     : torch.tensor of shape (3, m)                  : the depth point cloud
+        keypoints           : torch.tensor of shape (3, N)                  : transformed keypoints
+        R                   : torch.tensor of shape (3, 3)                  : rotation
+        t                   : torch.tensor of shape (3, 1)                  : translation
+        c                   : torch.tensor of shape (2, 1)                  : shape parameter
+        model_pcd_torch     : torch.tensor of shape (3, self.num_of_points) : transformed full point cloud
         """
 
         # Randomly rotate the self.model_mesh
@@ -298,10 +323,16 @@ class DepthAndIsotorpicShapePointCloud(torch.utils.data.Dataset):
         model_pcd_torch = model_pcd_torch.to(torch.float)
         model_pcd_torch = scaling_factor * model_pcd_torch + t
 
-        return depth_pcd_torch, keypoints_xyz.squeeze(0), R, t, shape, model_pcd_torch
+        return depth_pcd_torch, keypoints_xyz.squeeze(0), R, t, shape
 
 
     def _get_cad_models(self):
+        """
+        Returns two point clouds as shape models, one with the min shape and the other with the max shape.
+
+        output:
+        cad_models  : torch.tensor of shape (2, 3, self.num_of_points)
+        """
 
         model_pcd = self.model_mesh.sample_points_uniformly(number_of_points=self.num_of_points)
         model_pcd_torch = torch.from_numpy(np.asarray(model_pcd.points)).transpose(0, 1)  # (3, m)
@@ -316,6 +347,15 @@ class DepthAndIsotorpicShapePointCloud(torch.utils.data.Dataset):
         return cad_models
 
     def _get_model_keypoints(self):
+        """
+        Returns two sets of keypoints, one with the min shape and the other with the max shape.
+
+        output:
+        model_keypoints : torch.tensor of shape (2, 3, N)
+
+        where
+        N = number of keypoints
+        """
 
         keypoints = self.keypoints_xyz  # (3, N)
 
@@ -330,10 +370,16 @@ class DepthAndIsotorpicShapePointCloud(torch.utils.data.Dataset):
     def _get_diameter(self):
         """
         returns the diameter of the mid-sized object.
+
+        output  :   torch.tensor of shape (1)
         """
         return self.diameter*(self.shape_scaling[0] + self.shape_scaling[1])*0.5
 
     def _visualize(self):
+        """
+        Visualizes the two CAD models and the corresponding keypoints
+
+        """
 
         cad_models = self._get_cad_models()
         model_keypoints = self._get_model_keypoints()
@@ -343,8 +389,29 @@ class DepthAndIsotorpicShapePointCloud(torch.utils.data.Dataset):
 
 
 class DepthPointCloud2(torch.utils.data.Dataset):
-    def __init__(self, class_id, model_id, radius_multiple=[1.2, 3.0], num_of_points=1000, dataset_len=10000):
+    """
+    Given class id, model id, and number of points, it generates various depth point clouds and SE3 transformations
+    of the ShapeNetCore object.
+
+    Note:
+        The output depth point clouds will not contain the same number of points. Therefore, when using with a
+        dataloader, fix the batch_size=1.
+
+    Returns
+        input_point_cloud, keypoints, rotation, translation
+    """
+    def __init__(self, class_id, model_id, radius_multiple=torch.tensor([1.2, 3.0]),
+                 num_of_points=1000, dataset_len=10000):
         super().__init__()
+        """
+        class_id        : str   : class id of a ShapeNetCore object
+        model_id        : str   : model id of a ShapeNetCore object 
+        radius_multiple : torch.tensor of shape (2) : lower and upper limit of the distance from which depth point 
+                                                        cloud is constructed
+        num_of_points   : int   : max. number of points the depth point cloud will contain
+        dataset_len     : int   : size of the dataset  
+
+        """
 
         self.class_id = class_id
         self.model_id = model_id
@@ -373,9 +440,11 @@ class DepthPointCloud2(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         """
         output:
-        point_cloud : torch.tensor of shape (3, m)
-        R           : torch.tensor of shape (3, 3)
-        t           : torch.tensor of shape (3, 1)
+        depth_pcd_torch     : torch.tensor of shape (3, m)                  : the depth point cloud
+        keypoints           : torch.tensor of shape (3, N)                  : transformed keypoints
+        R                   : torch.tensor of shape (3, 3)                  : rotation
+        t                   : torch.tensor of shape (3, 1)                  : translation
+        model_pcd_torch     : torch.tensor of shape (3, self.num_of_points) : transformed full point cloud
         """
 
         # Randomly rotate the self.model_mesh
@@ -412,10 +481,14 @@ class DepthPointCloud2(torch.utils.data.Dataset):
         model_pcd_torch = model_pcd_torch.to(torch.float)
         model_pcd_torch = model_pcd_torch + t
 
-        return depth_pcd_torch, keypoints_xyz.squeeze(0), R, t, model_pcd_torch
+        return depth_pcd_torch, keypoints_xyz.squeeze(0), R, t
 
 
     def _get_cad_models_as_point_clouds(self):
+        """
+        Use _get_cad_models() instead of this function.
+
+        """
 
         model_pcd = self.model_mesh.sample_points_uniformly(number_of_points=self.num_of_points)
         model_pcd_torch = torch.from_numpy(np.asarray(model_pcd.points)).transpose(0, 1)  # (3, m)
@@ -424,11 +497,21 @@ class DepthPointCloud2(torch.utils.data.Dataset):
         return model_pcd_torch.unsqueeze(0)
 
     def _get_cad_models_as_mesh(self):
+        """
+        Returns the open3d Mesh object of the ShapeNetCore model
+
+        """
 
         return self.model_mesh
 
     def _get_cad_models(self):
-        #Depreciated. Use _get_cad_models_as_point_clouds().
+        """
+        Returns a sampled point cloud of the ShapeNetcore model with self.num_of_points points.
+
+        output:
+        cad_models  : torch.tensor of shape (1, 3, self.num_of_points)
+
+        """
 
         model_pcd = self.model_mesh.sample_points_uniformly(number_of_points=self.num_of_points)
         model_pcd_torch = torch.from_numpy(np.asarray(model_pcd.points)).transpose(0, 1)  # (3, m)
@@ -437,14 +520,32 @@ class DepthPointCloud2(torch.utils.data.Dataset):
         return model_pcd_torch.unsqueeze(0)
 
     def _get_model_keypoints(self):
+        """
+        Returns keypoints of the ShapeNetCore model annotated in the KeypointNet dataset.
+
+        output:
+        model_keypoints : torch.tensor of shape (1, 3, N)
+
+        where
+        N = number of keypoints
+        """
 
         return self.keypoints_xyz
 
     def _get_diameter(self):
+        """
+        Returns the diameter of the mid-sized object.
+
+        output  :   torch.tensor of shape (1)
+        """
 
         return self.diameter
 
     def _visualize(self):
+        """
+        Visualizes the two CAD models and the corresponding keypoints
+
+        """
 
         cad_models = self._get_cad_models()
         model_keypoints = self._get_model_keypoints()
@@ -455,9 +556,10 @@ class DepthPointCloud2(torch.utils.data.Dataset):
 
 class DepthPointCloud(torch.utils.data.Dataset):
     """
-    This creates the dataset for a given CAD model (class_id, model_id).
+    Use DepthPointCloud2 instead of this dataset.
 
-    It outputs various depth point clouds of the given CAD model.
+    This creates the dataset for a given CAD model (class_id, model_id). It outputs various depth point clouds of the
+    given CAD model.
     """
     def __init__(self, class_id, model_id, dir_name='../../data/learning_objects/keypointnet_datasets/',
                  radius_multiple=[1.2, 3.0], num_of_depth_images_per_radius=500, num_of_points=1000, torch_out=True):
@@ -540,12 +642,21 @@ class DepthPointCloud(torch.utils.data.Dataset):
 
 class SE3PointCloud(torch.utils.data.Dataset):
     """
-    This creates the dataset for a given CAD model (class_id, model_id).
+    Given class_id, model_id, and number of points generates various point clouds and SE3 transformations
+    of the ShapeNetCore object.
 
-    It outputs various SE(3) transformations of the given input point cloud.
+    Returns a batch of
+        input_point_cloud, keypoints, rotation, translation
     """
     def __init__(self, class_id, model_id, num_of_points=1000, dataset_len=10000,
                  dir_location='../../data/learning-objects/keypointnet_datasets/'):
+        """
+        class_id        : str   : class id of a ShapeNetCore object
+        model_id        : str   : model id of a ShapeNetCore object
+        num_of_points   : int   : max. number of points the depth point cloud will contain
+        dataset_len     : int   : size of the dataset
+
+        """
 
         self.class_id = class_id
         self.model_id = model_id
@@ -565,14 +676,15 @@ class SE3PointCloud(torch.utils.data.Dataset):
 
 
     def __len__(self):
+
         return self.len
 
     def __getitem__(self, idx):
         """
         output:
-        point_cloud : torch.tensor of shape (3, m)
-        R           : torch.tensor of shape (3, 3)
-        t           : torch.tensor of shape (3, 1)
+        point_cloud         : torch.tensor of shape (3, m)                  : the SE3 transformed point cloud
+        R                   : torch.tensor of shape (3, 3)                  : rotation
+        t                   : torch.tensor of shape (3, 1)                  : translation
         """
 
         R = transforms.random_rotation()
@@ -582,11 +694,15 @@ class SE3PointCloud(torch.utils.data.Dataset):
         model_pcd_torch = torch.from_numpy(np.asarray(model_pcd.points)).transpose(0, 1)  # (3, m)
         model_pcd_torch = model_pcd_torch.to(torch.float)
 
-
-        return R @ model_pcd_torch + t, R, t
+        # return R @ model_pcd_torch + t, R, t
+        return R @ model_pcd_torch + t, R @ self.keypoints_xyz.squeeze(0) + t, R, t
 
 
     def _get_cad_models_as_point_clouds(self):
+        """
+        Use _get_cad_models() instead of this function.
+
+        """
 
         model_pcd = self.model_mesh.sample_points_uniformly(number_of_points=self.num_of_points)
         model_pcd_torch = torch.from_numpy(np.asarray(model_pcd.points)).transpose(0, 1)  # (3, m)
@@ -595,11 +711,21 @@ class SE3PointCloud(torch.utils.data.Dataset):
         return model_pcd_torch.unsqueeze(0)
 
     def _get_cad_models_as_mesh(self):
+        """
+        Returns the open3d Mesh object of the ShapeNetCore model
+
+        """
 
         return self.model_mesh
 
     def _get_cad_models(self):
-        #Depreciated. Use _get_cad_models_as_point_clouds().
+        """
+        Returns a sampled point cloud of the ShapeNetcore model with self.num_of_points points.
+
+        output:
+        cad_models  : torch.tensor of shape (1, 3, self.num_of_points)
+
+        """
 
         model_pcd = self.model_mesh.sample_points_uniformly(number_of_points=self.num_of_points)
         model_pcd_torch = torch.from_numpy(np.asarray(model_pcd.points)).transpose(0, 1)  # (3, m)
@@ -608,14 +734,32 @@ class SE3PointCloud(torch.utils.data.Dataset):
         return model_pcd_torch.unsqueeze(0)
 
     def _get_model_keypoints(self):
+        """
+        Returns keypoints of the ShapeNetCore model annotated in the KeypointNet dataset.
+
+        output:
+        model_keypoints : torch.tensor of shape (1, 3, N)
+
+        where
+        N = number of keypoints
+        """
 
         return self.keypoints_xyz
 
     def _get_diameter(self):
+        """
+        Returns the diameter of the mid-sized object.
+
+        output  :   torch.tensor of shape (1)
+        """
 
         return self.diameter
 
     def _visualize(self):
+        """
+        Visualizes the two CAD models and the corresponding keypoints
+
+        """
 
         cad_models = self._get_cad_models()
         model_keypoints = self._get_model_keypoints()
@@ -626,14 +770,24 @@ class SE3PointCloud(torch.utils.data.Dataset):
 
 class SE3nIsotorpicShapePointCloud(torch.utils.data.Dataset):
     """
-    This creates the dataset for a given CAD model (class_id, model_id).
+    Given class id, model_id, number of points, and shape_scaling, it generates various point clouds and SE3
+    transformations of the ShapeNetCore object, scaled by a quantity between the range determined by shape_scaling.
 
-    It outputs various SE(3) transformations and Shape by isotropic scaling of the given input point cloud.
 
+    Returns a batch of
+        input_point_cloud, keypoints, rotation, translation, shape
     """
     def __init__(self, class_id, model_id, num_of_points=1000, dataset_len=10000,
                  shape_scaling=torch.tensor([0.5, 2.0]),
                  dir_location='../../data/learning-objects/keypointnet_datasets/'):
+        """
+        class_id        : str   : class id of a ShapeNetCore object
+        model_id        : str   : model id of a ShapeNetCore object
+        shape_scaling   : torch.tensor of shape (2) : lower and upper limit of isotropic shape scaling
+        num_of_points   : int   : max. number of points the depth point cloud will contain
+        dataset_len     : int   : size of the dataset
+
+        """
 
         self.class_id = class_id
         self.model_id = model_id
@@ -648,25 +802,24 @@ class SE3nIsotorpicShapePointCloud(torch.utils.data.Dataset):
         self.keypoints_xyz = self.keypoints_xyz - center
         self.keypoints_xyz = torch.from_numpy(self.keypoints_xyz).transpose(0, 1).unsqueeze(0).to(torch.float)
 
-        # # scaling to minimum scale
-        # scaling_factor_min = self.shape_scaling[0].clone().detach().numpy()
-        # scaling = np.eye(4)
-        # scaling[0, 0] = scaling_factor_min
-        # scaling[1, 1] = scaling_factor_min
-        # scaling[2, 2] = scaling_factor_min
-        #
-        # self.model_mesh = self.model_mesh.transform(scaling)
-        # self.keypoints_xyz = scaling_factor_min*self.keypoints_xyz
-
-
         # size of the model
         self.diameter = np.linalg.norm(np.asarray(self.model_mesh.get_max_bound()) - np.asarray(self.model_mesh.get_min_bound()))
 
 
     def __len__(self):
+
         return self.len
 
     def __getitem__(self, idx):
+        """
+        output:
+        depth_pcd_torch     : torch.tensor of shape (3, m)                  : the depth point cloud
+        keypoints           : torch.tensor of shape (3, N)                  : transformed keypoints
+        R                   : torch.tensor of shape (3, 3)                  : rotation
+        t                   : torch.tensor of shape (3, 1)                  : translation
+        c                   : torch.tensor of shape (2, 1)                  : shape parameter
+
+        """
 
         # random scaling
         alpha = torch.rand(1, 1)
@@ -697,6 +850,12 @@ class SE3nIsotorpicShapePointCloud(torch.utils.data.Dataset):
 
 
     def _get_cad_models(self):
+        """
+        Returns two point clouds as shape models, one with the min shape and the other with the max shape.
+
+        output:
+        cad_models  : torch.tensor of shape (2, 3, self.num_of_points)
+        """
 
         model_pcd = self.model_mesh.sample_points_uniformly(number_of_points=self.num_of_points)
         model_pcd_torch = torch.from_numpy(np.asarray(model_pcd.points)).transpose(0, 1)  # (3, m)
@@ -711,6 +870,15 @@ class SE3nIsotorpicShapePointCloud(torch.utils.data.Dataset):
         return cad_models
 
     def _get_model_keypoints(self):
+        """
+        Returns two sets of keypoints, one with the min shape and the other with the max shape.
+
+        output:
+        model_keypoints : torch.tensor of shape (2, 3, N)
+
+        where
+        N = number of keypoints
+        """
 
         keypoints = self.keypoints_xyz  # (3, N)
 
@@ -725,10 +893,17 @@ class SE3nIsotorpicShapePointCloud(torch.utils.data.Dataset):
     def _get_diameter(self):
         """
         returns the diameter of the mid-sized object.
+
+        output  :   torch.tensor of shape (1)
         """
+
         return self.diameter*(self.shape_scaling[0] + self.shape_scaling[1])*0.5
 
     def _visualize(self):
+        """
+        Visualizes the two CAD models and the corresponding keypoints
+
+        """
 
         cad_models = self._get_cad_models()
         model_keypoints = self._get_model_keypoints()
@@ -790,8 +965,7 @@ if __name__ == "__main__":
     loader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
 
     for i, data in enumerate(loader):
-        pc, R, t = data
-        kp = R @ model_keypoints + t
+        pc, kp, R, t = data
         print(pc.shape)
         print(kp.shape)
         visualize_torch_model_n_keypoints(cad_models=pc, model_keypoints=kp)
@@ -906,7 +1080,7 @@ if __name__ == "__main__":
     loader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)  #Note: the batch size has to be one!
 
     for i, data in enumerate(loader):
-        depth_pcd_torch, keypoints_xyz, R, t, shape, model_pcd_torch = data
+        depth_pcd_torch, keypoints_xyz, R, t, shape = data
         pc = depth_pcd_torch
         kp = keypoints_xyz
         print(pc.shape)
@@ -914,7 +1088,6 @@ if __name__ == "__main__":
         print(R.shape)
         print(t.shape)
         print(shape.shape)
-        print(model_pcd_torch.shape)
         visualize_torch_model_n_keypoints(cad_models=pc, model_keypoints=kp)
         if i >= 2:
             break

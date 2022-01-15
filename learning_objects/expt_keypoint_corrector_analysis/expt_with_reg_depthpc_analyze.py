@@ -109,8 +109,8 @@ def varul_mean(data):
 
 if __name__ == '__main__':
 
-    file_names = ["./expt_with_reg_depthpc/20220112_205609_experiment.pickle",
-                  "./expt_with_reg_depthpc/20220112_214100_experiment.pickle"]
+    file_names = ["./expt_with_reg_depthpc/20220113_121945_experiment.pickle",
+                  "./expt_with_reg_depthpc/20220113_131024_experiment.pickle"]
 
     for name in file_names:
 

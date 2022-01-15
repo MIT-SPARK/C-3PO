@@ -361,15 +361,15 @@ def run_experiments_on(class_id, model_id, kp_noise_type, kp_noise_fra=0.2, only
     shape_scaling = torch.tensor([0.5, 2.0])
 
     # averaging over
-    num_iterations = 50
+    num_iterations = 100
 
     # kp_noise parameters
-    kp_noise_var_range = torch.arange(0.1, 0.9, 0.05)
+    kp_noise_var_range = torch.arange(0.1, 1.55, 0.1)
 
     # certification parameters
-    epsilon = 0.98
+    epsilon = 0.995
     delta = 0.98
-    radius = 0.05
+    radius = 0.01
     certify = certifiability(epsilon=epsilon, delta=delta, radius=radius)
 
     # loss function parameters

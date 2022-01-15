@@ -106,11 +106,10 @@ def varul_mean(data):
     return var, mean.squeeze(-1)
 
 
-#ToDo: To be tested!
 if __name__ == '__main__':
 
-    file_names = ["./expt_with_pace_depthisopc/20220110_142015_experiment.pickle",
-                  "./expt_with_pace_depthisopc/20220110_181843_experiment.pickle"]
+    file_names = ["./expt_with_pace_depthisopc/20220113_020510_experiment.pickle",
+                  "./expt_with_pace_depthisopc/20220113_081936_experiment.pickle"]
 
     for name in file_names:
 
