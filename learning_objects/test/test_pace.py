@@ -143,7 +143,7 @@ if __name__ == '__main__':
     print('-' * 22)
     print("Testing learning_objects.models.pace_ddn.PACEddn")
     print('-' * 22)
-    fn = PACEddn(weights=weights, model_keypoints=model_keypoints, lambda_constant=lambda_constant)
+    fn = PACEddn(weights=weights, model_keypoints=model_keypoints)
     pace_implementation.test(fn)
 
 
@@ -151,7 +151,7 @@ if __name__ == '__main__':
     print('-' * 22)
     print("Testing learning_objects.models.pace_ddn.PACEbp")
     print('-' * 22)
-    fn = PACEbp(weights=weights, model_keypoints=model_keypoints, lambda_constant=lambda_constant)
+    fn = PACEbp(weights=weights, model_keypoints=model_keypoints)
     pace_implementation.test(fn.forward)
 
 
