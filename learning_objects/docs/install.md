@@ -5,6 +5,9 @@ Apolloscape Utils Package Dependencies
 - pymeshfix==0.15.0
 - pyrender==0.1.45
 
+for shape averaging:
+- Cython
+- h5py
 
 In Environment with 
 - python3.8
@@ -15,3 +18,4 @@ In Environment with
 - cvxpy
 - cvxpylayers 
 - pytorch3d
+

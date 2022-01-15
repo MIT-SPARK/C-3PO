@@ -1,0 +1,4 @@
+*.so
+car_models/
+output_frames/
+output_rotating_cars_frames/
