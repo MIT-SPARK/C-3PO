@@ -2,6 +2,7 @@
 This implements the keypoint correction with registration, pace, as (1) a class and (2) as an AbstractDeclarativeNode
 
 """
+import time
 
 import torch
 import open3d as o3d
@@ -290,6 +291,7 @@ class kp_corrector_reg():
 
 
 class kp_corrector_pace():
+    #ToDo: Computes PACE too many times. See if this can be fixed.
     def __init__(self, cad_models, model_keypoints, weights, batch_size, theta=10.0, kappa=50.0):
         super().__init__()
         """
@@ -331,9 +333,12 @@ class kp_corrector_pace():
 
         """
 
-
+        # start = time.perf_counter()
         R, t, c = self.pace.forward(y=detected_keypoints + correction)
+        # print("pace run time: ", time.perf_counter()-start)
+        # mid = time.perf_counter()
         keypoint_estimate, model_estimate = self.modelgen.forward(shape=c)
+        # print("model gen runtime: ", time.perf_counter()-mid)
         model_estimate = R @ model_estimate + t
         keypoint_estimate = R @ keypoint_estimate + t
 
