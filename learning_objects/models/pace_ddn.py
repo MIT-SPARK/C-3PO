@@ -20,6 +20,7 @@ from learning_objects.utils.general import generate_random_keypoints
 from learning_objects.utils.general import shape_error, translation_error, rotation_error
 
 
+#ToDo: This is what we use.
 class PACErotation(EqConstDeclarativeNode):
     """
     This implements the rotation computation in PACE as a declarative node (ddn.node.EqConstDeclarativeNode).
@@ -634,7 +635,8 @@ class PACEddn(nn.Module):
         self.N = self.model_keypoints.shape[-1]                   # (1, 1)
         self.K = self.model_keypoints.shape[0]                    # (1, 1)
         self.batch_size = batch_size
-        self.lambda_constant = torch.tensor(np.sqrt(self.K/self.N)).float()
+        # self.lambda_constant = torch.tensor(np.sqrt(self.K/self.N)).float()
+        self.lambda_constant = torch.tensor([1.0])
 
         self.b_w = self._get_b_w()                  # (1, K, 3)
         self.bar_B = self._get_bar_B()              # (1, 3N, K)
@@ -651,7 +653,7 @@ class PACEddn(nn.Module):
 
         # Rotation ddn layer
         pace_rotation_ddn = PACErotation(weights=weights, model_keypoints=model_keypoints,
-                                         lambda_constant=lambda_constant, batch_size=self.batch_size,
+                                         lambda_constant=self.lambda_constant, batch_size=self.batch_size,
                                          device=self.device_)
         self.pace_rotation_ddn_layer = DeclarativeLayer(pace_rotation_ddn)
         # self.pace_rotation_ddn_fn = ParamDeclarativeFunction(pace_rotation_ddn)
@@ -1052,6 +1054,7 @@ class PACEddn(nn.Module):
         return P
 
 
+#ToDo: This is what we use.
 class PACEbp():
     """
     PACE implementation as a differentiable function. The class parameterizes the PACE function.
@@ -1079,7 +1082,8 @@ class PACEbp():
         self.N = self.model_keypoints.shape[-1]                   # (1, 1)
         self.K = self.model_keypoints.shape[0]                    # (1, 1)
         self.batch_size = batch_size
-        self.lambda_constant = torch.tensor([np.sqrt(self.K/self.N)]).float()
+        # self.lambda_constant = torch.tensor([np.sqrt(self.K/self.N)]).float()
+        self.lambda_constant = torch.tensor([1.0])
 
         self.b_w = self._get_b_w()                  # (1, K, 3)
         self.bar_B = self._get_bar_B()              # (1, 3N, K)
