@@ -1074,16 +1074,15 @@ class PACEbp():
         model_keypoints: torch.tensor of shape (K, 3, N) 
         lambda_constant: torch.tensor of shape (1, 1)
         """
+        self.model_keypoints = model_keypoints  # (K, 3, N)
+        self.device_ = self.model_keypoints.device
+
         self.N = self.model_keypoints.shape[-1]  # (1, 1)
         self.K = self.model_keypoints.shape[0]  # (1, 1)
 
         if weights == None:
             weights = torch.ones(self.N, 1)
         self.w = weights.unsqueeze(0)               # (1, N, 1)
-
-
-        self.model_keypoints = model_keypoints                    # (K, 3, N)
-        self.device_ = self.model_keypoints.device
 
         self.batch_size = batch_size
         # self.lambda_constant = torch.tensor([np.sqrt(self.K/self.N)]).float()

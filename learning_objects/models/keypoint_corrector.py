@@ -292,7 +292,7 @@ class kp_corrector_reg():
 
 class kp_corrector_pace():
     #ToDo: Computes PACE too many times. See if this can be fixed.
-    def __init__(self, cad_models, model_keypoints, weights, batch_size, theta=10.0, kappa=50.0):
+    def __init__(self, cad_models, model_keypoints, batch_size=32, theta=10.0, kappa=50.0):
         super().__init__()
         """
         cad_models      : torch.tensor of shape (K, 3, m)
@@ -302,8 +302,7 @@ class kp_corrector_pace():
         self.model_keypoints = model_keypoints
         self.theta = theta
         self.kappa = kappa
-        self.pace = PACEbp(weights=weights,
-                           model_keypoints=self.model_keypoints, batch_size=batch_size)
+        self.pace = PACEbp(model_keypoints=self.model_keypoints)
         self.modelgen = ModelFromShape(cad_models=self.cad_models, model_keypoints=self.model_keypoints)
 
 

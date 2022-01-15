@@ -259,39 +259,6 @@ def validation_loss(input, output):
     return pc_loss + kp_loss + R_loss + t_loss
 
 
-
-
-def loss(input_point_cloud, detected_keypoints, target_point_cloud, target_keypoints):
-    """
-    Use self_supervised_loss instead.
-
-
-    inputs:
-    input_point_cloud   : torch.tensor of shape (B, 3, m)
-    target_point_cloud  : torch.tensor of shape (B, 3, n)
-    detected_keypoints  : torch.tensor of shape (B, 3, N)
-    target_keypoints    : torch.tensor of shape (B, 3, N)
-
-    output:
-    loss                : torch.tensor of shape (B, 1)
-    """
-    theta = 25.0
-
-    # pc_loss = soft_chamfer_half_distance(input_point_cloud, target_point_cloud, radius=1000.0)
-    pc_loss = chamfer_half_distance(input_point_cloud, target_point_cloud)
-    pc_loss = pc_loss.mean()
-
-    # kp_loss = keypoint_error(detected_keypoints, target_keypoints)
-    lossMSE = torch.nn.MSELoss()
-    kp_loss = lossMSE(detected_keypoints, target_keypoints)
-    # print(detected_keypoints)
-    # print(target_keypoints)
-    # print("PC loss: ", pc_loss.mean())
-    # print("KP loss: ", kp_loss.mean())
-
-    return pc_loss + theta*kp_loss
-
-
 # Training code
 def self_supervised_train_one_epoch(epoch_index, tb_writer, training_loader, model, optimizer):
     running_loss = 0.
@@ -643,11 +610,11 @@ if __name__ == "__main__":
 
 
     # training
-    # train_with_supervision(self_supervised_train_loader=self_supervised_train_loader,
-    #                        supervised_training_loader=supervised_train_loader,
-    #                        validation_loader=self_supervised_train_loader,
-    #                        model=model,
-    #                        optimizer=optimizer)
+    train_with_supervision(self_supervised_train_loader=self_supervised_train_loader,
+                           supervised_training_loader=supervised_train_loader,
+                           validation_loader=self_supervised_train_loader,
+                           model=model,
+                           optimizer=optimizer)
     train_without_supervision(self_supervised_train_loader=self_supervised_train_loader,
                               validation_loader=self_supervised_train_loader,
                               model=model,
