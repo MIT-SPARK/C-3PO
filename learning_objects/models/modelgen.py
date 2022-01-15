@@ -102,8 +102,8 @@ class ModelFromShape():
         self.cad_models: torch.tensor of shape (1, K, 3, n)
 
         output:
-        keypoints: torch.tensor of shape (B, 3, N)
-        model: torch.tensor of shape (B, 3, n)
+        predicted_keypoints: torch.tensor of shape (B, 3, N)
+        predicted_model: torch.tensor of shape (B, 3, n)
         """
         shape = shape.unsqueeze(-1) # (B, K, 1, 1)
         # averaging model keypoints
