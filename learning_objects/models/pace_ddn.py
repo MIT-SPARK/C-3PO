@@ -341,12 +341,12 @@ class PACErotation(EqConstDeclarativeNode):
         # Step (1)
         # Qparam.value = Q.detach().cpu().numpy()
         sol = sdp_for_rotation.solve()
-        print("-"*40)
-        print("Problem status: ", sdp_for_rotation.status)
-        print("Optimal value: ", sdp_for_rotation.value)
-        print("Optimal variable: ", Xvar.value)
-        print("Qparam: ", Qparam)
-        print("-"*40)
+        # print("-"*40)
+        # print("Problem status: ", sdp_for_rotation.status)
+        # print("Optimal value: ", sdp_for_rotation.value)
+        # print("Optimal variable: ", Xvar.value)
+        # print("Qparam: ", Qparam)
+        # print("-"*40)
         X = torch.from_numpy(Xvar.value)
         X = X.to(device=self.device_)
 
@@ -1505,9 +1505,6 @@ class PACEbp():
 
 
 
-
-
-
 if __name__ == "__main__":
 
     # Test: PACErotation(EqConstDeclarativeNode)
@@ -1575,7 +1572,7 @@ if __name__ == "__main__":
     print(loss.device.type)
     loss.backward()
 
-    print(keypoints.grad)
+    print("Shape of gradients at keypoints ", keypoints.grad.shape)
     print('-' * 20)
 
 
@@ -1621,7 +1618,7 @@ if __name__ == "__main__":
     loss = er_shape.mean() + er_trans.mean() + er_rot.mean()
     loss.backward()
 
-    print(keypoints.grad)
+    print("Shape of gradients at keypoints ", keypoints.grad.shape)
     print('-'*20)
 
 
@@ -1666,5 +1663,5 @@ if __name__ == "__main__":
     loss = er_shape.mean() + er_trans.mean() + er_rot.mean()
     loss.backward()
 
-    print(keypoints.grad)
+    print("Shape of gradients at keypoints ", keypoints.grad.shape)
     print('-'*20)

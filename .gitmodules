@@ -31,3 +31,6 @@
 [submodule "DeepSDF"]
 	path = DeepSDF
 	url = https://github.com/facebookresearch/DeepSDF.git
+[submodule "Realtime-Scan2CAD"]
+	path = Realtime-Scan2CAD
+	url = https://github.com/theycallmefm/Realtime-Scan2CAD.git

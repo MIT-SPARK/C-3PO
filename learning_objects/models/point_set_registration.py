@@ -29,12 +29,16 @@ from learning_objects.utils.general import shape_error, translation_error, rotat
 
 def wahba(source_points, target_points, device_=None):
     """
+    inputs:
     source_points: torch.tensor of shape (B, 3, N)
     target_points: torch.tensor of shape (B, 3, N)
 
     where
         B = batch size
         N = number of points in each point set
+
+    output:
+    R   : torch.tensor of shape (B, 3, 3)
     """
     batch_size = source_points.shape[0]
 

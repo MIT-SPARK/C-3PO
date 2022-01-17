@@ -289,6 +289,8 @@ def rotation_error(R, R_):
     R_err: torch.tensor of shape (1, 1) or (B, 1)
     """
 
+    #ToDo: Get the Rotation angle along the axis?
+
     if R.dim() == 2:
         return transforms.matrix_to_euler_angles(torch.matmul(R.T, R_), "XYZ").abs().sum()/3.0
     elif R.dim() == 3:
