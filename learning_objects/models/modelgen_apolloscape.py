@@ -241,7 +241,7 @@ class ModelFromShapeApollo():
             kpt_mesh.translate(xyz)
             kpt_mesh.paint_uniform_color([0.8, 0.0, 0.0])
             keypoint_markers.append(kpt_mesh)
-        o3d.visualization.draw_geometries([o3d_mesh] + keypoint_markers)
+        # o3d.visualization.draw_geometries([o3d_mesh] + keypoint_markers)
         avg_kpts_tensor = torch.from_numpy(np.asarray([avg_kpts.transpose()])).to(device=device)
         avg_cad_model = torch.from_numpy(np.asarray([np.asarray(final_pcd.points).transpose()])).to(device=device)
 
