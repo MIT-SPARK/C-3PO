@@ -36,21 +36,23 @@ PATH_TO_SCALED_KEYPOINTS = "../../dataset/apollo_car_3d/keypoints_3d/1_scaled_kp
 PATH_TO_TSDFS = "../../third_party/apolloscape/car_averaging/car_models/fused_tsdf/"
 
 class ModelFromShapeApollo():
-    def __init__(self, cad_models, model_keypoints):
-        super().__init__()
+    def __init__(self, num_of_points):
         """
+        :param num_of_points: number of points in the point cloud
+
         cad_models      : torch.tensor of shape (K, 3, n)
         model_keypoints : torch.tensor of shape (K, 3, N)
 
-        where 
+        where
         K = number of cad models
         n = number of points in each cad model
 
         Assumption:
         I am assuming that each CAD model is a point cloud of n points: (3, n)
         """
-        self.cad_models = cad_models.unsqueeze(0)  # (1, K, 3, n)
-        self.model_keypoints = model_keypoints.unsqueeze(0)  # (1, K, 3, N)
+        super().__init__()
+        self.K = APOLLOSCAPE_DATASET_SIZE
+        self.n = num_of_points
 
     def generate_shape_mask(self, max_shapes = 3):
         """
@@ -69,12 +71,12 @@ class ModelFromShapeApollo():
             if car_id2name[sample].name not in MODEL_NAMES_TO_IGNORE:
                 selected_ids.append(sample)
 
-        samples = np.random.randint(1, 10, num_shapes)
-        normalized_weights = list(samples/np.sum(samples))
+        samples = np.random.randint(1, 4, num_shapes)
+        normalized_weights = iter(samples/np.sum(samples))
         for id in selected_ids:
-            mask[id] = normalized_weights.pop()
-
-        assert np.sum(np.asarray(mask)) == 1
+            mask[id] = next(normalized_weights)
+        print("mask", mask)
+        assert np.abs(np.sum(np.asarray(mask))-1) <= 1e-3
         return mask
 
     def cluster_mesh(self, o3d_mesh):
@@ -187,9 +189,8 @@ class ModelFromShapeApollo():
             model_paths.append(model_path)
         return model_paths
 
-    def forward(self, shape):
+    def forward(self, shape=None):
         """
-        Why do we need batch operations here?
         shape: torch.tensor of shape (B, K, 1)
 
         where
@@ -200,15 +201,19 @@ class ModelFromShapeApollo():
         self.cad_models: torch.tensor of shape (1, K, 3, n)
 
         output:
-        keypoints: torch.tensor of shape (B, 3, N)
-        model: torch.tensor of shape (B, 3, n)
+        keypoints: torch.tensor of shape (B=1, 3, N)
+        model: torch.tensor of shape (B=1, 3, n)
+        weight_mask: torch.tensor of shape (1, K, 1)
         """
-        # shape = shape.unsqueeze(-1) # (B, K, 1, 1)
-        # return torch.einsum('bkmn,ukij->bij', shape, self.model_keypoints), torch.einsum('bkmn,ukij->bij', shape, self.cad_models)
         # Device
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-        mask = self.generate_shape_mask()
+        if shape is not None:
+            mask = np.asarray(shape.cpu()).flatten()
+            print(mask)
+            print(mask.shape)
+        else:
+            mask = self.generate_shape_mask()
         ids = np.nonzero(mask)[0]
         print("ids:", ids)
         model_paths = self.get_model_paths(ids)
@@ -226,42 +231,48 @@ class ModelFromShapeApollo():
         o3d_mesh.triangles = o3d.utility.Vector3iVector(avg_mesh['triangles'])
         o3d_mesh.compute_vertex_normals()
         final_mesh = self.cluster_mesh(o3d_mesh)
-        final_pcd = final_mesh.sample_points_uniformly(self.cad_models.shape[-1])
+        final_pcd = final_mesh.sample_points_uniformly(self.n)
 
         kpt_list = self.load_scaled_kpts(model_paths)
         avg_kpts = self.average_kpts(kpt_list, weights)
-        # keypoint_markers = []
-        # for xyz in avg_kpts:
-        #     kpt_mesh = o3d.geometry.TriangleMesh.create_sphere(radius=.005)
-        #     kpt_mesh.translate(xyz)
-        #     kpt_mesh.paint_uniform_color([0.8, 0.0, 0.0])
-        #     keypoint_markers.append(kpt_mesh)
-        # o3d.visualization.draw_geometries([o3d_mesh] + keypoint_markers)
+        keypoint_markers = []
+        for xyz in avg_kpts:
+            kpt_mesh = o3d.geometry.TriangleMesh.create_sphere(radius=.005)
+            kpt_mesh.translate(xyz)
+            kpt_mesh.paint_uniform_color([0.8, 0.0, 0.0])
+            keypoint_markers.append(kpt_mesh)
+        o3d.visualization.draw_geometries([o3d_mesh] + keypoint_markers)
         avg_kpts_tensor = torch.from_numpy(np.asarray([avg_kpts.transpose()])).to(device=device)
         avg_cad_model = torch.from_numpy(np.asarray([np.asarray(final_pcd.points).transpose()])).to(device=device)
 
-        return avg_kpts_tensor, avg_cad_model
+        return avg_kpts_tensor, avg_cad_model, torch.from_numpy(mask.transpose()).to(device=device)
 
 
 class ModelFromShapeApolloModule(nn.Module):
-    def __init__(self, cad_models, model_keypoints):
-        super().__init__()
+    def __init__(self, num_of_points):
         """
+
+        :param num_of_points: number of points in the point cloud
+
         cad_models      : torch.tensor of shape (K, 3, n)
         model_keypoints : torch.tensor of shape (K, 3, N)
 
-        where 
+        where
         K = number of cad models
         n = number of points in each cad model
 
         Assumption:
         I am assuming that each CAD model is a point cloud of n points: (3, n)
+
         """
+        super().__init__()
 
-        self.model_from_shape = ModelFromShapeApollo(cad_models=cad_models, model_keypoints=model_keypoints)
 
 
-    def forward(self, shape):
+        self.model_from_shape = ModelFromShapeApollo(num_of_points=num_of_points)
+
+
+    def forward(self, shape=None):
         """
         shape: torch.tensor of shape (B, K, 1)
 
@@ -283,6 +294,7 @@ class ModelFromShapeApolloModule(nn.Module):
 
 
 if __name__ == "__main__":
+    """Important Note: Only generates one averaged model at a time"""
 
     # Device
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -290,19 +302,16 @@ if __name__ == "__main__":
     print('device is ', device)
     print('-' * 20)
 
-    B = 10
-    K = 5
-    N = 8
+    K = 79 #79 models
     n = 100
-    cad_models = torch.rand(K, 3, n).to(device=device)
-    model_keypoints = cad_models[:, :, 0:N]
 
-    shape = torch.rand(B, K, 1).to(device=device)
-    shape = shape/shape.sum(1).unsqueeze(1)
+    shape = torch.rand(1, K).to(device=device)
 
-    shape_to_model_fn = ModelFromShapeApolloModule(cad_models=cad_models, model_keypoints=model_keypoints).to(device=device)
-    keypoints, model = shape_to_model_fn(shape=shape)
+    shape_to_model_fn = ModelFromShapeApolloModule(num_of_points=n).to(device=device)
+    # keypoints, model, mask = shape_to_model_fn(shape=shape)
+    keypoints, model, mask = shape_to_model_fn()
 
-    print("cad models have shape: ", cad_models[0, :, :].shape)
+
     print("output model has shape: ", model.shape)
     print("output keypoints has shape: ", keypoints.shape)
+    print("output mask has shape: ", mask.shape)
