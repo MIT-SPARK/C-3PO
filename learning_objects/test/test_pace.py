@@ -10,6 +10,7 @@ sys.path.append("../../")
 
 from learning_objects.models.pace import PACE, PACEmodule
 from learning_objects.models.pace_ddn import PACEbp, PACEddn
+from learning_objects.models.pace_altern_ddn import PACEbp as PACEalternbp
 from learning_objects.utils.category_gnc import solve_3dcat_with_sdp
 from learning_objects.utils.general import shape_error, rotation_error, translation_error, check_rot_mat, generate_random_keypoints
 
@@ -152,6 +153,13 @@ if __name__ == '__main__':
     print("Testing learning_objects.models.pace_ddn.PACEbp")
     print('-' * 22)
     fn = PACEbp(weights=weights, model_keypoints=model_keypoints)
+    pace_implementation.test(fn.forward)
+
+    #
+    print('-' * 22)
+    print("Testing learning_objects.models.pace_altern_ddn.PACEbp")
+    print('-' * 22)
+    fn = PACEalternbp(weights=weights, model_keypoints=model_keypoints)
     pace_implementation.test(fn.forward)
 
 
