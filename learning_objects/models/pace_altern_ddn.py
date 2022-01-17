@@ -158,7 +158,7 @@ class PACErotationNshape(EqConstDeclarativeNode):
             test_convergence = self._altern_test_convergence(obj, obj_)
 
             if iter > self.altern_iter_max:
-                print("Alternating Method reached max. iterations for ", test_convergence.sum(), '/', batch_size)
+                # ("Alternating Method reached max. iterations for ", test_convergence.sum(), '/', batch_size)
                 break
 
         return R, c
@@ -576,7 +576,7 @@ if __name__ == "__main__":
     lambda_constant = torch.tensor([1.0]).to(device=device)
     cad_models = torch.rand(K, 3, n).to(device=device)
 
-    pace_model = PACEbp(weights=weights, model_keypoints=model_keypoints, batch_size=B, device=device)
+    pace_model = PACEbp(weights=weights, model_keypoints=model_keypoints, batch_size=B, device=device)      #ToDo: Have to make this uniform. Either have device spcification for all such classes, or extract it from inputs.
 
     keypoints, rotations, translations, shape = generate_random_keypoints(batch_size=B,
                                                                           model_keypoints=model_keypoints.to('cpu'))
@@ -599,8 +599,8 @@ if __name__ == "__main__":
     print("shape error: ", er_shape.mean())
 
     loss = er_shape.mean() + er_trans.mean() + er_rot.mean()
-    # loss.backward()
+    loss.backward()
 
-    # print("Shape of gradients at keypoints ", keypoints.grad.shape)
+    print("Shape of gradients at keypoints ", keypoints.grad)
     print('-' * 20)
 
