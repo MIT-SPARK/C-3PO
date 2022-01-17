@@ -181,7 +181,7 @@ class experiment():
 
         # setting up keypoint corrector
         self.corrector = kp_corrector_pace(cad_models=self.cad_models, model_keypoints=self.model_keypoints,
-                                           theta=self.theta, kappa=self.kappa, batch_size=1, weights=self.weights)
+                                           theta=self.theta, kappa=self.kappa, batch_size=1)
 
         # setting up model generator
         self.modelgen = ModelFromShape(cad_models=self.cad_models, model_keypoints=self.model_keypoints)

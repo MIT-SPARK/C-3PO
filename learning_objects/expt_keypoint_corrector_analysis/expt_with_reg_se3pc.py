@@ -141,7 +141,7 @@ class experiment():
         # setting up data
         self.se3_dataset = SE3PointCloud(class_id=self.class_id, model_id=self.model_id, num_of_points=self.num_points,
                                     dataset_len=self.num_iterations)
-        self.se3_dataset_loader = torch.utils.data.DataLoader(self.se3_dataset, batch_size=1, shuffle=False)
+        self.se3_dataset_loader = torch.utils.data.DataLoader(self.se3_dataset, batch_size=1, shuffle=False)    #ToDo: This is written for batch_size=1. The experiment can be speeded up with higher batch size.
 
         self.model_keypoints = self.se3_dataset._get_model_keypoints()  # (1, 3, N)
         self.cad_models = self.se3_dataset._get_cad_models()  # (1, 3, m)
