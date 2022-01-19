@@ -18,6 +18,11 @@ from learning_objects.models.certifiability import certifiability
 
 from learning_objects.utils.general import display_two_pcs
 
+#ToDo: This code does not use batch sizes. It would be faster using batch sizes, as now the keypoint_corrector can
+# work for large batch sizes.
+
+#ToDo: I am keeing this without adding batch processing. It does not improve time much for expt_with_reg_se3pc.py to
+# warrant this change.
 
 def get_sq_distances(X, Y):
     """
