@@ -449,7 +449,8 @@ class DepthIsoPC(torch.utils.data.Dataset):
 
         point_cloud, padding = self._convert_to_fixed_sized_pc(pc, n=self.n)
 
-        return point_cloud, keypoints, R, t, c, padding
+        # return point_cloud, keypoints, R, t, c, padding       # We don't need padding. Instead, let's be consistent.
+        return point_cloud, keypoints, R, t, c
 
     def _convert_to_fixed_sized_pc(self, pc, n):
         """
@@ -747,7 +748,8 @@ class DepthPC(torch.utils.data.Dataset):
 
         point_cloud, padding = self._convert_to_fixed_sized_pc(pc, n=self.n)
 
-        return point_cloud, keypoints, R, t, padding
+        # return point_cloud, keypoints, R, t, padding          # We don't need padding. Instead, let's be consistent.
+        return point_cloud, keypoints, R, t
 
     def _convert_to_fixed_sized_pc(self, pc, n):
         """
