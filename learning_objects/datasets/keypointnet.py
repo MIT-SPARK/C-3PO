@@ -217,6 +217,9 @@ def generate_depth_data(class_id, model_id, radius_multiple = [1.2, 3.0],
 
 class DepthAndIsotorpicShapePointCloud(torch.utils.data.Dataset):
     """
+    Move to DepthIsoPC(torch.utils.data.Dataset).
+
+
     Given class id, model id, and number of points, it generates various depth point clouds and
     SE3 transformations of the ShapeNetCore object. The object is scaled isotropically by a quantity in the
     range determined by shape_scaling.
@@ -388,6 +391,143 @@ class DepthAndIsotorpicShapePointCloud(torch.utils.data.Dataset):
         return 0
 
 
+class DepthIsoPC(torch.utils.data.Dataset):
+    """
+    Given class id, model id, and number of points, it generates various depth point clouds and
+    SE3 transformations of the ShapeNetCore object. The object is scaled isotropically by a quantity in the
+    range determined by shape_scaling.
+
+    Note:
+        Unlike DephtAndIsotropicShapePointCloud(), this outputs depth point clouds of the same shape by appending with
+        zero points. It also outputs a flag to tell the user which outputs have been artificially added.
+
+        Unlike DephtAndIsotropicShapePointCloud(), this dataset can be used with a dataloader for any batch_size.
+
+    Returns
+        input_point_cloud, keypoints, rotation, translation, shape
+    """
+
+    def __init__(self, class_id, model_id, n=1000, shape_scaling=torch.tensor([0.5, 2.0]),
+                 radius_multiple=torch.tensor([1.2, 3.0]),
+                 num_of_points_to_sample=10000, dataset_len=10000):
+        super().__init__()
+        """
+        class_id        : str   : class id of a ShapeNetCore object
+        model_id        : str   : model id of a ShapeNetCore object
+        n               : int   : number of points in the output point cloud
+        shape_scaling   : torch.tensor of shape (2) : lower and upper limit of isotropic shape scaling
+        radius_multiple : torch.tensor of shape (2) : lower and upper limit of the distance from which depth point 
+                                                        cloud is constructed
+        num_of_points_to_sample   : int   : number of points sampled on the surface of the CAD model object
+        dataset_len     : int   : size of the dataset  
+
+        """
+        self.class_id = class_id
+        self.model_id = model_id
+        self.n = n
+        self.shape_scaling = shape_scaling
+        self.radius_multiple = radius_multiple
+        self.num_of_points_to_sample = num_of_points_to_sample
+        self.len = dataset_len
+
+        #ToDo: This is temporary. We will move the DepthAndIsotorpicShapePointCloud() here
+        # when we completely depreciate DepthAndIsotorpicShapePointCloud().
+        self.dataset = DepthAndIsotorpicShapePointCloud(class_id=self.class_id,
+                                                        model_id=self.model_id,
+                                                        shape_scaling=self.shape_scaling,
+                                                        radius_multiple=self.radius_multiple,
+                                                        num_of_points=self.num_of_points_to_sample,
+                                                        dataset_len=self.len)
+
+    def __len__(self):
+
+        return self.len
+
+    def __getitem__(self, idx):
+
+        pc, keypoints, R, t, c = self.dataset.__getitem__(idx)
+
+        point_cloud, padding = self._convert_to_fixed_sized_pc(pc, n=self.n)
+
+        return point_cloud, keypoints, R, t, c, padding
+
+    def _convert_to_fixed_sized_pc(self, pc, n):
+        """
+        inputs:
+        pc  : torch.tensor of shape (3, m)  : input point cloud of size m (m could be anything)
+        n   : int                           : number of points the output point cloud should have
+
+        outputs:
+        point_cloud     : torch.tensor of shape (3, n)
+        padding         : torch.tensor of shape (n)
+
+        """
+
+        m = pc.shape[-1]
+
+        if m > n:
+            idx = torch.randperm(m)
+            point_cloud = pc[:, idx[:n]]
+            padding = torch.zeros(size=(n,), dtype=torch.bool)
+
+        elif m < n:
+
+            pc_pad = torch.zeros(3, n-m)
+            point_cloud = torch.cat([pc, pc_pad], dim=1)
+            padding1 = torch.zeros(size=(m,), dtype=torch.bool)
+            padding2 = torch.ones(size=(n-m,), dtype=torch.bool)
+            padding = torch.cat([padding1, padding2], dim=0)
+            # Write code to pad pc with (n-m) zeros
+
+        else:
+            point_cloud = pc
+            padding = torch.zeros(size=(n,), dtype=torch.bool)
+
+        return point_cloud, padding
+
+
+    def _get_cad_models(self):
+        """
+        Returns two point clouds as shape models, one with the min shape and the other with the max shape.
+
+        output:
+        cad_models  : torch.tensor of shape (2, 3, self.num_of_points)
+        """
+
+        return self.dataset._get_cad_models()
+
+    def _get_model_keypoints(self):
+        """
+        Returns two sets of keypoints, one with the min shape and the other with the max shape.
+
+        output:
+        model_keypoints : torch.tensor of shape (2, 3, N)
+
+        where
+        N = number of keypoints
+        """
+
+        return self.dataset._get_model_keypoints()
+
+    def _get_diameter(self):
+        """
+        returns the diameter of the mid-sized object.
+
+        output  :   torch.tensor of shape (1)
+        """
+
+        return self.dataset._get_diameter()
+
+    def _visualize(self):
+        """
+        Visualizes the two CAD models and the corresponding keypoints
+
+        """
+        self.dataset._visualize()
+
+        return 0
+
+
 class DepthPointCloud2(torch.utils.data.Dataset):
     """
     Given class id, model id, and number of points, it generates various depth point clouds and SE3 transformations
@@ -550,6 +690,137 @@ class DepthPointCloud2(torch.utils.data.Dataset):
         cad_models = self._get_cad_models()
         model_keypoints = self._get_model_keypoints()
         visualize_torch_model_n_keypoints(cad_models=cad_models, model_keypoints=model_keypoints)
+
+        return 0
+
+
+class DepthPC(torch.utils.data.Dataset):
+    """
+    Given class id, model id, and number of points, it generates various depth point clouds and SE3 transformations
+    of the ShapeNetCore object.
+
+    Note:
+        Unlike DepthPointCloud2(), this outputs depth point clouds of the same shape by appending with
+        zero points. It also outputs a flag to tell the user which outputs have been artificially added.
+
+        Unlike DepthPointCloud2(), this dataset can be used with a dataloader for any batch_size.
+
+    Returns
+        input_point_cloud, keypoints, rotation, translation, padding
+    """
+
+    def __init__(self, class_id, model_id, n=1000, radius_multiple=torch.tensor([1.2, 3.0]),
+                 num_of_points_to_sample=10000, dataset_len=10000):
+        super().__init__()
+        """
+        class_id        : str   : class id of a ShapeNetCore object
+        model_id        : str   : model id of a ShapeNetCore object 
+        n               : int   : number of points in the output point cloud
+        radius_multiple : torch.tensor of shape (2) : lower and upper limit of the distance from which depth point 
+                                                        cloud is constructed
+        num_of_points_to_sample   : int   : number of points sampled on the surface of the CAD model object
+        dataset_len     : int   : size of the dataset  
+
+        """
+
+        self.class_id = class_id
+        self.model_id = model_id
+        self.n = n
+        self.radius_multiple = radius_multiple
+        self.num_of_points_to_sample = num_of_points_to_sample
+        self.len = dataset_len
+
+        # ToDo: This is temporary. We will move the DepthPointCloud2() here when we completely depreciate it.
+        self.dataset = DepthPointCloud2(class_id=self.class_id,
+                                        model_id=self.model_id,
+                                        radius_multiple=self.radius_multiple,
+                                        num_of_points=self.num_of_points_to_sample,
+                                        dataset_len=self.len)
+
+    def __len__(self):
+
+        return self.len
+
+    def __getitem__(self, idx):
+
+        pc, keypoints, R, t = self.dataset.__getitem__(idx)
+
+        point_cloud, padding = self._convert_to_fixed_sized_pc(pc, n=self.n)
+
+        return point_cloud, keypoints, R, t, padding
+
+    def _convert_to_fixed_sized_pc(self, pc, n):
+        """
+        inputs:
+        pc  : torch.tensor of shape (3, m)  : input point cloud of size m (m could be anything)
+        n   : int                           : number of points the output point cloud should have
+
+        outputs:
+        point_cloud     : torch.tensor of shape (3, n)
+        padding         : torch.tensor of shape (n)
+
+        """
+
+        m = pc.shape[-1]
+
+        if m > n:
+            idx = torch.randperm(m)
+            point_cloud = pc[:, idx[:n]]
+            padding = torch.zeros(size=(n,), dtype=torch.bool)
+
+        elif m < n:
+
+            pc_pad = torch.zeros(3, n - m)
+            point_cloud = torch.cat([pc, pc_pad], dim=1)
+            padding1 = torch.zeros(size=(m,), dtype=torch.bool)
+            padding2 = torch.ones(size=(n - m,), dtype=torch.bool)
+            padding = torch.cat([padding1, padding2], dim=0)
+            # Write code to pad pc with (n-m) zeros
+
+        else:
+            point_cloud = pc
+            padding = torch.zeros(size=(n,), dtype=torch.bool)
+
+        return point_cloud, padding
+
+    def _get_cad_models(self):
+        """
+        Returns two point clouds as shape models, one with the min shape and the other with the max shape.
+
+        output:
+        cad_models  : torch.tensor of shape (2, 3, self.num_of_points)
+        """
+
+        return self.dataset._get_cad_models()
+
+    def _get_model_keypoints(self):
+        """
+        Returns two sets of keypoints, one with the min shape and the other with the max shape.
+
+        output:
+        model_keypoints : torch.tensor of shape (2, 3, N)
+
+        where
+        N = number of keypoints
+        """
+
+        return self.dataset._get_model_keypoints()
+
+    def _get_diameter(self):
+        """
+        returns the diameter of the mid-sized object.
+
+        output  :   torch.tensor of shape (1)
+        """
+
+        return self.dataset._get_diameter()
+
+    def _visualize(self):
+        """
+        Visualizes the two CAD models and the corresponding keypoints
+
+        """
+        self.dataset._visualize()
 
         return 0
 
@@ -919,6 +1190,40 @@ if __name__ == "__main__":
     class_id = "03001627"  # chair
     model_id = "1e3fba4500d20bb49b9f2eb77f5e247e"  # a particular chair model
     batch_size = 5
+
+
+    #
+    print("Test: DepthIsoPC()")
+    dataset = DepthIsoPC(class_id=class_id, model_id=model_id)
+    loader = torch.utils.data.DataLoader(dataset, batch_size=10, shuffle=False)
+
+    for i, data in enumerate(loader):
+        pc, kp, R, t, c, padding = data
+        print(pc.shape)
+        print(kp.shape)
+        print(R.shape)
+        print(t.shape)
+        print(padding.shape)
+        # visualize_torch_model_n_keypoints(cad_models=pc, model_keypoints=kp)
+        if i >= 2:
+            break
+
+    #
+    print("Test: DepthPC()")
+    dataset = DepthPC(class_id=class_id, model_id=model_id)
+    loader = torch.utils.data.DataLoader(dataset, batch_size=10, shuffle=False)
+
+    for i, data in enumerate(loader):
+        pc, kp, R, t, padding = data
+        print(pc.shape)
+        print(kp.shape)
+        print(R.shape)
+        print(t.shape)
+        print(padding.shape)
+        # visualize_torch_model_n_keypoints(cad_models=pc, model_keypoints=kp)
+        if i >= 2:
+            break
+
 
 
     #
