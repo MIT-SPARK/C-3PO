@@ -1,3 +1,4 @@
+import time
 
 import torch
 from pytorch3d import ops, transforms
@@ -13,11 +14,14 @@ sys.path.append("../../")
 from learning_objects.datasets.keypointnet import SE3PointCloud, visualize_torch_model_n_keypoints
 
 from learning_objects.models.keypoint_corrector import kp_corrector_reg
-from learning_objects.models.point_set_registration import point_set_registration
+from learning_objects.models.point_set_registration import point_set_registration, PointSetRegistration
 from learning_objects.models.certifiability import certifiability
 
 from learning_objects.utils.general import display_two_pcs
 
+
+#ToDo: This code does not use batch sizes. It would be faster using batch sizes, as now the keypoint_corrector can
+# work for large batch sizes.
 
 def get_sq_distances(X, Y):
     """
@@ -50,15 +54,16 @@ def keypoint_perturbation(keypoints_true, var=0.8, type='uniform', fra=0.2):
     output:
     detected_keypoints  : torch.tensor of shape (B, 3, N)
     """
+    device_ = keypoints_true.device
 
     if type=='uniform':
         # detected_keypoints = keypoints_true + var*torch.randn_like(keypoints_true)
-        detected_keypoints = keypoints_true + var * (torch.rand(size=keypoints_true.shape) - 0.5)
+        detected_keypoints = keypoints_true + var * (torch.rand(size=keypoints_true.shape).to(device=device_) - 0.5)
 
     elif type=='sporadic':
-        mask = (torch.rand(size=keypoints_true.shape) < fra).int().float()
+        mask = (torch.rand(size=keypoints_true.shape).to(device=device_) < fra).int().float()
         # detected_keypoints = keypoints_true + var*torch.randn_like(keypoints_true)*mask
-        detected_keypoints = keypoints_true + var * (torch.rand(size=keypoints_true.shape) - 0.5) * mask
+        detected_keypoints = keypoints_true + var * (torch.rand(size=keypoints_true.shape).to(device=device_) - 0.5) * mask
     else:
         return ValueError
 
@@ -111,7 +116,7 @@ class experiment():
     def __init__(self, class_id, model_id, num_points, num_iterations, kp_noise_var_range,
                  kp_noise_type='sporadic', kp_noise_fra=0.2,
                  certify=certifiability(epsilon=0.8, delta=0.5, radius=0.3),
-                 theta=50.0, kappa=10.0):
+                 theta=50.0, kappa=10.0, device='cpu'):
         super().__init__()
 
         # model parameters
@@ -137,16 +142,23 @@ class experiment():
         # experiment name
         self.name = 'Analyzing keypoint corrector with simple registration on SE3PointCloud dataset'
 
+        # device
+        self.device_ = device
 
         # setting up data
         self.se3_dataset = SE3PointCloud(class_id=self.class_id, model_id=self.model_id, num_of_points=self.num_points,
                                     dataset_len=self.num_iterations)
-        self.se3_dataset_loader = torch.utils.data.DataLoader(self.se3_dataset, batch_size=1, shuffle=False)    #ToDo: This is written for batch_size=1. The experiment can be speeded up with higher batch size.
+        # self.se3_dataset_loader = torch.utils.data.DataLoader(self.se3_dataset, batch_size=1, shuffle=False)
+        self.se3_dataset_loader = torch.utils.data.DataLoader(self.se3_dataset, batch_size=self.num_iterations,         #ToDo: changed
+                                                              shuffle=False)
+        # ToDo: This is written for batch_size=1. The experiment can be sped up with higher batch size.
 
-        self.model_keypoints = self.se3_dataset._get_model_keypoints()  # (1, 3, N)
-        self.cad_models = self.se3_dataset._get_cad_models()  # (1, 3, m)
+        self.model_keypoints = self.se3_dataset._get_model_keypoints().to(device=self.device_)  # (1, 3, N)
+        self.cad_models = self.se3_dataset._get_cad_models().to(device=self.device_)  # (1, 3, m)
         self.diameter = self.se3_dataset._get_diameter()
 
+        # defining the point set registration
+        self.point_set_registration = PointSetRegistration(source_points=self.model_keypoints)
         # defining the keypoint corrector
         self.corrector = kp_corrector_reg(cad_models=self.cad_models, model_keypoints=self.model_keypoints,
                                      theta=self.theta, kappa=self.kappa)
@@ -171,13 +183,13 @@ class experiment():
     def _single_loop(self, kp_noise_var, visualization=False):
 
         # experiment data
-        rotation_err_naive = torch.zeros(self.num_iterations, 1)
-        rotation_err_corrector = torch.zeros(self.num_iterations, 1)
-        translation_err_naive = torch.zeros(self.num_iterations, 1)
-        translation_err_corrector = torch.zeros(self.num_iterations, 1)
+        rotation_err_naive = torch.zeros(self.num_iterations, 1).to(device=self.device_)
+        rotation_err_corrector = torch.zeros(self.num_iterations, 1).to(device=self.device_)
+        translation_err_naive = torch.zeros(self.num_iterations, 1).to(device=self.device_)
+        translation_err_corrector = torch.zeros(self.num_iterations, 1).to(device=self.device_)
 
-        certi_naive = torch.zeros((self.num_iterations, 1), dtype=torch.bool)
-        certi_corrector = torch.zeros((self.num_iterations, 1), dtype=torch.bool)
+        certi_naive = torch.zeros((self.num_iterations, 1), dtype=torch.bool).to(device=self.device_)
+        certi_corrector = torch.zeros((self.num_iterations, 1), dtype=torch.bool).to(device=self.device_)
 
         sqdist_input_naiveest = []
         sqdist_input_correctorest = []
@@ -185,10 +197,15 @@ class experiment():
         # experiment loop
         for i, data in enumerate(self.se3_dataset_loader):
 
-            print("Testing at kp_noise_var: ", kp_noise_var, ". Iteration: ", i)
+            # print("Testing at kp_noise_var: ", kp_noise_var, ". Iteration: ", i)
 
             # extracting data
             input_point_cloud, keypoints_true, rotation_true, translation_true = data
+            input_point_cloud = input_point_cloud.to(device=self.device_)
+            keypoints_true = keypoints_true.to(device=self.device_)
+            rotation_true = rotation_true.to(device=self.device_)
+            translation_true = translation_true.to(device=self.device_)
+
 
             # generating perturbed keypoints
             # keypoints_true = rotation_true @ self.model_keypoints + translation_true
@@ -199,7 +216,7 @@ class experiment():
                 visualize_torch_model_n_keypoints(cad_models=input_point_cloud, model_keypoints=detected_keypoints)
 
             # estimate model: using point set registration on perturbed keypoints
-            R_naive, t_naive = point_set_registration(source_points=self.model_keypoints, target_points=detected_keypoints)
+            R_naive, t_naive = self.point_set_registration.forward(target_points=detected_keypoints)
             model_estimate_naive = R_naive @ self.cad_models + t_naive
             if visualization:
                 print("Displaying input and naive model estimate: ")
@@ -208,17 +225,22 @@ class experiment():
             # estimate model: using the keypoint corrector
             correction = self.corrector.forward(detected_keypoints=detected_keypoints, input_point_cloud=input_point_cloud)
             # correction = torch.zeros_like(correction)
-            R, t = point_set_registration(source_points=self.model_keypoints, target_points=detected_keypoints + correction)
+            R, t = self.point_set_registration.forward(target_points=detected_keypoints + correction)
             model_estimate = R @ self.cad_models + t
             if visualization:
                 print("Displaying input and corrector model estimate: ")
                 display_two_pcs(pc1=input_point_cloud.squeeze(0), pc2=model_estimate.squeeze(0))
 
             # evaluate the two metrics
-            rotation_err_naive[i] = rotation_error(rotation_true, R_naive)
-            rotation_err_corrector[i] = rotation_error(rotation_true, R)
-            translation_err_naive[i] = translation_error(translation_true, t_naive)
-            translation_err_corrector[i] = translation_error(translation_true, t)
+            # rotation_err_naive[i] = rotation_error(rotation_true, R_naive)            #ToDo: changed
+            # rotation_err_corrector[i] = rotation_error(rotation_true, R)              #ToDo: changed
+            # translation_err_naive[i] = translation_error(translation_true, t_naive)   #ToDo: changed
+            # translation_err_corrector[i] = translation_error(translation_true, t)     #ToDo: changed
+
+            rotation_err_naive = rotation_error(rotation_true, R_naive)
+            rotation_err_corrector = rotation_error(rotation_true, R)
+            translation_err_naive = translation_error(translation_true, t_naive)
+            translation_err_corrector = translation_error(translation_true, t)
 
             # saving sq distances for certification analysis
             sq_dist_input_naive = get_sq_distances(X=input_point_cloud, Y=model_estimate_naive)
@@ -228,10 +250,12 @@ class experiment():
 
             # certification
             certi, _ = self.certify.forward(X=input_point_cloud, Z=model_estimate_naive)
-            certi_naive[i] = certi
+            # certi_naive[i] = certi            #ToDo: changed
+            certi_naive = certi
 
             certi, _ = self.certify.forward(X=input_point_cloud, Z=model_estimate)
-            certi_corrector[i] = certi
+            # certi_corrector[i] = certi        #ToDo: changed
+            certi_corrector = certi
 
             if visualization and i >= 5:
                 break
@@ -244,12 +268,12 @@ class experiment():
 
     def execute(self):
 
-        rotation_err_naive = torch.zeros(len(self.kp_noise_var_range), self.num_iterations)
-        translation_err_naive = torch.zeros(len(self.kp_noise_var_range), self.num_iterations)
-        rotation_err_corrector = torch.zeros(len(self.kp_noise_var_range), self.num_iterations)
-        translation_err_corrector = torch.zeros(len(self.kp_noise_var_range), self.num_iterations)
-        certi_naive = torch.zeros(size=(len(self.kp_noise_var_range), self.num_iterations), dtype=torch.bool)
-        certi_corrector = torch.zeros(size=(len(self.kp_noise_var_range), self.num_iterations), dtype=torch.bool)
+        rotation_err_naive = torch.zeros(len(self.kp_noise_var_range), self.num_iterations).to(device=self.device_)
+        translation_err_naive = torch.zeros(len(self.kp_noise_var_range), self.num_iterations).to(device=self.device_)
+        rotation_err_corrector = torch.zeros(len(self.kp_noise_var_range), self.num_iterations).to(device=self.device_)
+        translation_err_corrector = torch.zeros(len(self.kp_noise_var_range), self.num_iterations).to(device=self.device_)
+        certi_naive = torch.zeros(size=(len(self.kp_noise_var_range), self.num_iterations), dtype=torch.bool).to(device=self.device_)
+        certi_corrector = torch.zeros(size=(len(self.kp_noise_var_range), self.num_iterations), dtype=torch.bool).to(device=self.device_)
         sqdist_input_naiveest = []
         sqdist_input_correctorest = []
 
@@ -259,8 +283,11 @@ class experiment():
             print("Testing at kp_noise_var: ", kp_noise_var)
             print("-"*40)
 
+            start = time.perf_counter()
             Rerr_naive, Rerr_corrector, terr_naive, terr_corrector, \
             c_naive, c_corrector, sqdist_in_naive, sq_dist_in_corrector = self._single_loop(kp_noise_var=kp_noise_var)
+            end = time.perf_counter()
+            print("Time taken: ", (end-start)/60, ' min')
 
             rotation_err_naive[i, ...] = Rerr_naive.squeeze(-1)
             rotation_err_corrector[i, ...] = Rerr_corrector.squeeze(-1)
@@ -320,9 +347,13 @@ def run_experiments_on(class_id, model_id, kp_noise_type, kp_noise_fra=0.2, only
 
     # certification parameters
     epsilon = 0.995
-    delta = 0.98
-    radius = 0.01
+    delta = 0.99
+    radius = 0.005
     certify = certifiability(epsilon=epsilon, delta=delta, radius=radius)
+
+    # device
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print("Device is: ", device)
 
     # loss function parameters
     theta = 50.0
@@ -339,7 +370,7 @@ def run_experiments_on(class_id, model_id, kp_noise_type, kp_noise_fra=0.2, only
     expt = experiment(class_id=class_id, model_id=model_id, num_points=num_points,
                       num_iterations=num_iterations, kp_noise_var_range=kp_noise_var_range,
                       kp_noise_type=kp_noise_type, kp_noise_fra=kp_noise_fra,
-                      certify=certify, theta=theta, kappa=kappa)
+                      certify=certify, theta=theta, kappa=kappa, device=device)
 
     if only_visualize:
         while True:
