@@ -20,9 +20,6 @@ from learning_objects.models.certifiability import certifiability
 from learning_objects.utils.general import display_two_pcs
 
 
-#ToDo: This code does not use batch sizes. It would be faster using batch sizes, as now the keypoint_corrector can
-# work for large batch sizes.
-
 def get_sq_distances(X, Y):
     """
     inputs:
@@ -149,9 +146,8 @@ class experiment():
         self.se3_dataset = SE3PointCloud(class_id=self.class_id, model_id=self.model_id, num_of_points=self.num_points,
                                     dataset_len=self.num_iterations)
         # self.se3_dataset_loader = torch.utils.data.DataLoader(self.se3_dataset, batch_size=1, shuffle=False)
-        self.se3_dataset_loader = torch.utils.data.DataLoader(self.se3_dataset, batch_size=self.num_iterations,         #ToDo: changed
+        self.se3_dataset_loader = torch.utils.data.DataLoader(self.se3_dataset, batch_size=self.num_iterations,
                                                               shuffle=False)
-        # ToDo: This is written for batch_size=1. The experiment can be sped up with higher batch size.
 
         self.model_keypoints = self.se3_dataset._get_model_keypoints().to(device=self.device_)  # (1, 3, N)
         self.cad_models = self.se3_dataset._get_cad_models().to(device=self.device_)  # (1, 3, m)
@@ -232,10 +228,10 @@ class experiment():
                 display_two_pcs(pc1=input_point_cloud.squeeze(0), pc2=model_estimate.squeeze(0))
 
             # evaluate the two metrics
-            # rotation_err_naive[i] = rotation_error(rotation_true, R_naive)            #ToDo: changed
-            # rotation_err_corrector[i] = rotation_error(rotation_true, R)              #ToDo: changed
-            # translation_err_naive[i] = translation_error(translation_true, t_naive)   #ToDo: changed
-            # translation_err_corrector[i] = translation_error(translation_true, t)     #ToDo: changed
+            # rotation_err_naive[i] = rotation_error(rotation_true, R_naive)
+            # rotation_err_corrector[i] = rotation_error(rotation_true, R)
+            # translation_err_naive[i] = translation_error(translation_true, t_naive)
+            # translation_err_corrector[i] = translation_error(translation_true, t)
 
             rotation_err_naive = rotation_error(rotation_true, R_naive)
             rotation_err_corrector = rotation_error(rotation_true, R)
@@ -250,11 +246,11 @@ class experiment():
 
             # certification
             certi, _ = self.certify.forward(X=input_point_cloud, Z=model_estimate_naive)
-            # certi_naive[i] = certi            #ToDo: changed
+            # certi_naive[i] = certi
             certi_naive = certi
 
             certi, _ = self.certify.forward(X=input_point_cloud, Z=model_estimate)
-            # certi_corrector[i] = certi        #ToDo: changed
+            # certi_corrector[i] = certi
             certi_corrector = certi
 
             if visualization and i >= 5:
