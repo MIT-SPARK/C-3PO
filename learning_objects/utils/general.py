@@ -30,8 +30,8 @@ def display_two_pcs(pc1, pc2):
     pc1 : torch.tensor of shape (3, n)
     pc2 : torch.tensor of shape (3, m)
     """
-    pc1 = pc1.to('cpu')
-    pc2 = pc2.to('cpu')
+    pc1 = pc1.detach().to('cpu')
+    pc2 = pc2.detach().to('cpu')
 
     object1 = pos_tensor_to_o3d(pos=pc1)
     object2 = pos_tensor_to_o3d(pos=pc2)
