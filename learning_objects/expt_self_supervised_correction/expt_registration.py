@@ -9,6 +9,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchvision
 import torchvision.transforms as transforms
+from pytorch3d import ops
 
 from torch.utils.tensorboard import SummaryWriter
 from datetime import datetime
@@ -25,12 +26,13 @@ from learning_objects.utils.general import display_results
 
 from learning_objects.models.keypoint_detector import HeatmapKeypoints, RegressionKeypoints
 from learning_objects.models.point_set_registration import PointSetRegistration
-from learning_objects.models.keypoint_corrector import kp_corrector_reg
+from learning_objects.models.keypoint_corrector import kp_corrector_reg, correctorNode
 
 # from learning_objects.models.modelgen import ModelFromShape, ModelFromShapeModule
 
-from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPointCloud2
+from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPointCloud2, DepthPC
 
+from learning_objects.utils.ddn.node import DeclarativeLayer, ParamDeclarativeFunction
 
 SAVE_LOCATION = '../../data/learning_objects/expt_registration/runs/'
 
@@ -64,6 +66,7 @@ SAVE_LOCATION = '../../data/learning_objects/expt_registration/runs/'
 
 # Proposed Model
 class ProposedModel(nn.Module):
+    #ToDo: Later, move this to proposed_model.py in the same folder.
     """
     Given input point cloud, returns keypoints, predicted point cloud, rotation, and translation
 
@@ -100,9 +103,8 @@ class ProposedModel(nn.Module):
         # Registration
         self.point_set_registration = PointSetRegistration(source_points=self.model_keypoints)
 
-        # Registration + Correction
-        self.corrector = kp_corrector_reg(cad_models=self.cad_models.detach().clone().cpu(),
-                                          model_keypoints=self.model_keypoints.detach().clone().cpu())
+        # Corrector
+        self.corrector = kp_corrector_reg(cad_models=self.cad_models, model_keypoints=self.model_keypoints)
 
 
 
@@ -123,6 +125,7 @@ class ProposedModel(nn.Module):
         # shape             : torch.tensor of shape (B, self.K, 1)
 
         """
+        batch_size = input_point_cloud.shape[0]
         device_ = input_point_cloud.device
         detected_keypoints = self.keypoint_detector(input_point_cloud)
 
@@ -133,9 +136,7 @@ class ProposedModel(nn.Module):
             return predicted_point_cloud, detected_keypoints, R, t, None
 
         else:
-            correction = self.corrector.forward(detected_keypoints=detected_keypoints.detach().clone().cpu(),
-                                                input_point_cloud=input_point_cloud.detach().clone().cpu())
-            correction = correction.to(device_)
+            correction = self.corrector.forward(detected_keypoints, input_point_cloud)
             corrected_keypoints = detected_keypoints + correction
             R, t = self.point_set_registration.forward(corrected_keypoints)
             predicted_point_cloud= R @ self.cad_models + t
@@ -178,6 +179,34 @@ def translation_loss(t, t_):
 
     return lossMSE(t, t_)
 
+def chamfer_loss(pc, pc_, pc_padding=None):
+    """
+    inputs:
+    pc  : torch.tensor of shape (B, 3, n)
+    pc_ : torch.tensor of shape (B, 3, m)
+    pc_padding  : torch.tensor of shape (B, n)  : indicates if the point in pc is real-input or padded in
+
+    output:
+    loss    : torch.tensor of shape (B, 1)
+
+    """
+
+    if pc_padding == None:
+        batch_size, _, n = pc.shape
+        device_ = pc.device
+
+        # computes a padding by flagging zero vectors in the input point cloud.
+        pc_padding = ((pc == torch.zeros(3, 1).to(device=device_)).sum(dim=1) == 3)
+        # pc_padding = torch.zeros(batch_size, n).to(device=device_)
+
+    sq_dist, _, _ = ops.knn_points(torch.transpose(pc, -1, -2), torch.transpose(pc_, -1, -2), K=1)
+    # dist (B, n, 1): distance from point in X to the nearest point in Y
+
+    sq_dist = sq_dist.squeeze(-1)*torch.logical_not(pc_padding)
+    a = torch.logical_not(pc_padding)
+    loss = sq_dist.sum(dim=1)/a.sum(dim=1)
+
+    return loss.unsqueeze(-1)
 
 def self_supervised_loss(input_point_cloud, predicted_point_cloud, keypoint_correction):
     """
@@ -192,7 +221,7 @@ def self_supervised_loss(input_point_cloud, predicted_point_cloud, keypoint_corr
     """
     theta = 25.0
 
-    pc_loss = chamfer_half_distance(input_point_cloud, predicted_point_cloud)
+    pc_loss = chamfer_loss(pc=input_point_cloud, pc_=predicted_point_cloud)
     pc_loss = pc_loss.mean()
 
     lossMSE = torch.nn.MSELoss()
@@ -218,7 +247,7 @@ def supervised_loss(input, output):
 
     """
 
-    pc_loss = chamfer_half_distance(input[0], output[0])
+    pc_loss = chamfer_loss(pc=input[0], pc_=output[0])
     pc_loss = pc_loss.mean()
 
     lossMSE = torch.nn.MSELoss()
@@ -247,13 +276,13 @@ def validation_loss(input, output):
 
     """
 
-    pc_loss = chamfer_half_distance(input[0], output[0])
+    pc_loss = chamfer_loss(pc=input[0], pc_=output[0])
     pc_loss = pc_loss.mean()
 
     lossMSE = torch.nn.MSELoss()
     kp_loss = lossMSE(input[1], output[1]).mean()
 
-    R_loss = rotation_loss(input[2], output[2]).mean()  #ToDo: use utils.general.rotation_err. It computes angles.
+    R_loss = rotation_loss(input[2], output[2]).mean()      #ToDo: use utils.general.rotation_err. It computes angles.
     t_loss = translation_loss(input[3], output[3]).mean()
 
     return pc_loss + kp_loss + R_loss + t_loss
@@ -566,28 +595,42 @@ if __name__ == "__main__":
     class_id = "03001627"  # chair
     model_id = "1e3fba4500d20bb49b9f2eb77f5e247e"  # a particular chair model
     dataset_dir = '../../data/learning_objects/'
-    supervised_train_dataset_len = 12000
-    supervised_train_batch_size = 120
-    self_supervised_train_dataset_len = 500
-    self_supervised_train_batch_size = 1
+
+    # optimization parameters
     lr_sgd = 0.02
     momentum_sgd = 0.9
     lr_adam = 0.001
     num_of_points = 500
 
+    # sim dataset:
+    supervised_train_dataset_len = 12000
+    supervised_train_batch_size = 120
+    num_of_points_supervised = 500
+
+    # real dataset:
+    self_supervised_train_dataset_len = 10
+    self_supervised_train_batch_size = 5
+    num_of_points_to_sample = 10000
+    num_of_points_selfsupervised = 500
+
     # supervised and self-supervised training data
     supervised_train_dataset = SE3PointCloud(class_id=class_id,
                                              model_id=model_id,
-                                             num_of_points=num_of_points,
+                                             num_of_points=num_of_points_supervised,
                                              dataset_len=supervised_train_dataset_len)
     supervised_train_loader = torch.utils.data.DataLoader(supervised_train_dataset,
                                                           batch_size=supervised_train_batch_size,
                                                           shuffle=False)
 
-    self_supervised_train_dataset = DepthPointCloud2(class_id=class_id,
-                                                     model_id=model_id,
-                                                     num_of_points=num_of_points,
-                                                     dataset_len=self_supervised_train_dataset_len)
+    # self_supervised_train_dataset = DepthPointCloud2(class_id=class_id,
+    #                                                  model_id=model_id,
+    #                                                  num_of_points=num_of_points,
+    #                                                  dataset_len=self_supervised_train_dataset_len)
+    self_supervised_train_dataset = DepthPC(class_id=class_id,
+                                            model_id=model_id,
+                                            n=num_of_points_selfsupervised,
+                                            num_of_points_to_sample=num_of_points_to_sample,
+                                            dataset_len=self_supervised_train_dataset_len)
     self_supervised_train_loader = torch.utils.data.DataLoader(self_supervised_train_dataset,
                                                                batch_size=self_supervised_train_batch_size,
                                                                shuffle=False)
@@ -610,11 +653,11 @@ if __name__ == "__main__":
 
 
     # training
-    train_with_supervision(self_supervised_train_loader=self_supervised_train_loader,
-                           supervised_training_loader=supervised_train_loader,
-                           validation_loader=self_supervised_train_loader,
-                           model=model,
-                           optimizer=optimizer)
+    # train_with_supervision(self_supervised_train_loader=self_supervised_train_loader,
+    #                        supervised_training_loader=supervised_train_loader,
+    #                        validation_loader=self_supervised_train_loader,
+    #                        model=model,
+    #                        optimizer=optimizer)
     train_without_supervision(self_supervised_train_loader=self_supervised_train_loader,
                               validation_loader=self_supervised_train_loader,
                               model=model,
