@@ -15,12 +15,15 @@ from learning_objects.datasets.keypointnet import SE3nIsotorpicShapePointCloud, 
 
 from learning_objects.models.keypoint_corrector import kp_corrector_reg, kp_corrector_pace
 from learning_objects.models.point_set_registration import point_set_registration
-from learning_objects.models.pace_ddn import PACEbp
+# from learning_objects.models.pace_ddn import PACEbp
+from learning_objects.models.pace_altern_ddn import PACEbp
 from learning_objects.models.modelgen import ModelFromShape
 from learning_objects.models.certifiability import certifiability
 
 from learning_objects.utils.general import display_two_pcs
 
+#ToDo: This code works, but is still using solve_algo1() in kp_corrector_pace. This is because autograd backprop()
+# is not imlemented for PACEbp.But, this code now uses PACEbp from pace_altern_ddn.
 
 def get_sq_distances(X, Y):
     """
