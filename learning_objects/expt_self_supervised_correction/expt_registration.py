@@ -24,13 +24,13 @@ from learning_objects.utils.general import chamfer_half_distance, keypoint_error
 from learning_objects.utils.general import rotation_error, shape_error, translation_error
 from learning_objects.utils.general import display_results
 
-from learning_objects.models.keypoint_detector import HeatmapKeypoints, RegressionKeypoints
+from learning_objects.models.keypoint_detector import HeatmapKeypoints, RegressionKeypoints, RSNetKeypoints
 from learning_objects.models.point_set_registration import PointSetRegistration
 from learning_objects.models.keypoint_corrector import kp_corrector_reg, correctorNode
 
 # from learning_objects.models.modelgen import ModelFromShape, ModelFromShapeModule
 
-from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPointCloud2, DepthPC
+from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPointCloud2, DepthPC, CLASS_NAME
 
 from learning_objects.utils.ddn.node import DeclarativeLayer, ParamDeclarativeFunction
 
@@ -74,7 +74,7 @@ class ProposedModel(nn.Module):
         predicted_pc, detected_keypoints, rotation, translation     if correction_flag=False
         predicted_pc, corrected_keypoints, rotation, translation    if correction_flag=True
     """
-    def __init__(self, model_keypoints, cad_models, keypoint_detector=None):
+    def __init__(self, class_name, model_keypoints, cad_models, keypoint_detector=None):
         super().__init__()
         """ 
         model_keypoints     : torch.tensor of shape (K, 3, N)
@@ -86,9 +86,11 @@ class ProposedModel(nn.Module):
         """
 
         # Parameters
+        self.class_name = class_name
         self.model_keypoints = model_keypoints
         self.cad_models = cad_models
         self.device_ = self.cad_models.device
+        self.viz_keypoint_correction = False
 
         self.N = self.model_keypoints.shape[-1]  # (1, 1)
         self.K = self.model_keypoints.shape[0]  # (1, 1)
@@ -98,7 +100,7 @@ class ProposedModel(nn.Module):
             self.keypoint_detector = RegressionKeypoints(N=self.N, method='point_transformer',
                                                          dim=[3, 16, 32, 64, 128])
         else:
-            self.keypoint_detector = keypoint_detector
+            self.keypoint_detector = keypoint_detector(class_name=class_name, N=self.N)
 
         # Registration
         self.point_set_registration = PointSetRegistration(source_points=self.model_keypoints)
@@ -128,6 +130,12 @@ class ProposedModel(nn.Module):
         batch_size = input_point_cloud.shape[0]
         device_ = input_point_cloud.device
         detected_keypoints = self.keypoint_detector(input_point_cloud)
+        if self.viz_keypoint_correction:
+            print("visualizing detected keypoints")
+            inp = input_point_cloud.clone().detach().to('cpu')
+            kp = detected_keypoints.clone().detach().to('cpu')
+            display_results(inp, kp, inp, kp)
+            # print("FINISHED DETECTOR")
 
         if not correction_flag:
             R, t = self.point_set_registration.forward(detected_keypoints)
@@ -140,7 +148,12 @@ class ProposedModel(nn.Module):
             corrected_keypoints = detected_keypoints + correction
             R, t = self.point_set_registration.forward(corrected_keypoints)
             predicted_point_cloud= R @ self.cad_models + t
-
+            if self.viz_keypoint_correction
+                # print("FINISHED CORRECTOR")
+                print("visualizing corrected keypoints")
+                inp = predicted_point_cloud.clone().detach().to('cpu')
+                kp = corrected_keypoints.clone().detach().to('cpu')
+                display_results(inp, kp, inp, kp)
             return predicted_point_cloud, corrected_keypoints, R, t, correction
 
 
@@ -226,7 +239,6 @@ def self_supervised_loss(input_point_cloud, predicted_point_cloud, keypoint_corr
 
     lossMSE = torch.nn.MSELoss()
     kp_loss = lossMSE(keypoint_correction, torch.zeros_like(keypoint_correction)).mean()
-
     return pc_loss + theta*kp_loss
 
 
@@ -307,7 +319,6 @@ def self_supervised_train_one_epoch(epoch_index, tb_writer, training_loader, mod
 
         # Make predictions for this batch
         predicted_point_cloud, _, _, _, correction = model(input_point_cloud, correction_flag=True)
-
         # Compute the loss and its gradients
         loss = self_supervised_loss(input_point_cloud=input_point_cloud,
                                     predicted_point_cloud=predicted_point_cloud,
@@ -551,9 +562,10 @@ def visual_test(test_loader, model):
         t_target = t_target.to(device)
 
         # Make predictions for this batch
+        model.eval()
         predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted, _ = model(input_point_cloud,
                                                                                         correction_flag=False)
-
+        model.train()
         pc = input_point_cloud.clone().detach().to('cpu')
         pc_p = predicted_point_cloud.clone().detach().to('cpu')
         kp = keypoints_target.clone().detach().to('cpu')
@@ -593,6 +605,7 @@ if __name__ == "__main__":
     #
     #
     class_id = "03001627"  # chair
+    class_name = CLASS_NAME[class_id]
     model_id = "1e3fba4500d20bb49b9f2eb77f5e247e"  # a particular chair model
     dataset_dir = '../../data/learning_objects/'
 
@@ -611,7 +624,7 @@ if __name__ == "__main__":
     self_supervised_train_dataset_len = 10
     self_supervised_train_batch_size = 5
     num_of_points_to_sample = 10000
-    num_of_points_selfsupervised = 500
+    num_of_points_selfsupervised = 2048
 
     # supervised and self-supervised training data
     supervised_train_dataset = SE3PointCloud(class_id=class_id,
@@ -642,7 +655,7 @@ if __name__ == "__main__":
 
 
     # model
-    model = ProposedModel(model_keypoints=model_keypoints, cad_models=cad_models).to(device)
+    model = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models, keypoint_detector=RSNetKeypoints).to(device)
     num_parameters = sum(param.numel() for param in model.parameters() if param.requires_grad)
     print("Number of trainable parameters: ", num_parameters)
 
