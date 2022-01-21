@@ -879,6 +879,7 @@ class DeclarativeFunction(torch.autograd.Function):
         inputs = tuple(inputs)
         # print(inputs[0].shape)
         # print(output.shape)
+        # print("grad_output shape: ", grad_output.shape)
         grad_inputs = problem.gradient(*inputs, y=output, v=grad_output,
                                        ctx=solve_ctx)
         return (None, *grad_inputs)
