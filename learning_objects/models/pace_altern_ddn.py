@@ -24,15 +24,15 @@ import sys
 sys.path.append("../../")
 
 from learning_objects.models.point_set_registration import wahba
-from learning_objects.utils.ddn.node import EqConstDeclarativeNode, ParamDeclarativeFunction
+from learning_objects.utils.ddn.node import EqConstDeclarativeNode, ParamDeclarativeFunction, AbstractDeclarativeNode
 
 from learning_objects.utils.general import generate_random_keypoints
 from learning_objects.utils.general import shape_error, translation_error, rotation_error
 
 
-class PACErotationNshape(EqConstDeclarativeNode):
+class PACErotationNshape():
     def __init__(self, bar_B, lambda_constant=torch.tensor([1.0]), batch_size=32):
-        super().__init__(eps=0.05)
+        super().__init__()
         """
         bar_B   : torch.tensor of shape (1, 3N, K)  : see bar_B in (10) in [1].
         
@@ -51,8 +51,6 @@ class PACErotationNshape(EqConstDeclarativeNode):
         # Alternating Method parameters
         self.method_altern_tol = 1e-12
         self.altern_iter_max = 100
-
-
 
     def objective(self, bar_y, y):
         """
@@ -86,6 +84,7 @@ class PACErotationNshape(EqConstDeclarativeNode):
         return obj1 + self.lambda_constant*obj2
 
     def _test(self, bar_y, y):
+        #ToDo: Remove this.
 
         R, c = self._ytoRc(y)
         y_new = self._Rctoy(R, c)
@@ -108,6 +107,142 @@ class PACErotationNshape(EqConstDeclarativeNode):
         y = self._Rctoy(R, c)
 
         return y, None
+
+    def gradient(self, bar_y, y=None, v=None, ctx=None):
+
+        # g = self._gradient_method1(bar_y=bar_y, y=y, v=v, ctx=ctx)
+        g = self._gradient_method2(bar_y=bar_y, y=y, v=v, ctx=ctx)
+        return g
+
+    def _gradient_method2(self, bar_y, y=None, v=None, ctx=None):
+        # ToDo: to be tested.
+        """
+        inputs:
+        bar_y   : torch.tensor of shape (B, 3*N)    : normalized keypoints. see (9) in [1].
+        y       : torch.tensor of shape (B, 9+K)    : y[b, 0:9] : vectorized rotation matrix
+                                                    : y[b, 9:] : shape vector
+        v       : torch.tensor of shape (B, 9+K)    : grad_output with respect to loss, used during backprop()
+
+        outputs:
+        grad_input   : torch.tensor of shape (B, 3*N)
+
+        """
+
+        if v==None:
+            v = torch.ones_like(y)
+
+        def f(x):
+            y, _ = self.solve(x)
+            return y
+
+        Jf = torch.autograd.functional.jacobian(f, (bar_y,))
+
+        # print("Jf lenght: ", len(Jf))
+        # print("Jf shape: ", Jf[0].shape)
+
+        grad_input = torch.einsum('bobi,bo->bi', Jf[0], v)
+
+        return (grad_input,)
+
+
+
+
+    def _gradient_method1(self, bar_y, y=None, v=None, ctx=None):
+        #ToDo: This doesn't work. Gives error saying that the matrix Amat is singular. This may be numerical error
+        # or an error that at training, the matrix does become singular. Don't know how to fix this.
+        """
+        inputs:
+        bar_y   : torch.tensor of shape (B, 3*N)    : normalized keypoints. see (9) in [1].
+        y       : torch.tensor of shape (B, 9+K)    : y[b, 0:9] : vectorized rotation matrix
+                                                    : y[b, 9:] : shape vector
+        v       : torch.tensor of shape (B, 9+K)    : grad_output with respect to loss, used during backprop()
+
+        outputs:
+        grad_input   : torch.tensor of shape (B, 3*N)
+
+        """
+        batch_size = bar_y.shape[0]
+        if y==None:
+            y, _ = self.solve(bar_y=bar_y)
+
+        if v==None:
+            v = torch.ones_like(y)
+
+        R, c = self._ytoRc(y)       # R: (B, 3, 3), c: (B, K, 1)
+
+        def f(x, y, z):
+            """
+            x   : torch.tensor of shape (3*N)
+            y   : torch.tensor of shape (3, 3)
+            z   : torch.tensor of shape (K, 1)
+
+            output:
+            loss    : torch.tensor of shape (1,)
+            """
+            loss = self._objective(bar_y=x.unsqueeze(0), R=y.unsqueeze(0), c=z.unsqueeze(0))
+
+            return loss.squeeze(0)
+
+        grad_input = torch.zeros_like(bar_y)
+        for b in range(batch_size):
+
+            batch_bar_y = bar_y[b, ...]
+            batch_R = R[b, ...]
+            batch_c = c[b, ...]
+
+            Hf = torch.autograd.functional.hessian(f, (batch_bar_y, batch_R, batch_c))
+
+            # print("Shape of Hf[0][0]: ", Hf[0][0].shape)
+            # print("Shape of Hf[0][1]: ", Hf[0][1].shape)
+            # print("Shape of Hf[0][2]: ", Hf[0][2].shape)
+            # print("Shape of Hf[1][0]: ", Hf[1][0].shape)
+            # print("Shape of Hf[1][1]: ", Hf[1][1].shape)
+            # print("Shape of Hf[1][2]: ", Hf[1][2].shape)
+            # print("Shape of Hf[2][0]: ", Hf[2][0].shape)
+            # print("Shape of Hf[2][1]: ", Hf[2][1].shape)
+            # print("Shape of Hf[2][2]: ", Hf[2][2].shape)
+
+            fyR = Hf[0][1].reshape(3 * self.N, 9)
+            fyc = Hf[0][2].reshape(3 * self.N, self.K)
+            fRR = Hf[1][1].reshape(9, 9)
+            fRc = Hf[1][2].reshape(9, self.K)
+            fcR = Hf[2][1].reshape(self.K, 9)
+            fcc = Hf[2][2].reshape(self.K, self.K)
+
+            Amat = torch.zeros(9 + 1 + self.K + 15, 9 + self.K).to(device=self.device_)
+            Bmat = torch.zeros(9 + 1 + self.K + 15, 3 * self.N).to(device=self.device_)
+
+            # Amat[0:9, 0:9] = fRR
+            Amat[0:9, 9:] = fRc
+            Amat[9:10, 9:] = torch.ones(self.K).to(device=self.device_)
+            Amat[10:10 + self.K, :9] = fcR
+            Amat[10:10 + self.K, 9:] = fcc
+
+            r = batch_R.T.reshape(9, 1)
+            A = self._getA()
+            for i in range(15):
+                Amat[10 + self.K + i, 0:9] = r.T @ A[i, 1:, 1:]
+
+            Bmat[:9, :] = -fyR.T
+            Bmat[10:10 + self.K, :] = -fyc.T
+
+            print("Amat shape: ", Amat.shape)
+            print("Bmat shape: ", Bmat.shape)
+            print("Amat rank: ", torch.matrix_rank(Amat))
+            # Solve Amat X = Bmat
+            X = torch.lstsq(Bmat, Amat).solution[:Amat.size(1)]
+            # print("X shape: ", X.shape)
+            # DR = X[:9, :]
+            # Dc = X[9:, :]
+            # print("DR shape: ", DR.shape)
+            # print("Dc shape: ", Dc.shape)
+            # print("DR")
+            # print(DR)
+            # print("Dc")
+            # print(Dc)
+            grad_input[b, :] = X.T @ v[b, :]
+
+        return (grad_input,)
 
     def _method_altern(self, bar_y):
         """
@@ -208,39 +343,40 @@ class PACErotationNshape(EqConstDeclarativeNode):
 
         return torch.abs(obj-obj_) < self.method_altern_tol
 
-    def equality_constraints(self, bar_y, y):
-        """
-        inputs:
-        bar_y   : torch.tensor of shape (B, 3*N)    : normalized keypoints. see (9) in [1].
-        y       : torch.tensor of shape (B, 9+K)    : y[b, 0:9] : vectorized rotation matrix
-                                                    : y[b, 9:] : shape vector
-
-        outputs:
-        eq_constraints : torch.tensor of shape (B, 1)  : see (11) in [1]
-
-        """
-        batch_size = bar_y.shape[0]
-
-        # Rotation constraint
-        r = y[:, 0:9]
-        r = torch.cat([torch.ones((batch_size, 1), device=self.device_), r], dim=1)
-
-        batch_size = r.shape[0]
-        eq_constraints = torch.zeros((batch_size, 17), device=self.device_)
-
-        for constraint_idx in range(16):
-            temp_const = r.unsqueeze(1) @ self.A[constraint_idx, :, :].unsqueeze(0) @ r.unsqueeze(-1) - self.d[
-                constraint_idx]
-            temp_const = temp_const.squeeze(-1).squeeze(-1)
-            eq_constraints[:, constraint_idx] = temp_const
-
-        # Shape constraint
-        c = y[:, 9:]    # (B, K)
-        eq_constraints[:, 16] = c.sum(1) - 1
-
-        print("Shape of eq_constraints: ", eq_constraints.shape)
-
-        return eq_constraints
+    # def equality_constraints(self, bar_y, y):
+    #    #Note: We are no longer using the ddn setup to compute gradients. It gives errors anyway.
+    #     """
+    #     inputs:
+    #     bar_y   : torch.tensor of shape (B, 3*N)    : normalized keypoints. see (9) in [1].
+    #     y       : torch.tensor of shape (B, 9+K)    : y[b, 0:9] : vectorized rotation matrix
+    #                                                 : y[b, 9:] : shape vector
+    #
+    #     outputs:
+    #     eq_constraints : torch.tensor of shape (B, 1)  : see (11) in [1]
+    #
+    #     """
+    #     batch_size = bar_y.shape[0]
+    #
+    #     # Rotation constraint
+    #     r = y[:, 0:9]
+    #     r = torch.cat([torch.ones((batch_size, 1), device=self.device_), r], dim=1)
+    #
+    #     batch_size = r.shape[0]
+    #     eq_constraints = torch.zeros((batch_size, 17), device=self.device_)
+    #
+    #     for constraint_idx in range(16):
+    #         temp_const = r.unsqueeze(1) @ self.A[constraint_idx, :, :].unsqueeze(0) @ r.unsqueeze(-1) - self.d[
+    #             constraint_idx]
+    #         temp_const = temp_const.squeeze(-1).squeeze(-1)
+    #         eq_constraints[:, constraint_idx] = temp_const
+    #
+    #     # Shape constraint
+    #     c = y[:, 9:]    # (B, K)
+    #     eq_constraints[:, 16] = c.sum(1) - 1
+    #
+    #     print("Shape of eq_constraints: ", eq_constraints.shape)
+    #
+    #     return eq_constraints
 
     def _vecR(self, R):
         """
@@ -300,8 +436,6 @@ class PACErotationNshape(EqConstDeclarativeNode):
         g = Htemp / (torch.matmul(torch.ones(1, Htemp.shape[0], device=self.device_), Htemp))  # (K, 1)
 
         return G.unsqueeze(0), g.unsqueeze(0)
-
-
 
     def _getA(self):
         """
@@ -558,8 +692,6 @@ class PACEbp():
         return bar_B.unsqueeze(0)   #(1, 3N, K)
 
 
-
-
 if __name__ == "__main__":
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -567,9 +699,9 @@ if __name__ == "__main__":
     print('device is ', device)
     print('-' * 20)
 
-    B = 200
-    N = 20
-    K = 20
+    B = 40
+    N = 10
+    K = 44
     n = 400
     weights = torch.rand(N, 1).to(device=device)
     model_keypoints = torch.rand(K, 3, N).to(device=device)
@@ -584,6 +716,22 @@ if __name__ == "__main__":
     rotations = rotations.to(device=device)
     translations = translations.to(device=device)
     shape = shape.to(device=device)
+
+    # batch_size = B
+    # y = keypoints
+    #
+    # # Inside the forward pass:
+    # y_w = pace_model._get_y_w(y=y)
+    # bar_y = pace_model._get_bar_y(y=y, y_w=y_w)
+    # bar_y_eq9 = torch.transpose(bar_y, -1, -2).reshape(batch_size, -1)
+    # out = pace_model.rotation_n_shape_fn.forward(bar_y_eq9)
+    # R, c = pace_model.rotation_n_shape._ytoRc(out)
+    #
+    # grad_in = pace_model.rotation_n_shape.gradient(bar_y_eq9, out)
+    # print("Input gradients: ")
+    # print(grad_in.shape)
+    # print(grad_in)
+
 
     keypoints.requires_grad = True
     start = time.process_time()
@@ -601,6 +749,9 @@ if __name__ == "__main__":
     loss = er_shape.mean() + er_trans.mean() + er_rot.mean()
     loss.backward()
 
-    print("Shape of gradients at keypoints ", keypoints.grad)
+    print("Shape of gradients at keypoints ", keypoints.grad.shape)
+    print(keypoints.grad)
     print('-' * 20)
+
+
 
