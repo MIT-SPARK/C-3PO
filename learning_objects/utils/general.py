@@ -372,16 +372,37 @@ def display_results(input_point_cloud, detected_keypoints, target_point_cloud, t
     target_keypoints = target_keypoints[0, ...].to('cpu')
 
     input_point_cloud = pos_tensor_to_o3d(input_point_cloud)
-    detected_keypoints = pos_tensor_to_o3d(detected_keypoints)
-    target_point_cloud = pos_tensor_to_o3d(target_point_cloud)
-    target_keypoints = pos_tensor_to_o3d(target_keypoints)
-
     input_point_cloud.paint_uniform_color([0.7, 0.7, 0.7])
-    detected_keypoints.paint_uniform_color([0.8, 0.0, 0.0])
-    target_keypoints.paint_uniform_color([0.0, 0.8, 0.0])
+
+    # detected_keypoints = pos_tensor_to_o3d(detected_keypoints)
+    # detected_keypoints.paint_uniform_color([0.8, 0.0, 0.0])
+
+    detected_keypoints = detected_keypoints.numpy().transpose()
+    keypoint_markers = []
+    for xyz in detected_keypoints:
+        kpt_mesh = o3d.geometry.TriangleMesh.create_sphere(radius=.01)
+        kpt_mesh.translate(xyz)
+        kpt_mesh.paint_uniform_color([0.8, 0.0, 0.0])
+        keypoint_markers.append(kpt_mesh)
+    detected_keypoints = keypoint_markers
+    target_point_cloud = pos_tensor_to_o3d(target_point_cloud)
     target_point_cloud.paint_uniform_color([0.0, 0.0, 0.7])
 
-    o3d.visualization.draw_geometries([input_point_cloud, detected_keypoints, target_keypoints, target_point_cloud])
+    # target_keypoints = pos_tensor_to_o3d(target_keypoints)
+    # target_keypoints.paint_uniform_color([0.0, 0.8, 0.0])
+
+    target_keypoints = target_keypoints.numpy().transpose()
+    keypoint_markers = []
+    for xyz in target_keypoints:
+        kpt_mesh = o3d.geometry.TriangleMesh.create_sphere(radius=.01)
+        kpt_mesh.translate(xyz)
+        kpt_mesh.paint_uniform_color([0, 0.8, 0.0])
+        keypoint_markers.append(kpt_mesh)
+    target_keypoints = keypoint_markers
+
+    o3d.visualization.draw_geometries([input_point_cloud] + [target_point_cloud] + detected_keypoints + target_keypoints)
+
+    # o3d.visualization.draw_geometries([input_point_cloud, detected_keypoints, target_keypoints, target_point_cloud])
 
     return None
 
