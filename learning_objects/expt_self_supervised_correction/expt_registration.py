@@ -74,7 +74,8 @@ class ProposedModel(nn.Module):
         predicted_pc, detected_keypoints, rotation, translation     if correction_flag=False
         predicted_pc, corrected_keypoints, rotation, translation    if correction_flag=True
     """
-    def __init__(self, class_name, model_keypoints, cad_models, keypoint_detector=None):
+    def __init__(self, class_name, model_keypoints, cad_models, keypoint_detector=None,
+                 use_pretrained_regression_model=False):
         super().__init__()
         """ 
         model_keypoints     : torch.tensor of shape (K, 3, N)
@@ -91,6 +92,7 @@ class ProposedModel(nn.Module):
         self.cad_models = cad_models
         self.device_ = self.cad_models.device
         self.viz_keypoint_correction = False
+        self.use_pretrained_regression_model = use_pretrained_regression_model
 
         self.N = self.model_keypoints.shape[-1]  # (1, 1)
         self.K = self.model_keypoints.shape[0]  # (1, 1)
@@ -148,7 +150,7 @@ class ProposedModel(nn.Module):
             corrected_keypoints = detected_keypoints + correction
             R, t = self.point_set_registration.forward(corrected_keypoints)
             predicted_point_cloud= R @ self.cad_models + t
-            if self.viz_keypoint_correction
+            if self.viz_keypoint_correction:
                 # print("FINISHED CORRECTOR")
                 print("visualizing corrected keypoints")
                 inp = predicted_point_cloud.clone().detach().to('cpu')
@@ -448,8 +450,7 @@ def validate(writer, validation_loader, model):
     return avg_vloss
 
 
-def train_with_supervision(supervised_training_loader, self_supervised_train_loader, validation_loader, model,
-                           optimizer):
+def train_with_supervision(supervised_training_loader, validation_loader, model, optimizer):
 
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     writer = SummaryWriter(SAVE_LOCATION + 'expt_keypoint_detect_{}'.format(timestamp))
@@ -467,24 +468,14 @@ def train_with_supervision(supervised_training_loader, self_supervised_train_loa
         print("Training on simulated data with supervision:")
         avg_loss_supervised = supervised_train_one_epoch(epoch_number, writer, supervised_training_loader, model,
                                                          optimizer)
-        print("Training on real data with self-supervision:")
-        ave_loss_self_supervised = self_supervised_train_one_epoch(epoch_number, writer, self_supervised_train_loader,
-                                                                model, optimizer)
-
         # Validation. We don't need gradients on to do reporting.
         model.train(False)
         print("Validation on real data: ")
         avg_vloss = validate(writer, validation_loader, model)
 
-        print('LOSS supervised-train {}, self-supervised train {}, valid {}'.format(avg_loss_supervised,
-                                                                                    ave_loss_self_supervised,
-                                                                                    avg_vloss))
-
-        # Log the running loss averaged per batch
-        # for both training and validation
+        print('LOSS supervised-train {}, valid {}'.format(avg_loss_supervised, avg_vloss))
         writer.add_scalars('Training vs. Validation Loss',
                            {'Training (supervised)': avg_loss_supervised,
-                            'Training (self-supervised)': ave_loss_self_supervised,
                             'Validation': avg_vloss},
                            epoch_number + 1)
         writer.flush()
@@ -494,6 +485,8 @@ def train_with_supervision(supervised_training_loader, self_supervised_train_loa
             best_vloss = avg_vloss
             model_path = SAVE_LOCATION + 'expt_keypoint_detect_' + 'model_{}_{}'.format(timestamp, epoch_number)
             torch.save(model.state_dict(), model_path)
+            best_model_path = SAVE_LOCATION + 'best_supervised_keypoint_detect_model.pth'
+            torch.save(model.state_dict(), best_model_path)
 
         epoch_number += 1
 
@@ -541,6 +534,8 @@ def train_without_supervision(self_supervised_train_loader, validation_loader, m
             best_vloss = avg_vloss
             model_path = SAVE_LOCATION + 'expt_keypoint_detect_' + 'model_{}_{}'.format(timestamp, epoch_number)
             torch.save(model.state_dict(), model_path)
+            best_model_path = SAVE_LOCATION + 'best_self_supervised_keypoint_detect_model.pth'
+            torch.save(model.state_dict(), best_model_path)
 
         epoch_number += 1
 
@@ -655,7 +650,16 @@ if __name__ == "__main__":
 
 
     # model
-    model = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models, keypoint_detector=RSNetKeypoints).to(device)
+    model = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,
+                          keypoint_detector=None, use_pretrained_regression_model=False).to(device)
+    if model.use_pretrained_regression_model:
+        print("USING PRETRAINED REGRESSION MODEL, ONLY USE THIS WITH SELF-SUPERVISION")
+        best_model_checkpoint = os.path.join(SAVE_LOCATION, 'best_supervised_keypoint_detect_model.pth')
+        if not os.path.isfile(best_model_checkpoint):
+            print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")
+        state_dict = torch.load(best_model_checkpoint)
+        model.load_state_dict(state_dict)
+        model.train()
     num_parameters = sum(param.numel() for param in model.parameters() if param.requires_grad)
     print("Number of trainable parameters: ", num_parameters)
 
@@ -666,8 +670,8 @@ if __name__ == "__main__":
 
 
     # training
-    # train_with_supervision(self_supervised_train_loader=self_supervised_train_loader,
-    #                        supervised_training_loader=supervised_train_loader,
+    # for Regression KD
+    # train_with_supervision(supervised_training_loader=supervised_train_loader,
     #                        validation_loader=self_supervised_train_loader,
     #                        model=model,
     #                        optimizer=optimizer)
