@@ -24,7 +24,8 @@ from learning_objects.utils.general import rotation_error, shape_error, translat
 from learning_objects.utils.general import display_results
 
 from learning_objects.models.keypoint_detector import HeatmapKeypoints, RegressionKeypoints
-from learning_objects.models.pace_ddn import PACEbp
+# from learning_objects.models.pace_ddn import PACEbp
+from learning_objects.models.pace_altern_ddn import PACEbp
 from learning_objects.models.keypoint_corrector import kp_corrector_pace
 from learning_objects.models.modelgen import ModelFromShape
 
@@ -99,11 +100,10 @@ class ProposedModel(nn.Module):
             self.keypoint_detector = keypoint_detector
 
         # PACE
-        self.pace = PACEbp(model_keypoints=self.model_keypoints.detach().clone().cpu())
+        self.pace = PACEbp(model_keypoints=self.model_keypoints)     #ToDo: Remove this detach.
 
         # Registration + Correction
-        self.corrector = kp_corrector_pace(cad_models=self.cad_models.detach().clone().cpu(),
-                                          model_keypoints=self.model_keypoints.detach().clone().cpu())
+        self.corrector = kp_corrector_pace(cad_models=self.cad_models, model_keypoints=self.model_keypoints)
 
         # Model generator
         self.modelgen = ModelFromShape(cad_models=self.cad_models, model_keypoints=self.model_keypoints)
@@ -131,6 +131,7 @@ class ProposedModel(nn.Module):
         detected_keypoints = self.keypoint_detector(input_point_cloud)
 
         if not correction_flag:
+            # NOTE: This uses pace as a function. The backprop will happen through the iterations of the algorithm.
             R, t, c = self.pace.forward(detected_keypoints.clone().cpu())
             R = R.to(device_)
             t = t.to(device_)
@@ -142,8 +143,9 @@ class ProposedModel(nn.Module):
             return predicted_point_cloud, detected_keypoints, R, t, c, None
 
         else:
-            correction = self.corrector.forward(detected_keypoints=detected_keypoints.clone().cpu(),
-                                                input_point_cloud=input_point_cloud.clone().cpu())
+            #NOTE: This uses keypoint corrector as a function. The backprop will happen through the iterations of the algorithm.
+            correction = self.corrector.forward(detected_keypoints=detected_keypoints,
+                                                input_point_cloud=input_point_cloud)
 
             corrected_keypoints = detected_keypoints.clone().cpu() + correction
 
@@ -162,7 +164,6 @@ class ProposedModel(nn.Module):
 
 
 # loss functions
-#ToDo: Need to add shape error
 def keypoints_loss(kp, kp_):
     """
     kp  : torch.tensor of shape (B, 3, N)
@@ -230,7 +231,6 @@ def self_supervised_loss(input_point_cloud, predicted_point_cloud, keypoint_corr
 
 
 def supervised_loss(input, output):
-    # ToDo: Need to add shape error
     """
     inputs:
         input   : tuple of length 4 : input[0]  : torch.tensor of shape (B, 3, m) : input_point_cloud
@@ -263,7 +263,6 @@ def supervised_loss(input, output):
 
 
 def validation_loss(input, output):
-    #ToDo: Need to add shape error
     """
     inputs:
         input   : tuple of length 5 : input[0]  : torch.tensor of shape (B, 3, m) : input_point_cloud
@@ -659,10 +658,10 @@ if __name__ == "__main__":
                            validation_loader=self_supervised_train_loader,
                            model=model,
                            optimizer=optimizer)
-    train_without_supervision(self_supervised_train_loader=self_supervised_train_loader,
-                              validation_loader=self_supervised_train_loader,
-                              model=model,
-                              optimizer=optimizer)
+    # train_without_supervision(self_supervised_train_loader=self_supervised_train_loader,
+    #                           validation_loader=self_supervised_train_loader,
+    #                           model=model,
+    #                           optimizer=optimizer)
 
     # test
     print("Visualizing the trained model.")

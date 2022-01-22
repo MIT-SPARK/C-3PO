@@ -1,4 +1,0 @@
-class_id,model_id,kp_noise_type,kp_noise_fra,filename,num_iterations
-03001627,1e3fba4500d20bb49b9f2eb77f5e247e,sporadic,0.2,./expt_with_pace_depthisopc/20220113_020510_experiment.pickle,50
-03001627,1e3fba4500d20bb49b9f2eb77f5e247e,sporadic,0.8,./expt_with_pace_depthisopc/20220113_081936_experiment.pickle,50
-03001627,1e3fba4500d20bb49b9f2eb77f5e247e,sporadic,0.2,./expt_with_pace_depthisopc/20220114_082355_experiment.pickle,100
