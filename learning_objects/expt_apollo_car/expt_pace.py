@@ -9,6 +9,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchvision
 import torchvision.transforms as transforms
+from pytorch3d import ops
 
 from torch.utils.tensorboard import SummaryWriter
 from datetime import datetime
@@ -17,15 +18,10 @@ import sys
 sys.path.append("../../")
 
 
-from learning_objects.utils.ddn.node import ParamDeclarativeFunction
-from learning_objects.utils.general import generate_random_keypoints
-from learning_objects.utils.general import chamfer_half_distance, keypoint_error, soft_chamfer_half_distance
-from learning_objects.utils.general import rotation_error, shape_error, translation_error
 from learning_objects.utils.general import display_results
 
 from learning_objects.models.keypoint_detector import HeatmapKeypoints, RegressionKeypoints
-# from learning_objects.models.pace_ddn import PACEbp
-from learning_objects.models.pace_altern_ddn import PACEbp
+from learning_objects.models.pace import PACEmodule
 from learning_objects.models.keypoint_corrector import kp_corrector_pace
 from learning_objects.models.modelgen import ModelFromShape
 
@@ -35,33 +31,6 @@ from learning_objects.datasets.keypointnet import SE3nIsotorpicShapePointCloud, 
 
 
 SAVE_LOCATION = '../../data/learning_objects/expt_pace/runs/'
-
-
-# # Given ShapeNet class_id, model_id, this generates a dataset and a dataset loader with
-# # various transformations of the object point cloud.
-# #
-# # Variations: point density, SE3 transformations, and isotropic scaling
-# #
-# class_id = "03001627"  # chair
-# model_id = "1e3fba4500d20bb49b9f2eb77f5e247e"  # a particular chair model
-# dataset_dir = '../../data/learning_objects/'
-# dataset_len = 10000
-# batch_size = 4
-#
-#
-# se3_dataset100 = SE3PointCloud(class_id=class_id, model_id=model_id, num_of_points=100, dataset_len=dataset_len)
-# # se3_dataset500 = SE3PointCloud(class_id=class_id, model_id=model_id, num_of_points=500, dataset_len=dataset_len)
-# # se3_dataset1k = SE3PointCloud(class_id=class_id, model_id=model_id, num_of_points=1000, dataset_len=dataset_len)
-# # se3_dataset10k = SE3PointCloud(class_id=class_id, model_id=model_id, num_of_points=10000, dataset_len=dataset_len)
-#
-#
-# se3_dataset100_loader = torch.utils.data.DataLoader(se3_dataset100, batch_size=batch_size, shuffle=False)
-# # se3_dataset500_loader = torch.utils.data.DataLoader(se3_dataset500, batch_size=batch_size, shuffle=False)
-# # se3_dataset1k_loader = torch.utils.data.DataLoader(se3_dataset1k, batch_size=batch_size, shuffle=False)
-# # se3_dataset10k_loader = torch.utils.data.DataLoader(se3_dataset10k, batch_size=batch_size, shuffle=False)
-#
-# # Generate a shape category, CAD model objects, etc.
-
 
 
 # Proposed Model
@@ -100,7 +69,8 @@ class ProposedModel(nn.Module):
             self.keypoint_detector = keypoint_detector
 
         # PACE
-        self.pace = PACEbp(model_keypoints=self.model_keypoints)     #ToDo: Remove this detach.
+        self.pace = PACEmodule(model_keypoints=self.model_keypoints)
+        # self.pace = PACEbp(model_keypoints=self.model_keypoints)
 
         # Registration + Correction
         self.corrector = kp_corrector_pace(cad_models=self.cad_models, model_keypoints=self.model_keypoints)
@@ -132,10 +102,7 @@ class ProposedModel(nn.Module):
 
         if not correction_flag:
             # NOTE: This uses pace as a function. The backprop will happen through the iterations of the algorithm.
-            R, t, c = self.pace.forward(detected_keypoints.clone().cpu())
-            R = R.to(device_)
-            t = t.to(device_)
-            c = c.to(device_)
+            R, t, c = self.pace(detected_keypoints)
 
             _, predicted_point_cloud = self.modelgen.forward(c)
             predicted_point_cloud = R @ predicted_point_cloud + t
@@ -147,15 +114,9 @@ class ProposedModel(nn.Module):
             correction = self.corrector.forward(detected_keypoints=detected_keypoints,
                                                 input_point_cloud=input_point_cloud)
 
-            corrected_keypoints = detected_keypoints.clone().cpu() + correction
+            corrected_keypoints = detected_keypoints + correction
 
-            R, t, c = self.pace.forward(corrected_keypoints.clone().cpu())
-            R = R.to(device_)
-            t = t.to(device_)
-            c = c.to(device_)
-            correction = correction.to(device_)
-            corrected_keypoints = corrected_keypoints.to(device_)
-
+            R, t, c = self.pace(corrected_keypoints)
             _, predicted_point_cloud = self.modelgen.forward(c)
             predicted_point_cloud = R @ predicted_point_cloud + t
 
@@ -164,6 +125,34 @@ class ProposedModel(nn.Module):
 
 
 # loss functions
+def chamfer_loss(pc, pc_, pc_padding=None):
+    """
+    inputs:
+    pc  : torch.tensor of shape (B, 3, n)
+    pc_ : torch.tensor of shape (B, 3, m)
+    pc_padding  : torch.tensor of shape (B, n)  : indicates if the point in pc is real-input or padded in
+
+    output:
+    loss    : (B, 1)
+    """
+
+    if pc_padding == None:
+        batch_size, _, n = pc.shape
+        device_ = pc.device
+
+        # computes a padding by flagging zero vectors in the input point cloud.
+        pc_padding = ((pc == torch.zeros(3, 1).to(device=device_)).sum(dim=1) == 3)
+        # pc_padding = torch.zeros(batch_size, n).to(device=device_)
+
+    sq_dist, _, _ = ops.knn_points(torch.transpose(pc, -1, -2), torch.transpose(pc_, -1, -2), K=1)
+    # dist (B, n, 1): distance from point in X to the nearest point in Y
+
+    sq_dist = sq_dist.squeeze(-1)*torch.logical_not(pc_padding)
+    a = torch.logical_not(pc_padding)
+    loss = sq_dist.sum(dim=1)/a.sum(dim=1)
+
+    return loss.unsqueeze(-1)
+
 def keypoints_loss(kp, kp_):
     """
     kp  : torch.tensor of shape (B, 3, N)
@@ -221,7 +210,7 @@ def self_supervised_loss(input_point_cloud, predicted_point_cloud, keypoint_corr
     """
     theta = 25.0
 
-    pc_loss = chamfer_half_distance(input_point_cloud, predicted_point_cloud)
+    pc_loss = chamfer_loss(input_point_cloud, predicted_point_cloud)
     pc_loss = pc_loss.mean()
 
     lossMSE = torch.nn.MSELoss()
@@ -249,7 +238,7 @@ def supervised_loss(input, output):
 
     """
 
-    pc_loss = chamfer_half_distance(input[0], output[0])
+    pc_loss = chamfer_loss(input[0], output[0])
     pc_loss = pc_loss.mean()
 
     lossMSE = torch.nn.MSELoss()
@@ -281,7 +270,7 @@ def validation_loss(input, output):
 
     """
 
-    pc_loss = chamfer_half_distance(input[0], output[0])
+    pc_loss = chamfer_loss(input[0], output[0])
     pc_loss = pc_loss.mean()
 
     lossMSE = torch.nn.MSELoss()
