@@ -11,10 +11,34 @@ import os
 import sys
 sys.path.append("../../")
 
-from learning_objects.utils.general import pos_tensor_to_o3d
-from learning_objects.utils.general import chamfer_distance, chamfer_half_distance
 
+def chamfer_loss(pc, pc_, pc_padding=None):
+    """
+    inputs:
+    pc  : torch.tensor of shape (B, 3, n)
+    pc_ : torch.tensor of shape (B, 3, m)
+    pc_padding  : torch.tensor of shape (B, n)  : indicates if the point in pc is real-input or padded in
 
+    output:
+    loss    : (B, 1)
+    """
+
+    if pc_padding == None:
+        batch_size, _, n = pc.shape
+        device_ = pc.device
+
+        # computes a padding by flagging zero vectors in the input point cloud.
+        pc_padding = ((pc == torch.zeros(3, 1).to(device=device_)).sum(dim=1) == 3)
+        # pc_padding = torch.zeros(batch_size, n).to(device=device_)
+
+    sq_dist, _, _ = ops.knn_points(torch.transpose(pc, -1, -2), torch.transpose(pc_, -1, -2), K=1)
+    # dist (B, n, 1): distance from point in X to the nearest point in Y
+
+    sq_dist = sq_dist.squeeze(-1)*torch.logical_not(pc_padding)
+    a = torch.logical_not(pc_padding)
+    loss = sq_dist.sum(dim=1)/a.sum(dim=1)
+
+    return loss.unsqueeze(-1)
 
 def confidence(pc, pc_):
     """
@@ -26,8 +50,21 @@ def confidence(pc, pc_):
     confidence  : torch.tensor of shape (B, 1)
     """
 
-    return torch.exp(-chamfer_half_distance(pc, pc_))
+    return torch.exp(-chamfer_loss(pc, pc_))
     # return chamfer_distance(pc, pc_)
+
+def confidence_kp(kp, kp_):
+    """
+    inputs:
+    kp  : input point cloud : torch.tensor of shape (B, 3, n)
+    kp_ : model point cloud : torch.tensor of shape (B, 3, m)
+
+    output:
+    confidence  : torch.tensor of shape (B, 1)
+
+    """
+
+    return torch.exp(-((kp-kp_)**2).sum(dim=1).max(dim=1)[0].unsqueeze(-1))
 
 
 def completeness(pc, pc_, radius=0.3):
@@ -58,11 +95,13 @@ class certifiability():
         self.radius = radius
 
 
-    def forward(self, X, Z):
+    def forward(self, X, Z, kp=None, kp_=None):
         """
         inputs:
         X   : input :   torch.tensor of shape (B, 3, n)
         Z   : model :   torch.tensor of shape (B, 3, m)
+        kp  : detected/correct_keypoints    : torch.tensor of shape (B, 3, N)
+        kp_ : model keypoints               : torch.tensor of shape (B, 3, N)
 
         outputs:
         cert    : list of len B of boolean variables
@@ -72,7 +111,13 @@ class certifiability():
         confidence_ = confidence(X, Z)
         completeness_ = completeness(X, Z)
 
-        return (confidence_ >= self.epsilon) & (completeness_ >= self.delta), completeness_
+        if kp==None or kp_==None:
+            confidence_kp_ = 100000*torch.ones_like(confidence_)
+            print("Certifiability is not taking keypoint errors into account.")
+        else:
+            confidence_kp_ = confidence_kp(kp, kp_)
+
+        return (confidence_ >= self.epsilon) & (confidence_kp_ >= self.epsilon) & (completeness_ >= self.delta), completeness_
 
     def forward_with_distances(self, sq_dist_XZ, sq_dist_ZX):
         """
