@@ -144,7 +144,7 @@ def chamfer_loss(pc, pc_, pc_padding=None):
         pc_padding = ((pc == torch.zeros(3, 1).to(device=device_)).sum(dim=1) == 3)
         # pc_padding = torch.zeros(batch_size, n).to(device=device_)
 
-    sq_dist, _, _ = ops.knn_points(torch.transpose(pc, -1, -2), torch.transpose(pc_, -1, -2), K=1)
+    sq_dist, _, _ = ops.knn_points(torch.transpose(pc, -1, -2), torch.transpose(pc_, -1, -2), K=1, return_sorted=False)
     # dist (B, n, 1): distance from point in X to the nearest point in Y
 
     sq_dist = sq_dist.squeeze(-1)*torch.logical_not(pc_padding)

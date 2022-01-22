@@ -26,13 +26,9 @@ from learning_objects.utils.general import chamfer_distance, chamfer_half_distan
     translation_error, shape_error
 
 # from learning_objects.models.pace_ddn import PACEbp
-from learning_objects.models.pace_altern_ddn import PACEbp
+# from learning_objects.models.pace_altern_ddn import PACEbp
+from learning_objects.models.pace import PACEmodule
 from learning_objects.models.modelgen import ModelFromShape
-
-
-#ToDo: I decided to drop padding. We instead remove zero points from the input point cloud in loss computation. See
-# chamfer_loss. Therefore, we need to remove padding variables from the code at some point in time. This doesn't hurt
-# us as the code works with padding=None.
 
 
 def chamfer_loss_with_surface_normals(pc, pc_):
@@ -167,20 +163,18 @@ class kp_corrector_reg():
 
         self.point_set_registration_fn = PointSetRegistration(source_points=self.model_keypoints)
 
-    def forward(self, detected_keypoints, input_point_cloud, padding=None):
+    def forward(self, detected_keypoints, input_point_cloud):
         """
         input:
         detected_keypoints  : torch.tensor of shape (B, 3, N)
         input_point_cloud   : torch.tensor of shape (B, 3, m)
-        padding             : None or torch.tensor of shape (B, m) dtype=torch.bool
-                                        where True means it is a padded point to be ignored in chamfer loss computation.
 
         output:
         correction          : torch.tensor of shape (B, 3, N)
         """
-
+        torch.set_grad_enabled(True)
         # correction = self.solve_algo1(detected_keypoints, input_point_cloud)
-        correction = self.solve_algo2(detected_keypoints, input_point_cloud, padding)
+        correction, _ = self.solve(detected_keypoints, input_point_cloud)
 
         return correction
 
@@ -189,8 +183,6 @@ class kp_corrector_reg():
         input:
         detected_keypoints  : torch.tensor of shape (B, 3, N)
         input_point_cloud   : torch.tensor of shape (B, 3, m)
-        padding             : None or torch.tensor of shape (B, m) dtype=torch.bool
-                                        where True means it is a padded point to be ignored in chamfer loss computation.
 
         output:
         correction          : torch.tensor of shape (B, 3, N)
@@ -201,14 +193,12 @@ class kp_corrector_reg():
 
         return correction, None
 
-    def objective(self, detected_keypoints, input_point_cloud, correction, padding=None):
+    def objective(self, detected_keypoints, input_point_cloud, correction):
         """
         inputs:
         detected_keypoints  : torch.tensor of shape (B, 3, N)
         input_point_cloud   : torch.tensor of shape (B, 3, m)
         correction          : torch.tensor of shape (B, 3, N)
-        padding             : None or torch.tensor of shape (B, m) dtype=torch.bool
-                                        where True means it is a padded point to be ignored in chamfer loss computation.
 
         outputs:
         loss    : torch.tensor of shape (B, 1)
@@ -221,7 +211,7 @@ class kp_corrector_reg():
         model_estimate = R @ self.cad_models + t
         keypoint_estimate = R @ self.model_keypoints + t
 
-        loss_pc = chamfer_loss(pc=input_point_cloud, pc_=model_estimate, pc_padding=padding)
+        loss_pc = chamfer_loss(pc=input_point_cloud, pc_=model_estimate)
         # loss_pc = chamfer_loss_with_surface_normals(pc=input_point_cloud, pc_=model_estimate)
 
         loss_kp = keypoints_loss(kp=detected_keypoints+correction, kp_=keypoint_estimate)
@@ -243,7 +233,7 @@ class kp_corrector_reg():
 
         return dfdcorrection
 
-    def solve_algo2(self, detected_keypoints, input_point_cloud, padding=None, lr=0.1, max_iterations=1000, tol=1e-12):
+    def solve_algo2(self, detected_keypoints, input_point_cloud, lr=0.1, max_iterations=1000, tol=1e-12):
         """
         inputs:
         detected_keypoints  : torch.tensor of shape (B, 3, N)
@@ -255,7 +245,7 @@ class kp_corrector_reg():
         N = detected_keypoints.shape[-1]
         batch_size = detected_keypoints.shape[0]
 
-        f = lambda x: self.objective(detected_keypoints, input_point_cloud, x, padding)
+        f = lambda x: self.objective(detected_keypoints, input_point_cloud, x)
 
         correction = torch.zeros_like(detected_keypoints)
 
@@ -419,8 +409,7 @@ class kp_corrector_reg():
 
         return None
 
-    def objective_numpy(self, detected_keypoints, input_point_cloud, correction, padding=None):
-        # ToDo: Have to change for padding.
+    def objective_numpy(self, detected_keypoints, input_point_cloud, correction):
         """
         inputs:
         detected_keypoints  : numpy.ndarray of shape (3, N)
@@ -438,12 +427,11 @@ class kp_corrector_reg():
         correction = torch.from_numpy(correction).unsqueeze(0).to(torch.float)
 
         loss = self.objective(detected_keypoints=detected_keypoints, input_point_cloud=input_point_cloud,
-                              padding=padding, correction=correction)
+                              correction=correction)
 
         return loss.squeeze(0).numpy()
 
     def solve_algo1(self, detected_keypoints, input_point_cloud, lr=0.1, num_steps=20):
-        #ToDo: Have to change for padding.
         """
         inputs:
         detected_keypoints  : torch.tensor of shape (B, 3, N)
@@ -452,10 +440,6 @@ class kp_corrector_reg():
         outputs:
         correction          : torch.tensor of shape (B, 3, N)
         """
-
-        #ToDo: This corrects and registers the point clout very well. Two problems:
-        # 1. It changes the orientation of the object sometimes
-        # 2. It takes a few seconds to converge, which may be hard for a real-time operation
 
         N = detected_keypoints.shape[-1]
         batch_size = detected_keypoints.shape[0]
@@ -507,8 +491,8 @@ class kp_corrector_reg():
         return correction.clone().detach()
 
 
-class kp_corrector_pace():  #ToDo: remove batch_size
-    def __init__(self, cad_models, model_keypoints, batch_size=32, theta=10.0, kappa=50.0):
+class kp_corrector_pace():
+    def __init__(self, cad_models, model_keypoints, theta=10.0, kappa=50.0):
         super().__init__()
         """
         cad_models      : torch.tensor of shape (K, 3, m)
@@ -518,8 +502,10 @@ class kp_corrector_pace():  #ToDo: remove batch_size
         self.model_keypoints = model_keypoints
         self.theta = theta
         self.kappa = kappa
-        self.pace = PACEbp(model_keypoints=self.model_keypoints)
+        self.pace = PACEmodule(model_keypoints=self.model_keypoints)
         self.modelgen = ModelFromShape(cad_models=self.cad_models, model_keypoints=self.model_keypoints)
+
+        self.device_ = model_keypoints.device
 
     def forward(self, detected_keypoints, input_point_cloud):
         """
@@ -531,8 +517,7 @@ class kp_corrector_pace():  #ToDo: remove batch_size
         correction          : torch.tensor of shape (B, 3, N)
         """
 
-        # correction = self.solve_algo1(detected_keypoints, input_point_cloud)
-        correction = self.solve_algo2(detected_keypoints, input_point_cloud)
+        correction, _ = self.solve(detected_keypoints, input_point_cloud)
 
         return correction
 
@@ -712,7 +697,7 @@ class kp_corrector_pace():  #ToDo: remove batch_size
         """
 
         # start = time.perf_counter()
-        R, t, c = self.pace.forward(y=detected_keypoints + correction)
+        R, t, c = self.pace(detected_keypoints + correction)
         # print("pace run time: ", time.perf_counter()-start)
         # mid = time.perf_counter()
         keypoint_estimate, model_estimate = self.modelgen.forward(shape=c)
@@ -745,10 +730,11 @@ class kp_corrector_pace():  #ToDo: remove batch_size
         input_point_cloud = torch.from_numpy(input_point_cloud).unsqueeze(0).to(torch.float)
         correction = torch.from_numpy(correction).unsqueeze(0).to(torch.float)
 
-        loss = self.objective(detected_keypoints=detected_keypoints, input_point_cloud=input_point_cloud,
-                              correction=correction)
+        loss = self.objective(detected_keypoints=detected_keypoints.to(device=self.device_),
+                              input_point_cloud=input_point_cloud.to(device=self.device_),
+                              correction=correction.to(device=self.device_))
 
-        return loss.squeeze(0).numpy()
+        return loss.squeeze(0).to('cpu').numpy()
 
     def _get_objective_jacobian(self, fun, correction):
         #ToDo: Move inside solve_algo2()
@@ -764,7 +750,7 @@ class kp_corrector_pace():  #ToDo: remove batch_size
 
         return dfdcorrection
 
-    def solve_algo2(self, detected_keypoints, input_point_cloud, lr=0.1, max_iterations=10, tol=1e-12):
+    def solve_algo2(self, detected_keypoints, input_point_cloud, lr=0.1, max_iterations=1000, tol=1e-12):
         """
         inputs:
         detected_keypoints  : torch.tensor of shape (B, 3, N)
@@ -795,7 +781,7 @@ class kp_corrector_pace():  #ToDo: remove batch_size
             iter += 1
             obj = obj_
 
-            print(iter)
+            # print(iter)
 
             dfdcorrection = self._get_objective_jacobian(f, correction)
             correction -= lr*dfdcorrection*flag
@@ -812,7 +798,7 @@ class kp_corrector_pace():  #ToDo: remove batch_size
 
         return correction
 
-    def solve_algo1(self, detected_keypoints, input_point_cloud, lr=0.1, num_steps=20):
+    def solve_algo1(self, detected_keypoints, input_point_cloud):
         """
         inputs:
         detected_keypoints  : torch.tensor of shape (B, 3, N)
@@ -838,8 +824,8 @@ class kp_corrector_pace():  #ToDo: remove batch_size
 
                 kp = detected_keypoints[batch, ...]
                 pc = input_point_cloud[batch, ...]
-                kp = kp.clone().detach().to('cpu').numpy()
-                pc = pc.clone().detach().to('cpu').numpy()
+                kp = kp.to('cpu').numpy()
+                pc = pc.to('cpu').numpy()
 
 
                 batch_correction_init = 0.001*np.random.rand(3*N)
@@ -875,7 +861,7 @@ class kp_corrector_pace():  #ToDo: remove batch_size
                 correction[batch, ...] = batch_correction
 
 
-        return correction.clone().detach()
+        return correction
 
 
 
@@ -909,10 +895,10 @@ if __name__ == "__main__":
     #
     # # define the keypoint corrector
     # # option 1: use the backprop through all the iterations of optimization
-    # # corrector = kp_corrector_reg(cad_models=cad_models, model_keypoints=model_keypoints)
-    # # option 2: use autograd computed gradient for backprop
-    # corrector_node = kp_corrector_reg(cad_models=cad_models, model_keypoints=model_keypoints)
-    # corrector = ParamDeclarativeFunction(problem=corrector_node)
+    # corrector = kp_corrector_reg(cad_models=cad_models, model_keypoints=model_keypoints)
+    # # option 2: use autograd computed gradient for backprop. #ToDo: Not implemented gradient() correctly.
+    # # corrector_node = kp_corrector_reg(cad_models=cad_models, model_keypoints=model_keypoints)
+    # # corrector = ParamDeclarativeFunction(problem=corrector_node)
     #
     #
     # point_set_reg = PointSetRegistration(source_points=model_keypoints)
@@ -941,7 +927,7 @@ if __name__ == "__main__":
     #     # display_two_pcs(pc1=input_point_cloud[0, ...].detach(), pc2=model_estimate[0, ...].detach())
     #
     #     # # estimate model: using the keypoint corrector
-    #     detected_keypoints.requires_grad = True
+    #     # detected_keypoints.requires_grad = True
     #     start = time.perf_counter()
     #     correction = corrector.forward(detected_keypoints, input_point_cloud)
     #     # correction, _ = corrector.solve(detected_keypoints, input_point_cloud)
@@ -949,13 +935,13 @@ if __name__ == "__main__":
     #     print("Corrector time: ", 1000*(end-start)/B, ' ms')
     #     #
     #
-    #     loss = torch.norm(correction, p=2)**2
-    #     loss = loss.sum()
-    #     print("Testing backward: ")
-    #     loss.backward()
-    #     print("Shape of detected_keypoints.grad: ", detected_keypoints.grad.shape)
-    #     print("Sum of abs() of all elements in the detected_keypoints.grad: ", detected_keypoints.grad.abs().sum())
-    #     #
+    #     # loss = torch.norm(correction, p=2)**2
+    #     # loss = loss.sum()
+    #     # print("Testing backward: ")
+    #     # loss.backward()
+    #     # print("Shape of detected_keypoints.grad: ", detected_keypoints.grad.shape)
+    #     # print("Sum of abs() of all elements in the detected_keypoints.grad: ", detected_keypoints.grad.abs().sum())
+    #     # #
     #
     #     # correction = torch.zeros_like(correction)
     #     R, t = point_set_reg.forward(target_points=detected_keypoints+correction)
@@ -987,10 +973,10 @@ if __name__ == "__main__":
     #
     # # define the keypoint corrector
     # # option 1: use the backprop through all the iterations of optimization
-    # # corrector = kp_corrector_reg(cad_models=cad_models, model_keypoints=model_keypoints)
-    # # option 2: use autograd computed gradient for backprop
-    # corrector_node = kp_corrector_reg(cad_models=cad_models, model_keypoints=model_keypoints)
-    # corrector = ParamDeclarativeFunction(problem=corrector_node)
+    # corrector = kp_corrector_reg(cad_models=cad_models, model_keypoints=model_keypoints)
+    # # option 2: use autograd computed gradient for backprop. #ToDo: Not implemented gradient() correctly.
+    # # corrector_node = kp_corrector_reg(cad_models=cad_models, model_keypoints=model_keypoints)
+    # # corrector = ParamDeclarativeFunction(problem=corrector_node)
     #
     #
     # point_set_reg = PointSetRegistration(source_points=model_keypoints)
@@ -1018,20 +1004,20 @@ if __name__ == "__main__":
     #     display_two_pcs(pc1=input_point_cloud[0, ...].detach(), pc2=model_estimate[0, ...].detach())
     #
     #     # estimate model: using the keypoint corrector
-    #     detected_keypoints.requires_grad = True
+    #     # detected_keypoints.requires_grad = True
     #     start = time.process_time()
     #     correction = corrector.forward(detected_keypoints, input_point_cloud)
     #     end = time.process_time()
     #     print("Corrector time: ", 1000 * (end - start) / B, ' ms')
     #
-    #     #
-    #     loss = torch.norm(correction, p=2) ** 2
-    #     loss = loss.sum()
-    #     print("Testing backward: ")
-    #     loss.backward()
-    #     print("Shape of detected_keypoints.grad: ", detected_keypoints.grad.shape)
-    #     print("Sum of abs() of all elements in the detected_keypoints.grad: ", detected_keypoints.grad.abs().sum())
-    #     #
+    #     # #
+    #     # loss = torch.norm(correction, p=2) ** 2
+    #     # loss = loss.sum()
+    #     # print("Testing backward: ")
+    #     # loss.backward()
+    #     # print("Shape of detected_keypoints.grad: ", detected_keypoints.grad.shape)
+    #     # print("Sum of abs() of all elements in the detected_keypoints.grad: ", detected_keypoints.grad.abs().sum())
+    #     # #
     #
     #
     #
@@ -1050,11 +1036,11 @@ if __name__ == "__main__":
     #
     # print("-" * 40)
 
-    ####################################################################################################################
+    ###################################################################################################################
     print("-"*40)
     print("Verifying kp_corrector_pace() with SE3nIsotropicShapePointCloud(dataset) and keypoint_perturbation(): ")
 
-    B = 10
+    B = 1
     se3_dataset = SE3nIsotorpicShapePointCloud(class_id=class_id, model_id=model_id, num_of_points=500, dataset_len=1000)
     se3_dataset_loader = torch.utils.data.DataLoader(se3_dataset, batch_size=B, shuffle=False)
 
@@ -1066,12 +1052,12 @@ if __name__ == "__main__":
 
     # define the keypoint corrector
     # option 1: use the backprop through all the iterations of optimization
-    # corrector = kp_corrector_reg(cad_models=cad_models, model_keypoints=model_keypoints)
-    # option 2: use autograd computed gradient for backprop
-    corrector_node = kp_corrector_pace(cad_models=cad_models, model_keypoints=model_keypoints)
-    corrector = ParamDeclarativeFunction(problem=corrector_node)
+    corrector = kp_corrector_pace(cad_models=cad_models, model_keypoints=model_keypoints)
+    # option 2: use autograd computed gradient for backprop. #ToDo: Not implemented gradient() correctly, yet.
+    # corrector_node = kp_corrector_pace(cad_models=cad_models, model_keypoints=model_keypoints)
+    # corrector = ParamDeclarativeFunction(problem=corrector_node)
 
-    pace = PACEbp(model_keypoints=model_keypoints)
+    pace = PACEmodule(model_keypoints=model_keypoints)
     modelgen = ModelFromShape(cad_models=cad_models, model_keypoints=model_keypoints)
 
 
@@ -1089,13 +1075,12 @@ if __name__ == "__main__":
         # generating perturbed keypoints
         # keypoints_true = rotation_true @ model_keypoints + translation_true
         # detected_keypoints = keypoints_true
-        detected_keypoints = keypoint_perturbation(keypoints_true=keypoints_true, type='sporadic', var=0.8, fra=1.0)
+        detected_keypoints = keypoint_perturbation(keypoints_true=keypoints_true, type='sporadic', var=0.8, fra=0.2)
         detected_keypoints = detected_keypoints.to(device=device)
 
         # estimate model: using point set registration on perturbed keypoints
         start = time.perf_counter()
-        print(detected_keypoints.device)
-        R_naive, t_naive, c_naive = pace.forward(detected_keypoints)
+        R_naive, t_naive, c_naive = pace(detected_keypoints)
         end = time.perf_counter()
         print("Naive pace time: ", 1000*(end-start)/B, " ms")
         keypoint_naive, model_naive = modelgen.forward(shape=c_naive)
@@ -1105,7 +1090,7 @@ if __name__ == "__main__":
 
 
         # # estimate model: using the keypoint corrector
-        detected_keypoints.requires_grad = True
+        # detected_keypoints.requires_grad = True
         start = time.perf_counter()
         correction = corrector.forward(detected_keypoints, input_point_cloud)
         # correction, _ = corrector.solve(detected_keypoints, input_point_cloud)
@@ -1113,13 +1098,13 @@ if __name__ == "__main__":
         print("Corrector with pace time: ", 1000*(end-start)/B, ' ms')
         #
 
-        loss = torch.norm(correction, p=2)**2
-        loss = loss.sum()
-        print("Testing backward: ")
-        loss.backward()
-        print("Shape of detected_keypoints.grad: ", detected_keypoints.grad.shape)
-        print("Sum of abs() of all elements in the detected_keypoints.grad: ", detected_keypoints.grad.abs().sum())
-        #
+        # loss = torch.norm(correction, p=2)**2
+        # loss = loss.sum()
+        # print("Testing backward: ")
+        # loss.backward()
+        # print("Shape of detected_keypoints.grad: ", detected_keypoints.grad.shape)
+        # print("Sum of abs() of all elements in the detected_keypoints.grad: ", detected_keypoints.grad.abs().sum())
+        # #
 
         # correction = torch.zeros_like(correction)
         R, t, c = pace.forward(detected_keypoints+correction)
