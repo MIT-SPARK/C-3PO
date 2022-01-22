@@ -79,7 +79,7 @@ class PACEmodule(nn.Module):
     Note:
         The rotation computation is implemented as a cvxpylayer, which is also a nn.Module
     """
-    def __init__(self, weights, model_keypoints, lambda_constant=torch.tensor(1.0)):
+    def __init__(self, model_keypoints, weights=None, lambda_constant=torch.tensor(1.0)):
         super(PACEmodule, self).__init__()
         """
         weights: torch.tensor of shape (N, 1)
@@ -87,13 +87,16 @@ class PACEmodule(nn.Module):
         lambda_constant: torch.tensor of shape (1, 1)
         """
 
-        self.w = weights.unsqueeze(0)               # (1, N, 1)
         self.b = model_keypoints                    # (K, 3, N)
         self.device_ = model_keypoints.device
         self.lambda_constant = lambda_constant.to(device=self.device_)  # (1, 1)
-
         self.N = self.b.shape[-1]                   # (1, 1)
         self.K = self.b.shape[0]                    # (1, 1)
+
+        if weights==None:
+            self.w = torch.ones(1, self.N, 1).to(device=self.device_)
+        else:
+            self.w = weights.unsqueeze(0)  # (1, N, 1)
 
         self.b_w = self._get_b_w()                  # (1, K, 3)
         self.bar_B = self._get_bar_B()              # (1, 3N, K)
