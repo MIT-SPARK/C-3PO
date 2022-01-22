@@ -14,6 +14,7 @@ from pytorch3d import ops
 from torch.utils.tensorboard import SummaryWriter
 from datetime import datetime
 
+import os
 import sys
 sys.path.append("../../")
 
@@ -133,10 +134,10 @@ class ProposedModel(nn.Module):
         device_ = input_point_cloud.device
         detected_keypoints = self.keypoint_detector(input_point_cloud)
         if self.viz_keypoint_correction:
-            print("visualizing detected keypoints")
+        #     print("visualizing detected keypoints")
             inp = input_point_cloud.clone().detach().to('cpu')
-            kp = detected_keypoints.clone().detach().to('cpu')
-            display_results(inp, kp, inp, kp)
+            det_kp = detected_keypoints.clone().detach().to('cpu')
+        #     display_results(inp, kp, inp, kp)
             # print("FINISHED DETECTOR")
 
         if not correction_flag:
@@ -153,9 +154,10 @@ class ProposedModel(nn.Module):
             if self.viz_keypoint_correction:
                 # print("FINISHED CORRECTOR")
                 print("visualizing corrected keypoints")
-                inp = predicted_point_cloud.clone().detach().to('cpu')
-                kp = corrected_keypoints.clone().detach().to('cpu')
-                display_results(inp, kp, inp, kp)
+                Rt_inp = predicted_point_cloud.clone().detach().to('cpu')
+                corrected_kp = corrected_keypoints.clone().detach().to('cpu')
+                display_results(inp, det_kp, Rt_inp, corrected_kp)
+            # model_keypoints = R @ self.model_keypoints + t
             return predicted_point_cloud, corrected_keypoints, R, t, correction
 
 
@@ -197,8 +199,8 @@ def translation_loss(t, t_):
 def chamfer_loss(pc, pc_, pc_padding=None):
     """
     inputs:
-    pc  : torch.tensor of shape (B, 3, n)
-    pc_ : torch.tensor of shape (B, 3, m)
+    pc  : torch.tensor of shape (B, 3, n) #input pointcloud
+    pc_ : torch.tensor of shape (B, 3, m) #predicted pointcloud
     pc_padding  : torch.tensor of shape (B, n)  : indicates if the point in pc is real-input or padded in
 
     output:
@@ -213,10 +215,11 @@ def chamfer_loss(pc, pc_, pc_padding=None):
         # computes a padding by flagging zero vectors in the input point cloud.
         pc_padding = ((pc == torch.zeros(3, 1).to(device=device_)).sum(dim=1) == 3)
         # pc_padding = torch.zeros(batch_size, n).to(device=device_)
+    #pc may have a ton of points at 0,0,0
+    #for every point in the input point cloud pc, we want the closest point in the predicted pc_
+    sq_dist, _, _ = ops.knn_points(torch.transpose(pc, -1, -2), torch.transpose(pc_, -1, -2), K=1, return_sorted=False)
 
-    sq_dist, _, _ = ops.knn_points(torch.transpose(pc, -1, -2), torch.transpose(pc_, -1, -2), K=1)
     # dist (B, n, 1): distance from point in X to the nearest point in Y
-
     sq_dist = sq_dist.squeeze(-1)*torch.logical_not(pc_padding)
     a = torch.logical_not(pc_padding)
     loss = sq_dist.sum(dim=1)/a.sum(dim=1)
@@ -240,7 +243,12 @@ def self_supervised_loss(input_point_cloud, predicted_point_cloud, keypoint_corr
     pc_loss = pc_loss.mean()
 
     lossMSE = torch.nn.MSELoss()
-    kp_loss = lossMSE(keypoint_correction, torch.zeros_like(keypoint_correction)).mean()
+    if keypoint_correction is None:
+        kp_loss = torch.zeros(pc_loss.shape)
+    else:
+        kp_loss = lossMSE(keypoint_correction, torch.zeros_like(keypoint_correction)).mean()
+        print("kp_loss", kp_loss)
+        print("pc_loss", pc_loss)
     return pc_loss + theta*kp_loss
 
 
@@ -303,7 +311,7 @@ def validation_loss(input, output):
 
 
 # Training code
-def self_supervised_train_one_epoch(epoch_index, tb_writer, training_loader, model, optimizer):
+def self_supervised_train_one_epoch(epoch_index, tb_writer, training_loader, model, optimizer, correction_flag):
     running_loss = 0.
     last_loss = 0.
 
@@ -320,7 +328,7 @@ def self_supervised_train_one_epoch(epoch_index, tb_writer, training_loader, mod
         optimizer.zero_grad()
 
         # Make predictions for this batch
-        predicted_point_cloud, _, _, _, correction = model(input_point_cloud, correction_flag=True)
+        predicted_point_cloud, _, _, _, correction = model(input_point_cloud, correction_flag=correction_flag)
         # Compute the loss and its gradients
         loss = self_supervised_loss(input_point_cloud=input_point_cloud,
                                     predicted_point_cloud=predicted_point_cloud,
@@ -354,7 +362,7 @@ def self_supervised_train_one_epoch(epoch_index, tb_writer, training_loader, mod
     return last_loss
 
 
-def supervised_train_one_epoch(epoch_index, tb_writer, training_loader, model, optimizer):
+def supervised_train_one_epoch(epoch_index, tb_writer, training_loader, model, optimizer, correction_flag):
     running_loss = 0.
     last_loss = 0.
 
@@ -374,7 +382,7 @@ def supervised_train_one_epoch(epoch_index, tb_writer, training_loader, model, o
 
         # Make predictions for this batch
         predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted, _ = model(input_point_cloud,
-                                                                                     correction_flag=False)
+                                                                                     correction_flag=correction_flag)
 
         # Compute the loss and its gradients
         loss = supervised_loss(input=(input_point_cloud, keypoints_target, R_target, t_target),
@@ -410,7 +418,7 @@ def supervised_train_one_epoch(epoch_index, tb_writer, training_loader, model, o
 
 
 # Validation code
-def validate(writer, validation_loader, model):
+def validate(writer, validation_loader, model, correction_flag):
 
     with torch.no_grad():
 
@@ -425,7 +433,7 @@ def validate(writer, validation_loader, model):
 
             # Make predictions for this batch
             predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted, _ = model(input_point_cloud,
-                                                                                            correction_flag=True)
+                                                                                            correction_flag=correction_flag)
 
             vloss = validation_loss(input=(input_point_cloud, keypoints_target, R_target, t_target),
                                    output=(predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted))
@@ -434,10 +442,10 @@ def validate(writer, validation_loader, model):
 
             # if i==0:
             #     # Display results for validation
-            #     pc = input_point_cloud.clone().detach().to('cpu')
-            #     pc_t = target_point_cloud.clone().detach().to('cpu')
-            #     kp = detected_keypoints.clone().detach().to('cpu')
-            #     kp_t = target_keypoints.clone().detach().to('cpu')
+            #     pc = predicted_point_cloud.clone().detach().to('cpu')
+            #     pc_t = input_point_cloud.clone().detach().to('cpu')
+            #     kp = predicted_keypoints.clone().detach().to('cpu')
+            #     kp_t = keypoints_target.clone().detach().to('cpu')
             #     display_results(input_point_cloud=pc, detected_keypoints=kp, target_point_cloud=pc_t,
             #                     target_keypoints=kp_t)
             #     del pc, pc_t, kp, kp_t
@@ -450,7 +458,7 @@ def validate(writer, validation_loader, model):
     return avg_vloss
 
 
-def train_with_supervision(supervised_training_loader, validation_loader, model, optimizer):
+def train_with_supervision(supervised_training_loader, validation_loader, model, optimizer, correction_flag):
 
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     writer = SummaryWriter(SAVE_LOCATION + 'expt_keypoint_detect_{}'.format(timestamp))
@@ -467,11 +475,11 @@ def train_with_supervision(supervised_training_loader, validation_loader, model,
         model.train(True)
         print("Training on simulated data with supervision:")
         avg_loss_supervised = supervised_train_one_epoch(epoch_number, writer, supervised_training_loader, model,
-                                                         optimizer)
+                                                         optimizer, correction_flag=correction_flag)
         # Validation. We don't need gradients on to do reporting.
         model.train(False)
         print("Validation on real data: ")
-        avg_vloss = validate(writer, validation_loader, model)
+        avg_vloss = validate(writer, validation_loader, model, correction_flag=correction_flag)
 
         print('LOSS supervised-train {}, valid {}'.format(avg_loss_supervised, avg_vloss))
         writer.add_scalars('Training vs. Validation Loss',
@@ -485,7 +493,7 @@ def train_with_supervision(supervised_training_loader, validation_loader, model,
             best_vloss = avg_vloss
             model_path = SAVE_LOCATION + 'expt_keypoint_detect_' + 'model_{}_{}'.format(timestamp, epoch_number)
             torch.save(model.state_dict(), model_path)
-            best_model_path = SAVE_LOCATION + 'best_supervised_keypoint_detect_model.pth'
+            best_model_path = SAVE_LOCATION + 'best_supervised_keypoint_detect_model_se3.pth'
             torch.save(model.state_dict(), best_model_path)
 
         epoch_number += 1
@@ -495,7 +503,7 @@ def train_with_supervision(supervised_training_loader, validation_loader, model,
     return None
 
 
-def train_without_supervision(self_supervised_train_loader, validation_loader, model, optimizer):
+def train_without_supervision(self_supervised_train_loader, validation_loader, model, optimizer, correction_flag):
 
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     writer = SummaryWriter(SAVE_LOCATION + 'expt_keypoint_detect_{}'.format(timestamp))
@@ -512,12 +520,12 @@ def train_without_supervision(self_supervised_train_loader, validation_loader, m
         model.train(True)
         print("Training on real data with self-supervision: ")
         ave_loss_self_supervised = self_supervised_train_one_epoch(epoch_number, writer, self_supervised_train_loader,
-                                                                model, optimizer)
+                                                                model, optimizer, correction_flag=correction_flag)
 
         # Validation. We don't need gradients on to do reporting.
         model.train(False)
         print("Validation on real data: ")
-        avg_vloss = validate(writer, validation_loader, model)
+        avg_vloss = validate(writer, validation_loader, model, correction_flag=correction_flag)
 
         print('LOSS self-supervised train {}, valid {}'.format(ave_loss_self_supervised, avg_vloss))
 
@@ -534,7 +542,7 @@ def train_without_supervision(self_supervised_train_loader, validation_loader, m
             best_vloss = avg_vloss
             model_path = SAVE_LOCATION + 'expt_keypoint_detect_' + 'model_{}_{}'.format(timestamp, epoch_number)
             torch.save(model.state_dict(), model_path)
-            best_model_path = SAVE_LOCATION + 'best_self_supervised_keypoint_detect_model.pth'
+            best_model_path = SAVE_LOCATION + 'best_self_supervised_keypoint_detect_model_with_supervised_pretraining_with_corrector.pth'
             torch.save(model.state_dict(), best_model_path)
 
         epoch_number += 1
@@ -565,7 +573,9 @@ def visual_test(test_loader, model):
         pc_p = predicted_point_cloud.clone().detach().to('cpu')
         kp = keypoints_target.clone().detach().to('cpu')
         kp_p = predicted_keypoints.clone().detach().to('cpu')
-        display_results(input_point_cloud=pc, detected_keypoints=kp_p, target_point_cloud=pc_p,
+        # display_results(input_point_cloud=pc, detected_keypoints=kp_p, target_point_cloud=pc_p,
+        #                 target_keypoints=kp)
+        display_results(input_point_cloud=pc_p, detected_keypoints=kp_p, target_point_cloud=pc,
                         target_keypoints=kp)
 
         del pc, pc_p, kp, kp_p
@@ -603,6 +613,7 @@ if __name__ == "__main__":
     class_name = CLASS_NAME[class_id]
     model_id = "1e3fba4500d20bb49b9f2eb77f5e247e"  # a particular chair model
     dataset_dir = '../../data/learning_objects/'
+    correction_flag = True
 
     # optimization parameters
     lr_sgd = 0.02
@@ -617,8 +628,8 @@ if __name__ == "__main__":
 
     # real dataset:
     self_supervised_train_dataset_len = 10
-    self_supervised_train_batch_size = 5
-    num_of_points_to_sample = 10000
+    self_supervised_train_batch_size = 5 #can increase to make it faster
+    num_of_points_to_sample = 1000#0
     num_of_points_selfsupervised = 2048
 
     # supervised and self-supervised training data
@@ -651,10 +662,10 @@ if __name__ == "__main__":
 
     # model
     model = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,
-                          keypoint_detector=None, use_pretrained_regression_model=False).to(device)
+                          keypoint_detector=None, use_pretrained_regression_model=True).to(device)
     if model.use_pretrained_regression_model:
         print("USING PRETRAINED REGRESSION MODEL, ONLY USE THIS WITH SELF-SUPERVISION")
-        best_model_checkpoint = os.path.join(SAVE_LOCATION, 'best_supervised_keypoint_detect_model.pth')
+        best_model_checkpoint = os.path.join(SAVE_LOCATION, 'best_supervised_keypoint_detect_model_se3.pth')
         if not os.path.isfile(best_model_checkpoint):
             print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")
         state_dict = torch.load(best_model_checkpoint)
@@ -670,19 +681,28 @@ if __name__ == "__main__":
 
 
     # training
-    # for Regression KD
+    # for Regression KD val and test on depth pcl
     # train_with_supervision(supervised_training_loader=supervised_train_loader,
     #                        validation_loader=self_supervised_train_loader,
     #                        model=model,
     #                        optimizer=optimizer)
+    # for Regression KD val and test on se3 pcl
+    # train_with_supervision(supervised_training_loader=supervised_train_loader,
+    #                        validation_loader=supervised_train_loader,
+    #                        model=model,
+    #                        optimizer=optimizer,
+    #                        correction_flag=correction_flag)
     train_without_supervision(self_supervised_train_loader=self_supervised_train_loader,
                               validation_loader=self_supervised_train_loader,
                               model=model,
-                              optimizer=optimizer)
+                              optimizer=optimizer,
+                              correction_flag=correction_flag)
 
     # test
     print("Visualizing the trained model.")
     visual_test(test_loader=self_supervised_train_loader, model=model)
+    # visual_test(test_loader=supervised_train_loader, model=model, correction_flag=correction_flag)
+
 
 
 

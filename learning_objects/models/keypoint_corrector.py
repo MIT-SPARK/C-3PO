@@ -260,7 +260,7 @@ class kp_corrector_reg():
 
         f = lambda x: self.objective(detected_keypoints, input_point_cloud, x, padding)
 
-        correction = torch.zeros_like(detected_keypoints)
+        correction = torch.zeros_like(detected_keypoints, requires_grad=True) #todo: lisa update
 
         # max_iterations = max_iterations
         # tol = tol
@@ -277,7 +277,9 @@ class kp_corrector_reg():
             obj = obj_
 
             dfdcorrection = self._get_objective_jacobian(f, correction)
-            correction -= lr*dfdcorrection*flag
+            #correction -= lr*dfdcorrection*flag
+            #todo: lisa replaced line above with
+            correction = correction - lr*dfdcorrection*flag
             # correction -= lr * dfdcorrection
 
             obj_ = f(correction)

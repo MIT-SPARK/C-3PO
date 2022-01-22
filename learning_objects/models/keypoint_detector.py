@@ -22,7 +22,7 @@ from learning_objects.models.point_transformer import PointTransformerSegment, P
 from learning_objects.models.pointnet import PointNetDenseCls, PointNetCls
 from learning_objects.models.rsnet import RSNet
 
-CORRESPONDENCE_LOG_FOLER: str = '../../KeypointNetLearningObjects/benchmark_scripts/correspondence_log/'
+CORRESPONDENCE_LOG_FOLER: str = '../../KeypointNetLearning-Objects/benchmark_scripts/correspondence_log/'
 
 
 class ModelWrapper(torch.nn.Module):
