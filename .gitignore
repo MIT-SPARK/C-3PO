@@ -10,6 +10,8 @@ learning_objects/data/
 KeypointNetLearning-Objects/models/*
 KeypointNetLearning-Objects/pcds/*
 KeypointNetLearning-Objects/annotations/*
+KeypointNetLearning-Objects/benchmark_scripts/cache
+KeypointNetLearning-Objects/benchmark_scripts/correspondance_log
 
 # Temporary experimental data
 learning_objects/expt_keypoint_corrector_analysis/expt_with_pace_se3isopc
@@ -120,15 +122,5 @@ ENV/
 env.bak/
 venv.bak/
 
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
-
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
+#
+/learning_objects/expt_keypoint_corrector_analysis/expt_with_pace_depthisopc/

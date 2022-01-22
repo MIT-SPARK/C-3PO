@@ -95,13 +95,14 @@ def rotation_error(R, R_):
     """
 
     if R.dim() == 2:
-        return transforms.matrix_to_euler_angles(torch.matmul(R.T, R_), "XYZ").abs().sum()/3.0
+        return torch.arccos(0.5*(torch.trace(R.T @ R)-1))
+        # return transforms.matrix_to_euler_angles(torch.matmul(R.T, R_), "XYZ").abs().sum()/3.0
         # return torch.abs(0.5*(torch.trace(R.T @ R_) - 1).unsqueeze(-1))
         # return 1 - 0.5*(torch.trace(R.T @ R_) - 1).unsqueeze(-1)
         # return torch.norm(R.T @ R_ - torch.eye(3, device=R.device), p='fro')
     elif R.dim() == 3:
-        return transforms.matrix_to_euler_angles(torch.transpose(R, 1, 2) @ R_, "XYZ").abs().mean(1).unsqueeze(1)
-        # return torch.abs(0.5*(torch.einsum('bii->b', torch.transpose(R, 1, 2) @ R_) - 1).unsqueeze(-1))
+        # return transforms.matrix_to_euler_angles(torch.transpose(R, 1, 2) @ R_, "XYZ").abs().mean(1).unsqueeze(1)
+        return torch.acos(0.5*(torch.einsum('bii->b', torch.transpose(R, -1, -2) @ R_) - 1).unsqueeze(-1))
         # return 1 - 0.5 * (torch.einsum('bii->b', torch.transpose(R, 1, 2) @ R_) - 1).unsqueeze(-1)
         # return torch.norm(R.transpose(-1, -2) @ R_ - torch.eye(3, device=R.device), p='fro', dim=[1, 2])
     else:
@@ -214,6 +215,7 @@ class experiment():
             # estimate model: using point set registration on perturbed keypoints
             R_naive, t_naive = self.point_set_registration.forward(target_points=detected_keypoints)
             model_estimate_naive = R_naive @ self.cad_models + t_naive
+            keypoint_estimate_naive = R_naive @ self.model_keypoints + t_naive
             if visualization:
                 print("Displaying input and naive model estimate: ")
                 display_two_pcs(pc1=input_point_cloud.squeeze(0), pc2=model_estimate_naive.squeeze(0))
@@ -223,6 +225,7 @@ class experiment():
             # correction = torch.zeros_like(correction)
             R, t = self.point_set_registration.forward(target_points=detected_keypoints + correction)
             model_estimate = R @ self.cad_models + t
+            keypoint_estimate = R @ self.model_keypoints + t
             if visualization:
                 print("Displaying input and corrector model estimate: ")
                 display_two_pcs(pc1=input_point_cloud.squeeze(0), pc2=model_estimate.squeeze(0))
@@ -245,11 +248,13 @@ class experiment():
             sqdist_input_correctorest.append(sq_dist_input_corrector)
 
             # certification
-            certi, _ = self.certify.forward(X=input_point_cloud, Z=model_estimate_naive)
+            certi, _ = self.certify.forward(X=input_point_cloud, Z=model_estimate_naive,
+                                            kp=keypoint_estimate_naive, kp_=detected_keypoints)
             # certi_naive[i] = certi
             certi_naive = certi
 
-            certi, _ = self.certify.forward(X=input_point_cloud, Z=model_estimate)
+            certi, _ = self.certify.forward(X=input_point_cloud, Z=model_estimate,
+                                            kp=keypoint_estimate, kp_=detected_keypoints+correction)
             # certi_corrector[i] = certi
             certi_corrector = certi
 

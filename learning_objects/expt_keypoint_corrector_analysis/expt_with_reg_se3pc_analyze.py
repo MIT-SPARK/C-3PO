@@ -108,8 +108,8 @@ def varul_mean(data):
 
 if __name__ == '__main__':
 
-    file_names = ["./expt_with_reg_se3pc/20220119_113651_experiment.pickle",
-                  "./expt_with_reg_se3pc/20220119_120203_experiment.pickle"]
+    file_names = ["./expt_with_reg_se3pc/20220122_161424_experiment.pickle",
+                  "./expt_with_reg_se3pc/20220122_163754_experiment.pickle"]
 
     for name in file_names:
 
@@ -119,16 +119,16 @@ if __name__ == '__main__':
 
         print("-" * 80)
 
-        Rerr_naive = data['rotation_err_naive']
-        Rerr_corrector = data['rotation_err_corrector']
-        terr_naive = data['translation_err_naive']
-        terr_corrector = data['translation_err_corrector']
-        certi_naive = data['certi_naive']
-        certi_corrector = data['certi_corrector']
+        Rerr_naive = data['rotation_err_naive'].to('cpu')
+        Rerr_corrector = data['rotation_err_corrector'].to('cpu')
+        terr_naive = data['translation_err_naive'].to('cpu')
+        terr_corrector = data['translation_err_corrector'].to('cpu')
+        certi_naive = data['certi_naive'].to('cpu')
+        certi_corrector = data['certi_corrector'].to('cpu')
         sqdist_input_naiveest = data['sqdist_input_naiveest']
         sqdist_input_correctorest = data['sqdist_input_correctorest']
 
-        kp_noise_var_range = parameters['kp_noise_var_range']
+        kp_noise_var_range = parameters['kp_noise_var_range'].to('cpu')
         kp_noise_type = parameters['kp_noise_type']
         kp_noise_fra = parameters['kp_noise_fra']
         class_id = parameters['class_id']

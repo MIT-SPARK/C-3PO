@@ -22,8 +22,34 @@ sys.path.append("../../")
 
 from learning_objects.utils.ddn.node import AbstractDeclarativeNode, EqConstDeclarativeNode, DeclarativeLayer, ParamDeclarativeFunction
 from learning_objects.utils.general import generate_random_keypoints
-from learning_objects.utils.general import shape_error, translation_error, rotation_error
 
+
+
+def rotation_error(R, R_):
+    """
+    R   : torch.tensor of shape (3, 3) or (B, 3, 3)
+    R_  : torch.tensor of shape (3, 3) or (B, 3, 3)
+
+    out: torch.tensor of shape (1,) or (B, 1)
+
+    """
+    device_ = R.device
+
+    ErrorMat = R @ R_.transpose(-1, -2) - torch.eye(3).to(device=device_)
+
+    return (ErrorMat**2).sum(dim=(-1, -2)).unsqueeze(-1)
+
+def translation_error(t, t_):
+    """
+    t   : torch.tensor of shape (3, 1) or (B, 3, 1)
+    t_  : torch.tensor of shape (3, 1) or (B, 3, 1)
+
+    out: torch.tensor of shape (1,) or (B, 1)
+
+    """
+    ErrorMat = t - t_
+
+    return (ErrorMat ** 2).sum(dim=(-1, -2)).unsqueeze(-1)
 
 
 
@@ -87,7 +113,7 @@ def point_set_registration(source_points, target_points, weights=None, device_=N
     source_points_centered = torch.einsum('bdn,ln->bdn', source_points_centered, weights)   # (B, 3, N)
     target_points_centered = torch.einsum('bdn,ln->bdn', target_points_centered, weights)   # (B, 3, N)
 
-    rotation = wahba(source_points=source_points_centered, target_points=target_points_centered, device_=device_)
+    rotation = wahba(source_points=source_points_centered, target_points=target_points_centered)
 
     # getting the translation
     translation = target_points_ave.unsqueeze(-1) - rotation @ source_points_ave.unsqueeze(-1)
@@ -123,30 +149,31 @@ class PointSetRegistration():
 if __name__ == '__main__':
 
 
-    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    device = 'cpu'
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    # device = 'cpu'
     print('device is ', device)
     print('-' * 20)
 
 
-    B = 1000
-    N = 20
+    B = 2
+    N = 10
     d = 3
 
-    source_points = torch.rand(B, d, N)
-    rotation = transforms.random_rotations(B)
+    source_points = torch.rand(B, d, N).to(device=device)
+    # source_points.requires_grad = True
+
+    rotation = transforms.random_rotations(B).to(device=device)
 
     target_points = rotation @ source_points
-    target_points += 0.01*torch.rand(size=target_points.shape)
-
+    target_points += 0.01*torch.rand(size=target_points.shape).to(device=device)
+    target_points.requires_grad = True
 
     print('-' * 40)
     print("Testing wahba()")
     print('-' * 40)
     start = time.process_time()
     rotation_est = wahba(source_points=source_points - source_points.mean(-1).unsqueeze(-1),
-                         target_points=target_points-target_points.mean(-1).unsqueeze(-1),
-                         device_=device)
+                         target_points=target_points-target_points.mean(-1).unsqueeze(-1))
     end = time.process_time()
     print("Output shape: ", rotation_est.shape)
 
@@ -154,26 +181,32 @@ if __name__ == '__main__':
     print("Rotation error: ", err.mean())
     print("Time for wahba: ", 1000*(end-start)/B, ' ms')
 
+    loss = err.sum()
+    loss.backward()
+    print("Target point gradient: ", target_points.grad)
+
 
     print('-'*40)
     print("Testing point_set_registration()")
     print('-' * 40)
 
-    B = 10
-    N = 20
+
+
+    B = 20
+    N = 10
     d = 3
 
-    source_points = torch.rand(B, d, N)
-    rotation = transforms.random_rotations(B)
-    translation = torch.rand(B, d, 1)
+    source_points = torch.rand(B, d, N).to(device=device)
+    rotation = transforms.random_rotations(B).to(device=device)
+    translation = torch.rand(B, d, 1).to(device=device)
 
     target_points = rotation @ source_points + translation
-    target_points += 0.01*torch.rand(size=target_points.shape)
+    target_points += 0.1*torch.rand(size=target_points.shape).to(device=device)
+    target_points.requires_grad = True
 
     start = time.process_time()
     rotation_est, translation_est = point_set_registration(source_points=source_points,
-                                                           target_points=target_points,
-                                                           device_=device)
+                                                           target_points=target_points)
     end = time.process_time()
 
     print("Output rotation shape: ", rotation.shape)
@@ -185,4 +218,8 @@ if __name__ == '__main__':
     print("Translation error: ", err_trans.mean())
     print("Time for point_set_registration: ", 1000*(end-start)/B, ' ms')
 
+
+    loss = 100*err_rot.sum() + 100*err_trans.sum()
+    loss.backward()
+    print("Target point gradient: ", target_points.grad)
 

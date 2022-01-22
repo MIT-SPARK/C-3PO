@@ -8,7 +8,7 @@ import os
 import sys
 sys.path.append("../../")
 
-from learning_objects.models.pace import PACE, PACEmodule
+from learning_objects.models.pace import PACEmodule
 from learning_objects.models.pace_ddn import PACEbp, PACEddn
 from learning_objects.models.pace_altern_ddn import PACEbp as PACEalternbp
 from learning_objects.utils.category_gnc import solve_3dcat_with_sdp
@@ -132,13 +132,6 @@ if __name__ == '__main__':
     print('-' * 22)
     fn = PACEmodule(weights=weights, model_keypoints=model_keypoints, lambda_constant=lambda_constant)
     pace_implementation.test(fn)
-
-    #
-    print('-' * 22)
-    print("Testing learning_objects.models.pace.PACE")
-    print('-' * 22)
-    fn = PACE(weights=weights, model_keypoints=model_keypoints, lambda_constant=lambda_constant)
-    pace_implementation.test(fn.forward)
 
     #
     print('-' * 22)

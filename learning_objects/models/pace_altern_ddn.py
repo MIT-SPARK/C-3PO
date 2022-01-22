@@ -83,15 +83,21 @@ class PACErotationNshape():
 
         return obj1 + self.lambda_constant*obj2
 
-    def _test(self, bar_y, y):
-        #ToDo: Remove this.
+    def forward(self, bar_y):
+        """
+        inputs:
+        bar_y   : torch.tensor of shape (B, 3*N)    : normalized keypoints. see (9) in [1].
 
-        R, c = self._ytoRc(y)
-        y_new = self._Rctoy(R, c)
+        outputs:
+        y       : torch.tensor of shape (B, 9+K)    : y[b, 0:9] : vectorized rotation matrix
+                                                    : y[b, 9:] : shape vector
 
-        print("Error in y: ", torch.norm(y-y_new, p=2).mean())
+        NOTE: This only mimics solve method. We are keeping this till we implement the .gradient() correctly.
 
-        return None
+        """
+        y, _ = self.solve(bar_y)
+
+        return y
 
     def solve(self, bar_y):
         """
@@ -144,12 +150,8 @@ class PACErotationNshape():
 
         return (grad_input,)
 
-
-
-
     def _gradient_method1(self, bar_y, y=None, v=None, ctx=None):
-        #ToDo: This doesn't work. Gives error saying that the matrix Amat is singular. This may be numerical error
-        # or an error that at training, the matrix does become singular. Don't know how to fix this.
+        #ToDo: Implement the explicit gradient method here.
         """
         inputs:
         bar_y   : torch.tensor of shape (B, 3*N)    : normalized keypoints. see (9) in [1].
@@ -563,14 +565,14 @@ class PACEbp():
         This implment rotation computation is implemented as a declarative node (ddn.node.EqConstDeclarativeNode)
        This module can run on
     """
-    def __init__(self, model_keypoints, weights=None, batch_size=32, device='cpu'):
+    def __init__(self, model_keypoints, weights=None, batch_size=32):
         super().__init__()
         """
         weights: torch.tensor of shape (N, 1)
         model_keypoints: torch.tensor of shape (K, 3, N) 
         lambda_constant: torch.tensor of shape (1, 1)
         """
-        self.device_ = device
+        self.device_ = model_keypoints.device
         self.model_keypoints = model_keypoints.to(device=self.device_)      # (K, 3, N)
 
         self.N = self.model_keypoints.shape[-1]                             # (1, 1)
@@ -587,8 +589,12 @@ class PACEbp():
         self.bar_B = self._get_bar_B()              # (1, 3N, K)
 
         # Rotation ddn layer
-        self.rotation_n_shape = PACErotationNshape(bar_B=self.bar_B, lambda_constant=self.lambda_constant)
-        self.rotation_n_shape_fn = ParamDeclarativeFunction(self.rotation_n_shape)
+        # option 1: as a function. This will backprop through the Alternating Method algorithm steps.
+        self.rotation_n_shape_fn = PACErotationNshape(bar_B=self.bar_B, lambda_constant=self.lambda_constant)
+        # option 2: ParamDeclarativeFunction. This will backprop using a .gradient() module, that can compute
+        # input-output derivatives. NOTE: Currently, this method is not implemented. So, do not use it.
+        # self.rotation_n_shape = PACErotationNshape(bar_B=self.bar_B, lambda_constant=self.lambda_constant)
+        # self.rotation_n_shape_fn = ParamDeclarativeFunction(self.rotation_n_shape)
 
     def forward(self, y):
         """
@@ -606,7 +612,7 @@ class PACEbp():
 
         bar_y_eq9 = torch.transpose(bar_y, -1, -2).reshape(batch_size, -1)
         out = self.rotation_n_shape_fn.forward(bar_y_eq9)
-        R, c = self.rotation_n_shape._ytoRc(out)
+        R, c = self.rotation_n_shape_fn._ytoRc(out)
         # R = torch.transpose(R, -1, -2)
         t = self._translation(y_w=y_w, R=R, c=c)
 
@@ -708,7 +714,7 @@ if __name__ == "__main__":
     lambda_constant = torch.tensor([1.0]).to(device=device)
     cad_models = torch.rand(K, 3, n).to(device=device)
 
-    pace_model = PACEbp(weights=weights, model_keypoints=model_keypoints, batch_size=B, device=device)      #ToDo: Have to make this uniform. Either have device spcification for all such classes, or extract it from inputs.
+    pace_model = PACEbp(weights=weights, model_keypoints=model_keypoints, batch_size=B)
 
     keypoints, rotations, translations, shape = generate_random_keypoints(batch_size=B,
                                                                           model_keypoints=model_keypoints.to('cpu'))
