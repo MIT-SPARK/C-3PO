@@ -31,29 +31,6 @@ from learning_objects.models.pace import PACEmodule
 from learning_objects.models.modelgen import ModelFromShape
 
 
-def chamfer_loss_with_surface_normals(pc, pc_):
-    #ToDo: Not used. If used, need to make sure to get rid of all zero points in pc, when computing loss. See
-    # chamfer_loss.
-    """
-    inputs:
-    pc  : torch.tensor of shape (B, 3, n)
-    pc_ : torch.tensor of shape (B, 3, m)
-
-    output:
-    loss    :
-    """
-
-    normals = ops.estimate_pointcloud_normals(pc.transpose(-1, -2))
-    normals_ = ops.estimate_pointcloud_normals(pc_.transpose(-1, -2))
-
-    loss, loss_normals = pyt_chamfer_distance(x=pc.transpose(-1, -2),
-                                              y=pc_.transpose(-1, -2),
-                                              x_normals=normals, y_normals=normals_)
-
-    # Using surface normals in the loss function, takes a long time, but
-    # converges correctly. Not much orientation errors; provided you weigh the loss_normals correctly.
-    return loss + 0.01*loss_normals
-
 def chamfer_loss(pc, pc_, pc_padding=None):
     """
     inputs:
@@ -73,7 +50,7 @@ def chamfer_loss(pc, pc_, pc_padding=None):
         pc_padding = ((pc == torch.zeros(3, 1).to(device=device_)).sum(dim=1) == 3)
         # pc_padding = torch.zeros(batch_size, n).to(device=device_)
 
-    sq_dist, _, _ = ops.knn_points(torch.transpose(pc, -1, -2), torch.transpose(pc_, -1, -2), K=1)
+    sq_dist, _, _ = ops.knn_points(torch.transpose(pc, -1, -2), torch.transpose(pc_, -1, -2), K=1, return_sorted=False)
     # dist (B, n, 1): distance from point in X to the nearest point in Y
 
     sq_dist = sq_dist.squeeze(-1)*torch.logical_not(pc_padding)
@@ -81,6 +58,7 @@ def chamfer_loss(pc, pc_, pc_padding=None):
     loss = sq_dist.sum(dim=1)/a.sum(dim=1)
 
     return loss.unsqueeze(-1)
+
 
 def keypoints_loss(kp, kp_):
     """
@@ -92,6 +70,41 @@ def keypoints_loss(kp, kp_):
     lossMSE = torch.nn.MSELoss(reduction='none')
 
     return lossMSE(kp, kp_).sum(1).mean(1).unsqueeze(-1)
+
+
+def rotation_loss(R, R_):
+
+    device_ = R.device
+
+    err_mat = R @ R_.transpose(-1, -2) - torch.eye(3, device=device_)
+    lossMSE = torch.nn.MSELoss(reduction='mean')
+
+    return lossMSE(err_mat, torch.zeros_like(err_mat))
+
+
+def translation_loss(t, t_):
+    """
+    t   : torch.tensor of shape (B, 3, N)
+    t_  : torch.tensor of shape (B, 3, N)
+
+    """
+
+    lossMSE = torch.nn.MSELoss(reduction='mean')
+
+    return lossMSE(t, t_)
+
+
+def shape_loss(c, c_):
+    """
+    c   : torch.tensor of shape (B, K, 1)
+    c_  : torch.tensor of shape (B, K, 1)
+
+    """
+
+    lossMSE = torch.nn.MSELoss(reduction='mean')
+
+    return lossMSE(c, c_)
+
 
 def registration_eval(R, R_, t, t_):
     """
@@ -105,6 +118,7 @@ def registration_eval(R, R_, t, t_):
 
     return rotation_error(R, R_) + translation_error(t, t_)
 
+
 def pace_eval(R, R_, t, t_, c, c_):
     """
     inputs:
@@ -116,6 +130,7 @@ def pace_eval(R, R_, t, t_, c, c_):
     """
 
     return rotation_error(R, R_) + translation_error(t, t_) + shape_error(c, c_)
+
 
 def keypoint_perturbation(keypoints_true, var=0.8, type='uniform', fra=0.2):
     """
@@ -147,8 +162,6 @@ def keypoint_perturbation(keypoints_true, var=0.8, type='uniform', fra=0.2):
         return None
 
 
-
-
 class kp_corrector_reg():
     def __init__(self, cad_models, model_keypoints, theta=50.0, kappa=10.0):
         super().__init__()
@@ -163,36 +176,6 @@ class kp_corrector_reg():
 
         self.point_set_registration_fn = PointSetRegistration(source_points=self.model_keypoints)
 
-    def forward(self, detected_keypoints, input_point_cloud):
-        """
-        input:
-        detected_keypoints  : torch.tensor of shape (B, 3, N)
-        input_point_cloud   : torch.tensor of shape (B, 3, m)
-
-        output:
-        correction          : torch.tensor of shape (B, 3, N)
-        """
-        torch.set_grad_enabled(True)
-        # correction = self.solve_algo1(detected_keypoints, input_point_cloud)
-        correction, _ = self.solve(detected_keypoints, input_point_cloud)
-
-        return correction
-
-    def solve(self, detected_keypoints, input_point_cloud):
-        """
-        input:
-        detected_keypoints  : torch.tensor of shape (B, 3, N)
-        input_point_cloud   : torch.tensor of shape (B, 3, m)
-
-        output:
-        correction          : torch.tensor of shape (B, 3, N)
-        """
-
-        # correction = self.solve_algo1(detected_keypoints, input_point_cloud)
-        correction = self.solve_algo2(detected_keypoints, input_point_cloud)
-
-        return correction, None
-
     def objective(self, detected_keypoints, input_point_cloud, correction):
         """
         inputs:
@@ -205,8 +188,6 @@ class kp_corrector_reg():
 
         """
 
-        #Note: kappa = 100.0 and theta = 1.0 showed promising results. It resuled in no orientation errors in registration.
-
         R, t = self.point_set_registration_fn.forward(detected_keypoints+correction)
         model_estimate = R @ self.cad_models + t
         keypoint_estimate = R @ self.model_keypoints + t
@@ -218,197 +199,6 @@ class kp_corrector_reg():
         # loss_kp = 0.0
 
         return self.kappa*loss_pc + self.theta*loss_kp
-
-    def _get_objective_jacobian(self, fun, correction):
-        #ToDo: Move this inside solve_algo2(). This is not used anywhere else.
-
-        torch.set_grad_enabled(True)
-        batch_size = correction.shape[0]
-        dfdcorrection = torch.zeros_like(correction)
-
-        # Do not set create_graph=True in jacobian. It will slow down computation substantially.
-        dfdcorrectionX = torch.autograd.functional.jacobian(fun, correction)
-        b = range(batch_size)
-        dfdcorrection[b, ...] = dfdcorrectionX[b, 0, b, ...]
-
-        return dfdcorrection
-
-    def solve_algo2(self, detected_keypoints, input_point_cloud, lr=0.1, max_iterations=1000, tol=1e-12):
-        """
-        inputs:
-        detected_keypoints  : torch.tensor of shape (B, 3, N)
-        input_point_cloud   : torch.tensor of shape (B, 3, m)
-
-        outputs:
-        correction          : torch.tensor of shape (B, 3, N)
-        """
-        N = detected_keypoints.shape[-1]
-        batch_size = detected_keypoints.shape[0]
-
-        f = lambda x: self.objective(detected_keypoints, input_point_cloud, x)
-
-        correction = torch.zeros_like(detected_keypoints, requires_grad=True) #todo: lisa update
-
-        # max_iterations = max_iterations
-        # tol = tol
-        # lr = lr
-
-        iter = 0
-        obj_ = f(correction)
-        flag = torch.ones_like(obj_).to(dtype=torch.bool)
-        # flag_idx = flag.nonzero()
-        flag = flag.unsqueeze(-1).repeat(1, 3, N)
-        while iter < max_iterations:
-
-            iter += 1
-            obj = obj_
-
-            dfdcorrection = self._get_objective_jacobian(f, correction)
-
-            correction = correction - lr*dfdcorrection*flag
-
-            obj_ = f(correction)
-
-            if (obj-obj_).abs().max() < tol:
-                break
-            else:
-                flag = (obj-obj_).abs() > tol
-                # flag_idx = flag.nonzero()
-                flag = flag.unsqueeze(-1).repeat(1, 3, N)
-
-        return correction
-
-    def gradient(self, detected_keypoints, input_point_cloud, y=None, v=None, ctx=None):
-
-        if y==None:
-            y, _ = self.solve(detected_keypoints, input_point_cloud)
-        if v==None:
-            v = torch.ones_like(y)
-        correction = y
-        output_grad = v
-
-        # g = self._gradient_method1(detected_keypoints=detected_keypoints,
-        #                            input_point_cloud=input_point_cloud,
-        #                            correction=correction, output_grad=output_grad)
-        g = self._gradient_method2(detected_keypoints=detected_keypoints,
-                                   input_point_cloud=input_point_cloud,
-                                   correction=correction, output_grad=output_grad)
-
-        return g
-
-    def _gradient_method2(self, detected_keypoints, input_point_cloud, correction, output_grad=None):
-        #ToDo: to be tested.
-        torch.set_grad_enabled(True)
-        def fun(kp, pc):
-
-            y = self.solve_algo2(kp, pc)
-            return y
-
-        if output_grad==None:
-            output_grad = torch.ones_like(correction)
-
-        J = torch.autograd.functional.jacobian(fun, (detected_keypoints, input_point_cloud))
-
-        dldkp = torch.einsum('bdnbkm,bdn->bkm', J[0], output_grad)
-        dldpc = torch.einsum('bdnbkm,bdn->bkm', J[1], output_grad)
-
-        return (dldkp, dldpc)
-
-    def _gradient_method1(self, detected_keypoints, input_point_cloud, correction, output_grad=None):
-        #ToDo: Does not work correctly. Will give errors stating that fuu is sindular.
-        torch.set_grad_enabled(True)
-        """
-        inputs:
-        detected_keypoints  : torch.tensor of shape (B, 3, N)
-        input_point_cloud   : torch.tensor of shape (B, 3, m)
-        correction          : torch.tensor of shape (B, 3, N)
-        output_grad         : torch.tensor of shape (B, 3, N)
-
-        outputs:
-        input_gradient  : (torch.tensor(B, 3, N), None)
-
-        """
-        batch_size, _, N = detected_keypoints.shape
-        if output_grad==None:
-            output_grad = torch.ones_like(correction)
-
-        f = lambda x, u: self.objective(x, input_point_cloud, u)
-
-
-        def DfDx(x, u):
-
-            Jf = torch.autograd.functional.jacobian(f, (x, u))
-
-            b = range(batch_size)
-            fx = Jf[0][b, 0, b, ...]
-            fu = Jf[1][b, 0, b, ...]
-
-            return fx
-
-        def DfDu(x, u):
-
-            Jf = torch.autograd.functional.jacobian(f, (x, u))
-
-            b = range(batch_size)
-            fu = Jf[1][b, 0, b, ...]
-
-            return fu
-
-        fx = DfDx(detected_keypoints, correction)
-        fu = DfDu(detected_keypoints, correction)
-
-        print("Shape of fx: ", fx.shape)
-        print("Shape of fu: ", fu.shape)
-
-        print("fx: ")
-        print(fx)               #ToDo: These gradients are also very small!!
-        print("fu: ")
-        print(fu)
-        print("fx-fu:")
-        print(fx-fu)
-
-
-        Jfx = torch.autograd.functional.jacobian(DfDx, (detected_keypoints, correction))
-        Jfu = torch.autograd.functional.jacobian(DfDu, (detected_keypoints, correction))
-
-        print("Shape of Jfx[0]: ", Jfx[0].shape)
-        print("Shape of Jfx[1]: ", Jfx[1].shape)
-        print("Shape of Jfu[0]: ", Jfu[0].shape)
-        print("Shape of Jfu[1]: ", Jfu[1].shape)
-
-        b = range(batch_size)
-        fxx = Jfx[0][b, :, :, b, :, :]
-        fxu = Jfx[1][b, :, :, b, :, :]
-        fux = Jfu[0][b, :, :, b, :, :]
-        fuu = Jfu[1][b, :, :, b, :, :]
-
-        print("Shape of fxx: ", fxx.shape)
-        print("Shape of fxu: ", fxu.shape)
-        print("Shape of fux: ", fux.shape)
-        print("Shape of fuu: ", fuu.shape)
-
-        fxu = fxu.reshape(batch_size, 3*N, 3*N)
-        fuu = fuu.reshape(batch_size, 3*N, 3*N)
-
-        print("After reshaping: ")
-        print("Shape of fxu: ", fxu.shape)
-        print("Shape of fuu: ", fuu.shape)
-
-        # now solve fuu DuDx = -fxu             #ToDo: This does not solve correctly. The fuu matrix is singular!
-        for i in range(batch_size):
-            rank = torch.matrix_rank(fuu[i, ...])
-            print("Rank of matrix ", i, ": ", rank)     #ToDo: It outputs that the rank of each matrix is zero! Why is this zero rank?
-            # print("The matrix fuu[i, ...]")
-            # print(fuu[i, ...])
-
-        X = torch.linalg.solve(fuu, -fxu)
-        print(X.shape)
-
-
-
-
-
-        return None
 
     def objective_numpy(self, detected_keypoints, input_point_cloud, correction):
         """
@@ -431,6 +221,21 @@ class kp_corrector_reg():
                               correction=correction)
 
         return loss.squeeze(0).numpy()
+
+    def solve(self, detected_keypoints, input_point_cloud):
+        """
+        input:
+        detected_keypoints  : torch.tensor of shape (B, 3, N)
+        input_point_cloud   : torch.tensor of shape (B, 3, m)
+
+        output:
+        correction          : torch.tensor of shape (B, 3, N)
+        """
+
+        # correction = self.solve_algo1(detected_keypoints, input_point_cloud)
+        correction = self.solve_algo2(detected_keypoints, input_point_cloud)
+
+        return correction, None
 
     def solve_algo1(self, detected_keypoints, input_point_cloud, lr=0.1, num_steps=20):
         """
@@ -491,6 +296,92 @@ class kp_corrector_reg():
 
         return correction.clone().detach()
 
+    def solve_algo2(self, detected_keypoints, input_point_cloud, lr=0.1, max_iterations=1000, tol=1e-12):
+        """
+        inputs:
+        detected_keypoints  : torch.tensor of shape (B, 3, N)
+        input_point_cloud   : torch.tensor of shape (B, 3, m)
+
+        outputs:
+        correction          : torch.tensor of shape (B, 3, N)
+        """
+        def _get_objective_jacobian(fun, x):
+
+            torch.set_grad_enabled(True)
+            batch_size = x.shape[0]
+            dfdcorrection = torch.zeros_like(x)
+
+            # Do not set create_graph=True in jacobian. It will slow down computation substantially.
+            dfdcorrectionX = torch.autograd.functional.jacobian(fun, x)
+            b = range(batch_size)
+            dfdcorrection[b, ...] = dfdcorrectionX[b, 0, b, ...]
+
+            return dfdcorrection
+
+        N = detected_keypoints.shape[-1]
+        correction = torch.zeros_like(detected_keypoints)
+
+        f = lambda x: self.objective(detected_keypoints, input_point_cloud, x)
+
+        # max_iterations = max_iterations
+        # tol = tol
+        # lr = lr
+
+        iter = 0
+        obj_ = f(correction)
+        flag = torch.ones_like(obj_).to(dtype=torch.bool)
+        # flag_idx = flag.nonzero()
+        flag = flag.unsqueeze(-1).repeat(1, 3, N)
+        while iter < max_iterations:
+
+            iter += 1
+            obj = obj_
+
+            dfdcorrection = _get_objective_jacobian(f, correction)
+            correction -= lr*dfdcorrection*flag
+
+            obj_ = f(correction)
+
+            if (obj-obj_).abs().max() < tol:
+                break
+            else:
+                flag = (obj-obj_).abs() > tol
+                # flag_idx = flag.nonzero()
+                flag = flag.unsqueeze(-1).repeat(1, 3, N)
+
+        return correction
+
+    def solve_algo3(self, *xs, correction):
+        #ToDo: Not tested. See if this works. This is from the ddn library pnp_node.py
+        with torch.enable_grad():
+            opt = torch.optim.LBFGS([correction],
+                                    lr=1.0,
+                                    max_iter=1000,
+                                    max_eval=None,
+                                    tolerance_grad=1e-40,
+                                    tolerance_change=1e-40,
+                                    history_size=100,
+                                    line_search_fn="strong_wolfe"
+                                    )
+            def reevaluate():
+                opt.zero_grad()
+                f = self.objective(*xs, correction=correction).sum() # sum over batch elements
+                f.backward()
+                return f
+            opt.step(reevaluate)
+        return correction
+
+    def gradient(self, detected_keypoints, input_point_cloud, y=None, v=None, ctx=None):
+
+        if v==None:
+            v = torch.ones_like(detected_keypoints)
+
+        # v = gradient of ML loss with respect to correction.
+        # Therefore, the gradient to backpropagate is -v for detected_keypoints.
+        # We don't backpropagate gradient with respect to the input_point_cloud
+        return (-v, None)
+
+
 
 class kp_corrector_pace():
     def __init__(self, cad_models, model_keypoints, theta=10.0, kappa=50.0):
@@ -508,19 +399,59 @@ class kp_corrector_pace():
 
         self.device_ = model_keypoints.device
 
-    def forward(self, detected_keypoints, input_point_cloud):
+    def objective(self, detected_keypoints, input_point_cloud, y):
         """
-        input:
+        inputs:
         detected_keypoints  : torch.tensor of shape (B, 3, N)
         input_point_cloud   : torch.tensor of shape (B, 3, m)
+        y                   : torch.tensor of shape (B, 3, N)
+
+        outputs:
+        loss    : torch.tensor of shape (B, 1)
+
+        """
+        correction = y
+
+        # start = time.perf_counter()
+        R, t, c = self.pace(detected_keypoints + correction)
+        # print("pace run time: ", time.perf_counter()-start)
+        # mid = time.perf_counter()
+        keypoint_estimate, model_estimate = self.modelgen.forward(shape=c)
+        # print("model gen runtime: ", time.perf_counter()-mid)
+        model_estimate = R @ model_estimate + t
+        keypoint_estimate = R @ keypoint_estimate + t
+
+        loss_pc = chamfer_loss(pc=input_point_cloud, pc_=model_estimate)
+        # loss_pc = chamfer_loss_with_surface_normals(pc=input_point_cloud, pc_=model_estimate)
+
+        loss_kp = keypoints_loss(kp=detected_keypoints + correction, kp_=keypoint_estimate)
+        # loss_kp = 0.0
+
+        return self.kappa * loss_pc + self.theta * loss_kp
+
+    def objective_numpy(self, detected_keypoints, input_point_cloud, y):
+        """
+        inputs:
+        detected_keypoints  : numpy.ndarray of shape (3, N)
+        input_point_cloud   : numpy.ndarray of shape (3, m)
+        y                   : numpy.ndarray of shape (3*N,)
 
         output:
-        correction          : torch.tensor of shape (B, 3, N)
+        loss    : numpy.ndarray of shape (1,)
         """
+        correction = y
+        N = detected_keypoints.shape[-1]
+        correction = correction.reshape(3, N)
 
-        correction, _ = self.solve(detected_keypoints, input_point_cloud)
+        detected_keypoints = torch.from_numpy(detected_keypoints).unsqueeze(0).to(torch.float)
+        input_point_cloud = torch.from_numpy(input_point_cloud).unsqueeze(0).to(torch.float)
+        correction = torch.from_numpy(correction).unsqueeze(0).to(torch.float)
 
-        return correction
+        loss = self.objective(detected_keypoints=detected_keypoints.to(device=self.device_),
+                              input_point_cloud=input_point_cloud.to(device=self.device_),
+                              y=correction.to(device=self.device_))
+
+        return loss.squeeze(0).to('cpu').numpy()
 
     def solve(self, detected_keypoints, input_point_cloud):
         """
@@ -537,220 +468,6 @@ class kp_corrector_pace():
 
         return correction, None
 
-    def gradient(self, detected_keypoints, input_point_cloud, y, v=None, ctx=None):
-        """
-        inputs:
-        detected_keypoints  : torch.tensor of shape (B, 3, N)
-        input_point_cloud   : torch.tensor of shape (B, 3, m)
-        y                   : torch.tensor of shape (B, 3, N)
-        v                   : torch.tensor of shape (B, 3, N)   : output_grad
-
-        outputs:
-        input_grad  : torch.tensor of shape ((B, 3, N), None)   : we don't pass grad with respect to the input point cloud
-
-        """
-        if v == None:
-            v = torch.ones_like(y)
-
-        correction = y
-        output_grad = v
-
-        # g = self._gradient_method1(detected_keypoints=detected_keypoints,
-        #                            input_point_cloud=input_point_cloud,
-        #                            correction=correction, output_grad=output_grad)
-        g = self._gradient_method2(detected_keypoints=detected_keypoints,
-                                   input_point_cloud=input_point_cloud,
-                                   correction=correction, output_grad=output_grad)
-
-        return g
-
-    def _gradient_method2(self, detected_keypoints, input_point_cloud, correction, output_grad=None):
-        """
-        inputs:
-        detected_keypoints  : torch.tensor of shape (B, 3, N)
-        input_point_cloud   : torch.tensor of shape (B, 3, m)
-        correction          : torch.tensor of shape (B, 3, N)
-        v                   : torch.tensor of shape (B, 3, N)   : output_grad
-
-        outputs:
-        input_grad  : torch.tensor of shape ((B, 3, N), None)   : we don't pass grad with respect to the input point cloud
-
-        """
-        torch.set_grad_enabled(True)
-
-        def fun(kp, pc):
-
-            y = self.solve_algo2(kp, pc)
-            return y
-
-        if output_grad==None:
-            output_grad = torch.ones_like(correction)
-
-        J = torch.autograd.functional.jacobian(fun, (detected_keypoints, input_point_cloud))
-
-        dldkp = torch.einsum('bdnbkm,bdn->bkm', J[0], output_grad)
-        dldpc = torch.einsum('bdnbkm,bdn->bkm', J[1], output_grad)
-
-        return (dldkp, dldpc)
-
-    def _gradient_method1(self, detected_keypoints, input_point_cloud, correction, output_grad=None):
-        #ToDo: Does not work correctly. Will give errors stating that fuu is sindular.
-        """
-        inputs:
-        detected_keypoints  : torch.tensor of shape (B, 3, N)
-        input_point_cloud   : torch.tensor of shape (B, 3, m)
-        correction          : torch.tensor of shape (B, 3, N)
-        output_grad         : torch.tensor of shape (B, 3, N)
-
-        outputs:
-        input_gradient  : (torch.tensor(B, 3, N), None)
-
-        """
-        torch.set_grad_enabled(True)
-        batch_size, _, N = detected_keypoints.shape
-        if output_grad==None:
-            output_grad = torch.ones_like(correction)
-
-        f = lambda x, u: self.objective(x, input_point_cloud, u)
-
-
-        def DfDx(x, u):
-
-            Jf = torch.autograd.functional.jacobian(f, (x, u))
-
-            b = range(batch_size)
-            fx = Jf[0][b, 0, b, ...]
-            fu = Jf[1][b, 0, b, ...]
-
-            return fx
-
-        def DfDu(x, u):
-
-            Jf = torch.autograd.functional.jacobian(f, (x, u))
-
-            b = range(batch_size)
-            fu = Jf[1][b, 0, b, ...]
-
-            return fu
-
-        fx = DfDx(detected_keypoints, correction)
-        fu = DfDu(detected_keypoints, correction)
-
-        print("Shape of fx: ", fx.shape)
-        print("Shape of fu: ", fu.shape)
-
-        print("fx: ")
-        print(fx)               #ToDo: These gradients are also very small!!
-        print("fu: ")
-        print(fu)
-        print("fx-fu:")
-        print(fx-fu)
-
-
-        Jfx = torch.autograd.functional.jacobian(DfDx, (detected_keypoints, correction))
-        Jfu = torch.autograd.functional.jacobian(DfDu, (detected_keypoints, correction))
-
-        print("Shape of Jfx[0]: ", Jfx[0].shape)
-        print("Shape of Jfx[1]: ", Jfx[1].shape)
-        print("Shape of Jfu[0]: ", Jfu[0].shape)
-        print("Shape of Jfu[1]: ", Jfu[1].shape)
-
-        b = range(batch_size)
-        fxx = Jfx[0][b, :, :, b, :, :]
-        fxu = Jfx[1][b, :, :, b, :, :]
-        fux = Jfu[0][b, :, :, b, :, :]
-        fuu = Jfu[1][b, :, :, b, :, :]
-
-        print("Shape of fxx: ", fxx.shape)
-        print("Shape of fxu: ", fxu.shape)
-        print("Shape of fux: ", fux.shape)
-        print("Shape of fuu: ", fuu.shape)
-
-        fxu = fxu.reshape(batch_size, 3*N, 3*N)
-        fuu = fuu.reshape(batch_size, 3*N, 3*N)
-
-        print("After reshaping: ")
-        print("Shape of fxu: ", fxu.shape)
-        print("Shape of fuu: ", fuu.shape)
-
-        # now solve fuu DuDx = -fxu             #ToDo: This does not solve correctly. The fuu matrix is singular!
-        for i in range(batch_size):
-            rank = torch.matrix_rank(fuu[i, ...])
-            print("Rank of matrix ", i, ": ", rank)     #ToDo: It outputs that the rank of each matrix is zero! Why is this zero rank?
-            # print("The matrix fuu[i, ...]")
-            # print(fuu[i, ...])
-
-        X = torch.linalg.solve(fuu, -fxu)
-        print(X.shape)
-
-        return None
-
-    def objective(self, detected_keypoints, input_point_cloud, correction):
-        """
-        inputs:
-        detected_keypoints  : torch.tensor of shape (B, 3, N)
-        input_point_cloud   : torch.tensor of shape (B, 3, m)
-        correction          : torch.tensor of shape (B, 3, N)
-
-        outputs:
-        loss    : torch.tensor of shape (B, 1)
-
-        """
-
-        # start = time.perf_counter()
-        R, t, c = self.pace(detected_keypoints + correction)
-        # print("pace run time: ", time.perf_counter()-start)
-        # mid = time.perf_counter()
-        keypoint_estimate, model_estimate = self.modelgen.forward(shape=c)
-        # print("model gen runtime: ", time.perf_counter()-mid)
-        model_estimate = R @ model_estimate + t
-        keypoint_estimate = R @ keypoint_estimate + t
-
-        loss_pc = chamfer_loss(pc=input_point_cloud, pc_=model_estimate)
-        # loss_pc = chamfer_loss_with_surface_normals(pc=input_point_cloud, pc_=model_estimate)
-
-        loss_kp = keypoints_loss(kp=detected_keypoints+correction, kp_=keypoint_estimate)
-        # loss_kp = 0.0
-
-        return self.kappa*loss_pc + self.theta*loss_kp
-
-    def objective_numpy(self, detected_keypoints, input_point_cloud, correction):
-        """
-        inputs:
-        detected_keypoints  : numpy.ndarray of shape (3, N)
-        input_point_cloud   : numpy.ndarray of shape (3, m)
-        correction          : numpy.ndarray of shape (3*N,)
-
-        output:
-        loss    : numpy.ndarray of shape (1,)
-        """
-        N = detected_keypoints.shape[-1]
-        correction = correction.reshape(3, N)
-
-        detected_keypoints = torch.from_numpy(detected_keypoints).unsqueeze(0).to(torch.float)
-        input_point_cloud = torch.from_numpy(input_point_cloud).unsqueeze(0).to(torch.float)
-        correction = torch.from_numpy(correction).unsqueeze(0).to(torch.float)
-
-        loss = self.objective(detected_keypoints=detected_keypoints.to(device=self.device_),
-                              input_point_cloud=input_point_cloud.to(device=self.device_),
-                              correction=correction.to(device=self.device_))
-
-        return loss.squeeze(0).to('cpu').numpy()
-
-    def _get_objective_jacobian(self, fun, correction):
-        #ToDo: Move inside solve_algo2()
-
-        torch.set_grad_enabled(True)
-        batch_size = correction.shape[0]
-        dfdcorrection = torch.zeros_like(correction)
-
-        # Do not set create_graph=True in jacobian. It will slow down computation substantially.
-        dfdcorrectionX = torch.autograd.functional.jacobian(fun, correction)
-        b = range(batch_size)
-        dfdcorrection[b, ...] = dfdcorrectionX[b, 0, b, ...]
-
-        return dfdcorrection
-
     def solve_algo2(self, detected_keypoints, input_point_cloud, lr=0.1, max_iterations=1000, tol=1e-12):
         """
         inputs:
@@ -760,6 +477,19 @@ class kp_corrector_pace():
         outputs:
         correction          : torch.tensor of shape (B, 3, N)
         """
+        def _get_objective_jacobian(fun, x):
+
+            torch.set_grad_enabled(True)
+            batch_size = x.shape[0]
+            dfdcorrection = torch.zeros_like(x)
+
+            # Do not set create_graph=True in jacobian. It will slow down computation substantially.
+            dfdcorrectionX = torch.autograd.functional.jacobian(fun, x)
+            b = range(batch_size)
+            dfdcorrection[b, ...] = dfdcorrectionX[b, 0, b, ...]
+
+            return dfdcorrection
+
         N = detected_keypoints.shape[-1]
         batch_size = detected_keypoints.shape[0]
 
@@ -783,8 +513,8 @@ class kp_corrector_pace():
             obj = obj_
 
             # print(iter)
-
-            dfdcorrection = self._get_objective_jacobian(f, correction)
+            # Note: each iteration computes does a forward pass on the objective function to compute the jacobian.
+            dfdcorrection = _get_objective_jacobian(f, correction)
             correction -= lr*dfdcorrection*flag
             # correction -= lr * dfdcorrection
 
@@ -864,9 +594,15 @@ class kp_corrector_pace():
 
         return correction
 
+    def gradient(self, detected_keypoints, input_point_cloud, y=None, v=None, ctx=None):
 
+        if v==None:
+            v = torch.ones_like(detected_keypoints)
 
-
+        # v = gradient of ML loss with respect to correction.
+        # Therefore, the gradient to backpropagate is -v for detected_keypoints.
+        # We don't backpropagate gradient with respect to the input_point_cloud
+        return (-v, None)
 
 
 if __name__ == "__main__":
@@ -880,162 +616,159 @@ if __name__ == "__main__":
     class_id = "03001627"  # chair
     model_id = "1e3fba4500d20bb49b9f2eb77f5e247e"  # a particular chair model
 
-    # ####################################################################################################################
-    # print("-"*40)
-    # print("Verifying kp_corrector_reg() with SE3PointCloud(dataset) and keypoint_perturbation(): ")
-    #
-    # B = 10
-    # se3_dataset = SE3PointCloud(class_id=class_id, model_id=model_id, num_of_points=500, dataset_len=1000)
-    # se3_dataset_loader = torch.utils.data.DataLoader(se3_dataset, batch_size=B, shuffle=False)
-    #
-    # model_keypoints = se3_dataset._get_model_keypoints()    # (1, 3, N)
-    # cad_models = se3_dataset._get_cad_models()              # (1, 3, m)
-    # model_keypoints = model_keypoints.to(device=device)
-    # cad_models = cad_models.to(device=device)
-    #
-    #
-    # # define the keypoint corrector
-    # # option 1: use the backprop through all the iterations of optimization
-    # corrector = kp_corrector_reg(cad_models=cad_models, model_keypoints=model_keypoints)
-    # # option 2: use autograd computed gradient for backprop. #ToDo: Not implemented gradient() correctly.
-    # # corrector_node = kp_corrector_reg(cad_models=cad_models, model_keypoints=model_keypoints)
-    # # corrector = ParamDeclarativeFunction(problem=corrector_node)
-    #
-    #
-    # point_set_reg = PointSetRegistration(source_points=model_keypoints)
-    #
-    # for i, data in enumerate(se3_dataset_loader):
-    #
-    #     input_point_cloud, keypoints_true, rotation_true, translation_true = data
-    #
-    #     input_point_cloud = input_point_cloud.to(device=device)
-    #     keypoints_true = keypoints_true.to(device=device)
-    #     rotation_true = rotation_true.to(device=device)
-    #     translation_true = translation_true.to(device=device)
-    #
-    #     # generating perturbed keypoints
-    #     # keypoints_true = rotation_true @ model_keypoints + translation_true
-    #     # detected_keypoints = keypoints_true
-    #     detected_keypoints = keypoint_perturbation(keypoints_true=keypoints_true, type='sporadic', var=0.8, fra=1.0)
-    #     detected_keypoints = detected_keypoints.to(device=device)
-    #
-    #     # estimate model: using point set registration on perturbed keypoints
-    #     start = time.perf_counter()
-    #     R_naive, t_naive = point_set_reg.forward(target_points=detected_keypoints)
-    #     end = time.perf_counter()
-    #     print("Naive registration time: ", 1000*(end-start)/B, " ms")
-    #     # model_estimate = R_naive @ cad_models + t_naive
-    #     # display_two_pcs(pc1=input_point_cloud[0, ...].detach(), pc2=model_estimate[0, ...].detach())
-    #
-    #     # # estimate model: using the keypoint corrector
-    #     # detected_keypoints.requires_grad = True
-    #     start = time.perf_counter()
-    #     correction = corrector.forward(detected_keypoints, input_point_cloud)
-    #     # correction, _ = corrector.solve(detected_keypoints, input_point_cloud)
-    #     end = time.perf_counter()
-    #     print("Corrector time: ", 1000*(end-start)/B, ' ms')
-    #     #
-    #
-    #     # loss = torch.norm(correction, p=2)**2
-    #     # loss = loss.sum()
-    #     # print("Testing backward: ")
-    #     # loss.backward()
-    #     # print("Shape of detected_keypoints.grad: ", detected_keypoints.grad.shape)
-    #     # print("Sum of abs() of all elements in the detected_keypoints.grad: ", detected_keypoints.grad.abs().sum())
-    #     # #
-    #
-    #     # correction = torch.zeros_like(correction)
-    #     R, t = point_set_reg.forward(target_points=detected_keypoints+correction)
-    #     # model_estimate = R @ cad_models + t
-    #     # display_two_pcs(pc1=input_point_cloud[0, ...].detach(), pc2=model_estimate[0, ...].detach())
-    #
-    #     # evaluate the two metrics
-    #     print("Evaluation error (wo correction): ", registration_eval(R_naive, rotation_true, t_naive, translation_true).mean())
-    #     print("Evaluation error (w correction): ", registration_eval(R, rotation_true, t, translation_true).mean())
-    #     # the claim is that with the correction we can
-    #
-    #     if i >= 5:
-    #         break
-    #
-    # print("-" * 40)
-    #
-    # ####################################################################################################################
-    # print("-"*40)
-    # print("Verifying kp_corrector_reg() with DepthPC(dataset) and keypoint_perturbation(): ")
-    #
-    # B=10
-    # depth_dataset = DepthPC(class_id=class_id, model_id=model_id, n=500, num_of_points_to_sample=1000, dataset_len=100)
-    # depth_dataset_loader = torch.utils.data.DataLoader(depth_dataset, batch_size=B, shuffle=False)
-    #
-    # model_keypoints = depth_dataset._get_model_keypoints()    # (1, 3, N)
-    # cad_models = depth_dataset._get_cad_models()              # (1, 3, m)
-    # model_keypoints = model_keypoints.to(device=device)
-    # cad_models = cad_models.to(device=device)
-    #
-    # # define the keypoint corrector
-    # # option 1: use the backprop through all the iterations of optimization
-    # corrector = kp_corrector_reg(cad_models=cad_models, model_keypoints=model_keypoints)
-    # # option 2: use autograd computed gradient for backprop. #ToDo: Not implemented gradient() correctly.
-    # # corrector_node = kp_corrector_reg(cad_models=cad_models, model_keypoints=model_keypoints)
-    # # corrector = ParamDeclarativeFunction(problem=corrector_node)
-    #
-    #
-    # point_set_reg = PointSetRegistration(source_points=model_keypoints)
-    #
-    # for i, data in enumerate(depth_dataset_loader):
-    #
-    #     input_point_cloud, keypoints_true, rotation_true, translation_true = data
-    #
-    #     input_point_cloud = input_point_cloud.to(device=device)
-    #     keypoints_true = keypoints_true.to(device=device)
-    #     rotation_true = rotation_true.to(device=device)
-    #     translation_true = translation_true.to(device=device)
-    #
-    #     # generating perturbed keypoints
-    #     # detected_keypoints = keypoints_true
-    #     detected_keypoints = keypoint_perturbation(keypoints_true=keypoints_true, type='sporadic', var=0.8, fra=1.0)
-    #     detected_keypoints = detected_keypoints.to(device=device)
-    #
-    #     # estimate model: using point set registration on perturbed keypoints
-    #     start = time.process_time()
-    #     R_naive, t_naive = point_set_reg.forward(target_points=detected_keypoints)
-    #     end = time.process_time()
-    #     print("Naive registration time: ", 1000 * (end - start) / B, " ms")
-    #     model_estimate = R_naive @ cad_models + t_naive
-    #     display_two_pcs(pc1=input_point_cloud[0, ...].detach(), pc2=model_estimate[0, ...].detach())
-    #
-    #     # estimate model: using the keypoint corrector
-    #     # detected_keypoints.requires_grad = True
-    #     start = time.process_time()
-    #     correction = corrector.forward(detected_keypoints, input_point_cloud)
-    #     end = time.process_time()
-    #     print("Corrector time: ", 1000 * (end - start) / B, ' ms')
-    #
-    #     # #
-    #     # loss = torch.norm(correction, p=2) ** 2
-    #     # loss = loss.sum()
-    #     # print("Testing backward: ")
-    #     # loss.backward()
-    #     # print("Shape of detected_keypoints.grad: ", detected_keypoints.grad.shape)
-    #     # print("Sum of abs() of all elements in the detected_keypoints.grad: ", detected_keypoints.grad.abs().sum())
-    #     # #
-    #
-    #
-    #
-    #     # correction = torch.zeros_like(correction)
-    #     R, t = point_set_reg.forward(target_points=detected_keypoints+correction)
-    #     model_estimate = R @ cad_models + t
-    #     display_two_pcs(pc1=input_point_cloud[0, ...].detach(), pc2=model_estimate[0, ...].detach())
-    #
-    #     # evaluate the two metrics
-    #     print("Evaluation error (wo correction): ", registration_eval(R_naive, rotation_true, t_naive, translation_true).mean())
-    #     print("Evaluation error (w correction): ", registration_eval(R, rotation_true, t, translation_true).mean())
-    #     # the claim is that with the correction we can
-    #
-    #     if i >= 5:
-    #         break
-    #
-    # print("-" * 40)
+    ####################################################################################################################
+    print("-"*40)
+    print("Verifying kp_corrector_reg() with SE3PointCloud(dataset) and keypoint_perturbation(): ")
+
+    B = 10
+    se3_dataset = SE3PointCloud(class_id=class_id, model_id=model_id, num_of_points=500, dataset_len=1000)
+    se3_dataset_loader = torch.utils.data.DataLoader(se3_dataset, batch_size=B, shuffle=False)
+
+    model_keypoints = se3_dataset._get_model_keypoints()    # (1, 3, N)
+    cad_models = se3_dataset._get_cad_models()              # (1, 3, m)
+    model_keypoints = model_keypoints.to(device=device)
+    cad_models = cad_models.to(device=device)
+
+
+    # define the keypoint corrector
+    # option 1: use the backprop through all the iterations of optimization
+    # corrector = kp_corrector_reg(cad_models=cad_models, model_keypoints=model_keypoints)  #Note: DO NOT USE THIS.
+    # option 2: use autograd computed gradient for backprop.
+    corrector_node = kp_corrector_reg(cad_models=cad_models, model_keypoints=model_keypoints)
+    corrector = ParamDeclarativeFunction(problem=corrector_node)
+
+
+    point_set_reg = PointSetRegistration(source_points=model_keypoints)
+
+    for i, data in enumerate(se3_dataset_loader):
+
+        input_point_cloud, keypoints_true, rotation_true, translation_true = data
+
+        input_point_cloud = input_point_cloud.to(device=device)
+        keypoints_true = keypoints_true.to(device=device)
+        rotation_true = rotation_true.to(device=device)
+        translation_true = translation_true.to(device=device)
+
+        # generating perturbed keypoints
+        # keypoints_true = rotation_true @ model_keypoints + translation_true
+        # detected_keypoints = keypoints_true
+        detected_keypoints = keypoint_perturbation(keypoints_true=keypoints_true, type='sporadic', var=0.8, fra=1.0)
+        detected_keypoints = detected_keypoints.to(device=device)
+
+        # estimate model: using point set registration on perturbed keypoints
+        start = time.perf_counter()
+        R_naive, t_naive = point_set_reg.forward(target_points=detected_keypoints)
+        end = time.perf_counter()
+        print("Naive registration time: ", 1000*(end-start)/B, " ms")
+        # model_estimate = R_naive @ cad_models + t_naive
+        # display_two_pcs(pc1=input_point_cloud[0, ...].detach(), pc2=model_estimate[0, ...].detach())
+
+        # # estimate model: using the keypoint corrector
+        detected_keypoints.requires_grad = True
+        start = time.perf_counter()
+        correction = corrector.forward(detected_keypoints, input_point_cloud)
+        end = time.perf_counter()
+        print("Corrector time: ", 1000*(end-start)/B, ' ms')
+        #
+
+        loss = torch.norm(correction, p=2)**2
+        loss = loss.sum()
+        print("Testing backward: ")
+        loss.backward()
+        print("Shape of detected_keypoints.grad: ", detected_keypoints.grad.shape)
+        print("Sum of abs() of all elements in the detected_keypoints.grad: ", detected_keypoints.grad.abs().sum())
+        #
+
+        # correction = torch.zeros_like(correction)
+        R, t = point_set_reg.forward(target_points=detected_keypoints+correction)
+        # model_estimate = R @ cad_models + t
+        # display_two_pcs(pc1=input_point_cloud[0, ...].detach(), pc2=model_estimate[0, ...].detach())
+
+        # evaluate the two metrics
+        print("Evaluation error (wo correction): ", registration_eval(R_naive, rotation_true, t_naive, translation_true).mean())
+        print("Evaluation error (w correction): ", registration_eval(R, rotation_true, t, translation_true).mean())
+        # the claim is that with the correction we can
+
+        if i >= 3:
+            break
+
+    print("-" * 40)
+
+    ####################################################################################################################
+    print("-"*40)
+    print("Verifying kp_corrector_reg() with DepthPC(dataset) and keypoint_perturbation(): ")
+
+    B=10
+    depth_dataset = DepthPC(class_id=class_id, model_id=model_id, n=500, num_of_points_to_sample=1000, dataset_len=100)
+    depth_dataset_loader = torch.utils.data.DataLoader(depth_dataset, batch_size=B, shuffle=False)
+
+    model_keypoints = depth_dataset._get_model_keypoints()    # (1, 3, N)
+    cad_models = depth_dataset._get_cad_models()              # (1, 3, m)
+    model_keypoints = model_keypoints.to(device=device)
+    cad_models = cad_models.to(device=device)
+
+    # define the keypoint corrector
+    # option 1: use the backprop through all the iterations of optimization
+    # corrector = kp_corrector_reg(cad_models=cad_models, model_keypoints=model_keypoints)  #Note: DO NOT USE THIS.
+    # option 2: use autograd computed gradient for backprop.
+    corrector_node = kp_corrector_reg(cad_models=cad_models, model_keypoints=model_keypoints)
+    corrector = ParamDeclarativeFunction(problem=corrector_node)
+
+
+    point_set_reg = PointSetRegistration(source_points=model_keypoints)
+
+    for i, data in enumerate(depth_dataset_loader):
+
+        input_point_cloud, keypoints_true, rotation_true, translation_true = data
+
+        input_point_cloud = input_point_cloud.to(device=device)
+        keypoints_true = keypoints_true.to(device=device)
+        rotation_true = rotation_true.to(device=device)
+        translation_true = translation_true.to(device=device)
+
+        # generating perturbed keypoints
+        # detected_keypoints = keypoints_true
+        detected_keypoints = keypoint_perturbation(keypoints_true=keypoints_true, type='sporadic', var=0.8, fra=1.0)
+        detected_keypoints = detected_keypoints.to(device=device)
+
+        # estimate model: using point set registration on perturbed keypoints
+        start = time.process_time()
+        R_naive, t_naive = point_set_reg.forward(target_points=detected_keypoints)
+        end = time.process_time()
+        print("Naive registration time: ", 1000 * (end - start) / B, " ms")
+        # model_estimate = R_naive @ cad_models + t_naive
+        # display_two_pcs(pc1=input_point_cloud[0, ...].detach(), pc2=model_estimate[0, ...].detach())
+
+        # estimate model: using the keypoint corrector
+        detected_keypoints.requires_grad = True
+        start = time.process_time()
+        correction = corrector.forward(detected_keypoints, input_point_cloud)
+        end = time.process_time()
+        print("Corrector time: ", 1000 * (end - start) / B, ' ms')
+
+        #
+        loss = torch.norm(correction, p=2) ** 2
+        loss = loss.sum()
+        print("Testing backward: ")
+        loss.backward()
+        print("Shape of detected_keypoints.grad: ", detected_keypoints.grad.shape)
+        print("Sum of abs() of all elements in the detected_keypoints.grad: ", detected_keypoints.grad.abs().sum())
+        #
+
+        # correction = torch.zeros_like(correction)
+        R, t = point_set_reg.forward(target_points=detected_keypoints+correction)
+        # model_estimate = R @ cad_models + t
+        # display_two_pcs(pc1=input_point_cloud[0, ...].detach(), pc2=model_estimate[0, ...].detach())
+
+        # evaluate the two metrics
+        print("Evaluation error (wo correction): ", registration_eval(R_naive, rotation_true, t_naive, translation_true).mean())
+        print("Evaluation error (w correction): ", registration_eval(R, rotation_true, t, translation_true).mean())
+        # the claim is that with the correction we can
+
+        if i >= 3:
+            break
+
+    print("-" * 40)
 
     ###################################################################################################################
     print("-"*40)
@@ -1053,10 +786,10 @@ if __name__ == "__main__":
 
     # define the keypoint corrector
     # option 1: use the backprop through all the iterations of optimization
-    corrector = kp_corrector_pace(cad_models=cad_models, model_keypoints=model_keypoints)
-    # option 2: use autograd computed gradient for backprop. #ToDo: Not implemented gradient() correctly, yet.
-    # corrector_node = kp_corrector_pace(cad_models=cad_models, model_keypoints=model_keypoints)
-    # corrector = ParamDeclarativeFunction(problem=corrector_node)
+    # corrector = kp_corrector_pace(cad_models=cad_models, model_keypoints=model_keypoints) #Note: DO NOT USE THIS.
+    # option 2: use autograd computed gradient for backprop.
+    corrector_node = kp_corrector_pace(cad_models=cad_models, model_keypoints=model_keypoints)
+    corrector = ParamDeclarativeFunction(problem=corrector_node)
 
     pace = PACEmodule(model_keypoints=model_keypoints)
     modelgen = ModelFromShape(cad_models=cad_models, model_keypoints=model_keypoints)
@@ -1091,21 +824,20 @@ if __name__ == "__main__":
 
 
         # # estimate model: using the keypoint corrector
-        # detected_keypoints.requires_grad = True
+        detected_keypoints.requires_grad = True
         start = time.perf_counter()
         correction = corrector.forward(detected_keypoints, input_point_cloud)
-        # correction, _ = corrector.solve(detected_keypoints, input_point_cloud)
         end = time.perf_counter()
         print("Corrector with pace time: ", 1000*(end-start)/B, ' ms')
         #
 
-        # loss = torch.norm(correction, p=2)**2
-        # loss = loss.sum()
-        # print("Testing backward: ")
-        # loss.backward()
-        # print("Shape of detected_keypoints.grad: ", detected_keypoints.grad.shape)
-        # print("Sum of abs() of all elements in the detected_keypoints.grad: ", detected_keypoints.grad.abs().sum())
-        # #
+        loss = torch.norm(correction, p=2)**2
+        loss = loss.sum()
+        print("Testing backward: ")
+        loss.backward()
+        print("Shape of detected_keypoints.grad: ", detected_keypoints.grad.shape)
+        print("Sum of abs() of all elements in the detected_keypoints.grad: ", detected_keypoints.grad.abs().sum())
+        #
 
         # correction = torch.zeros_like(correction)
         R, t, c = pace.forward(detected_keypoints+correction)
@@ -1122,14 +854,8 @@ if __name__ == "__main__":
         print("Evaluation error (w correction): ", pace_eval(R, rotation_true, t, translation_true, c, shape_true).mean())
         # the claim is that with the correction we can
 
-        if i >= 5:
+        if i >= 3:
             break
 
     print("-" * 40)
-
-
-
-
-
-
 
