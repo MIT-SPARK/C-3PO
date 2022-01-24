@@ -20,6 +20,7 @@ sys.path.append("../../")
 
 from learning_objects.utils.general import display_results
 
+from learning_objects.utils.ddn.node import AbstractDeclarativeNode, ParamDeclarativeFunction
 from learning_objects.models.keypoint_detector import HeatmapKeypoints, RegressionKeypoints
 from learning_objects.models.pace import PACEmodule
 from learning_objects.models.keypoint_corrector import kp_corrector_pace
@@ -42,7 +43,7 @@ class ProposedModel(nn.Module):
         predicted_pc, detected_keypoints, rotation, translation     if correction_flag=False
         predicted_pc, corrected_keypoints, rotation, translation    if correction_flag=True
     """
-    def __init__(self, model_keypoints, cad_models, keypoint_detector=None):
+    def __init__(self, class_name, model_keypoints, cad_models, keypoint_detector=None, use_pretrained_model=False):
         super().__init__()
         """ 
         model_keypoints     : torch.tensor of shape (K, 3, N)
@@ -54,9 +55,11 @@ class ProposedModel(nn.Module):
         """
 
         # Parameters
+        self.class_name = class_name
         self.model_keypoints = model_keypoints
         self.cad_models = cad_models
         self.device_ = self.cad_models.device
+        self.use_pretrained_model = use_pretrained_model
 
         self.N = self.model_keypoints.shape[-1]  # (1, 1)
         self.K = self.model_keypoints.shape[0]  # (1, 1)
@@ -66,14 +69,14 @@ class ProposedModel(nn.Module):
             self.keypoint_detector = RegressionKeypoints(N=self.N, method='point_transformer',
                                                          dim=[3, 16, 32, 64, 128])
         else:
-            self.keypoint_detector = keypoint_detector
+            self.keypoint_detector = keypoint_detector(class_name=class_name, N=self.N)
 
         # PACE
         self.pace = PACEmodule(model_keypoints=self.model_keypoints)
-        # self.pace = PACEbp(model_keypoints=self.model_keypoints)
 
         # Registration + Correction
-        self.corrector = kp_corrector_pace(cad_models=self.cad_models, model_keypoints=self.model_keypoints)
+        corrector_node = kp_corrector_pace(cad_models=self.cad_models, model_keypoints=self.model_keypoints)
+        self.corrector = ParamDeclarativeFunction(problem=corrector_node)
 
         # Model generator
         self.modelgen = ModelFromShape(cad_models=self.cad_models, model_keypoints=self.model_keypoints)

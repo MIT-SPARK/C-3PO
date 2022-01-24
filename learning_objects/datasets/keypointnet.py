@@ -1,4 +1,5 @@
 import copy
+from enum import Enum
 
 ANNOTATIONS_FOLDER: str = '../../data/KeypointNet/KeypointNet/annotations/'
 PCD_FOLDER_NAME: str = '../../data/KeypointNet/KeypointNet/pcds/'
@@ -1040,6 +1041,10 @@ class SE3PointCloud(torch.utils.data.Dataset):
 
         return 0
 
+class ScaleAxis(Enum):
+    X = 0
+    Y = 1
+    Z = 2
 
 class SE3nIsotorpicShapePointCloud(torch.utils.data.Dataset):
     """
@@ -1160,6 +1165,155 @@ class SE3nIsotorpicShapePointCloud(torch.utils.data.Dataset):
 
         model_keypoints[0, ...] = self.shape_scaling[0]*keypoints
         model_keypoints[1, ...] = self.shape_scaling[1]*keypoints
+
+        return model_keypoints
+
+    def _get_diameter(self):
+        """
+        returns the diameter of the mid-sized object.
+
+        output  :   torch.tensor of shape (1)
+        """
+
+        return self.diameter*(self.shape_scaling[0] + self.shape_scaling[1])*0.5
+
+    def _visualize(self):
+        """
+        Visualizes the two CAD models and the corresponding keypoints
+
+        """
+
+        cad_models = self._get_cad_models()
+        model_keypoints = self._get_model_keypoints()
+        visualize_torch_model_n_keypoints(cad_models=cad_models, model_keypoints=model_keypoints)
+
+        return 0
+
+class SE3nAnisotropicScalingPointCloud(torch.utils.data.Dataset):
+    """
+    Given class id, model_id, number of points, and shape_scaling, it generates various point clouds and SE3
+    transformations of the ShapeNetCore object, scaled by a quantity between the range determined by shape_scaling
+    in the direction described by scale_direction before se3 transformation.
+
+
+    Returns a batch of
+        input_point_cloud, keypoints, rotation, translation, shape
+    """
+    def __init__(self, class_id, model_id, num_of_points=1000, dataset_len=10000,
+                 shape_scaling=torch.tensor([0.5, 2.0]), scale_direction=ScaleAxis.X,
+                 dir_location='../../data/learning-objects/keypointnet_datasets/'):
+        """
+        class_id        : str   : class id of a ShapeNetCore object
+        model_id        : str   : model id of a ShapeNetCore object
+        shape_scaling   : torch.tensor of shape (2) : lower and upper limit of isotropic shape scaling
+        num_of_points   : int   : max. number of points the depth point cloud will contain
+        dataset_len     : int   : size of the dataset
+
+        """
+
+        self.class_id = class_id
+        self.model_id = model_id
+        self.num_of_points = num_of_points
+        self.len = dataset_len
+        self.shape_scaling = shape_scaling
+        self.scale_direction = scale_direction.value
+
+        # get model
+        self.model_mesh, _, self.keypoints_xyz = get_model_and_keypoints(class_id, model_id)
+        center = self.model_mesh.get_center()
+        self.model_mesh.translate(-center)
+        self.keypoints_xyz = self.keypoints_xyz - center
+        self.keypoints_xyz = torch.from_numpy(self.keypoints_xyz).transpose(0, 1).unsqueeze(0).to(torch.float)
+
+        # size of the model
+        self.diameter = np.linalg.norm(np.asarray(self.model_mesh.get_max_bound()) - np.asarray(self.model_mesh.get_min_bound()))
+
+
+    def __len__(self):
+
+        return self.len
+
+    def __getitem__(self, idx):
+        """
+        output:
+        depth_pcd_torch     : torch.tensor of shape (3, m)                  : the depth point cloud
+        keypoints           : torch.tensor of shape (3, N)                  : transformed keypoints
+        R                   : torch.tensor of shape (3, 3)                  : rotation
+        t                   : torch.tensor of shape (3, 1)                  : translation
+        c                   : torch.tensor of shape (2, 1)                  : shape parameter
+
+        """
+
+        # random scaling
+        alpha = torch.rand(1, 1)
+        scaling_factor = alpha*(self.shape_scaling[1]-self.shape_scaling[0]) + self.shape_scaling[0]
+
+        model_mesh = self.model_mesh
+        model_pcd = model_mesh.sample_points_uniformly(number_of_points=self.num_of_points)
+        model_pcd_torch = torch.from_numpy(np.asarray(model_pcd.points)).transpose(0, 1)  # (3, m)
+        model_pcd_torch = model_pcd_torch.to(torch.float)
+        model_pcd_torch[self.scale_direction] = scaling_factor * model_pcd_torch[self.scale_direction]
+        keypoints_xyz = torch.clone(self.keypoints_xyz.squeeze())
+        keypoints_xyz[self.scale_direction] = scaling_factor * keypoints_xyz[self.scale_direction]
+
+        # random rotation and translation
+        R = transforms.random_rotation()
+        t = torch.rand(3, 1)
+
+        model_pcd_torch = R @ model_pcd_torch + t
+        keypoints_xyz = R @ keypoints_xyz + t
+
+        # shape parameter
+        shape = torch.zeros(2, 1)
+        shape[0] = 1 - alpha
+        shape[1] = alpha
+
+        return model_pcd_torch, keypoints_xyz, R, t, shape
+
+
+    def _get_cad_models(self):
+        """
+        Returns two point clouds as shape models, one with the min shape and the other with the max shape.
+
+        output:
+        cad_models  : torch.tensor of shape (2, 3, self.num_of_points)
+        """
+
+        model_pcd = self.model_mesh.sample_points_uniformly(number_of_points=self.num_of_points)
+        model_pcd_torch = torch.from_numpy(np.asarray(model_pcd.points)).transpose(0, 1)  # (3, m)
+        model_pcd_torch = model_pcd_torch.to(torch.float)
+
+        cad_models = torch.zeros_like(model_pcd_torch).unsqueeze(0)
+        cad_models = cad_models.repeat(2, 1, 1)
+
+        cad_models[0, ...] = torch.clone(model_pcd_torch)
+        cad_models[1, ...] = torch.clone(model_pcd_torch)
+
+        cad_models[0, self.scale_direction, ...] = self.shape_scaling[0] * cad_models[0, self.scale_direction, ...]
+        cad_models[1, self.scale_direction, ...] = self.shape_scaling[1] * cad_models[1, self.scale_direction, ...]
+
+        return cad_models
+
+    def _get_model_keypoints(self):
+        """
+        Returns two sets of keypoints, one with the min shape and the other with the max shape.
+
+        output:
+        model_keypoints : torch.tensor of shape (2, 3, N)
+
+        where
+        N = number of keypoints
+        """
+
+        keypoints = self.keypoints_xyz  # (3, N)
+
+        model_keypoints = torch.zeros_like(keypoints)
+        model_keypoints = model_keypoints.repeat(2, 1, 1)
+
+        model_keypoints[0, ...] = torch.clone(keypoints)
+        model_keypoints[1, ...] = torch.clone(keypoints)
+        model_keypoints[0,self.scale_direction, ...] = self.shape_scaling[0] * model_keypoints[0,self.scale_direction, ...]
+        model_keypoints[1,self.scale_direction, ...] = self.shape_scaling[1] * model_keypoints[1,self.scale_direction, ...]
 
         return model_keypoints
 
@@ -1320,6 +1474,47 @@ if __name__ == "__main__":
     print("Test: SE3nIsotorpicShapePointCloud(torch.utils.data.Dataset)")
     dataset = SE3nIsotorpicShapePointCloud(class_id=class_id, model_id=model_id,
                                            shape_scaling=torch.tensor([5.0, 20.0]))
+    model = dataset.model_mesh
+    length = dataset.len
+    class_id = dataset.class_id
+    model_id = dataset.model_id
+
+    diameter = dataset._get_diameter()
+    model_keypoints = dataset._get_model_keypoints()
+    cad_models = dataset._get_cad_models()
+
+    print("diameter: ", diameter)
+    print("shape of model keypoints: ", model_keypoints.shape)
+    print("shape of cad models: ", cad_models.shape)
+
+    #
+    print("Test: visualize_torch_model_n_keypoints()")
+    visualize_torch_model_n_keypoints(cad_models=cad_models, model_keypoints=model_keypoints)
+    dataset._visualize()
+
+    loader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
+
+    modelgen = ModelFromShape(cad_models=cad_models, model_keypoints=model_keypoints)
+
+    for i, data in enumerate(loader):
+        pc, kp, R, t, c = data
+        visualize_torch_model_n_keypoints(cad_models=pc, model_keypoints=kp)
+
+        # getting the model from R, t, c
+        kp_gen, pc_gen = modelgen.forward(shape=c)
+        kp_gen = R @ kp_gen + t
+        pc_gen = R @ pc_gen + t
+        display_two_pcs(pc1=pc[0, ...], pc2=pc_gen[0, ...])
+        display_two_pcs(pc1=kp[0, ...], pc2=kp_gen[0, ...])
+
+        if i >= 5:
+            break
+
+    #
+    print("Test: SE3nAnisotropicScalingPointCloud(torch.utils.data.Dataset)")
+    dataset = SE3nAnisotropicScalingPointCloud(class_id=class_id, model_id=model_id,
+                                           shape_scaling=torch.tensor([1.0, 2.0]),
+                                           scale_direction=ScaleAxis.X)
 
     model = dataset.model_mesh
     length = dataset.len

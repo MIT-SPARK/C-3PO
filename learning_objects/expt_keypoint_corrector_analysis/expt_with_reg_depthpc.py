@@ -16,6 +16,7 @@ from learning_objects.models.keypoint_corrector import kp_corrector_reg
 from learning_objects.models.point_set_registration import point_set_registration
 from learning_objects.models.certifiability import certifiability
 
+from learning_objects.utils.ddn.node import ParamDeclarativeFunction
 from learning_objects.utils.general import display_two_pcs
 
 #ToDo: This code does not use batch sizes. It would be faster using batch sizes, as now the keypoint_corrector can
@@ -154,8 +155,9 @@ class experiment():
         self.diameter = self.se3_dataset._get_diameter()
 
         # defining the keypoint corrector
-        self.corrector = kp_corrector_reg(cad_models=self.cad_models, model_keypoints=self.model_keypoints,
-                                     theta=self.theta, kappa=self.kappa)
+        corrector_node = kp_corrector_reg(cad_models=self.cad_models, model_keypoints=self.model_keypoints,
+                                           theta=self.theta, kappa=self.kappa)
+        self.corrector = ParamDeclarativeFunction(problem=corrector_node)
 
         # setting up experiment parameters and data for saving
         self.data = dict()
@@ -213,7 +215,7 @@ class experiment():
                 display_two_pcs(pc1=input_point_cloud.squeeze(0), pc2=model_estimate_naive.squeeze(0))
 
             # estimate model: using the keypoint corrector
-            correction = self.corrector.forward(detected_keypoints=detected_keypoints, input_point_cloud=input_point_cloud)
+            correction = self.corrector.forward(detected_keypoints, input_point_cloud)
             # correction = torch.zeros_like(correction)
             R, t = point_set_registration(source_points=self.model_keypoints, target_points=detected_keypoints + correction)
             model_estimate = R @ self.cad_models + t

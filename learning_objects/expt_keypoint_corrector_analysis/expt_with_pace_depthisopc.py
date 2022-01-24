@@ -20,6 +20,7 @@ from learning_objects.models.pace_altern_ddn import PACEbp
 from learning_objects.models.modelgen import ModelFromShape
 from learning_objects.models.certifiability import certifiability
 
+from learning_objects.utils.ddn.node import ParamDeclarativeFunction
 from learning_objects.utils.general import display_two_pcs
 
 #ToDo: This code works, but is still using solve_algo1() in kp_corrector_pace. This is because autograd backprop()
@@ -183,9 +184,9 @@ class experiment():
         self.pace = PACEbp(weights=self.weights,model_keypoints=self.model_keypoints,batch_size=1)
 
         # setting up keypoint corrector
-        self.corrector = kp_corrector_pace(cad_models=self.cad_models, model_keypoints=self.model_keypoints,
-                                           theta=self.theta, kappa=self.kappa, batch_size=1)
-
+        corrector_node = kp_corrector_pace(cad_models=self.cad_models, model_keypoints=self.model_keypoints,
+                                           theta=self.theta, kappa=self.kappa)
+        self.corrector = ParamDeclarativeFunction(problem=corrector_node)
         # setting up model generator
         self.modelgen = ModelFromShape(cad_models=self.cad_models, model_keypoints=self.model_keypoints)
 
@@ -247,7 +248,7 @@ class experiment():
                 display_two_pcs(pc1=input_point_cloud.squeeze(0), pc2=model_estimate_naive.squeeze(0))
 
             # estimate model: using the keypoint corrector
-            correction = self.corrector.forward(detected_keypoints=detected_keypoints, input_point_cloud=input_point_cloud)
+            correction = self.corrector.forward(detected_keypoints, input_point_cloud)
             # correction = torch.zeros_like(correction)
             R, t, c = self.pace.forward(y=detected_keypoints+correction)
             _, model_estimate = self.modelgen.forward(shape=c)
