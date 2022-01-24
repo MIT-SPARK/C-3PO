@@ -27,7 +27,7 @@ from learning_objects.utils.general import display_results
 
 from learning_objects.models.keypoint_detector import HeatmapKeypoints, RegressionKeypoints, RSNetKeypoints
 from learning_objects.models.point_set_registration import PointSetRegistration
-from learning_objects.models.keypoint_corrector import kp_corrector_reg, correctorNode
+from learning_objects.models.keypoint_corrector import kp_corrector_reg
 
 # from learning_objects.models.modelgen import ModelFromShape, ModelFromShapeModule
 
@@ -110,7 +110,8 @@ class ProposedModel(nn.Module):
 
         # Corrector
         self.corrector = kp_corrector_reg(cad_models=self.cad_models, model_keypoints=self.model_keypoints)
-
+        corrector_node = kp_corrector_reg(cad_models=cad_models, model_keypoints=model_keypoints)
+        self.corrector = ParamDeclarativeFunction(problem=corrector_node)
 
 
     def forward(self, input_point_cloud, correction_flag=False):
@@ -134,10 +135,8 @@ class ProposedModel(nn.Module):
         device_ = input_point_cloud.device
         detected_keypoints = self.keypoint_detector(input_point_cloud)
         if self.viz_keypoint_correction:
-        #     print("visualizing detected keypoints")
             inp = input_point_cloud.clone().detach().to('cpu')
             det_kp = detected_keypoints.clone().detach().to('cpu')
-        #     display_results(inp, kp, inp, kp)
             # print("FINISHED DETECTOR")
 
         if not correction_flag:
@@ -156,8 +155,7 @@ class ProposedModel(nn.Module):
                 print("visualizing corrected keypoints")
                 Rt_inp = predicted_point_cloud.clone().detach().to('cpu')
                 corrected_kp = corrected_keypoints.clone().detach().to('cpu')
-                display_results(inp, det_kp, Rt_inp, corrected_kp)
-            # model_keypoints = R @ self.model_keypoints + t
+                display_results(inp, det_kp, inp, corrected_kp)
             return predicted_point_cloud, corrected_keypoints, R, t, correction
 
 
@@ -440,7 +438,7 @@ def validate(writer, validation_loader, model, correction_flag):
             # vloss = loss_fn(input_point_cloud, detected_keypoints, target_point_cloud, target_keypoints)
             running_vloss += vloss
 
-            # if i==0:
+            # if i<3:
             #     # Display results for validation
             #     pc = predicted_point_cloud.clone().detach().to('cpu')
             #     pc_t = input_point_cloud.clone().detach().to('cpu')
@@ -509,7 +507,7 @@ def train_without_supervision(self_supervised_train_loader, validation_loader, m
     writer = SummaryWriter(SAVE_LOCATION + 'expt_keypoint_detect_{}'.format(timestamp))
     epoch_number = 0
 
-    EPOCHS = 100
+    EPOCHS = 50
 
     best_vloss = 1_000_000.
 
@@ -573,8 +571,6 @@ def visual_test(test_loader, model):
         pc_p = predicted_point_cloud.clone().detach().to('cpu')
         kp = keypoints_target.clone().detach().to('cpu')
         kp_p = predicted_keypoints.clone().detach().to('cpu')
-        # display_results(input_point_cloud=pc, detected_keypoints=kp_p, target_point_cloud=pc_p,
-        #                 target_keypoints=kp)
         display_results(input_point_cloud=pc_p, detected_keypoints=kp_p, target_point_cloud=pc,
                         target_keypoints=kp)
 
@@ -595,9 +591,7 @@ if __name__ == "__main__":
     print('-' * 20)
     print("Running expt_keypoint_detect.py")
     print('-' * 20)
-    # device
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    # device = 'cpu'
     print('device is ', device)
     print('-' * 20)
     torch.cuda.empty_cache()
@@ -641,10 +635,6 @@ if __name__ == "__main__":
                                                           batch_size=supervised_train_batch_size,
                                                           shuffle=False)
 
-    # self_supervised_train_dataset = DepthPointCloud2(class_id=class_id,
-    #                                                  model_id=model_id,
-    #                                                  num_of_points=num_of_points,
-    #                                                  dataset_len=self_supervised_train_dataset_len)
     self_supervised_train_dataset = DepthPC(class_id=class_id,
                                             model_id=model_id,
                                             n=num_of_points_selfsupervised,
@@ -661,8 +651,13 @@ if __name__ == "__main__":
 
 
     # model
+    # Note: set use_pretrained_regression_model to True if we're using models pretrained on se3 dataset with supervision
+    # if keypoint_detector=RSNetKeypoints, it will automatically load the pretrained model inside the detector,
+    # so set use_pretrained_regression_model=False
+    # This difference is because RSNetKeypoints was trained with supervision in KeypointNet,
+    # whereas RegressionKeypoints was trained with supervision in this script and saved ProposedModel weights
     model = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,
-                          keypoint_detector=None, use_pretrained_regression_model=True).to(device)
+                          keypoint_detector=RSNetKeypoints, use_pretrained_regression_model=False).to(device)
     if model.use_pretrained_regression_model:
         print("USING PRETRAINED REGRESSION MODEL, ONLY USE THIS WITH SELF-SUPERVISION")
         best_model_checkpoint = os.path.join(SAVE_LOCATION, 'best_supervised_keypoint_detect_model_se3.pth')
@@ -677,15 +672,14 @@ if __name__ == "__main__":
 
     # optimizer
     optimizer = torch.optim.SGD(model.parameters(), lr=lr_sgd, momentum=momentum_sgd)
-    # optimizer = torch.optim.Adam(model.parameters(), lr=lr_adam)
-
 
     # training
     # for Regression KD val and test on depth pcl
     # train_with_supervision(supervised_training_loader=supervised_train_loader,
     #                        validation_loader=self_supervised_train_loader,
     #                        model=model,
-    #                        optimizer=optimizer)
+    #                        optimizer=optimizer,
+    #                        correction_flag=correction_flag)
     # for Regression KD val and test on se3 pcl
     # train_with_supervision(supervised_training_loader=supervised_train_loader,
     #                        validation_loader=supervised_train_loader,
@@ -701,7 +695,6 @@ if __name__ == "__main__":
     # test
     print("Visualizing the trained model.")
     visual_test(test_loader=self_supervised_train_loader, model=model)
-    # visual_test(test_loader=supervised_train_loader, model=model, correction_flag=correction_flag)
 
 
 
