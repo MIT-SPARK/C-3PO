@@ -18,6 +18,7 @@ learning_objects/expt_keypoint_corrector_analysis/expt_with_pace_se3isopc
 learning_objects/expt_keypoint_corrector_analysis/expt_with_pace_depthisopc
 learning_objects/expt_keypoint_corrector_analysis/expt_with_reg_se3pc
 learning_objects/expt_keypoint_corrector_analysis/expt_with_reg_depthpc
+learning_objects/expt_pace_compute_time/runs
 
 # Misc folders
 example_package/
