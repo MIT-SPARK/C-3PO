@@ -284,7 +284,7 @@ class experiment():
         pickle.dump([self.parameters, self.data], file)
         file.close()
 
-        return location + filemane
+        return location + filename
 
 
 def run_experiments_on(class_id, model_id, only_visualize=False):
