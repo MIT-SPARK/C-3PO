@@ -1384,7 +1384,8 @@ class SE3nAnisotropicScalingPointCloud(torch.utils.data.Dataset):
     """
     def __init__(self, class_id, model_id, num_of_points=1000, dataset_len=10000,
                  shape_scaling=torch.tensor([0.5, 2.0]), scale_direction=ScaleAxis.X,
-                 dir_location='../../data/learning-objects/keypointnet_datasets/'):
+                 dir_location='../../data/learning-objects/keypointnet_datasets/',
+                 shape_dataset=None):
         """
         class_id        : str   : class id of a ShapeNetCore object
         model_id        : str   : model id of a ShapeNetCore object
@@ -1400,6 +1401,7 @@ class SE3nAnisotropicScalingPointCloud(torch.utils.data.Dataset):
         self.len = dataset_len
         self.shape_scaling = shape_scaling
         self.scale_direction = scale_direction.value
+        self.shape_dataset = shape_dataset
 
         # get model
         self.model_mesh, _, self.keypoints_xyz = get_model_and_keypoints(class_id, model_id)
@@ -1428,7 +1430,11 @@ class SE3nAnisotropicScalingPointCloud(torch.utils.data.Dataset):
         """
 
         # random scaling
-        alpha = torch.rand(1, 1)
+        if self.shape_dataset is not None:
+            alpha = torch.tensor(self.shape_dataset[idx])
+        else:
+            alpha = torch.rand(1, 1)
+
         scaling_factor = alpha*(self.shape_scaling[1]-self.shape_scaling[0]) + self.shape_scaling[0]
 
         model_mesh = self.model_mesh
