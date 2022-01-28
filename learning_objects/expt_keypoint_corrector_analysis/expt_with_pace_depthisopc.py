@@ -250,7 +250,7 @@ class experiment():
 
             # estimate model: using point set registration on perturbed keypoints
             R_naive, t_naive, c_naive = self.pace.forward(y=detected_keypoints)
-            _, model_estimate_naive = self.modelgen.forward(shape=c_naive)
+            keypoint_estimate_naive, model_estimate_naive = self.modelgen.forward(shape=c_naive)
             model_estimate_naive = R_naive @ model_estimate_naive + t_naive
             if visualization:
                 print("Displaying input and naive model estimate: ")
@@ -260,7 +260,7 @@ class experiment():
             correction = self.corrector.forward(detected_keypoints, input_point_cloud)
             # correction = torch.zeros_like(correction)
             R, t, c = self.pace.forward(y=detected_keypoints+correction)
-            _, model_estimate = self.modelgen.forward(shape=c)
+            keypoint_estimate, model_estimate = self.modelgen.forward(shape=c)
             model_estimate = R @ model_estimate + t
             if visualization:
                 print("Displaying input and corrector model estimate: ")
@@ -280,15 +280,12 @@ class experiment():
             sqdist_input_naiveest.append(sq_dist_input_naive)
             sqdist_input_correctorest.append(sq_dist_input_corrector)
 
-            kp_detected_naive = R_naive @ detected_keypoints + t_naive
-            kp_gt_naive = R_naive @ keypoints_true + t_naive
-            kp_detected_corrected = R @ (detected_keypoints + correction) + t
-            kp_gt_corrected = R @ keypoints_true + t
+            kp_detected_naive = R_naive @ keypoint_estimate_naive + t_naive
+            kp_detected_corrected = R @ keypoint_estimate + t
             # certification
-            certi, _ = self.certify.forward(X=input_point_cloud, Z=model_estimate_naive, kp=kp_detected_naive, kp_= kp_gt_naive)
+            certi, _ = self.certify.forward(X=input_point_cloud, Z=model_estimate_naive, kp=kp_detected_naive, kp_=detected_keypoints)
             certi_naive[i] = certi
-
-            certi, _ = self.certify.forward(X=input_point_cloud, Z=model_estimate, kp=kp_detected_corrected, kp_=kp_gt_corrected)
+            certi, _ = self.certify.forward(X=input_point_cloud, Z=model_estimate, kp=kp_detected_corrected, kp_=detected_keypoints + correction)
             certi_corrector[i] = certi
 
             if visualization and i >= 5:
