@@ -60,6 +60,10 @@ from learning_objects.models.modelgen import ModelFromShape
 from learning_objects.utils.general import pos_tensor_to_o3d
 import learning_objects.utils.general as gu
 
+class ScaleAxis(Enum):
+    X = 0
+    Y = 1
+    Z = 2
 
 def display_two_pcs(pc1, pc2):
     """
@@ -391,6 +395,190 @@ class DepthAndIsotorpicShapePointCloud(torch.utils.data.Dataset):
 
         return 0
 
+class DepthAndAnisotropicScalingPointCloud(torch.utils.data.Dataset):
+    """
+        TODO: make a version that works with batch_size > 1 aka outputs pointclouds of a set size
+
+        Given class id, model id, and number of points, it generates various depth point clouds and
+        SE3 transformations of the ShapeNetCore object. The object is scaled anisotropically by a quantity in the
+        range determined by shape_scaling in the direction determined by scale_direction
+
+        Note:
+            The output depth point clouds will not contain the same number of points. Therefore, when using with a
+            dataloader, fix the batch_size=1.
+
+        Returns
+            input_point_cloud, keypoints, rotation, translation, shape
+        """
+
+    def __init__(self, class_id, model_id, shape_scaling=torch.tensor([0.5, 2.0]),
+                 scale_direction=ScaleAxis.X,
+                 radius_multiple=torch.tensor([1.2, 3.0]),
+                 num_of_points=1000, dataset_len=10000):
+        super().__init__()
+        """
+        class_id        : str   : class id of a ShapeNetCore object
+        model_id        : str   : model id of a ShapeNetCore object
+        shape_scaling   : torch.tensor of shape (2) : lower and upper limit of isotropic shape scaling
+        radius_multiple : torch.tensor of shape (2) : lower and upper limit of the distance from which depth point 
+                                                        cloud is constructed
+        num_of_points   : int   : max. number of points the depth point cloud will contain
+        dataset_len     : int   : size of the dataset  
+
+        """
+        self.class_id = class_id
+        self.model_id = model_id
+        self.shape_scaling = shape_scaling
+        self.scale_direction = scale_direction.value
+        self.radius_multiple = radius_multiple
+        self.num_of_points = num_of_points
+        self.len = dataset_len
+
+        # get model
+        self.model_mesh, _, self.keypoints_xyz = get_model_and_keypoints(class_id, model_id)
+        center = self.model_mesh.get_center()
+        self.model_mesh.translate(-center)
+
+        self.keypoints_xyz = self.keypoints_xyz - center
+        self.keypoints_xyz = torch.from_numpy(self.keypoints_xyz).transpose(0, 1).unsqueeze(0).to(torch.float)
+
+        # size of the model
+        self.diameter = np.linalg.norm(
+            np.asarray(self.model_mesh.get_max_bound()) - np.asarray(self.model_mesh.get_min_bound()))
+
+        #
+        self.camera_location = torch.tensor([1.0, 0.0, 0.0]).unsqueeze(
+            -1)  # set a camera location, with respect to the origin
+
+    def __len__(self):
+        return self.len
+
+    def __getitem__(self, idx):
+        """
+        output:
+        depth_pcd_torch     : torch.tensor of shape (3, m)                  : the depth point cloud
+        keypoints           : torch.tensor of shape (3, N)                  : transformed keypoints
+        R                   : torch.tensor of shape (3, 3)                  : rotation
+        t                   : torch.tensor of shape (3, 1)                  : translation
+        c                   : torch.tensor of shape (2, 1)                  : shape parameter
+        model_pcd_torch     : torch.tensor of shape (3, self.num_of_points) : transformed full point cloud
+        """
+        # Choose a random scaling factor to scale the depth point cloud, bounded within the self.radius_multiple
+        alpha = torch.rand(1, 1)
+        scaling_factor = alpha * (self.shape_scaling[1] - self.shape_scaling[0]) + self.shape_scaling[0]
+
+        # Choose a random rotation
+        R = transforms.random_rotation()
+
+        model_mesh = copy.deepcopy(self.model_mesh)
+
+        # Sample a point cloud from the self.model_mesh
+        pcd = model_mesh.sample_points_uniformly(number_of_points=self.num_of_points)
+
+        model_pcd_points = np.asarray(pcd.points).transpose()  # (3, m)
+        model_pcd_points[self.scale_direction] = scaling_factor * model_pcd_points[self.scale_direction]
+        pcd.points = o3d.utility.Vector3dVector(model_pcd_points.transpose())
+
+
+        pcd = pcd.rotate(R=R.numpy(), center=np.zeros((3,1)))
+
+        # scaled_diameter = max(self.diameter, self.diameter*scaling_factor)
+
+        # Take a depth image from a distance of the rotated self.model_mesh from self.camera_location
+        beta = torch.rand(1, 1)
+        camera_location_factor = beta * (self.radius_multiple[1] - self.radius_multiple[0]) + self.radius_multiple[0]
+        radius = gu.get_radius(cam_location=camera_location_factor * self.camera_location.numpy(),
+                               object_diameter=self.diameter)
+        depth_pcd = gu.get_depth_pcd(centered_pcd=pcd, camera=self.camera_location.numpy(), radius=radius)
+
+        depth_pcd_torch = torch.from_numpy(np.asarray(depth_pcd.points)).transpose(0, 1)  # (3, m)
+        depth_pcd_torch = depth_pcd_torch.to(torch.float)
+
+        keypoints_xyz = torch.clone(self.keypoints_xyz.squeeze())
+        keypoints_xyz[self.scale_direction] = scaling_factor * keypoints_xyz[self.scale_direction]
+        keypoints_xyz = R @ keypoints_xyz
+
+        # Translate by a random t
+        t = torch.rand(3, 1)
+        depth_pcd_torch = depth_pcd_torch + t
+        keypoints_xyz = keypoints_xyz + t
+
+        # shape parameter
+        shape = torch.zeros(2, 1)
+        shape[0] = 1 - alpha
+        shape[1] = alpha
+
+        return depth_pcd_torch, keypoints_xyz.squeeze(0), R, t, shape
+
+    def _get_cad_models(self):
+        """
+        Returns two point clouds as shape models, one with the min shape and the other with the max shape
+        along scale_direction
+
+        output:
+        cad_models  : torch.tensor of shape (2, 3, self.num_of_points)
+        """
+
+        model_pcd = self.model_mesh.sample_points_uniformly(number_of_points=self.num_of_points)
+        model_pcd_torch = torch.from_numpy(np.asarray(model_pcd.points)).transpose(0, 1)  # (3, m)
+        model_pcd_torch = model_pcd_torch.to(torch.float)
+
+        cad_models = torch.zeros_like(model_pcd_torch).unsqueeze(0)
+        cad_models = cad_models.repeat(2, 1, 1)
+
+        cad_models[0, ...] = torch.clone(model_pcd_torch)
+        cad_models[1, ...] = torch.clone(model_pcd_torch)
+
+        cad_models[0, self.scale_direction, ...] = self.shape_scaling[0] * cad_models[0, self.scale_direction, ...]
+        cad_models[1, self.scale_direction, ...] = self.shape_scaling[1] * cad_models[1, self.scale_direction, ...]
+
+        return cad_models
+
+    def _get_model_keypoints(self):
+        """
+        Returns two sets of keypoints, one with the min shape and the other with the max shape
+                along scale_direction.
+
+        output:
+        model_keypoints : torch.tensor of shape (2, 3, N)
+
+        where
+        N = number of keypoints
+        """
+
+        keypoints = self.keypoints_xyz  # (3, N)
+
+        model_keypoints = torch.zeros_like(keypoints)
+        model_keypoints = model_keypoints.repeat(2, 1, 1)
+
+        model_keypoints[0, ...] = torch.clone(keypoints)
+        model_keypoints[1, ...] = torch.clone(keypoints)
+        model_keypoints[0, self.scale_direction, ...] = self.shape_scaling[0] * model_keypoints[
+            0, self.scale_direction, ...]
+        model_keypoints[1, self.scale_direction, ...] = self.shape_scaling[1] * model_keypoints[
+            1, self.scale_direction, ...]
+
+        return model_keypoints
+
+    def _get_diameter(self):
+        """
+        returns the diameter of the mid-sized object.
+
+        output  :   torch.tensor of shape (1)
+        """
+        return self.diameter * (self.shape_scaling[0] + self.shape_scaling[1]) * 0.5
+
+    def _visualize(self):
+        """
+        Visualizes the two CAD models and the corresponding keypoints
+
+        """
+
+        cad_models = self._get_cad_models()
+        model_keypoints = self._get_model_keypoints()
+        visualize_torch_model_n_keypoints(cad_models=cad_models, model_keypoints=model_keypoints)
+
+        return 0
 
 class DepthIsoPC(torch.utils.data.Dataset):
     """
@@ -732,7 +920,7 @@ class DepthPC(torch.utils.data.Dataset):
         self.num_of_points_to_sample = num_of_points_to_sample
         self.len = dataset_len
 
-        # ToDo: This is temporary. We will move the DepthPointCloud2() here when we completely depreciate it.
+        # ToDo: This is temporary. We will move the DepthPointCloud2() here when we completely deprecate it.
         self.dataset = DepthPointCloud2(class_id=self.class_id,
                                         model_id=self.model_id,
                                         radius_multiple=self.radius_multiple,
@@ -1041,11 +1229,6 @@ class SE3PointCloud(torch.utils.data.Dataset):
 
         return 0
 
-class ScaleAxis(Enum):
-    X = 0
-    Y = 1
-    Z = 2
-
 class SE3nIsotorpicShapePointCloud(torch.utils.data.Dataset):
     """
     Given class id, model_id, number of points, and shape_scaling, it generates various point clouds and SE3
@@ -1201,7 +1384,8 @@ class SE3nAnisotropicScalingPointCloud(torch.utils.data.Dataset):
     """
     def __init__(self, class_id, model_id, num_of_points=1000, dataset_len=10000,
                  shape_scaling=torch.tensor([0.5, 2.0]), scale_direction=ScaleAxis.X,
-                 dir_location='../../data/learning-objects/keypointnet_datasets/'):
+                 dir_location='../../data/learning-objects/keypointnet_datasets/',
+                 shape_dataset=None):
         """
         class_id        : str   : class id of a ShapeNetCore object
         model_id        : str   : model id of a ShapeNetCore object
@@ -1217,6 +1401,7 @@ class SE3nAnisotropicScalingPointCloud(torch.utils.data.Dataset):
         self.len = dataset_len
         self.shape_scaling = shape_scaling
         self.scale_direction = scale_direction.value
+        self.shape_dataset = shape_dataset
 
         # get model
         self.model_mesh, _, self.keypoints_xyz = get_model_and_keypoints(class_id, model_id)
@@ -1245,7 +1430,11 @@ class SE3nAnisotropicScalingPointCloud(torch.utils.data.Dataset):
         """
 
         # random scaling
-        alpha = torch.rand(1, 1)
+        if self.shape_dataset is not None:
+            alpha = torch.tensor(self.shape_dataset[idx])
+        else:
+            alpha = torch.rand(1, 1)
+
         scaling_factor = alpha*(self.shape_scaling[1]-self.shape_scaling[0]) + self.shape_scaling[0]
 
         model_mesh = self.model_mesh
@@ -1557,9 +1746,47 @@ if __name__ == "__main__":
 
 
 
-    #
-    print("Test: DepthPoiontCloud2(torch.utils.data.Dataset)")
+
+    print("Test: DepthAndIsotorpicShapePointCloud(torch.utils.data.Dataset)")
     dataset = DepthAndIsotorpicShapePointCloud(class_id=class_id, model_id=model_id)
+
+    model = dataset.model_mesh
+    length = dataset.len
+    class_id = dataset.class_id
+    model_id = dataset.model_id
+
+    diameter = dataset._get_diameter()
+    model_keypoints = dataset._get_model_keypoints()
+    cad_models = dataset._get_cad_models()
+
+    print("diameter: ", diameter)
+    print("shape of model keypoints: ", model_keypoints.shape)
+    print("shape of cad models: ", cad_models.shape)
+
+    #
+    print("Test: visualize_torch_model_n_keypoints()")
+    visualize_torch_model_n_keypoints(cad_models=cad_models, model_keypoints=model_keypoints)
+    dataset._visualize()
+
+    loader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)  #Note: the batch size has to be one!
+
+    for i, data in enumerate(loader):
+        depth_pcd_torch, keypoints_xyz, R, t, shape = data
+        pc = depth_pcd_torch
+        kp = keypoints_xyz
+        print(pc.shape)
+        print(kp.shape)
+        print(R.shape)
+        print(t.shape)
+        print(shape.shape)
+        visualize_torch_model_n_keypoints(cad_models=pc, model_keypoints=kp)
+        if i >= 2:
+            break
+
+
+    print("Test: DepthAndAnisotropicScalingPointCloud(torch.utils.data.Dataset)")
+    dataset = DepthAndAnisotropicScalingPointCloud(class_id=class_id, model_id=model_id,
+                                                   scale_direction=ScaleAxis.X)
 
     model = dataset.model_mesh
     length = dataset.len

@@ -8,23 +8,26 @@ import csv
 
 import os
 import sys
+import random
 sys.path.append("../../")
 
 from learning_objects.datasets.keypointnet import SE3nIsotorpicShapePointCloud, visualize_torch_model_n_keypoints, \
-    DepthAndIsotorpicShapePointCloud
+    DepthAndIsotorpicShapePointCloud, DepthAndAnisotropicScalingPointCloud, ScaleAxis
+
+from learning_objects.datasets.keypointnet import PCD_FOLDER_NAME as KEYPOINTNET_PCD_FOLDER_NAME
+from learning_objects.datasets.keypointnet import CLASS_NAME as KEYPOINTNET_ID2NAME, \
+    CLASS_ID as KEYPOINTNET_NAME2ID
 
 from learning_objects.models.keypoint_corrector import kp_corrector_reg, kp_corrector_pace
 from learning_objects.models.point_set_registration import point_set_registration
 # from learning_objects.models.pace_ddn import PACEbp
 from learning_objects.models.pace_altern_ddn import PACEbp
+from learning_objects.models.pace import PACEmodule
 from learning_objects.models.modelgen import ModelFromShape
 from learning_objects.models.certifiability import certifiability
 
 from learning_objects.utils.ddn.node import ParamDeclarativeFunction
 from learning_objects.utils.general import display_two_pcs
-
-#ToDo: This code works, but is still using solve_algo1() in kp_corrector_pace. This is because autograd backprop()
-# is not imlemented for PACEbp.But, this code now uses PACEbp from pace_altern_ddn.
 
 def get_sq_distances(X, Y):
     """
@@ -166,10 +169,15 @@ class experiment():
 
 
         # setting up data
-        self.se3_dataset = DepthAndIsotorpicShapePointCloud(class_id=self.class_id, model_id=self.model_id,
-                                                            num_of_points=self.num_points,
-                                                            dataset_len=self.num_iterations,
-                                                            shape_scaling=self.shape_scaling)
+        # self.se3_dataset = DepthAndIsotorpicShapePointCloud(class_id=self.class_id, model_id=self.model_id,
+        #                                                     num_of_points=self.num_points,
+        #                                                     dataset_len=self.num_iterations,
+        #                                                     shape_scaling=self.shape_scaling)
+        self.se3_dataset = DepthAndAnisotropicScalingPointCloud(class_id=self.class_id, model_id=self.model_id,
+                                                                num_of_points=self.num_points,
+                                                                dataset_len=self.num_iterations,
+                                                                shape_scaling=self.shape_scaling,
+                                                                scale_direction=ScaleAxis.X)
         self.se3_dataset_loader = torch.utils.data.DataLoader(self.se3_dataset, batch_size=1, shuffle=False)
 
         self.model_keypoints = self.se3_dataset._get_model_keypoints()  # (2, 3, N)
@@ -182,6 +190,7 @@ class experiment():
         self.K = self.model_keypoints.shape[0]
         self.weights = torch.ones(self.N, 1)
         self.pace = PACEbp(weights=self.weights,model_keypoints=self.model_keypoints,batch_size=1)
+        # self.pace = PACEmodule(weights=self.weights, model_keypoints=self.model_keypoints)
 
         # setting up keypoint corrector
         corrector_node = kp_corrector_pace(cad_models=self.cad_models, model_keypoints=self.model_keypoints,
@@ -241,7 +250,7 @@ class experiment():
 
             # estimate model: using point set registration on perturbed keypoints
             R_naive, t_naive, c_naive = self.pace.forward(y=detected_keypoints)
-            _, model_estimate_naive = self.modelgen.forward(shape=c_naive)
+            keypoint_estimate_naive, model_estimate_naive = self.modelgen.forward(shape=c_naive)
             model_estimate_naive = R_naive @ model_estimate_naive + t_naive
             if visualization:
                 print("Displaying input and naive model estimate: ")
@@ -251,7 +260,7 @@ class experiment():
             correction = self.corrector.forward(detected_keypoints, input_point_cloud)
             # correction = torch.zeros_like(correction)
             R, t, c = self.pace.forward(y=detected_keypoints+correction)
-            _, model_estimate = self.modelgen.forward(shape=c)
+            keypoint_estimate, model_estimate = self.modelgen.forward(shape=c)
             model_estimate = R @ model_estimate + t
             if visualization:
                 print("Displaying input and corrector model estimate: ")
@@ -271,11 +280,12 @@ class experiment():
             sqdist_input_naiveest.append(sq_dist_input_naive)
             sqdist_input_correctorest.append(sq_dist_input_corrector)
 
+            kp_detected_naive = R_naive @ keypoint_estimate_naive + t_naive
+            kp_detected_corrected = R @ keypoint_estimate + t
             # certification
-            certi, _ = self.certify.forward(X=input_point_cloud, Z=model_estimate_naive)
+            certi, _ = self.certify.forward(X=input_point_cloud, Z=model_estimate_naive, kp=kp_detected_naive, kp_=detected_keypoints)
             certi_naive[i] = certi
-
-            certi, _ = self.certify.forward(X=input_point_cloud, Z=model_estimate)
+            certi, _ = self.certify.forward(X=input_point_cloud, Z=model_estimate, kp=kp_detected_corrected, kp_=detected_keypoints + correction)
             certi_corrector[i] = certi
 
             if visualization and i >= 5:
@@ -346,9 +356,9 @@ class experiment():
         self.execute()
 
         # saving the experiment and data
-        location = './expt_with_pace_depthisopc/'
+        location = './expt_with_pace_depthanisopc/' + str(self.class_id) + '/' + str(self.model_id) + '/'
         if not os.path.isdir(location):
-            os.mkdir(location)
+            os.makedirs(location)
 
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         filemane = timestamp + '_experiment.pickle'
@@ -414,7 +424,7 @@ def run_experiments_on(class_id, model_id, kp_noise_type, kp_noise_fra=0.2, only
         expt['filename'] = filename
         expt['num_iterations'] = num_iterations
 
-        expt_filename = 'expt_with_pace_depthisopc/experiments.csv'
+        expt_filename = 'expt_with_pace_depthanisopc/' + str(class_id) + '/' + str(model_id) + '/' + 'experiments.csv'
         field_names = ['class_id', 'model_id', 'kp_noise_type', 'kp_noise_fra', 'filename', 'num_iterations']
 
         fp = open(expt_filename, 'a')
@@ -424,6 +434,28 @@ def run_experiments_on(class_id, model_id, kp_noise_type, kp_noise_fra=0.2, only
 
 
 #ToDo: Write the code to run this experiment for 10 models in each of the 16 model categories. The result will be the average error.
+
+def choose_random_models(num_models=10, pcd_path = KEYPOINTNET_PCD_FOLDER_NAME):
+    """
+    For each class_id in pcd_path, choose num_models models randomly from each class.
+    :param num_models: the number of models to sample from each class_id category
+    :return: class_id_to_model_id_samples: dict: maps class_id to a list of sampled model_ids
+    """
+    class_id_to_model_id_samples = {}
+    folder_contents = os.listdir(pcd_path)
+    for class_id in folder_contents:
+        models = os.listdir(pcd_path + str(class_id) + '/')
+        #choose random num_models from models without replacement
+        model_id_samples = random.sample(models, num_models)
+        class_id_to_model_id_samples[class_id] = model_id_samples
+    return class_id_to_model_id_samples
+
+def run_full_experiment(kp_noise_fra=0.8):
+    class_id_to_model_id_samples = choose_random_models(10)
+    for class_id, model_id_samples in class_id_to_model_id_samples.items():
+        for model_id in model_id_samples:
+            run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='sporadic', kp_noise_fra=kp_noise_fra)
+
 
 if __name__ == "__main__":
 

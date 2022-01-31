@@ -12,15 +12,17 @@ import sys
 sys.path.append("../../")
 
 
-def chamfer_loss(pc, pc_, pc_padding=None):
+def chamfer_loss(pc, pc_, pc_padding=None, max_loss=True):
     """
     inputs:
     pc  : torch.tensor of shape (B, 3, n)
     pc_ : torch.tensor of shape (B, 3, m)
     pc_padding  : torch.tensor of shape (B, n)  : indicates if the point in pc is real-input or padded in
+    max_loss : boolean : indicates if output loss should be maximum of the distances between pc and pc_ instead of the mean
 
     output:
     loss    : (B, 1)
+        returns max_loss if max_loss is true
     """
 
     if pc_padding == None:
@@ -36,7 +38,11 @@ def chamfer_loss(pc, pc_, pc_padding=None):
 
     sq_dist = sq_dist.squeeze(-1)*torch.logical_not(pc_padding)
     a = torch.logical_not(pc_padding)
-    loss = sq_dist.sum(dim=1)/a.sum(dim=1)
+
+    if max_loss:
+        loss = sq_dist.max(dim=1)[0]
+    else:
+        loss = sq_dist.sum(dim=1)/a.sum(dim=1)
 
     return loss.unsqueeze(-1)
 

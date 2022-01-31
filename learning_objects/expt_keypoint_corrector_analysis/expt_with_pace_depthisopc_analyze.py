@@ -108,8 +108,8 @@ def varul_mean(data):
 
 if __name__ == '__main__':
 
-    file_names = ["./expt_with_pace_depthisopc/20220113_020510_experiment.pickle",
-                  "./expt_with_pace_depthisopc/20220113_081936_experiment.pickle"]
+    file_names = ["./expt_with_pace_depthisopc/03001627/1e3fba4500d20bb49b9f2eb77f5e247e/20220127_000158_experiment.pickle",
+                  "./expt_with_pace_depthisopc/03001627/1e3fba4500d20bb49b9f2eb77f5e247e/20220127_000158_experiment.pickle"]
 
     for name in file_names:
 
@@ -230,7 +230,7 @@ if __name__ == '__main__':
         plt.show()
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         rand_string = generate_filename()
-        filename = name[:-7] + '_rotation_error_plot_' + timestamp + '_' + rand_string +'.pdf'
+        filename = name[:-7] + '_rotation_error_plot_' + timestamp + '_' + rand_string +'.jpg'
         fig.savefig(filename)
         plt.close(fig)
 
@@ -260,7 +260,7 @@ if __name__ == '__main__':
         plt.show()
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         rand_string = generate_filename()
-        filename = name[:-7] + '_translation_error_plot_' + timestamp + '_' + rand_string + '.pdf'
+        filename = name[:-7] + '_translation_error_plot_' + timestamp + '_' + rand_string + '.jpg'
         fig.savefig(filename)
         plt.close(fig)
 
@@ -288,7 +288,7 @@ if __name__ == '__main__':
         plt.show()
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         rand_string = generate_filename()
-        filename = name[:-7] + '_shape_error_plot_' + timestamp + '_' + rand_string + '.pdf'
+        filename = name[:-7] + '_shape_error_plot_' + timestamp + '_' + rand_string + '.jpg'
         fig.savefig(filename)
         plt.close(fig)
 
@@ -317,7 +317,7 @@ if __name__ == '__main__':
         plt.show()
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         rand_string = generate_filename()
-        filename = name[:-7] + '_fraction_not_certifiable_plot_' + timestamp + '_' + rand_string + '.pdf'
+        filename = name[:-7] + '_fraction_not_certifiable_plot_' + timestamp + '_' + rand_string + '.jpg'
         fig.savefig(filename)
         plt.close(fig)
 

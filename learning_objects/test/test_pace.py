@@ -11,10 +11,59 @@ sys.path.append("../../")
 from learning_objects.models.pace import PACEmodule
 from learning_objects.models.pace_ddn import PACEbp, PACEddn
 from learning_objects.models.pace_altern_ddn import PACEbp as PACEalternbp
-from learning_objects.utils.category_gnc import solve_3dcat_with_sdp
+from learning_objects.utils.category_gnc import solve_3dcat_with_sdp, solve_3dcat_with_altern
 from learning_objects.utils.general import shape_error, rotation_error, translation_error, check_rot_mat, generate_random_keypoints
 
+class PACEAltern():
+    def __init__(self, model_keypoints, weights=None, lambda_constant=None):
+        """
+        model_keypoints: torch.tensor of shape (K, 3, N)
 
+        """
+        super().__init__()
+
+        self.K = model_keypoints.shape[0]
+        self.N = model_keypoints.shape[-1]
+        self.model_keypoints = model_keypoints
+        self.batch_size = 1
+
+        if weights==None:
+            self.weights = torch.ones(self.N, 1)
+        else:
+            self.weights = weights
+
+        if lambda_constant==None:
+            self.lambda_constant = torch.tensor([1.0])
+        else:
+            self.lambda_constant = lambda_constant
+
+    def forward(self, y):
+        # Generate data just for shape of R, t, c
+        _, R, t, c = generate_random_keypoints(batch_size=self.batch_size, model_keypoints=self.model_keypoints)
+        self.R = R          # (B, 3, 3)
+        self.t = t          # (B, 3, 1)
+        self.c = c          # (B, K, 1)
+        self.input_keypoints = y
+
+        # PACE: output from Jingnan's implementation
+        self.R_ji = torch.zeros_like(self.R)      # (B, 3, 3)
+        self.t_ji = torch.zeros_like(self.t)      # (B, 3, 1)
+        self.c_ji = torch.zeros_like(self.c)      # (B, K, 1)
+
+        for batch in range(self.batch_size):
+            bR_ji, bt_ji, bc_ji, _, _ = solve_3dcat_with_altern(tgt=self.input_keypoints[batch, ...].numpy(), cad_kpts=self.model_keypoints.numpy(),
+                                                             weights=self.weights.squeeze(-1).numpy(),
+                                                             lam=self.lambda_constant.numpy(),
+                                                             print_info=False)
+            bR_ji = torch.from_numpy(bR_ji).float()
+            bt_ji = torch.from_numpy(bt_ji).unsqueeze(-1).float()
+            bc_ji = torch.from_numpy(bc_ji).unsqueeze(-1).float()
+
+            self.R_ji[batch, ...] = bR_ji
+            self.t_ji[batch, ...] = bt_ji
+            self.c_ji[batch, ...] = bc_ji
+
+        return self.R_ji, self.t_ji, self.c_ji
 
 class PACEimplementation():
     def __init__(self, model_keypoints, weights=None, lambda_constant=None):
@@ -53,7 +102,7 @@ class PACEimplementation():
         self.c_ji = torch.zeros_like(self.c)      # (B, K, 1)
 
         for batch in range(self.batch_size):
-            bR_ji, bt_ji, bc_ji, _, _ = solve_3dcat_with_sdp(tgt=self.input_keypoints[batch, ...].numpy(), cad_kpts=model_keypoints.numpy(),
+            bR_ji, bt_ji, bc_ji, _, _ = solve_3dcat_with_altern(tgt=self.input_keypoints[batch, ...].numpy(), cad_kpts=model_keypoints.numpy(),
                                                              weights=self.weights.squeeze(-1).numpy(),
                                                              lam=self.lambda_constant.numpy(),
                                                              print_info=False)
