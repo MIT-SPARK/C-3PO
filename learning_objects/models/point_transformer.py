@@ -461,7 +461,7 @@ class PointTransformerSegment(nn.Module):
 
 
 class PointTransformerCls(nn.Module):
-    def __init__(self, output_dim=20, channels=[6, 32, 64, 128, 256, 512], k=16, sampling_ratio=0.25):
+    def __init__(self, output_dim=20, channels=[16, 32, 64, 128, 256, 512], k=16, sampling_ratio=0.25):
         super().__init__()
 
         channels.append(output_dim)
@@ -496,7 +496,7 @@ class PointTransformerCls(nn.Module):
 
     def _break_up_pc(self, pc):
         xyz = pc[..., 0:3].contiguous()
-        features = pc[..., 3:].transpose(1, 2).contiguous() if pc.size(-1) > 3 else None
+        features = pc[..., 3:].contiguous() if pc.size(-1) > 3 else None
 
         return xyz, features
 
@@ -513,11 +513,16 @@ class PointTransformerCls(nn.Module):
             be formated as (x, y, z, features...)
         """
         xyz, features = self._break_up_pc(pointcloud)
+        # print("Shape of xyz: ", xyz.shape)
+        # print("Shape of features: ", features.shape)
+        # xyz, _ = self._break_up_pc(pointcloud)
 
         # # Timers
         # t_prev = Timer("prev_block")
         # t_prev.tic()
-        features = self.prev_block(xyz)
+        features = self.prev_block(xyz)       # this will make the architecture non-translation equivariant!!
+        # features = 0.001*torch.randn_like(xyz)
+        # features = self.prev_block(features)
         # t_prev.toc()
 
         # t_prev_trs = Timer("prev_transformer")

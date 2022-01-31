@@ -148,7 +148,7 @@ class certifiability():
         sq_dist = sq_dist_ZX.squeeze(-1)
         dist = torch.sqrt(sq_dist)
         completeness_ = ((dist <= self.radius).int().float().sum(-1)/dist.shape[-1]).unsqueeze(-1)
-
+        #ToDo: Change to accomodate new definition of certification.
         return (confidence_ >= self.epsilon) & (completeness_ >= self.delta), completeness_
 
 

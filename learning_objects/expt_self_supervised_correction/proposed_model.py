@@ -1,5 +1,6 @@
 """
 This writes a proposed model for expt_registration
+
 """
 
 
@@ -16,25 +17,17 @@ from datetime import datetime
 import sys
 sys.path.append("../../")
 
-
-from learning_objects.utils.ddn.node import ParamDeclarativeFunction
-from learning_objects.utils.general import generate_random_keypoints
-from learning_objects.utils.general import chamfer_half_distance, keypoint_error, soft_chamfer_half_distance
-from learning_objects.utils.general import rotation_error, shape_error, translation_error
-from learning_objects.utils.general import display_results
-
 from learning_objects.models.keypoint_detector import HeatmapKeypoints, RegressionKeypoints
 from learning_objects.models.point_set_registration import PointSetRegistration
-from learning_objects.models.keypoint_corrector import kp_corrector_reg, correctorNode
+from learning_objects.models.keypoint_corrector import kp_corrector_reg
 
-# from learning_objects.models.modelgen import ModelFromShape, ModelFromShapeModule
+from learning_objects.models.point_transformer import kNN_torch, index_points
 
-from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPointCloud2, DepthPC
+from learning_objects.utils.ddn.node import ParamDeclarativeFunction
+from learning_objects.utils.general import display_results
 
-from learning_objects.utils.ddn.node import DeclarativeLayer, ParamDeclarativeFunction
-
-class ProposedModel2(nn.Module):
-    #ToDo: RT working on this. Do not use this.
+# Proposed Model
+class ProposedModel(nn.Module):
     """
     Given input point cloud, returns keypoints, predicted point cloud, rotation, and translation
 
@@ -43,7 +36,8 @@ class ProposedModel2(nn.Module):
         predicted_pc, corrected_keypoints, rotation, translation    if correction_flag=True
     """
 
-    def __init__(self, model_keypoints, cad_models, keypoint_detector=None):
+    def __init__(self, class_name, model_keypoints, cad_models, keypoint_detector=None,
+                 use_pretrained_regression_model=False, create_features=True):
         super().__init__()
         """ 
         model_keypoints     : torch.tensor of shape (K, 3, N)
@@ -55,26 +49,31 @@ class ProposedModel2(nn.Module):
         """
 
         # Parameters
+        self.class_name = class_name
         self.model_keypoints = model_keypoints
         self.cad_models = cad_models
         self.device_ = self.cad_models.device
+        self.viz_keypoint_correction = False
+        self.use_pretrained_regression_model = use_pretrained_regression_model
+        self.create_features = create_features
 
         self.N = self.model_keypoints.shape[-1]  # (1, 1)
         self.K = self.model_keypoints.shape[0]  # (1, 1)
 
         # Keypoint Detector
         if keypoint_detector == None:
-            self.keypoint_detector = RegressionKeypoints(N=self.N, method='point_transformer',
-                                                         dim=[3, 16, 32, 64, 128])
+            self.keypoint_detector = RegressionKeypoints(N=self.N, method='pointnet',
+                                                         dim=[6, 32, 64, 128])
         else:
-            self.keypoint_detector = keypoint_detector
+            self.keypoint_detector = keypoint_detector(class_name=class_name, N=self.N)
 
         # Registration
         self.point_set_registration = PointSetRegistration(source_points=self.model_keypoints)
 
         # Corrector
-        #ToDo: Change to a corrector that backprops using gradient computation.
-        self.corrector = kp_corrector_reg(cad_models=self.cad_models, model_keypoints=self.model_keypoints)
+        # self.corrector = kp_corrector_reg(cad_models=self.cad_models, model_keypoints=self.model_keypoints)
+        corrector_node = kp_corrector_reg(cad_models=self.cad_models, model_keypoints=self.model_keypoints)
+        self.corrector = ParamDeclarativeFunction(problem=corrector_node)
 
     def forward(self, input_point_cloud, correction_flag=False):
         """
@@ -95,7 +94,23 @@ class ProposedModel2(nn.Module):
         """
         batch_size = input_point_cloud.shape[0]
         device_ = input_point_cloud.device
-        detected_keypoints = self.keypoint_detector(input_point_cloud)
+
+        # Creating features for the point cloud
+        if self.create_features:
+            pos = input_point_cloud.transpose(-1, -2)       #ToDo
+            knn_idx = kNN_torch(pos, pos, k=16)
+            knn_xyz = index_points(pos, knn_idx)
+            features = (pos[:, :, None] - knn_xyz).sum(-2)
+            pc_with_features = torch.cat([pos, features], dim=-1).transpose(-1, -2)
+            # print(pc_with_features)
+            detected_keypoints = self.keypoint_detector(pc_with_features)
+        else:
+            detected_keypoints = self.keypoint_detector(input_point_cloud)
+
+        if self.viz_keypoint_correction:
+            inp = input_point_cloud.clone().detach().to('cpu')
+            det_kp = detected_keypoints.clone().detach().to('cpu')
+            # print("FINISHED DETECTOR")
 
         if not correction_flag:
             R, t = self.point_set_registration.forward(detected_keypoints)
@@ -108,5 +123,11 @@ class ProposedModel2(nn.Module):
             corrected_keypoints = detected_keypoints + correction
             R, t = self.point_set_registration.forward(corrected_keypoints)
             predicted_point_cloud = R @ self.cad_models + t
+            if self.viz_keypoint_correction:
+                # print("FINISHED CORRECTOR")
+                print("visualizing corrected keypoints")
+                Rt_inp = predicted_point_cloud.clone().detach().to('cpu')
+                corrected_kp = corrected_keypoints.clone().detach().to('cpu')
+                display_results(inp, det_kp, inp, corrected_kp)
 
             return predicted_point_cloud, corrected_keypoints, R, t, correction
