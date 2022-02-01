@@ -298,8 +298,9 @@ class DepthAndIsotorpicShapePointCloud(torch.utils.data.Dataset):
 
         # Take a depth image from a distance of the rotated self.model_mesh from self.camera_location
         beta = torch.rand(1, 1)
-        camera_lcation_factor = beta*(self.radius_multiple[1]-self.radius_multiple[0]) + self.radius_multiple[0]
-        radius = gu.get_radius(cam_location=camera_lcation_factor*self.camera_location.numpy(),
+        camera_location_factor = beta*(self.radius_multiple[1]-self.radius_multiple[0]) + self.radius_multiple[0]
+        camera_location_factor = camera_location_factor * self.diameter
+        radius = gu.get_radius(cam_location=camera_location_factor*self.camera_location.numpy(),
                                object_diameter=self.diameter)
         depth_pcd = gu.get_depth_pcd(centered_pcd=pcd, camera=self.camera_location.numpy(), radius=radius)
 
@@ -487,6 +488,7 @@ class DepthAndAnisotropicScalingPointCloud(torch.utils.data.Dataset):
         # Take a depth image from a distance of the rotated self.model_mesh from self.camera_location
         beta = torch.rand(1, 1)
         camera_location_factor = beta * (self.radius_multiple[1] - self.radius_multiple[0]) + self.radius_multiple[0]
+        camera_location_factor = camera_location_factor * self.diameter
         radius = gu.get_radius(cam_location=camera_location_factor * self.camera_location.numpy(),
                                object_diameter=self.diameter)
         depth_pcd = gu.get_depth_pcd(centered_pcd=pcd, camera=self.camera_location.numpy(), radius=radius)
@@ -789,8 +791,9 @@ class DepthPointCloud2(torch.utils.data.Dataset):
 
         # Take a depth image from a distance of the rotated self.model_mesh from self.camera_location
         beta = torch.rand(1, 1)
-        camera_lcation_factor = beta*(self.radius_multiple[1]-self.radius_multiple[0]) + self.radius_multiple[0]
-        radius = gu.get_radius(cam_location=camera_lcation_factor*self.camera_location.numpy(),
+        camera_location_factor = beta*(self.radius_multiple[1]-self.radius_multiple[0]) + self.radius_multiple[0]
+        camera_location_factor = camera_location_factor * self.diameter
+        radius = gu.get_radius(cam_location=camera_location_factor*self.camera_location.numpy(),
                                object_diameter=self.diameter)
         depth_pcd = gu.get_depth_pcd(centered_pcd=pcd, camera=self.camera_location.numpy(), radius=radius)
 
