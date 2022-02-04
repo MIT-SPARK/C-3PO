@@ -15,18 +15,13 @@ from learning_objects.datasets.keypointnet import SE3nIsotorpicShapePointCloud, 
 
 from learning_objects.models.keypoint_corrector import kp_corrector_reg, kp_corrector_pace
 from learning_objects.models.point_set_registration import point_set_registration
-# from learning_objects.models.pace_ddn import PACEbp
-from learning_objects.models.pace_altern_ddn import PACEbp
-from learning_objects.test.test_pace import PACEAltern
+from learning_objects.models.pace import PACEmodule
+# from learning_objects.test.test_pace import PACEAltern
 from learning_objects.models.modelgen import ModelFromShape
 from learning_objects.models.certifiability import certifiability
 
 from learning_objects.utils.ddn.node import ParamDeclarativeFunction
 from learning_objects.utils.general import display_two_pcs
-
-
-#ToDo: This code works, but is still using solve_algo1() in kp_corrector_pace. This is because autograd is not imlemented for PACEbp.
-# But, this code now uses PACEbp from pace_altern_ddn.
 
 def get_sq_distances(X, Y):
     """
@@ -39,10 +34,10 @@ def get_sq_distances(X, Y):
     sq_dist_yz  : torch.tensor of shape (B, m)  : for every point in Y, the sq. distance to the closest point in X
     """
 
-    sq_dist_xy, _, _ = ops.knn_points(torch.transpose(X, -1, -2), torch.transpose(Y, -1, -2), K=1)
+    sq_dist_xy, _, _ = ops.knn_points(torch.transpose(X, -1, -2), torch.transpose(Y, -1, -2), K=1, return_sorted=False)
     # dist (B, n, 1): distance from point in X to the nearest point in Y
 
-    sq_dist_yx, _, _ = ops.knn_points(torch.transpose(Y, -1, -2), torch.transpose(X, -1, -2), K=1)
+    sq_dist_yx, _, _ = ops.knn_points(torch.transpose(Y, -1, -2), torch.transpose(X, -1, -2), K=1, return_sorted=False)
     # dist (B, n, 1): distance from point in Y to the nearest point in X
 
     return sq_dist_xy, sq_dist_yx
@@ -151,7 +146,8 @@ class experiment():
         self.N = self.model_keypoints.shape[-1]
         self.K = self.model_keypoints.shape[0]
         self.weights = torch.ones(self.N, 1)
-        self.pace = PACEAltern(model_keypoints=self.model_keypoints, weights=self.weights)
+        self.pace = PACEmodule(model_keypoints=self.model_keypoints, weights=self.weights, use_optimized_lambda_constant=True,
+                               class_id=self.class_id)
 
 
         self.modelgen = ModelFromShape(cad_models=self.cad_models, model_keypoints=self.model_keypoints)
@@ -195,6 +191,8 @@ class experiment():
             # estimate model: using point set registration on perturbed keypoints
             R_pace, t_pace, c_pace = self.pace.forward(y=keypoints_true)
             _, model_estimate_naive = self.modelgen.forward(shape=c_pace)
+            #also see output of modelgen from ground truth shape
+            # use pace module (no alternating minimization and initilize with ground truth)
             model_estimate_naive = R_pace @ model_estimate_naive + t_pace
             if visualization:
                 print("Displaying input and naive model estimate: ")
@@ -213,8 +211,7 @@ class experiment():
             shape_true_2[i] = shape_true[1]
             shape_pace_1[i] = c_pace[0]
             shape_pace_2[i] = c_pace[1]
-
-            if i == len(self.shape_dataset) - 1:
+            if i == len(self.shape_dataset) - 1 :
                 break
 
 
@@ -273,10 +270,9 @@ class experiment():
         self.execute()
 
         # saving the experiment and data
-        location = './expt_pace_original/'
+        location = './expt_pace_original/' + str(self.class_id) + '/' + str(self.model_id) + '/'
         if not os.path.isdir(location):
-            os.mkdir(location)
-
+            os.makedirs(location)
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         filename = timestamp + '_experiment.pickle'
 
@@ -338,7 +334,7 @@ def run_experiments_on(class_id, model_id, only_visualize=False):
         expt['filename'] = filename
         expt['num_iterations'] = num_iterations
 
-        expt_filename = 'expt_pace_original/experiments.csv'
+        expt_filename = 'expt_pace_original/' + str(class_id) + '/' + str(model_id) + '/experiments.csv'
         field_names = ['class_id', 'model_id', 'filename', 'num_iterations']
 
         fp = open(expt_filename, 'a')
@@ -352,8 +348,8 @@ def run_experiments_on(class_id, model_id, only_visualize=False):
 if __name__ == "__main__":
 
     # model parameters
-    class_id = "03001627"  # chair
-    model_id = "1e3fba4500d20bb49b9f2eb77f5e247e"  # a particular chair model
+    class_id = "03001627"
+    model_id = "1f0bfd529b33c045b84e887edbdca251"  # a particular model
 
     # class_id = "04379243"
     # model_id = "2a88f66d5e09e502581fd77200548509"

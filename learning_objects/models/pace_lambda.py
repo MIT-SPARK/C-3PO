@@ -7,15 +7,22 @@ import torch
 from scipy import optimize
 import numpy as np
 import random
+import pickle
 
 import sys
+import os
 sys.path.append("../../")
 
 from learning_objects.models.pace import PACEmodule
 from learning_objects.models.modelgen import ModelFromShape
 from learning_objects.datasets.keypointnet import SE3nAnisotropicScalingPointCloud, \
     DepthAndAnisotropicScalingPointCloud, ScaleAxis
+from learning_objects.datasets.keypointnet import PCD_FOLDER_NAME as KEYPOINTNET_PCD_FOLDER_NAME, \
+    CLASS_NAME as KEYPOINTNET_ID2NAME, \
+    CLASS_ID as KEYPOINTNET_NAME2ID
 from learning_objects.utils.general import display_two_pcs
+
+PATH_TO_OPTIMIZED_LAMBDA_CONSTANTS = '../../data/KeypointNet/KeypointNet/lambda_constants/'
 
 
 class GetLambda():
@@ -169,39 +176,92 @@ def test_lambda(lambda_constant, dataset, viz=False):
             _, model_estimate_naive = modelgen.forward(shape=c)
             model_estimate_naive = R @ model_estimate_naive + t
             display_two_pcs(pc1=input_point_cloud.squeeze(0), pc2=model_estimate_naive.squeeze(0))
+        mean_batch_loss = ((c - shape_true) ** 2).mean(dim=1).mean(dim=1).mean()
+        if mean_batch_loss > 1e-3:
+            raise Exception("mean_batch_loss is not zero")
+        if viz:
+            print("mean batch loss: " + str(i) + str(mean_batch_loss)) #mean loss per batch
+            print("------------------------------------")
 
-        print("mean batch loss: " + str(i) + str(((c - shape_true) ** 2).mean(dim=1).mean(dim=1).mean())) #mean loss per batch
-        print("------------------------------------")
+def choose_random_models(num_models=10, pcd_path = KEYPOINTNET_PCD_FOLDER_NAME):
+    """
+    For each class_id in pcd_path, choose num_models models randomly from each class.
+    :param num_models: the number of models to sample from each class_id category
+    :return: class_id_to_model_id_samples: dict: maps class_id to a list of sampled model_ids
+    """
+    class_id_to_model_id_samples = {}
+    folder_contents = os.listdir(pcd_path)
+    for class_id in folder_contents:
+        print("class_id", class_id)
+        models = os.listdir(pcd_path + str(class_id) + '/')
+        #choose random num_models from models without replacement
+        model_id_samples = random.sample(models, num_models)
+        model_id_samples = [path[:-4] for path in model_id_samples]
+        class_id_to_model_id_samples[class_id] = model_id_samples
+    return class_id_to_model_id_samples
 
+def run_full_optimize_and_save(class_id_to_model_id_samples):
+    """
+    Saves a best lambda_constant for each class
+    note: may have to run multiple times because optimization sometimes fails or reaches
+    :param class_id_to_model_id_samples:
+    :return:
+    """
+    class_ids = list(class_id_to_model_id_samples.keys())
+    class_ids.sort()
+    class_ids.reverse()
+    # for class_id, model_ids in class_id_to_model_id_samples.items():
+    for class_id in class_ids:
+        model_ids = class_id_to_model_id_samples[class_id]
+        print("starting category:", class_id)
+
+        for model_id in model_ids:
+            lambda_constant, dataset = generate_lambda(class_id, model_id)
+            break
+        for model_id in model_ids:
+            # if the depth dataset is uncommented, viz must be set to true in test_lambda
+            # dataset = DepthAndAnisotropicScalingPointCloud(class_id=class_id, model_id=model_id,
+            #                                                num_of_points=2048,
+            #                                                dataset_len=10,
+            #                                                shape_scaling=torch.tensor([0.5, 2.0]),
+            #                                                scale_direction=ScaleAxis.X)
+
+            test_lambda(lambda_constant, dataset)
+        #save lambda_constant
+        filepath = PATH_TO_OPTIMIZED_LAMBDA_CONSTANTS + "/" + str(class_id) + '.pkl'
+        pickle.dump(lambda_constant, open(filepath, "wb"))
 
 if __name__ == "__main__":
+    class_id_to_model_id_samples = choose_random_models()
+    run_full_optimize_and_save(class_id_to_model_id_samples)
+
     #test:
     # generate a lambda optimized for a model inside of a category
     # test that lambda on different models within that category
     # uncomment the category you want to tune lambda for:
 
-    class_id = "03001627"  # chair
-    chair_models = ["1e3fba4500d20bb49b9f2eb77f5e247e", "1a6f615e8b1b5ae4dbbc9440457e303e",
-                    "1a38407b3036795d19fb4103277a6b93", "1b7bef12c554c1244c686b8271245d1b",
-                    "1b92525f3945f486fe24b6f1cb4a9319", "1e0580f443a9e6d2593ebeeedbff73b",
-                    "1f0bfd529b33c045b84e887edbdca251", "2b1af04045c8c823f51f77a6d7299806",
-                    "2bd6800d64c01d677721fafb59ea099", "2bd6800d64c01d677721fafb59ea099"]
-    random.shuffle(chair_models) #shuffles in place
-    for model_id in chair_models:
-        lambda_constant, dataset = generate_lambda(class_id, model_id)
-        break
-    for model_id in chair_models:
-        print("testing on new model_id within category", class_id)
-        # if the depth dataset is uncommented, viz must be set to true in test_lambda
-        # dataset = DepthAndAnisotropicScalingPointCloud(class_id=class_id, model_id=model_id,
-        #                                                num_of_points=2048,
-        #                                                dataset_len=10,
-        #                                                shape_scaling=torch.tensor([0.5, 2.0]),
-        #                                                scale_direction=ScaleAxis.X)
+    # class_id = "03001627"  # chair
+    # chair_models = ["1e3fba4500d20bb49b9f2eb77f5e247e", "1a6f615e8b1b5ae4dbbc9440457e303e",
+    #                 "1a38407b3036795d19fb4103277a6b93", "1b7bef12c554c1244c686b8271245d1b",
+    #                 "1b92525f3945f486fe24b6f1cb4a9319", "1e0580f443a9e6d2593ebeeedbff73b",
+    #                 "1f0bfd529b33c045b84e887edbdca251", "2b1af04045c8c823f51f77a6d7299806",
+    #                 "2bd6800d64c01d677721fafb59ea099", "2bd6800d64c01d677721fafb59ea099"]
+    # random.shuffle(chair_models) #shuffles in place
+    # for model_id in chair_models:
+    #     lambda_constant, dataset = generate_lambda(class_id, model_id)
+    #     break
+    # for model_id in chair_models:
+    #     print("testing on new model_id within category", class_id)
+    #     # if the depth dataset is uncommented, viz must be set to true in test_lambda
+    #     # dataset = DepthAndAnisotropicScalingPointCloud(class_id=class_id, model_id=model_id,
+    #     #                                                num_of_points=2048,
+    #     #                                                dataset_len=10,
+    #     #                                                shape_scaling=torch.tensor([0.5, 2.0]),
+    #     #                                                scale_direction=ScaleAxis.X)
+    #
+    #     test_lambda(lambda_constant, dataset)
 
-        test_lambda(lambda_constant, dataset)
-
-    class_id = "03467517" #guitar
+    # class_id = "03467517" #guitar
     # guitar_models = ["1a96f73d0929bd4793f0194265a9746c", "1c8c6874c0cb9bc73429c1c21d77499d",
     #                 "1e019147e99ddf90d6e28d388c951ca4", "1e56954ca36bbfdd6b05157edf4233a3",
     #                 "1f08ecadd3cb407dcf45555a18e7351a", "1fbbf4450cb813faed5f5791584afe61",

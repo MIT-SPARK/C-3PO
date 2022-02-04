@@ -20,7 +20,7 @@ COLORS = dict(mcolors.BASE_COLORS, **mcolors.CSS4_COLORS)
 
 if __name__ == '__main__':
 
-    file_names = ["./expt_pace_original/20220127_202653_experiment.pickle"]
+    file_names = ["./expt_pace_original/03001627/1f0bfd529b33c045b84e887edbdca251/20220203_230223_experiment.pickle"]
 
     for name in file_names:
 
@@ -49,8 +49,8 @@ if __name__ == '__main__':
         fig = plt.figure()
         true_color = [(0, str(item / len(shape_true_1)), 0) for item in range(len(shape_true_1))]
         pace_color = [(str(item / len(shape_true_1)), 0, 0) for item in range(len(shape_true_1))]
-        plt.scatter(x=shape_true_1, y=shape_true_2, s=20.0, label='shape_true', c='green')
-        plt.scatter(x=shape_pace_1, y=shape_pace_2, s=20.0, label='shape_pace', c='red')
+        plt.scatter(x=shape_true_1, y=shape_true_2, s=30.0, label='shape_true', c='green')
+        plt.scatter(x=shape_pace_1, y=shape_pace_2, s=10.0, label='shape_pace', c='red')
         plt.xlabel('ratio shape 1')
         plt.ylabel('ratio shape 2')
         plt.title("Category: " + str(CLASS_NAME[class_id]) + ", Model: " + str(model_id))

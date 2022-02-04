@@ -14,6 +14,7 @@ Note:
 
 import torch
 import torch.nn as nn
+import pickle
 
 
 import os
@@ -21,8 +22,11 @@ import sys
 sys.path.append("../../")
 
 from learning_objects.utils.general import generate_random_keypoints
+from learning_objects.datasets.keypointnet import CLASS_NAME, CLASS_ID
 
 from learning_objects.models.sdp import RotationSDP
+
+PATH_TO_OPTIMIZED_LAMBDA_CONSTANTS = '../../data/KeypointNet/KeypointNet/lambda_constants/'
 
 def rotation_error(R, R_):
     """
@@ -79,7 +83,7 @@ class PACEmodule(nn.Module):
     Note:
         The rotation computation is implemented as a cvxpylayer, which is also a nn.Module
     """
-    def __init__(self, model_keypoints, weights=None, lambda_constant=torch.tensor(1.0)):
+    def __init__(self, model_keypoints, weights=None, lambda_constant=torch.tensor(1.0), use_optimized_lambda_constant=False, class_id='03001627'):
         super(PACEmodule, self).__init__()
         """
         weights: torch.tensor of shape (N, 1)
@@ -89,7 +93,14 @@ class PACEmodule(nn.Module):
 
         self.b = model_keypoints                    # (K, 3, N)
         self.device_ = model_keypoints.device
-        self.lambda_constant = lambda_constant.to(device=self.device_)  # (1, 1)
+        if use_optimized_lambda_constant and class_id is not None:
+            fp = open(PATH_TO_OPTIMIZED_LAMBDA_CONSTANTS + class_id + '.pkl', 'rb')
+            self.lambda_constant = pickle.load(fp)
+            fp.close()
+            self.lambda_constant.to(device=self.device_)
+            print("lambda_constant loaded from pkl file:", self.lambda_constant)
+        else:
+            self.lambda_constant = lambda_constant.to(device=self.device_)  # (1, 1)
         self.N = self.b.shape[-1]                   # (1, 1)
         self.K = self.b.shape[0]                    # (1, 1)
 
