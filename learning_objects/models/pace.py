@@ -95,9 +95,9 @@ class PACEmodule(nn.Module):
         self.device_ = model_keypoints.device
         if use_optimized_lambda_constant and class_id is not None:
             fp = open(PATH_TO_OPTIMIZED_LAMBDA_CONSTANTS + class_id + '.pkl', 'rb')
-            self.lambda_constant = pickle.load(fp)
+            lambda_constant = pickle.load(fp)
             fp.close()
-            self.lambda_constant.to(device=self.device_)
+            self.lambda_constant = lambda_constant.to(device=self.device_)
             print("lambda_constant loaded from pkl file:", self.lambda_constant)
         else:
             self.lambda_constant = lambda_constant.to(device=self.device_)  # (1, 1)

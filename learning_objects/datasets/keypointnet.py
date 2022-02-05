@@ -837,7 +837,7 @@ class DepthPointCloud2(torch.utils.data.Dataset):
 
         return self.model_mesh
 
-    def _get_cad_models(self):
+    def _get_cad_models(self, n = None):
         """
         Returns a sampled point cloud of the ShapeNetcore model with self.num_of_points points.
 
@@ -845,8 +845,9 @@ class DepthPointCloud2(torch.utils.data.Dataset):
         cad_models  : torch.tensor of shape (1, 3, self.num_of_points)
 
         """
-
-        model_pcd = self.model_mesh.sample_points_uniformly(number_of_points=self.num_of_points)
+        if n is None:
+            n = self.num_of_points
+        model_pcd = self.model_mesh.sample_points_uniformly(number_of_points=n)
         model_pcd_torch = torch.from_numpy(np.asarray(model_pcd.points)).transpose(0, 1)  # (3, m)
         model_pcd_torch = model_pcd_torch.to(torch.float)
 
@@ -945,6 +946,9 @@ class DepthPC(torch.utils.data.Dataset):
 
     def _convert_to_fixed_sized_pc(self, pc, n):
         """
+        Adds (0,0,0) points to the point cloud if the number of points is less than
+        n such that the resulting point cloud has n points.
+
         inputs:
         pc  : torch.tensor of shape (3, m)  : input point cloud of size m (m could be anything)
         n   : int                           : number of points the output point cloud should have
@@ -985,7 +989,7 @@ class DepthPC(torch.utils.data.Dataset):
         cad_models  : torch.tensor of shape (2, 3, self.num_of_points)
         """
 
-        return self.dataset._get_cad_models()
+        return self.dataset._get_cad_models(n=self.n)
 
     def _get_model_keypoints(self):
         """

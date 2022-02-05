@@ -6,13 +6,16 @@ from pytorch3d import ops, transforms
 from datetime import datetime
 import pickle
 import csv
+import random
 
 import os
 import sys
 sys.path.append("../../")
 
 from learning_objects.datasets.keypointnet import SE3PointCloud, visualize_torch_model_n_keypoints
-
+from learning_objects.datasets.keypointnet import PCD_FOLDER_NAME as KEYPOINTNET_PCD_FOLDER_NAME, \
+    CLASS_NAME as KEYPOINTNET_ID2NAME, \
+    CLASS_ID as KEYPOINTNET_NAME2ID
 from learning_objects.models.keypoint_corrector import kp_corrector_reg
 from learning_objects.models.point_set_registration import point_set_registration, PointSetRegistration
 from learning_objects.models.certifiability import certifiability
@@ -34,14 +37,17 @@ def get_sq_distances(X, Y):
     sq_dist_yz  : torch.tensor of shape (B, m)  : for every point in Y, the sq. distance to the closest point in X
     """
 
-    sq_dist_xy, _, _ = ops.knn_points(torch.transpose(X, -1, -2), torch.transpose(Y, -1, -2), K=1)
+    sq_dist_xy, _, _ = ops.knn_points(torch.transpose(X, -1, -2), torch.transpose(Y, -1, -2), K=1, return_sorted=False)
     # dist (B, n, 1): distance from point in X to the nearest point in Y
 
-    sq_dist_yx, _, _ = ops.knn_points(torch.transpose(Y, -1, -2), torch.transpose(X, -1, -2), K=1)
+    sq_dist_yx, _, _ = ops.knn_points(torch.transpose(Y, -1, -2), torch.transpose(X, -1, -2), K=1, return_sorted=False)
     # dist (B, n, 1): distance from point in Y to the nearest point in X
 
     return sq_dist_xy, sq_dist_yx
 
+def get_kp_sq_distances(kp, kp_):
+    sq_dist = ((kp-kp_)**2).sum(dim=1)
+    return sq_dist #check output dimensions
 
 def keypoint_perturbation(keypoints_true, var=0.8, type='uniform', fra=0.2):
     """
@@ -195,10 +201,15 @@ class experiment():
         sqdist_input_naiveest = []
         sqdist_input_correctorest = []
 
+        sqdist_kp_naiveest = []
+        sqdist_kp_correctorest = []
+
+        pc_padding_masks = []
+
         # experiment loop
         for i, data in enumerate(self.se3_dataset_loader):
-
-            # print("Testing at kp_noise_var: ", kp_noise_var, ". Iteration: ", i)
+            if i % 10 == 0:
+                print("Testing at kp_noise_var: ", kp_noise_var, ". Iteration: ", i)
 
             # extracting data
             input_point_cloud, keypoints_true, rotation_true, translation_true = data
@@ -251,7 +262,14 @@ class experiment():
             sqdist_input_naiveest.append(sq_dist_input_naive)
             sqdist_input_correctorest.append(sq_dist_input_corrector)
 
-            # certification
+            sq_dist_kp_naive = get_kp_sq_distances(kp = keypoint_estimate_naive, kp_=detected_keypoints)
+            sq_dist_kp_corrector = get_kp_sq_distances(kp = keypoint_estimate, kp_ = detected_keypoints + correction)
+            sqdist_kp_naiveest.append(sq_dist_kp_naive)
+            sqdist_kp_correctorest.append(sq_dist_kp_corrector)
+
+            pc_padding = ((input_point_cloud == torch.zeros(3, 1).to(device=self.device_)).sum(dim=1) == 3)
+            pc_padding_masks.append(pc_padding)
+
             certi, _ = self.certify.forward(X=input_point_cloud, Z=model_estimate_naive,
                                             kp=keypoint_estimate_naive, kp_=detected_keypoints)
             # certi_naive[i] = certi
@@ -267,7 +285,8 @@ class experiment():
 
 
         return rotation_err_naive, rotation_err_corrector, translation_err_naive, translation_err_corrector, \
-               certi_naive, certi_corrector, sqdist_input_naiveest, sqdist_input_correctorest
+               certi_naive, certi_corrector, sqdist_input_naiveest, sqdist_input_correctorest, sqdist_kp_naiveest, \
+               sqdist_kp_correctorest, pc_padding_masks
 
 
 
@@ -281,6 +300,9 @@ class experiment():
         certi_corrector = torch.zeros(size=(len(self.kp_noise_var_range), self.num_iterations), dtype=torch.bool).to(device=self.device_)
         sqdist_input_naiveest = []
         sqdist_input_correctorest = []
+        sqdist_kp_naiveest = []
+        sqdist_kp_correctorest = []
+        pc_padding_masks = []
 
         for i, kp_noise_var in enumerate(self.kp_noise_var_range):
 
@@ -290,7 +312,8 @@ class experiment():
 
             start = time.perf_counter()
             Rerr_naive, Rerr_corrector, terr_naive, terr_corrector, \
-            c_naive, c_corrector, sqdist_in_naive, sq_dist_in_corrector = self._single_loop(kp_noise_var=kp_noise_var)
+            c_naive, c_corrector, sqdist_in_naive, sq_dist_in_corrector, \
+            sqdist_kp_naive, sqdist_kp_corrector, pc_padding_mask  = self._single_loop(kp_noise_var=kp_noise_var)
             end = time.perf_counter()
             print("Time taken: ", (end-start)/60, ' min')
 
@@ -306,6 +329,10 @@ class experiment():
             sqdist_input_naiveest.append(sqdist_in_naive)
             sqdist_input_correctorest.append(sq_dist_in_corrector)
 
+            sqdist_kp_naiveest.append(sqdist_kp_naive)
+            sqdist_kp_correctorest.append(sqdist_kp_corrector)
+
+            pc_padding_masks.append(pc_padding_mask)
 
         self.data['rotation_err_naive'] = rotation_err_naive
         self.data['rotation_err_corrector'] = rotation_err_corrector
@@ -315,9 +342,13 @@ class experiment():
         self.data['certi_corrector'] = certi_corrector
         self.data['sqdist_input_naiveest'] = sqdist_input_naiveest
         self.data['sqdist_input_correctorest'] = sqdist_input_correctorest
+        self.data['sqdist_kp_naiveest'] = sqdist_kp_naiveest
+        self.data['sqdist_kp_correctorest'] = sqdist_kp_correctorest
+        self.data['pc_padding_masks'] = pc_padding_masks
 
         return rotation_err_naive, rotation_err_corrector, translation_err_naive, translation_err_corrector, \
-               certi_naive, certi_corrector, sqdist_input_naiveest, sqdist_input_correctorest
+               certi_naive, certi_corrector, sqdist_input_naiveest, sqdist_input_correctorest, \
+               sqdist_kp_naiveest, sqdist_kp_correctorest, pc_padding_masks
 
     def execute_n_save(self):
 
@@ -325,9 +356,9 @@ class experiment():
         self.execute()
 
         # saving the experiment and data
-        location = './expt_with_reg_se3pc/'
+        location = './expt_with_reg_se3pc/' + str(self.class_id) + '/' + str(self.model_id) + '/'
         if not os.path.isdir(location):
-            os.mkdir(location)
+            os.makedirs(location)
 
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         filemane = timestamp + '_experiment.pickle'
@@ -351,7 +382,9 @@ def run_experiments_on(class_id, model_id, kp_noise_type, kp_noise_fra=0.2, only
     kp_noise_var_range = torch.arange(0.1, 1.55, 0.1)
 
     # certification parameters
-    epsilon = 0.995
+    # epsilon = 0.995
+    epsilon = 0.98
+
     delta = 0.99
     radius = 0.005
     certify = certifiability(epsilon=epsilon, delta=delta, radius=radius)
@@ -396,7 +429,7 @@ def run_experiments_on(class_id, model_id, kp_noise_type, kp_noise_fra=0.2, only
         expt['filename'] = filename
         expt['num_iterations'] = num_iterations
 
-        expt_filename = './expt_with_reg_se3pc/experiments.csv'
+        expt_filename = './expt_with_reg_se3pc/' + str(class_id) + '/' + str(model_id) + '/' + 'experiments.csv'
         field_names = ['class_id', 'model_id', 'kp_noise_type', 'kp_noise_fra', 'filename', 'num_iterations']
 
         fp = open(expt_filename, 'a')
@@ -405,17 +438,41 @@ def run_experiments_on(class_id, model_id, kp_noise_type, kp_noise_fra=0.2, only
         fp.close()
 
 
+def choose_random_models(num_models=10, pcd_path = KEYPOINTNET_PCD_FOLDER_NAME):
+    """
+    For each class_id in pcd_path, choose num_models models randomly from each class.
+    :param num_models: the number of models to sample from each class_id category
+    :return: class_id_to_model_id_samples: dict: maps class_id to a list of sampled model_ids
+    """
+    class_id_to_model_id_samples = {}
+    folder_contents = os.listdir(pcd_path)
+    for class_id in folder_contents:
+        models = os.listdir(pcd_path + str(class_id) + '/')
+        #choose random num_models from models without replacement
+        model_id_samples = random.sample(models, num_models)
+        model_id_samples = [path[:-4] for path in model_id_samples]
+        class_id_to_model_id_samples[class_id] = model_id_samples
+    return class_id_to_model_id_samples
 
-#ToDo: Write the code to run this experiment for 10 models in each of the 16 model categories. The result will be the average error.
+def run_full_experiment(kp_noise_fra=0.8):
+    class_id_to_model_id_samples = choose_random_models(num_models=1)
+    for class_id, model_id_samples in class_id_to_model_id_samples.items():
+        if class_id not in ["02691156", "02808440", "02876657", \
+                            "02954340", "02958343", "03467517", \
+                            "03790512", "04225987", "04379243", \
+                            "04530566"]:
+            for model_id in model_id_samples:
+                run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='sporadic', kp_noise_fra=kp_noise_fra)
+
 
 if __name__ == "__main__":
-
+    run_full_experiment()
     # model parameters
-    class_id = "03001627"  # chair
-    model_id = "1e3fba4500d20bb49b9f2eb77f5e247e"  # a particular chair model
-
-    run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='sporadic', kp_noise_fra=0.2)
-    run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='sporadic', kp_noise_fra=0.8)
+    # class_id = "03001627"  # chair
+    # model_id = "1e3fba4500d20bb49b9f2eb77f5e247e"  # a particular chair model
+    #
+    # run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='sporadic', kp_noise_fra=0.2)
+    # run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='sporadic', kp_noise_fra=0.8)
     # run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='uniform')
 
     # run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='sporadic', kp_noise_fra=0.2,
