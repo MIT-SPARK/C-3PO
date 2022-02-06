@@ -67,9 +67,6 @@ def three_interpolate(p, p_old, x):
     # c = torch.stack(tuple(torch.vstack((a[i, ...], b[i, ...])) for i in range(a.size(0))))
 
 
-
-
-
 def farthest_point_sampling(xyz, npoints):
     """
     Inputs:
@@ -103,8 +100,6 @@ def farthest_point_sampling(xyz, npoints):
     out = torch.reshape(_xyz_out, (xyz.size(0), -1, 3))
     out = out.to(input_device)
     return out
-
-
 
 
 def square_distance(src, dst):

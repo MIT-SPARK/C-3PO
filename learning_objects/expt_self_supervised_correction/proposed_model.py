@@ -62,7 +62,7 @@ class ProposedModel(nn.Module):
 
         # Keypoint Detector
         if keypoint_detector == None:
-            self.keypoint_detector = RegressionKeypoints(N=self.N, method='pointnet',
+            self.keypoint_detector = RegressionKeypoints(N=self.N, method='point_transformer',
                                                          dim=[6, 32, 64, 128])
         else:
             self.keypoint_detector = keypoint_detector(class_name=class_name, N=self.N)
