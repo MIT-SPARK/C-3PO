@@ -28,3 +28,6 @@
 [submodule "Realtime-Scan2CAD"]
 	path = Realtime-Scan2CAD
 	url = https://github.com/theycallmefm/Realtime-Scan2CAD.git
+[submodule "point-transformer"]
+	path = point-transformer
+	url = https://github.com/POSTECH-CVLab/point-transformer.git
