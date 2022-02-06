@@ -4,9 +4,6 @@
 [submodule "pointnet.pytorch"]
 	path = pointnet.pytorch
 	url = https://github.com/fxia22/pointnet.pytorch.git
-[submodule "point-transformer"]
-	path = point-transformer
-	url = https://github.com/POSTECH-CVLab/point-transformer.git
 [submodule "cvxpylayers"]
 	path = cvxpylayers
 	url = https://github.com/cvxgrp/cvxpylayers.git
