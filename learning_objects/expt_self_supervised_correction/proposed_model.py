@@ -55,13 +55,18 @@ class ProposedModel(nn.Module):
         self.device_ = self.cad_models.device
         self.viz_keypoint_correction = False
         self.use_pretrained_regression_model = use_pretrained_regression_model
-        self.create_features = create_features
 
         self.N = self.model_keypoints.shape[-1]  # (1, 1)
         self.K = self.model_keypoints.shape[0]  # (1, 1)
 
         # Keypoint Detector
         if keypoint_detector == None:
+            self.keypoint_detector = RegressionKeypoints(N=self.N, method='pointnet',
+                                                         dim=[6, 32, 64, 128])
+        elif keypoint_detector == 'pointnet':
+            self.keypoint_detector = RegressionKeypoints(N=self.N, method='pointnet',
+                                                         dim=[6, 32, 64, 128])
+        elif keypoint_detector == 'point_transformer':
             self.keypoint_detector = RegressionKeypoints(N=self.N, method='point_transformer',
                                                          dim=[6, 32, 64, 128])
         else:
@@ -92,20 +97,19 @@ class ProposedModel(nn.Module):
         # shape             : torch.tensor of shape (B, self.K, 1)
 
         """
-        batch_size = input_point_cloud.shape[0]
+        batch_size, _, m = input_point_cloud.shape
         device_ = input_point_cloud.device
 
-        # Creating features for the point cloud
-        if self.create_features:
-            pos = input_point_cloud.transpose(-1, -2)       #ToDo
-            knn_idx = kNN_torch(pos, pos, k=16)
-            knn_xyz = index_points(pos, knn_idx)
-            features = (pos[:, :, None] - knn_xyz).sum(-2)
-            pc_with_features = torch.cat([pos, features], dim=-1).transpose(-1, -2)
-            # print(pc_with_features)
-            detected_keypoints = self.keypoint_detector(pc_with_features)
-        else:
-            detected_keypoints = self.keypoint_detector(input_point_cloud)
+        num_zero_pts = torch.sum(input_point_cloud == 0, dim=1)
+        num_zero_pts = torch.sum(num_zero_pts == 3, dim=1)
+        num_nonzero_pts = m - num_zero_pts
+        num_nonzero_pts = num_nonzero_pts.unsqueeze(-1)
+
+        center = torch.sum(input_point_cloud, dim=-1)/num_nonzero_pts
+        center = center.unsqueeze(-1)
+        pc_centered = input_point_cloud - center
+        detected_keypoints = self.keypoint_detector(pc_centered)
+        detected_keypoints += center
 
         if self.viz_keypoint_correction:
             inp = input_point_cloud.clone().detach().to('cpu')
