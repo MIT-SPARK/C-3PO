@@ -163,16 +163,18 @@ def keypoint_perturbation(keypoints_true, var=0.8, type='uniform', fra=0.2):
 
 
 class kp_corrector_reg():
-    def __init__(self, cad_models, model_keypoints, theta=50.0, kappa=10.0):
+    def __init__(self, cad_models, model_keypoints, theta=50.0, kappa=10.0, algo='torch'):
         super().__init__()
         """
         cad_models      : torch.tensor of shape (1, 3, m)
         model_keypoints : torch.tensor of shape (1, 3, N)
+        algo            : 'scipy' or 'torch'
         """
         self.cad_models = cad_models
         self.model_keypoints = model_keypoints
         self.theta = theta
         self.kappa = kappa
+        self.algo = algo
 
         self.point_set_registration_fn = PointSetRegistration(source_points=self.model_keypoints)
 
@@ -232,8 +234,12 @@ class kp_corrector_reg():
         correction          : torch.tensor of shape (B, 3, N)
         """
 
-        # correction = self.solve_algo1(detected_keypoints, input_point_cloud)
-        correction = self.solve_algo2(detected_keypoints, input_point_cloud)
+        if self.algo == 'scipy':
+            correction = self.solve_algo1(detected_keypoints, input_point_cloud)
+        elif self.algo == 'torch':
+            correction = self.solve_algo2(detected_keypoints, input_point_cloud)
+        else:
+            raise NotImplementedError
 
         return correction, None
 
@@ -384,11 +390,13 @@ class kp_corrector_reg():
 
 
 class kp_corrector_pace():
-    def __init__(self, cad_models, model_keypoints, theta=10.0, kappa=50.0):
+    def __init__(self, cad_models, model_keypoints, theta=10.0, kappa=50.0, algo='torch'):
         super().__init__()
         """
         cad_models      : torch.tensor of shape (K, 3, m)
         model_keypoints : torch.tensor of shape (K, 3, N)
+        algo            : 'scipy' or 'torch'
+        
         """
         self.cad_models = cad_models
         self.model_keypoints = model_keypoints
@@ -396,6 +404,7 @@ class kp_corrector_pace():
         self.kappa = kappa
         self.pace = PACEmodule(model_keypoints=self.model_keypoints)
         self.modelgen = ModelFromShape(cad_models=self.cad_models, model_keypoints=self.model_keypoints)
+        self.algo = algo
 
         self.device_ = model_keypoints.device
 
@@ -463,8 +472,12 @@ class kp_corrector_pace():
         correction          : torch.tensor of shape (B, 3, N)
         """
 
-        # correction = self.solve_algo1(detected_keypoints, input_point_cloud)
-        correction = self.solve_algo2(detected_keypoints, input_point_cloud)
+        if self.algo == 'scipy':
+            correction = self.solve_algo1(detected_keypoints, input_point_cloud)
+        elif self.algo == 'torch':
+            correction = self.solve_algo2(detected_keypoints, input_point_cloud)
+        else:
+            raise NotImplementedError
 
         return correction, None
 
@@ -560,7 +573,7 @@ class kp_corrector_pace():
 
 
                 batch_correction_init = 0.001*np.random.rand(3*N)
-                fun = lambda x: self.objective_numpy(detected_keypoints=kp, input_point_cloud=pc, correction=x)
+                fun = lambda x: self.objective_numpy(detected_keypoints=kp, input_point_cloud=pc, y=x)
 
 
                 loss_before = fun(x=batch_correction_init)
