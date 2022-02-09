@@ -302,7 +302,7 @@ def train_with_supervision(supervised_training_loader, validation_loader, model,
             best_vloss = avg_vloss
             model_path = SAVE_LOCATION + 'expt_keypoint_detect_' + 'model_{}_{}'.format(timestamp, epoch_number)
             torch.save(model.state_dict(), model_path)
-            best_model_path = SAVE_LOCATION + '_best_supervised_keypoint_detect_model_se3.pth'
+            best_model_path = SAVE_LOCATION + '_best_supervised_keypoint_detect_pointnet_se3.pth'
             torch.save(model.state_dict(), best_model_path)
 
         epoch_number += 1
@@ -314,7 +314,7 @@ def train_with_supervision(supervised_training_loader, validation_loader, model,
 
 
 # Test the keypoint detector with PACE. See if you can learn the keypoints.
-def visual_test(test_loader, model):
+def visual_test(test_loader, model, correction_flag=False):
 
     for i, vdata in enumerate(test_loader):
         input_point_cloud, keypoints_target, R_target, t_target = vdata
@@ -326,7 +326,7 @@ def visual_test(test_loader, model):
         # Make predictions for this batch
         model.eval()
         predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted, _ = model(input_point_cloud,
-                                                                                        correction_flag=False)
+                                                                                        correction_flag=correction_flag)
         model.train()
         pc = input_point_cloud.clone().detach().to('cpu')
         pc_p = predicted_point_cloud.clone().detach().to('cpu')
@@ -380,18 +380,18 @@ if __name__ == "__main__":
     # sim dataset:
     supervised_train_dataset_len = 50000
     supervised_train_batch_size = 100
-    num_of_points_supervised = 500
+    num_of_points_supervised = 1000
 
     # supervised and self-supervised training data
-    # supervised_train_dataset = SE3PointCloud(class_id=class_id,
-    #                                          model_id=model_id,
-    #                                          num_of_points=num_of_points_supervised,
-    #                                          dataset_len=supervised_train_dataset_len)
-    supervised_train_dataset = DepthPC(class_id=class_id,
-                                            model_id=model_id,
-                                            n=2000,
-                                            num_of_points_to_sample=1000,
-                                            dataset_len=supervised_train_dataset_len)
+    supervised_train_dataset = SE3PointCloud(class_id=class_id,
+                                             model_id=model_id,
+                                             num_of_points=num_of_points_supervised,
+                                             dataset_len=supervised_train_dataset_len)
+    # supervised_train_dataset = DepthPC(class_id=class_id,
+    #                                         model_id=model_id,
+    #                                         n=2000,
+    #                                         num_of_points_to_sample=1000,
+    #                                         dataset_len=supervised_train_dataset_len)
     supervised_train_loader = torch.utils.data.DataLoader(supervised_train_dataset,
                                                           batch_size=supervised_train_batch_size,
                                                           shuffle=False)
@@ -401,9 +401,13 @@ if __name__ == "__main__":
     val_batch_size = 50
 
     # supervised and self-supervised training data
-    val_dataset = DepthPC(class_id=class_id, model_id=model_id, n=2000,
-                                            num_of_points_to_sample=1000,
-                                            dataset_len=val_dataset_len)
+    val_dataset = SE3PointCloud(class_id=class_id,
+                                model_id=model_id,
+                                num_of_points=num_of_points_supervised,
+                                dataset_len=val_dataset_len)
+    # val_dataset = DepthPC(class_id=class_id, model_id=model_id, n=2000,
+    #                                         num_of_points_to_sample=1000,
+    #                                         dataset_len=val_dataset_len)
     val_loader = torch.utils.data.DataLoader(val_dataset,
                                                           batch_size=val_batch_size,
                                                           shuffle=False)
@@ -421,14 +425,15 @@ if __name__ == "__main__":
     # This difference is because RSNetKeypoints was trained with supervision in KeypointNet,
     # whereas RegressionKeypoints was trained with supervision in this script and saved ProposedModel weights
     model = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,                # Use this for supervised training of pointnet
-                          keypoint_detector=None, use_pretrained_regression_model=False).to(device)
+                          keypoint_detector='pointnet', use_pretrained_regression_model=True).to(device)
     # model = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,                  # Use this for visualizing a pre-trained pointnet
     #                       keypoint_detector=None, use_pretrained_regression_model=True).to(device)
 
     if model.use_pretrained_regression_model:
         print("USING PRETRAINED REGRESSION MODEL, ONLY USE THIS WITH SELF-SUPERVISION")
-        best_model_checkpoint = os.path.join(SAVE_LOCATION, '_best_supervised_keypoint_detect_model_depthpc.pth')
+        # best_model_checkpoint = os.path.join(SAVE_LOCATION, '_best_supervised_keypoint_detect_model_depthpc.pth')
         # best_model_checkpoint = os.path.join(SAVE_LOCATION, '_best_supervised_keypoint_detect_model_se3.pth')
+        best_model_checkpoint = os.path.join(SAVE_LOCATION, '_best_supervised_keypoint_detect_pointnet_se3.pth')
         if not os.path.isfile(best_model_checkpoint):
             print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")
         state_dict = torch.load(best_model_checkpoint)
@@ -442,12 +447,65 @@ if __name__ == "__main__":
     optimizer = torch.optim.SGD(model.parameters(), lr=lr_sgd, momentum=momentum_sgd)
 
     # training
-    train_with_supervision(supervised_training_loader=supervised_train_loader,                                          # Use this for supervised training
-                           validation_loader=val_loader,
-                           model=model,
-                           optimizer=optimizer,
-                           correction_flag=False)
+    # train_with_supervision(supervised_training_loader=supervised_train_loader,                                          # Use this for supervised training
+    #                        validation_loader=val_loader,
+    #                        model=model,
+    #                        optimizer=optimizer,
+    #                        correction_flag=False)
 
     # test
     print("Visualizing the trained model.")
-    visual_test(test_loader=supervised_train_loader, model=model)
+    visual_test(supervised_train_loader, model, correction_flag=False)
+
+    dataset = SE3PointCloud(class_id=class_id,
+                                             model_id=model_id,
+                                             num_of_points=500,
+                                             dataset_len=supervised_train_dataset_len)
+    # supervised_train_dataset = DepthPC(class_id=class_id,
+    #                                         model_id=model_id,
+    #                                         n=2000,
+    #                                         num_of_points_to_sample=1000,
+    #                                         dataset_len=supervised_train_dataset_len)
+    loader = torch.utils.data.DataLoader(dataset,
+                                                          batch_size=supervised_train_batch_size,
+                                                          shuffle=False)
+    visual_test(test_loader=loader, model=model, correction_flag=False)
+
+    dataset = SE3PointCloud(class_id=class_id,
+                            model_id=model_id,
+                            num_of_points=200,
+                            dataset_len=supervised_train_dataset_len)
+    # supervised_train_dataset = DepthPC(class_id=class_id,
+    #                                         model_id=model_id,
+    #                                         n=2000,
+    #                                         num_of_points_to_sample=1000,
+    #                                         dataset_len=supervised_train_dataset_len)
+    loader = torch.utils.data.DataLoader(dataset,
+                                         batch_size=supervised_train_batch_size,
+                                         shuffle=False)
+    visual_test(test_loader=loader, model=model, correction_flag=False)
+
+    dataset = SE3PointCloud(class_id=class_id,
+                            model_id=model_id,
+                            num_of_points=100,
+                            dataset_len=supervised_train_dataset_len)
+    # supervised_train_dataset = DepthPC(class_id=class_id,
+    #                                         model_id=model_id,
+    #                                         n=2000,
+    #                                         num_of_points_to_sample=1000,
+    #                                         dataset_len=supervised_train_dataset_len)
+    loader = torch.utils.data.DataLoader(dataset,
+                                         batch_size=supervised_train_batch_size,
+                                         shuffle=False)
+    visual_test(test_loader=loader, model=model, correction_flag=False)
+
+
+
+    # testing on real dataset
+    real_batch_size = 1
+    real_dataset = DepthPC(class_id=class_id, model_id=model_id, n=2000, num_of_points_to_sample=1000,
+                           dataset_len=val_dataset_len)
+    real_loader = torch.utils.data.DataLoader(real_dataset, batch_size=real_batch_size, shuffle=False)
+    visual_test(test_loader=real_loader, model=model, correction_flag=False)
+    visual_test(test_loader=real_loader, model=model, correction_flag=True)
+
