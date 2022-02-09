@@ -31,15 +31,17 @@ from learning_objects.models.pace import PACEmodule
 from learning_objects.models.modelgen import ModelFromShape
 
 
-def chamfer_loss(pc, pc_, pc_padding=None):
+def chamfer_loss(pc, pc_, pc_padding=None, max_loss=False):
     """
     inputs:
     pc  : torch.tensor of shape (B, 3, n)
     pc_ : torch.tensor of shape (B, 3, m)
     pc_padding  : torch.tensor of shape (B, n)  : indicates if the point in pc is real-input or padded in
+    max_loss : boolean : indicates if output loss should be maximum of the distances between pc and pc_ instead of the mean
 
     output:
-    loss    :
+    loss    : (B, 1)
+        returns max_loss if max_loss is true
     """
 
     if pc_padding == None:
@@ -50,12 +52,16 @@ def chamfer_loss(pc, pc_, pc_padding=None):
         pc_padding = ((pc == torch.zeros(3, 1).to(device=device_)).sum(dim=1) == 3)
         # pc_padding = torch.zeros(batch_size, n).to(device=device_)
 
-    sq_dist, _, _ = ops.knn_points(torch.transpose(pc, -1, -2), torch.transpose(pc_, -1, -2), K=1, return_sorted=False)
+    sq_dist, _, _ = ops.knn_points(torch.transpose(pc, -1, -2), torch.transpose(pc_, -1, -2), K=1)
     # dist (B, n, 1): distance from point in X to the nearest point in Y
 
     sq_dist = sq_dist.squeeze(-1)*torch.logical_not(pc_padding)
     a = torch.logical_not(pc_padding)
-    loss = sq_dist.sum(dim=1)/a.sum(dim=1)
+
+    if max_loss:
+        loss = sq_dist.max(dim=1)[0]
+    else:
+        loss = sq_dist.sum(dim=1)/a.sum(dim=1)
 
     return loss.unsqueeze(-1)
 
@@ -194,7 +200,8 @@ class kp_corrector_reg():
         model_estimate = R @ self.cad_models + t
         keypoint_estimate = R @ self.model_keypoints + t
 
-        loss_pc = chamfer_loss(pc=input_point_cloud, pc_=model_estimate)
+        loss_pc = chamfer_loss(pc=input_point_cloud, pc_=model_estimate, max_loss=True)
+        # loss_pc = max_chamfer_loss(pc=input_point_cloud, pc_=model_estimate)
         # loss_pc = chamfer_loss_with_surface_normals(pc=input_point_cloud, pc_=model_estimate)
 
         loss_kp = keypoints_loss(kp=detected_keypoints+correction, kp_=keypoint_estimate)
