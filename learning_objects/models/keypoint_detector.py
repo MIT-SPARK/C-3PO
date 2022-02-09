@@ -97,12 +97,12 @@ class HeatmapKeypoints(nn.Module):
         """
         Inputs:
         ------
-        pointcloud: (B, 3+d, self.N) torch.Tensor
+        pointcloud: (B, 3+d, m) torch.Tensor
                         B = batch size
-                        self.N = number of points per point cloud
+                        m = number of points per point cloud
                         d = input feature dimension
-                        pointcloud[B, 0:3, self.N] = locations
-                        pointcloud[B, 3:, self.N] = input features
+                        pointcloud[B, 0:3, m] = locations
+                        pointcloud[B, 3:, m] = input features
 
         Outputs:
         -------
@@ -111,7 +111,7 @@ class HeatmapKeypoints(nn.Module):
                         self.N = number of keypoints
                         y[B, 0:3, self.N] = location of keypoints
         """
-
+        device_ = pointcloud.device
         pointcloud = torch.transpose(pointcloud, -1, -2)    # (B, N, 3+d)
 
         if self.method == 'point_transformer':
@@ -129,11 +129,11 @@ class HeatmapKeypoints(nn.Module):
             raise ValueError
 
 
-        y = torch.zeros(size=(pointcloud.size(0), self.N, 3))
+        y = torch.zeros(size=(pointcloud.size(0), self.N, 3)).to(device=device_)
         for i in range(idx.size(0)):
             y[i, :, :] = pointcloud[i, idx[i], :3]
 
-        return y.transpose(-1, -2)      # (B, 3, self.N)
+        return y.transpose(-1, -2), heatmap.transpose(-1, -2)      # (B, 3, self.N), (B, self.N, m)
 
 
 class RegressionKeypoints(nn.Module):

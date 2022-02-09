@@ -165,9 +165,6 @@ def supervised_train_one_epoch(epoch_index, tb_writer, training_loader, model, o
     running_loss = 0.
     last_loss = 0.
 
-    # Here, we use enumerate(training_loader) instead of
-    # iter(training_loader) so that we can track the batch
-    # index and do some intra-epoch reporting
     for i, data in enumerate(training_loader):
         # # Every data instance is an input + label pair
         # input_point_cloud, keypoints_target, R_target, t_target = data
@@ -199,25 +196,18 @@ def supervised_train_one_epoch(epoch_index, tb_writer, training_loader, model, o
         # Zero your gradients for every batch!
         optimizer.zero_grad()
 
-        # Make predictions for this batch
-        pc2 = R.transpose(-1, -2) @ (pc - t)
-
         out = model(pc, correction_flag=False)
         kp_pred = out[1]
-        out = model(pc2, correction_flag=False)
-        kp2_pred = out[1]
-
-        kp2_target = R.transpose(-1, -2) @ (kp_pred - t)
 
         # loss1 : kp and kp_pred
         # loss2 : kp2_pred, pr2_target
 
         loss1 = ((kp - kp_pred)**2).sum(dim=1).mean(dim=1).mean()
-        loss2 = ((kp2_pred - kp2_target)**2).sum(dim=1).mean(dim=1).mean()
 
-        # Compute the loss and its gradients                                                                            #ToDo: Add another
+        # Compute the loss and its gradients
         loss = loss1
-        # loss = 0.5*(loss1 + loss2)
+        # print(loss.shape)
+        # print(loss)
         loss.backward()
 
         # Adjust learning weights
@@ -228,7 +218,7 @@ def supervised_train_one_epoch(epoch_index, tb_writer, training_loader, model, o
         if i % 10 == 0:
             print("Batch ", (i+1), " loss: ", loss.item())
 
-        del pc, kp, R, t, pc2, kp_pred, kp2_pred, kp2_target
+        del pc, kp, R, t, kp_pred
         torch.cuda.empty_cache()
 
     ave_tloss = running_loss / (i + 1)
@@ -388,15 +378,20 @@ if __name__ == "__main__":
     num_of_points = 500
 
     # sim dataset:
-    supervised_train_dataset_len = 5000
-    supervised_train_batch_size = 50
+    supervised_train_dataset_len = 50000
+    supervised_train_batch_size = 100
     num_of_points_supervised = 500
 
     # supervised and self-supervised training data
-    supervised_train_dataset = SE3PointCloud(class_id=class_id,
-                                             model_id=model_id,
-                                             num_of_points=num_of_points_supervised,
-                                             dataset_len=supervised_train_dataset_len)
+    # supervised_train_dataset = SE3PointCloud(class_id=class_id,
+    #                                          model_id=model_id,
+    #                                          num_of_points=num_of_points_supervised,
+    #                                          dataset_len=supervised_train_dataset_len)
+    supervised_train_dataset = DepthPC(class_id=class_id,
+                                            model_id=model_id,
+                                            n=2000,
+                                            num_of_points_to_sample=1000,
+                                            dataset_len=supervised_train_dataset_len)
     supervised_train_loader = torch.utils.data.DataLoader(supervised_train_dataset,
                                                           batch_size=supervised_train_batch_size,
                                                           shuffle=False)
@@ -406,11 +401,10 @@ if __name__ == "__main__":
     val_batch_size = 50
 
     # supervised and self-supervised training data
-    val_dataset = SE3PointCloud(class_id=class_id,
-                                             model_id=model_id,
-                                             num_of_points=num_of_points_supervised,
-                                             dataset_len=val_dataset_len)
-    val_loader = torch.utils.data.DataLoader(supervised_train_dataset,
+    val_dataset = DepthPC(class_id=class_id, model_id=model_id, n=2000,
+                                            num_of_points_to_sample=1000,
+                                            dataset_len=val_dataset_len)
+    val_loader = torch.utils.data.DataLoader(val_dataset,
                                                           batch_size=val_batch_size,
                                                           shuffle=False)
 
@@ -426,14 +420,15 @@ if __name__ == "__main__":
     # so set use_pretrained_regression_model=False
     # This difference is because RSNetKeypoints was trained with supervision in KeypointNet,
     # whereas RegressionKeypoints was trained with supervision in this script and saved ProposedModel weights
-    model = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,                # Use this for supervised training of point-transformer
+    model = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,                # Use this for supervised training of pointnet
                           keypoint_detector=None, use_pretrained_regression_model=False).to(device)
-    # model = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,                  # Use this for visualizing a pre-trained point-transformer
+    # model = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,                  # Use this for visualizing a pre-trained pointnet
     #                       keypoint_detector=None, use_pretrained_regression_model=True).to(device)
 
     if model.use_pretrained_regression_model:
         print("USING PRETRAINED REGRESSION MODEL, ONLY USE THIS WITH SELF-SUPERVISION")
-        best_model_checkpoint = os.path.join(SAVE_LOCATION, '_best_supervised_keypoint_detect_model_se3.pth')
+        best_model_checkpoint = os.path.join(SAVE_LOCATION, '_best_supervised_keypoint_detect_model_depthpc.pth')
+        # best_model_checkpoint = os.path.join(SAVE_LOCATION, '_best_supervised_keypoint_detect_model_se3.pth')
         if not os.path.isfile(best_model_checkpoint):
             print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")
         state_dict = torch.load(best_model_checkpoint)
@@ -456,29 +451,3 @@ if __name__ == "__main__":
     # test
     print("Visualizing the trained model.")
     visual_test(test_loader=supervised_train_loader, model=model)
-
-
-
-    # testing on "real" data        #ToDo: change name to real_data
-    self_supervised_train_dataset_len = 10000
-    self_supervised_train_batch_size = 1  # can increase to make it faster
-    num_of_points_to_sample = 1000  # 0
-    num_of_points_selfsupervised = 2048
-
-    self_supervised_train_dataset = DepthPC(class_id=class_id,
-                                            model_id=model_id,
-                                            n=num_of_points_selfsupervised,
-                                            num_of_points_to_sample=num_of_points_to_sample,
-                                            dataset_len=self_supervised_train_dataset_len)
-    # self_supervised_train_dataset = DepthPointCloud2(class_id=class_id,
-    #                                         model_id=model_id,
-    #                                         num_of_points=num_of_points_selfsupervised,
-    #                                         dataset_len=self_supervised_train_dataset_len)
-    self_supervised_train_loader = torch.utils.data.DataLoader(self_supervised_train_dataset,
-                                                               batch_size=self_supervised_train_batch_size,
-                                                               shuffle=False)
-    visual_test(test_loader=self_supervised_train_loader, model=model)        #ToDo: Write to analyze the pre-trained model on real data.
-
-
-
-

@@ -22,6 +22,7 @@ from torch_geometric.nn.pool import fps
 
 #### Some functions taken from point-transformer.point_transformer_lib.point_transformer_utils
 
+#ToDo: The interpolate and farthest point sampling won't interpolate
 
 def three_interpolate(p, p_old, x):
     """
@@ -67,9 +68,6 @@ def three_interpolate(p, p_old, x):
     # c = torch.stack(tuple(torch.vstack((a[i, ...], b[i, ...])) for i in range(a.size(0))))
 
 
-
-
-
 def farthest_point_sampling(xyz, npoints):
     """
     Inputs:
@@ -103,8 +101,6 @@ def farthest_point_sampling(xyz, npoints):
     out = torch.reshape(_xyz_out, (xyz.size(0), -1, 3))
     out = out.to(input_device)
     return out
-
-
 
 
 def square_distance(src, dst):
