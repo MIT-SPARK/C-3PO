@@ -50,7 +50,7 @@ import open3d as o3d
 import json
 import numpy as np
 import pytorch3d
-from pytorch3d import transforms
+from pytorch3d import transforms, ops
 
 import os
 import sys
@@ -396,6 +396,7 @@ class DepthAndIsotorpicShapePointCloud(torch.utils.data.Dataset):
 
         return 0
 
+
 class DepthAndAnisotropicScalingPointCloud(torch.utils.data.Dataset):
     """
         TODO: make a version that works with batch_size > 1 aka outputs pointclouds of a set size
@@ -581,6 +582,7 @@ class DepthAndAnisotropicScalingPointCloud(torch.utils.data.Dataset):
         visualize_torch_model_n_keypoints(cad_models=cad_models, model_keypoints=model_keypoints)
 
         return 0
+
 
 class DepthIsoPC(torch.utils.data.Dataset):
     """
@@ -1236,6 +1238,7 @@ class SE3PointCloud(torch.utils.data.Dataset):
 
         return 0
 
+
 class SE3nIsotorpicShapePointCloud(torch.utils.data.Dataset):
     """
     Given class id, model_id, number of points, and shape_scaling, it generates various point clouds and SE3
@@ -1378,6 +1381,7 @@ class SE3nIsotorpicShapePointCloud(torch.utils.data.Dataset):
         visualize_torch_model_n_keypoints(cad_models=cad_models, model_keypoints=model_keypoints)
 
         return 0
+
 
 class SE3nAnisotropicScalingPointCloud(torch.utils.data.Dataset):
     """
@@ -1533,6 +1537,142 @@ class SE3nAnisotropicScalingPointCloud(torch.utils.data.Dataset):
         visualize_torch_model_n_keypoints(cad_models=cad_models, model_keypoints=model_keypoints)
 
         return 0
+
+
+
+# This dataset is for the heatmap keypoint detector
+class SE3PointCloudHtmpKP(torch.utils.data.Dataset):
+    """
+    Given class_id, model_id, and number of points generates various point clouds and SE3 transformations
+    of the ShapeNetCore object.
+
+    Returns a batch of
+        input_point_cloud, keypoints, rotation, translation
+    """
+    def __init__(self, class_id, model_id, num_of_points=1000, dataset_len=10000,
+                 dir_location='../../data/learning-objects/keypointnet_datasets/'):
+        """
+        class_id        : str   : class id of a ShapeNetCore object
+        model_id        : str   : model id of a ShapeNetCore object
+        num_of_points   : int   : max. number of points the depth point cloud will contain
+        dataset_len     : int   : size of the dataset
+
+        """
+
+        self.class_id = class_id
+        self.model_id = model_id
+        self.num_of_points = num_of_points
+        self.len = dataset_len
+
+        self.dataset = SE3PointCloud(class_id=self.class_id, model_id=self.model_id,
+                                     num_of_points=self.num_of_points, dataset_len=self.len)
+
+        # get model
+        # self.model_mesh, _, self.keypoints_xyz = get_model_and_keypoints(class_id, model_id)
+        # center = self.model_mesh.get_center()
+        # self.model_mesh.translate(-center)
+        #
+        # self.keypoints_xyz = self.keypoints_xyz - center
+        # self.keypoints_xyz = torch.from_numpy(self.keypoints_xyz).transpose(0, 1).unsqueeze(0).to(torch.float)
+        #
+        # size of the model
+        # self.diameter = np.linalg.norm(np.asarray(self.model_mesh.get_max_bound()) - np.asarray(self.model_mesh.get_min_bound()))
+
+
+    def __len__(self):
+
+        return self.len
+
+    def __getitem__(self, idx):
+        """
+        output:
+        point_cloud         : torch.tensor of shape (3, m)                  : the SE3 transformed point cloud
+        R                   : torch.tensor of shape (3, 3)                  : rotation
+        t                   : torch.tensor of shape (3, 1)                  : translation
+        """
+
+        pc, kp, R, t = self.dataset.__getitem__(idx)    # (3, m), (3, N)
+
+        _, kp_idx, _ = ops.knn_points(p1=kp.unsqueeze(0).transpose(-1, -2),
+                                      p2=pc.unsqueeze(0).transpose(-1, -2),
+                                      K=1, return_nn=True, return_sorted=False)
+
+        kp_idx = kp_idx.squeeze(0)  # (N, 1)
+
+        return pc, kp, R, t, kp_idx
+
+
+    def _get_cad_models_as_point_clouds(self):
+        """
+        Use _get_cad_models() instead of this function.
+
+        """
+
+        out = self.dataset._get_cad_models_as_point_clouds()
+
+        return out
+
+    def _get_cad_models_as_mesh(self):
+        """
+        Returns the open3d Mesh object of the ShapeNetCore model
+
+        """
+
+        out = self.dataset._get_cad_models_as_mesh()
+
+        return out
+
+    def _get_cad_models(self):
+        """
+        Returns a sampled point cloud of the ShapeNetcore model with self.num_of_points points.
+
+        output:
+        cad_models  : torch.tensor of shape (1, 3, self.num_of_points)
+
+        """
+
+        out = self.dataset._get_cad_models()
+
+        return out
+
+    def _get_model_keypoints(self):
+        """
+        Returns keypoints of the ShapeNetCore model annotated in the KeypointNet dataset.
+
+        output:
+        model_keypoints : torch.tensor of shape (1, 3, N)
+
+        where
+        N = number of keypoints
+        """
+
+        out = self.dataset._get_model_keypoints()
+
+        return out
+
+    def _get_diameter(self):
+        """
+        Returns the diameter of the mid-sized object.
+
+        output  :   torch.tensor of shape (1)
+        """
+
+        out = self.dataset._get_diameter()
+
+        return out
+
+    def _visualize(self):
+        """
+        Visualizes the two CAD models and the corresponding keypoints
+
+        """
+
+        cad_models = self._get_cad_models()
+        model_keypoints = self._get_model_keypoints()
+        visualize_torch_model_n_keypoints(cad_models=cad_models, model_keypoints=model_keypoints)
+
+        return 0
+
 
 
 if __name__ == "__main__":

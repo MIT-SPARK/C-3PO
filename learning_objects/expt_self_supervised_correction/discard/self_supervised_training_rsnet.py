@@ -323,7 +323,7 @@ def train_without_supervision(self_supervised_train_loader, validation_loader, m
 
 
 # Test the keypoint detector with PACE. See if you can learn the keypoints.
-def visual_test(test_loader, model):
+def visual_test(test_loader, model, correction_flag=False):
 
     for i, vdata in enumerate(test_loader):
         input_point_cloud, keypoints_target, R_target, t_target = vdata
@@ -332,10 +332,13 @@ def visual_test(test_loader, model):
         R_target = R_target.to(device)
         t_target = t_target.to(device)
 
+        input_point_cloud = R_target.transpose(-1, -2) @ (input_point_cloud - t_target)
+        keypoints_target = R_target.transpose(-1, -2) @ (keypoints_target - t_target)
+
         # Make predictions for this batch
         model.eval()
         predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted, _ = model(input_point_cloud,
-                                                                                        correction_flag=False)
+                                                                                        correction_flag=correction_flag)
         model.train()
         pc = input_point_cloud.clone().detach().to('cpu')
         pc_p = predicted_point_cloud.clone().detach().to('cpu')
@@ -389,7 +392,7 @@ if __name__ == "__main__":
 
     # sim dataset:
     supervised_train_dataset_len = 10000
-    supervised_train_batch_size = 5#0
+    supervised_train_batch_size = 1#0
     num_of_points_supervised = 500
 
     # real dataset:
@@ -437,7 +440,7 @@ if __name__ == "__main__":
     # model = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,                # Use this for self-supervised training of a pre-trained point-transformer
     #                       keypoint_detector=None, use_pretrained_regression_model=True).to(device)
     model = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,                # Use this for self-supervised training of a pre-trained RSNetKeypoints model
-                          keypoint_detector=RSNetKeypoints, use_pretrained_regression_model=True).to(device)
+                          keypoint_detector=RSNetKeypoints, use_pretrained_regression_model=False).to(device)
 
     if model.use_pretrained_regression_model:
         print("USING PRETRAINED REGRESSION MODEL, ONLY USE THIS WITH SELF-SUPERVISION")
@@ -470,8 +473,8 @@ if __name__ == "__main__":
 
     # test
     print("Visualizing the trained model.")
-    visual_test(test_loader=supervised_train_loader, model=model)
-    visual_test(test_loader=self_supervised_train_loader, model=model)
+    visual_test(test_loader=supervised_train_loader, model=model, correction_flag=True)
+    visual_test(test_loader=self_supervised_train_loader, model=model, correction_flag=True)
 
 
 
