@@ -3,6 +3,7 @@ import torch
 from pytorch3d import ops, transforms
 
 from datetime import datetime
+import time
 import pickle
 import csv
 import random
@@ -114,7 +115,10 @@ def rotation_error(R, R_):
         # return torch.norm(R.T @ R_ - torch.eye(3, device=R.device), p='fro')
     elif R.dim() == 3:
         # return transforms.matrix_to_euler_angles(torch.transpose(R, 1, 2) @ R_, "XYZ").abs().mean(1).unsqueeze(1)
-        return torch.acos(0.5*(torch.einsum('bii->b', torch.transpose(R, -1, -2) @ R_) - 1).unsqueeze(-1))
+        error = 0.5*(torch.einsum('bii->b', torch.transpose(R, -1, -2) @ R_) - 1).unsqueeze(-1)
+        epsilon = 1e-8
+        return torch.acos(torch.clamp(error, -1 + epsilon, 1 - epsilon))
+        # return torch.acos(0.5*(torch.einsum('bii->b', torch.transpose(R, -1, -2) @ R_) - 1).unsqueeze(-1))
         # return 1 - 0.5 * (torch.einsum('bii->b', torch.transpose(R, 1, 2) @ R_) - 1).unsqueeze(-1)
         # return torch.norm(R.transpose(-1, -2) @ R_ - torch.eye(3, device=R.device), p='fro', dim=[1, 2])
     else:
@@ -159,7 +163,7 @@ class experiment():
         # n is the desired number of points in the pcl,
         self.se3_dataset = DepthPC(class_id=self.class_id, model_id=self.model_id,
                                    num_of_points_to_sample=self.num_points, dataset_len=self.num_iterations)
-        self.se3_dataset_loader = torch.utils.data.DataLoader(self.se3_dataset, batch_size=self.num_iterations, shuffle=False)
+        self.se3_dataset_loader = torch.utils.data.DataLoader(self.se3_dataset, batch_size=self.num_iterations, shuffle=False, num_workers=4)
 
         self.model_keypoints = self.se3_dataset._get_model_keypoints().to(device=self.device_)  # (1, 3, N)
         self.cad_models = self.se3_dataset._get_cad_models().to(device=self.device_)  # (1, 3, m)
@@ -312,9 +316,12 @@ class experiment():
             print("Testing at kp_noise_var: ", kp_noise_var)
             print("-"*40)
 
+            start = time.perf_counter()
             Rerr_naive, Rerr_corrector, terr_naive, terr_corrector, \
             c_naive, c_corrector, sqdist_in_naive, sq_dist_in_corrector, sqdist_kp_naive, \
             sqdist_kp_corrector, pc_padding_mask = self._single_loop(kp_noise_var=kp_noise_var)
+            end = time.perf_counter()
+            print("Time taken: ", (end-start)/60, ' min')
 
             rotation_err_naive[i, ...] = Rerr_naive.squeeze(-1)
             rotation_err_corrector[i, ...] = Rerr_corrector.squeeze(-1)
@@ -443,6 +450,12 @@ def choose_random_models(num_models=10, pcd_path = KEYPOINTNET_PCD_FOLDER_NAME):
     """
     class_id_to_model_id_samples = {}
     folder_contents = os.listdir(pcd_path)
+    # ###
+    # # hardcoded:
+    # return {'03001627': ['1cc6f2ed3d684fa245f213b8994b4a04'],
+    #         '02818832': ['7c8eb4ab1f2c8bfa2fb46fb8b9b1ac9f']
+    #         }
+    # ###
     for class_id in folder_contents:
         models = os.listdir(pcd_path + str(class_id) + '/')
         #choose random num_models from models without replacement
