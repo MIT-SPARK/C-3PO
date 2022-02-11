@@ -130,6 +130,33 @@ def supervised_loss(input, output):
     return pc_loss + kp_loss + R_loss + t_loss
     # return kp_loss
 
+
+def contrastive_loss(heatmap, labels, epsilon=0.4):
+    """
+    inputs:
+    heatmap : torch.tensor of shape (B, m)  : values between 0:1
+    labels  : torch.tensor of shape (B)     : index from 0:m
+    epsilon : gap between true and false
+
+    """
+    device_ = heatmap.device
+    # epsilon = epsilon.to(device=device_)
+
+    b = torch.tensor([heatmap[i, labels[i]] for i in range(heatmap.shape[0])])       #ToDo: find an efficient way of doing this.
+    b = b.unsqueeze(-1).to(device=device_)
+    contrast = b - epsilon - heatmap
+
+    # another way:
+    # contrast = torch.zeros_like(heatmap)
+    # contrast[i, j] = heatmap[i, labels[i]] - epsilon - heatmap[i, j]
+
+
+    contrast = contrast
+    loss = contrast.mean()
+
+    return -loss
+
+
 def validation_loss(input, output):
     """
     inputs:
@@ -167,7 +194,7 @@ def supervised_train_one_epoch(epoch_index, tb_writer, training_loader, model, o
     running_loss = 0.
     last_loss = 0.
 
-    loss_fn = nn.CrossEntropyLoss()
+    cross_entropy_loss = nn.CrossEntropyLoss()
 
     for i, data in enumerate(training_loader):
         # # Every data instance is an input + label pair
@@ -206,7 +233,10 @@ def supervised_train_one_epoch(epoch_index, tb_writer, training_loader, model, o
         heatmap = out[5]    # (B, N, m)
 
         B, N, m = heatmap.shape
-        loss = loss_fn(heatmap.reshape(B * N, m), kp_idx.reshape(B * N).long())
+        loss1 = cross_entropy_loss(heatmap.reshape(B * N, m), kp_idx.reshape(B * N).long())
+        loss2 = contrastive_loss(heatmap.reshape(B * N, m), kp_idx.reshape(B * N).long())
+        # loss = loss1
+        loss = loss1 + 0.001*loss2
         loss.backward()
 
         # Adjust learning weights
@@ -215,7 +245,7 @@ def supervised_train_one_epoch(epoch_index, tb_writer, training_loader, model, o
         # Gather data and report
         running_loss += loss.item()         # Note: the output of supervised_loss is already averaged over batch_size
         if i % 10 == 0:
-            print("Batch ", (i+1), " loss: ", loss.item())
+            print("Batch ", (i+1), " loss: ", loss.item(), " CE loss: ", loss1.item(), " contra. loss(-): ", -loss2.item())
 
         del pc, kp, R, t, kp_idx, heatmap
         torch.cuda.empty_cache()
@@ -301,7 +331,7 @@ def train_with_supervision(supervised_training_loader, validation_loader, model,
             best_vloss = avg_vloss
             model_path = SAVE_LOCATION + 'expt_keypoint_detect_' + 'model_{}_{}'.format(timestamp, epoch_number)
             torch.save(model.state_dict(), model_path)
-            best_model_path = SAVE_LOCATION + '_best_supervised_keypoint_detect_pointnet_htmp_se3.pth'
+            best_model_path = SAVE_LOCATION + '_best_supervised_keypoint_detect_pointnet_htmp_se3_Wcontraloss.pth'
             torch.save(model.state_dict(), best_model_path)
 
         epoch_number += 1
@@ -430,16 +460,14 @@ if __name__ == "__main__":
     # This difference is because RSNetKeypoints was trained with supervision in KeypointNet,
     # whereas RegressionKeypoints was trained with supervision in this script and saved ProposedModel weights
     model = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,                # Use this for supervised training of pointnet
-                          keypoint_detector='pointnet', use_pretrained_regression_model=True).to(device=device)
+                          keypoint_detector='pointnet', use_pretrained_regression_model=False).to(device=device)
     # model = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,                  # Use this for visualizing a pre-trained pointnet
     #                       keypoint_detector=None, use_pretrained_regression_model=True).to(device)
 
     if model.use_pretrained_regression_model:
         print("USING PRETRAINED REGRESSION MODEL, ONLY USE THIS WITH SELF-SUPERVISION")
-        # best_model_checkpoint = os.path.join(SAVE_LOCATION, '_best_supervised_keypoint_detect_model_depthpc.pth')
-        # best_model_checkpoint = os.path.join(SAVE_LOCATION, '_best_supervised_keypoint_detect_model_se3.pth')
-        # best_model_checkpoint = os.path.join(SAVE_LOCATION, '_best_supervised_keypoint_detect_pointnet_se3.pth')
-        best_model_checkpoint = os.path.join(SAVE_LOCATION, '_best_supervised_keypoint_detect_pointnet_htmp_se3.pth')
+        # best_model_checkpoint = os.path.join(SAVE_LOCATION, '_best_supervised_keypoint_detect_pointnet_htmp_se3.pth')
+        best_model_checkpoint = os.path.join(SAVE_LOCATION, '_best_supervised_keypoint_detect_pointnet_htmp_se3_Wcontraloss.pth')
         if not os.path.isfile(best_model_checkpoint):
             print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")
         state_dict = torch.load(best_model_checkpoint)
@@ -453,11 +481,11 @@ if __name__ == "__main__":
     optimizer = torch.optim.SGD(model.parameters(), lr=lr_sgd, momentum=momentum_sgd)
 
     # training
-    # train_with_supervision(supervised_training_loader=supervised_train_loader,                                          # Use this for supervised training
-    #                        validation_loader=val_loader,
-    #                        model=model,
-    #                        optimizer=optimizer,
-    #                        correction_flag=False)
+    train_with_supervision(supervised_training_loader=supervised_train_loader,                                          # Use this for supervised training
+                           validation_loader=val_loader,
+                           model=model,
+                           optimizer=optimizer,
+                           correction_flag=False)
 
     del optimizer, supervised_train_dataset, supervised_train_loader, val_dataset, val_loader
 

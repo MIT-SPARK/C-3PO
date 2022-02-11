@@ -128,7 +128,6 @@ class HeatmapKeypoints(nn.Module):
         else:
             raise ValueError
 
-
         y = torch.zeros(size=(pointcloud.size(0), self.N, 3)).to(device=device_)
         for i in range(idx.size(0)):
             y[i, :, :] = pointcloud[i, idx[i], :3]

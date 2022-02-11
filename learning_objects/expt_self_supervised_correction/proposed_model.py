@@ -218,7 +218,7 @@ class ProposedRegressionModel(nn.Module):
         corrector_node = kp_corrector_reg(cad_models=self.cad_models, model_keypoints=self.model_keypoints)
         self.corrector = ParamDeclarativeFunction(problem=corrector_node)
 
-    def forward(self, input_point_cloud, correction_flag=False):
+    def forward(self, input_point_cloud, correction_flag=False, need_predicted_keypoints=False):
         """
         input:
         input_point_cloud   : torch.tensor of shape (B, 3, m)
@@ -258,7 +258,12 @@ class ProposedRegressionModel(nn.Module):
             R, t = self.point_set_registration.forward(detected_keypoints)
             predicted_point_cloud = R @ self.cad_models + t
 
-            return predicted_point_cloud, detected_keypoints, R, t, None
+            # return predicted_point_cloud, detected_keypoints, R, t, None
+            if not need_predicted_keypoints:
+                return predicted_point_cloud, detected_keypoints, R, t, None
+            else:
+                predicted_model_keypoints = R @ self.model_keypoints + t
+                return predicted_point_cloud, detected_keypoints, R, t, None, predicted_model_keypoints
 
         else:
             correction = self.corrector.forward(detected_keypoints, input_point_cloud)
@@ -272,7 +277,12 @@ class ProposedRegressionModel(nn.Module):
                 corrected_kp = corrected_keypoints.clone().detach().to('cpu')
                 display_results(inp, det_kp, inp, corrected_kp)
 
-            return predicted_point_cloud, corrected_keypoints, R, t, correction
+            # return predicted_point_cloud, corrected_keypoints, R, t, correction
+            if not need_predicted_keypoints:
+                return predicted_point_cloud, corrected_keypoints, R, t, correction
+            else:
+                predicted_model_keypoints = R @ self.model_keypoints + t
+                return predicted_point_cloud, corrected_keypoints, R, t, correction, predicted_model_keypoints
 
 
 class ProposedHeatmapModel(nn.Module):
@@ -331,7 +341,7 @@ class ProposedHeatmapModel(nn.Module):
         corrector_node = kp_corrector_reg(cad_models=self.cad_models, model_keypoints=self.model_keypoints)
         self.corrector = ParamDeclarativeFunction(problem=corrector_node)
 
-    def forward(self, input_point_cloud, correction_flag=False):
+    def forward(self, input_point_cloud, correction_flag=False, need_predicted_keypoints=False):
         """
         input:
         input_point_cloud   : torch.tensor of shape (B, 3, m)
@@ -374,7 +384,11 @@ class ProposedHeatmapModel(nn.Module):
             R, t = self.point_set_registration.forward(detected_keypoints)
             predicted_point_cloud = R @ self.cad_models + t
 
-            return predicted_point_cloud, detected_keypoints, R, t, None, heatmap
+            if not need_predicted_keypoints:
+                return predicted_point_cloud, detected_keypoints, R, t, None, heatmap
+            else:
+                predicted_model_keypoints = R @ self.model_keypoints + t
+                return predicted_point_cloud, detected_keypoints, R, t, None, heatmap, predicted_model_keypoints
 
         else:
             correction = self.corrector.forward(detected_keypoints, input_point_cloud)
@@ -388,4 +402,8 @@ class ProposedHeatmapModel(nn.Module):
                 corrected_kp = corrected_keypoints.clone().detach().to('cpu')
                 display_results(inp, det_kp, inp, corrected_kp)
 
-            return predicted_point_cloud, corrected_keypoints, R, t, correction, heatmap
+            if not need_predicted_keypoints:
+                return predicted_point_cloud, corrected_keypoints, R, t, correction, heatmap
+            else:
+                predicted_model_keypoints = R @ self.model_keypoints + t
+                return predicted_point_cloud, corrected_keypoints, R, t, correction, heatmap, predicted_model_keypoints
