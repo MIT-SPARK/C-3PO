@@ -94,6 +94,36 @@ def chamfer_loss(pc, pc_, pc_padding=None):
 
     return loss.unsqueeze(-1)
 
+def max_chamfer_loss(pc, pc_, pc_padding=None):
+    """
+    inputs:
+    pc  : torch.tensor of shape (B, 3, n) #input pointcloud
+    pc_ : torch.tensor of shape (B, 3, m) #predicted pointcloud
+    pc_padding  : torch.tensor of shape (B, n)  : indicates if the point in pc is real-input or padded in
+
+    output:
+    loss    : torch.tensor of shape (B, 1)
+
+    """
+
+    if pc_padding == None:
+        batch_size, _, n = pc.shape
+        device_ = pc.device
+
+        # computes a padding by flagging zero vectors in the input point cloud.
+        pc_padding = ((pc == torch.zeros(3, 1).to(device=device_)).sum(dim=1) == 3)
+        # pc_padding = torch.zeros(batch_size, n).to(device=device_)
+    #pc may have a ton of points at 0,0,0
+    #for every point in the input point cloud pc, we want the closest point in the predicted pc_
+    sq_dist, _, _ = ops.knn_points(torch.transpose(pc, -1, -2), torch.transpose(pc_, -1, -2), K=1, return_sorted=False)
+
+    # dist (B, n, 1): distance from point in X to the nearest point in Y
+    sq_dist = sq_dist.squeeze(-1)*torch.logical_not(pc_padding)
+    a = torch.logical_not(pc_padding)
+    loss = sq_dist.sum(dim=1)/a.sum(dim=1)
+    loss = sq_dist.max(dim=1)[0]
+
+    return loss.unsqueeze(-1)
 
 def self_supervised_loss(input_point_cloud, predicted_point_cloud, keypoint_correction):
     """
@@ -109,6 +139,7 @@ def self_supervised_loss(input_point_cloud, predicted_point_cloud, keypoint_corr
     theta = 25.0
 
     pc_loss = chamfer_loss(pc=input_point_cloud, pc_=predicted_point_cloud)
+    # pc_loss = max_chamfer_loss(pc=input_point_cloud, pc_=predicted_point_cloud)
     pc_loss = pc_loss.mean()
 
     lossMSE = torch.nn.MSELoss()
@@ -116,8 +147,8 @@ def self_supervised_loss(input_point_cloud, predicted_point_cloud, keypoint_corr
         kp_loss = torch.zeros(pc_loss.shape)
     else:
         kp_loss = lossMSE(keypoint_correction, torch.zeros_like(keypoint_correction)).mean()
-        print("kp_loss", kp_loss)
-        print("pc_loss", pc_loss)
+        # print("kp_loss", kp_loss)
+        # print("pc_loss", pc_loss)
     return pc_loss + theta*kp_loss
 
 
@@ -189,7 +220,7 @@ def self_supervised_train_one_epoch(epoch_index, tb_writer, training_loader, mod
     # index and do some intra-epoch reporting
     for i, data in enumerate(training_loader):
         # Every data instance is an input + label pair
-        print("Training on datapoint ", i, "/", len(training_loader))
+        # print("Running batch ", i+1, "/", len(training_loader))
         input_point_cloud, _, _, _ = data
         input_point_cloud = input_point_cloud.to(device)
 
@@ -197,9 +228,9 @@ def self_supervised_train_one_epoch(epoch_index, tb_writer, training_loader, mod
         optimizer.zero_grad()
 
         # Make predictions for this batch
-        predicted_point_cloud, _, _, _, correction = model(input_point_cloud, correction_flag=True)
+        predicted_point_cloud, _, _, _, correction = model(input_point_cloud, correction_flag=False)                    # correction_flag = False because this is naive
         # Compute the loss and its gradients
-        loss = self_supervised_loss(input_point_cloud=input_point_cloud,
+        loss = self_supervised_loss(input_point_cloud=input_point_cloud,                                                # this will only use the chamfer loss
                                     predicted_point_cloud=predicted_point_cloud,
                                     keypoint_correction=correction)
         loss.backward()
@@ -209,26 +240,15 @@ def self_supervised_train_one_epoch(epoch_index, tb_writer, training_loader, mod
 
         # Gather data and report
         running_loss += loss.item()
-        if i % 500 == 0:
-            last_loss = running_loss / 500  # loss per batch
-            print('  batch {} loss: {}'.format(i + 1, last_loss))
-            tb_x = epoch_index * len(training_loader) + i + 1
-            tb_writer.add_scalar('Loss/train', last_loss, tb_x)
-            running_loss = 0.
-
-            # # Disply results after each 1000 training iterations
-            # pc = input_point_cloud.clone().detach().to('cpu')
-            # pc_t = target_point_cloud.clone().detach().to('cpu')
-            # kp = detected_keypoints.clone().detach().to('cpu')
-            # kp_t = target_keypoints.clone().detach().to('cpu')
-            # display_results(input_point_cloud=pc, detected_keypoints=kp, target_point_cloud=pc_t, target_keypoints=kp_t)
-            #
-            # del pc, pc_t, kp, kp_t
+        if i % 20 == 0:                                                                                                 # print frequency
+            print("Batch ", (i+1), "/", len(training_loader), " loss: ", loss.item())
 
         del input_point_cloud, predicted_point_cloud, correction
         torch.cuda.empty_cache()
 
-    return last_loss
+    ave_tloss = running_loss / (i + 1)
+
+    return ave_tloss
 
 
 # Validation code
@@ -246,12 +266,14 @@ def validate(writer, validation_loader, model, correction_flag):
             t_target = t_target.to(device)
 
             # Make predictions for this batch
-            predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted, _ = model(input_point_cloud,
-                                                                                            correction_flag=True)
+            predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted, correction = model(input_point_cloud,
+                                                                                            correction_flag=False)      # correction_flag=False because this is naive
 
-            vloss = validation_loss(input=(input_point_cloud, keypoints_target, R_target, t_target),
-                                   output=(predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted))
-            # vloss = loss_fn(input_point_cloud, detected_keypoints, target_point_cloud, target_keypoints)
+            # vloss = validation_loss(input=(input_point_cloud, keypoints_target, R_target, t_target),                    #ToDo: Can't use this validation loss.
+            #                        output=(predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted))
+            vloss = self_supervised_loss(input_point_cloud=input_point_cloud,                                           # this loss will only use the chamer loss, and not the other!
+                                    predicted_point_cloud=predicted_point_cloud,
+                                    keypoint_correction=correction)
             running_vloss += vloss
 
             # if i<3:
@@ -278,7 +300,7 @@ def train_without_supervision(self_supervised_train_loader, validation_loader, m
     writer = SummaryWriter(SAVE_LOCATION + 'expt_keypoint_detect_{}'.format(timestamp))
     epoch_number = 0
 
-    EPOCHS = 50
+    EPOCHS = 20
 
     best_vloss = 1_000_000.
 
@@ -289,12 +311,12 @@ def train_without_supervision(self_supervised_train_loader, validation_loader, m
         model.train(True)
         print("Training on real data with self-supervision: ")
         ave_loss_self_supervised = self_supervised_train_one_epoch(epoch_number, writer, self_supervised_train_loader,
-                                                                model, optimizer, correction_flag=True)
+                                                                model, optimizer, correction_flag=False)                # correction_flag=False because this is naive
 
         # Validation. We don't need gradients on to do reporting.
         model.train(False)
         print("Validation on real data: ")
-        avg_vloss = validate(writer, validation_loader, model, correction_flag=True)
+        avg_vloss = validate(writer, validation_loader, model, correction_flag=False)                                   # correction_flag=False because this is naive
 
         print('LOSS self-supervised train {}, valid {}'.format(ave_loss_self_supervised, avg_vloss))
 
@@ -311,7 +333,7 @@ def train_without_supervision(self_supervised_train_loader, validation_loader, m
             best_vloss = avg_vloss
             model_path = SAVE_LOCATION + 'expt_keypoint_detect_' + 'model_{}_{}'.format(timestamp, epoch_number)
             torch.save(model.state_dict(), model_path)
-            best_model_path = SAVE_LOCATION + 'best_self_supervised_keypoint_detect_model_with_supervised_pretraining_with_corrector.pth'
+            best_model_path = SAVE_LOCATION + 'best_self_supervised_keypoint_detect_pointnet_naive.pth'
             torch.save(model.state_dict(), best_model_path)
 
         epoch_number += 1
@@ -331,9 +353,6 @@ def visual_test(test_loader, model, correction_flag=False):
         keypoints_target = keypoints_target.to(device)
         R_target = R_target.to(device)
         t_target = t_target.to(device)
-
-        input_point_cloud = R_target.transpose(-1, -2) @ (input_point_cloud - t_target)
-        keypoints_target = R_target.transpose(-1, -2) @ (keypoints_target - t_target)
 
         # Make predictions for this batch
         model.eval()
@@ -391,24 +410,24 @@ if __name__ == "__main__":
     num_of_points = 500
 
     # sim dataset:
-    supervised_train_dataset_len = 10000
-    supervised_train_batch_size = 1#0
-    num_of_points_supervised = 500
+    # supervised_train_dataset_len = 10000
+    # supervised_train_batch_size = 5#0
+    # num_of_points_supervised = 500
 
     # real dataset:
-    self_supervised_train_dataset_len = 10000
-    self_supervised_train_batch_size = 1 #can increase to make it faster
+    self_supervised_train_dataset_len = 100000
+    self_supervised_train_batch_size = 50 #can increase to make it faster
     num_of_points_to_sample = 1000#0
     num_of_points_selfsupervised = 2048
 
-    # supervised and self-supervised training data
-    supervised_train_dataset = SE3PointCloud(class_id=class_id,
-                                             model_id=model_id,
-                                             num_of_points=num_of_points_supervised,
-                                             dataset_len=supervised_train_dataset_len)
-    supervised_train_loader = torch.utils.data.DataLoader(supervised_train_dataset,
-                                                          batch_size=supervised_train_batch_size,
-                                                          shuffle=False)
+    # # supervised and self-supervised training data
+    # supervised_train_dataset = SE3PointCloud(class_id=class_id,
+    #                                          model_id=model_id,
+    #                                          num_of_points=num_of_points_supervised,
+    #                                          dataset_len=supervised_train_dataset_len)
+    # supervised_train_loader = torch.utils.data.DataLoader(supervised_train_dataset,
+    #                                                       batch_size=supervised_train_batch_size,
+    #                                                       shuffle=False)
 
     self_supervised_train_dataset = DepthPC(class_id=class_id,
                                             model_id=model_id,
@@ -423,10 +442,20 @@ if __name__ == "__main__":
                                                                batch_size=self_supervised_train_batch_size,
                                                                shuffle=False)
 
+    # validation dataset:
+    val_dataset_len = 100
+    val_batch_size = 50
+    val_dataset = DepthPC(class_id=class_id, model_id=model_id,
+                                            n=num_of_points_selfsupervised,
+                                            num_of_points_to_sample=num_of_points_to_sample,
+                                            dataset_len=val_dataset_len)
+    val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=val_batch_size, shuffle=False)
+
+
 
     # Generate a shape category, CAD model objects, etc.
-    cad_models = supervised_train_dataset._get_cad_models().to(torch.float).to(device=device)
-    model_keypoints = supervised_train_dataset._get_model_keypoints().to(torch.float).to(device=device)
+    cad_models = self_supervised_train_dataset._get_cad_models().to(torch.float).to(device=device)
+    model_keypoints = self_supervised_train_dataset._get_model_keypoints().to(torch.float).to(device=device)
 
 
     # model
@@ -435,22 +464,26 @@ if __name__ == "__main__":
     # so set use_pretrained_regression_model=False
     # This difference is because RSNetKeypoints was trained with supervision in KeypointNet,
     # whereas RegressionKeypoints was trained with supervision in this script and saved ProposedModel weights
-    # model = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,                # Use this for supervised training of point-transformer
+    # model = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,                # Use this for supervised training of point_net or point-transformer
     #                       keypoint_detector=None, use_pretrained_regression_model=False).to(device)
-    # model = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,                # Use this for self-supervised training of a pre-trained point-transformer
-    #                       keypoint_detector=None, use_pretrained_regression_model=True).to(device)
-    model = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,                # Use this for self-supervised training of a pre-trained RSNetKeypoints model
-                          keypoint_detector=RSNetKeypoints, use_pretrained_regression_model=False).to(device)
+    model = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,                # Use this for self-supervised training of a pre-trained point_net or point-transformer
+                          keypoint_detector='pointnet', use_pretrained_regression_model=True).to(device)
+    # model = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,                # Use this for self-supervised training of a pre-trained RSNetKeypoints model
+    #                       keypoint_detector='', use_pretrained_regression_model=True).to(device)
 
     if model.use_pretrained_regression_model:
         print("USING PRETRAINED REGRESSION MODEL, ONLY USE THIS WITH SELF-SUPERVISION")
+        # best_model_checkpoint = os.path.join(SAVE_LOCATION, '_best_supervised_keypoint_detect_model_depthpc.pth')
         # best_model_checkpoint = os.path.join(SAVE_LOCATION, '_best_supervised_keypoint_detect_model_se3.pth')
-        folder = '../../KeypointNetLearning-Objects/benchmark_scripts/correspondence_log/chair/rsnet/'
-        best_model_checkpoint = os.path.join(folder, 'best.pth')
+        # best_model_checkpoint = os.path.join(SAVE_LOCATION, '_best_supervised_keypoint_detect_pointnet_se3.pth')
+        # best_model_checkpoint = os.path.join(SAVE_LOCATION, 'best_self_supervised_keypoint_detect_pointnet.pth')
+        best_model_checkpoint = os.path.join(SAVE_LOCATION, 'best_self_supervised_keypoint_detect_pointnet_naive.pth')
+        # folder = '../../KeypointNetLearning-Objects/benchmark_scripts/correspondence_log/chair/rsnet/'
+        # best_model_checkpoint = os.path.join(folder, 'best.pth')
         if not os.path.isfile(best_model_checkpoint):
             print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")
         state_dict = torch.load(best_model_checkpoint)
-        model.keypoint_detector.load_state_dict(state_dict)
+        model.load_state_dict(state_dict)
         model.train()
     num_parameters = sum(param.numel() for param in model.parameters() if param.requires_grad)
     print("Number of trainable parameters: ", num_parameters)
@@ -466,15 +499,32 @@ if __name__ == "__main__":
     #                        optimizer=optimizer,
     #                        correction_flag=False)
     # train_without_supervision(self_supervised_train_loader=self_supervised_train_loader,                                # Use this for self-supervised training
-    #                           validation_loader=self_supervised_train_loader,
+    #                           validation_loader=val_loader,
     #                           model=model,
     #                           optimizer=optimizer,
     #                           correction_flag=True)
 
     # test
     print("Visualizing the trained model.")
-    visual_test(test_loader=supervised_train_loader, model=model, correction_flag=True)
-    visual_test(test_loader=self_supervised_train_loader, model=model, correction_flag=True)
+    dataset_len = 20
+    dataset_batch_size = 1
+
+    # dataset = SE3PointCloud(class_id=class_id,
+    #                                          model_id=model_id,
+    #                                          num_of_points=num_of_points_to_sample,
+    #                                          dataset_len=dataset_len)
+    dataset = DepthPC(class_id=class_id,
+                                            model_id=model_id,
+                                            n=num_of_points_selfsupervised,
+                                            num_of_points_to_sample=num_of_points_to_sample,
+                                            dataset_len=dataset_len)
+    loader = torch.utils.data.DataLoader(dataset,
+                                                               batch_size=dataset_batch_size,
+                                                               shuffle=False)
+
+    # visual_test(test_loader=supervised_train_loader, model=model, correction_flag=False)
+    # visual_test(test_loader=loader, model=model, correction_flag=False)
+    visual_test(test_loader=loader, model=model, correction_flag=True)
 
 
 
