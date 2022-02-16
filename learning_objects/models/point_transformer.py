@@ -42,7 +42,8 @@ def three_interpolate(p, p_old, x):
     """
 
     input_device = p.device
-    device = 'cpu'
+    # device = 'cpu'
+    device = input_device
     p = p.to(device=device)
     p_old = p_old.to(device=device)
     x = x.to(device=device)
@@ -53,8 +54,8 @@ def three_interpolate(p, p_old, x):
 
     batch = torch.kron(torch.arange(start=0, end=p.size(0)), torch.ones(p.size(1)))
     batch_old = torch.kron(torch.arange(start=0, end=p_old.size(0)), torch.ones(p_old.size(1)))
-    batch = batch.long()
-    batch_old = batch_old.long()
+    batch = batch.long().to(device=device)
+    batch_old = batch_old.long().to(device=device)
     _interpolated_feats = knn_interpolate(x=_x, pos_x=_p, pos_y=_p_old, batch_x=batch, batch_y=batch_old, k=3)
 
     interpolated_feats = torch.reshape(_interpolated_feats, (p_old.size(0), -1, x.size(-1)))
@@ -88,13 +89,14 @@ def farthest_point_sampling(xyz, npoints):
     """
 
     input_device = xyz.device
-    device = 'cpu'
+    # device = 'cpu'
+    device = input_device
     xyz = xyz.to(device=device)
 
     _xyz = xyz.view(-1, xyz.shape[-1])
     # _xyz = torch.vstack(tuple(xyz[i, ...] for i in range(xyz.size(0))))
     batch = torch.kron(torch.arange(start=0, end=xyz.size(0)), torch.ones(xyz.size(1)))
-    batch = batch.long()
+    batch = batch.long().to(device=device)
     ratio = npoints/xyz.size(-2)
     index = fps(_xyz, batch, ratio=ratio, random_start=True)
     _xyz_out = _xyz[index]
@@ -652,6 +654,20 @@ if __name__ == '__main__':
     print(y.is_cuda)
 
     print('-'*20)
+
+    # Test: PointTransformerCls()
+    print('Test: PointTransformerCls()')
+
+    pointcloud = torch.rand(4, 2000, 3).cuda()
+    print(pointcloud.is_cuda)
+
+    pt_cls = PointTransformerCls(output_dim=3*10).to(device=device)
+
+    y = pt_cls(pointcloud)
+    print(y.size())
+    print(y.is_cuda)
+
+    print('-' * 20)
 
 
 

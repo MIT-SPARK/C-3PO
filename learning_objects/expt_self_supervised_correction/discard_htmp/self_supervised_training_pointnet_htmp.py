@@ -181,7 +181,7 @@ def self_supervised_loss(input_point_cloud, predicted_point_cloud,
         fra_certi = num_certi/certi.shape[0]    # not to be used for training
 
         # pc loss
-        pc_loss = chamfer_loss(pc=input_point_cloud, pc_=predicted_point_cloud)         # Using normal chamfer loss here, as the max chamfer is used in certification
+        pc_loss = chamfer_loss(pc=input_point_cloud, pc_=predicted_point_cloud, max_loss=True)         # Using normal chamfer loss here, as the max chamfer is used in certification
         pc_loss = pc_loss * certi
         pc_loss = pc_loss.sum()/num_certi
 
@@ -266,8 +266,8 @@ def self_supervised_train_one_epoch(epoch_index, tb_writer, training_loader, mod
                                  predicted_model_keypoints=predicted_model_keypoints,
                                  heatmap=heatmap)
 
-        loss = pc_loss + 25*(ce_loss + 0.001*contra_loss)         # first 20 epochs: place high weight on kp loss
-        # loss = 25*pc_loss + ce_loss + 0.001 * contra_loss         # next 20 epochs: place high weight on pc loss
+        # loss = pc_loss + 25*(ce_loss + 0.001*contra_loss)         # first 20 epochs: place high weight on kp loss
+        loss = 25*pc_loss + ce_loss + 0.001 * contra_loss         # next 20 epochs: place high weight on pc loss
 
         loss.backward()
 
@@ -376,7 +376,7 @@ def train_without_supervision(self_supervised_train_loader, validation_loader, m
             best_vloss = avg_vloss
             model_path = SAVE_LOCATION + 'expt_keypoint_detect_' + 'model_{}_{}'.format(timestamp, epoch_number)
             torch.save(model.state_dict(), model_path)
-            best_model_path = SAVE_LOCATION + 'best_self_supervised_keypoint_detect_pointnet_htmp2.pth'
+            best_model_path = SAVE_LOCATION + 'best_self_supervised_keypoint_detect_pointnet_htmp3.pth'
             torch.save(model.state_dict(), best_model_path)
 
         epoch_number += 1
@@ -448,7 +448,7 @@ if __name__ == "__main__":
 
     # optimization parameters
     lr_sgd = 0.02
-    momentum_sgd = 0.99
+    momentum_sgd = 0.9#9
     lr_adam = 0.001
     num_of_points = 500
 
@@ -519,8 +519,9 @@ if __name__ == "__main__":
         print("USING PRETRAINED REGRESSION MODEL, ONLY USE THIS WITH SELF-SUPERVISION")
         # best_model_checkpoint = os.path.join(SAVE_LOCATION,
         #                                      '_best_supervised_keypoint_detect_pointnet_htmp_se3_Wcontraloss.pth')
-        best_model_checkpoint = os.path.join(SAVE_LOCATION, 'best_self_supervised_keypoint_detect_pointnet_htmp.pth')
-        # best_model_checkpoint = os.path.join(SAVE_LOCATION, 'best_self_supervised_keypoint_detect_pointnet_htmp2.pth')
+        # best_model_checkpoint = os.path.join(SAVE_LOCATION, 'best_self_supervised_keypoint_detect_pointnet_htmp.pth')
+        best_model_checkpoint = os.path.join(SAVE_LOCATION, 'best_self_supervised_keypoint_detect_pointnet_htmp2.pth')
+        # best_model_checkpoint = os.path.join(SAVE_LOCATION, 'best_self_supervised_keypoint_detect_pointnet_htmp3.pth')
         if not os.path.isfile(best_model_checkpoint):
             print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")
         state_dict = torch.load(best_model_checkpoint)
