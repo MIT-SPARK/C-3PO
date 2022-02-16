@@ -111,7 +111,10 @@ def rotation_error(R, R_):
         # return torch.norm(R.T @ R_ - torch.eye(3, device=R.device), p='fro')
     elif R.dim() == 3:
         # return transforms.matrix_to_euler_angles(torch.transpose(R, 1, 2) @ R_, "XYZ").abs().mean(1).unsqueeze(1)
-        return torch.acos(0.5*(torch.einsum('bii->b', torch.transpose(R, -1, -2) @ R_) - 1).unsqueeze(-1))
+        error = 0.5*(torch.einsum('bii->b', torch.transpose(R, -1, -2) @ R_) - 1).unsqueeze(-1)
+        epsilon = 1e-8
+        return torch.acos(torch.clamp(error, -1 + epsilon, 1 - epsilon))
+        # return torch.acos(0.5*(torch.einsum('bii->b', torch.transpose(R, -1, -2) @ R_) - 1).unsqueeze(-1))
         # return 1 - 0.5 * (torch.einsum('bii->b', torch.transpose(R, 1, 2) @ R_) - 1).unsqueeze(-1)
         # return torch.norm(R.transpose(-1, -2) @ R_ - torch.eye(3, device=R.device), p='fro', dim=[1, 2])
     else:
@@ -157,7 +160,7 @@ class experiment():
                                     dataset_len=self.num_iterations)
         # self.se3_dataset_loader = torch.utils.data.DataLoader(self.se3_dataset, batch_size=1, shuffle=False)
         self.se3_dataset_loader = torch.utils.data.DataLoader(self.se3_dataset, batch_size=self.num_iterations,
-                                                              shuffle=False)
+                                                              shuffle=False, num_workers=4)
 
         self.model_keypoints = self.se3_dataset._get_model_keypoints().to(device=self.device_)  # (1, 3, N)
         self.cad_models = self.se3_dataset._get_cad_models().to(device=self.device_)  # (1, 3, m)
@@ -446,6 +449,12 @@ def choose_random_models(num_models=10, pcd_path = KEYPOINTNET_PCD_FOLDER_NAME):
     """
     class_id_to_model_id_samples = {}
     folder_contents = os.listdir(pcd_path)
+    ###
+    # # hardcoded:
+    # return {'03001627': ['1cc6f2ed3d684fa245f213b8994b4a04'],
+    #         '02818832': ['7c8eb4ab1f2c8bfa2fb46fb8b9b1ac9f']
+    #         }
+
     for class_id in folder_contents:
         models = os.listdir(pcd_path + str(class_id) + '/')
         #choose random num_models from models without replacement
@@ -457,12 +466,8 @@ def choose_random_models(num_models=10, pcd_path = KEYPOINTNET_PCD_FOLDER_NAME):
 def run_full_experiment(kp_noise_fra=0.8):
     class_id_to_model_id_samples = choose_random_models(num_models=1)
     for class_id, model_id_samples in class_id_to_model_id_samples.items():
-        if class_id not in ["02691156", "02808440", "02876657", \
-                            "02954340", "02958343", "03467517", \
-                            "03790512", "04225987", "04379243", \
-                            "04530566"]:
-            for model_id in model_id_samples:
-                run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='sporadic', kp_noise_fra=kp_noise_fra)
+        for model_id in model_id_samples:
+            run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='sporadic', kp_noise_fra=kp_noise_fra)
 
 
 if __name__ == "__main__":

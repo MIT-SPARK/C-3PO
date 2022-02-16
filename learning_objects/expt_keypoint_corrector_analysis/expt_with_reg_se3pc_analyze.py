@@ -14,6 +14,7 @@ import sys
 sys.path.append("../../")
 from learning_objects.utils.general import generate_filename, scatter_bar_plot
 from learning_objects.datasets.keypointnet import CLASS_NAME
+from learning_objects.models.certifiability import certifiability
 
 COLORS = dict(mcolors.BASE_COLORS, **mcolors.CSS4_COLORS)
 
@@ -105,11 +106,57 @@ def varul_mean(data):
 
     return var, mean.squeeze(-1)
 
+def certification(data, epsilon, delta, num_iterations=100, full_batch=False):
+    device_ = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    certify=certifiability(epsilon=epsilon, delta=delta, radius=0.3)
+    ###
+    certi_naive = torch.zeros(size=(15, num_iterations), dtype=torch.bool).to(
+        device=device_)
+    certi_corrector = torch.zeros(size=(15, num_iterations), dtype=torch.bool).to(
+        device=device_)
+
+    ###
+    sqdist_input_naiveest = data['sqdist_input_naiveest']
+    sqdist_input_correctorest = data['sqdist_input_correctorest']
+    sqdist_kp_naiveest = data['sqdist_kp_naiveest']
+    sqdist_kp_correctorest = data['sqdist_kp_correctorest']
+    pc_padding_masks = data['pc_padding_masks']
+
+    for kp_noise_var_i in range(len(sqdist_input_naiveest)):
+        print("kp_noise_var_i", kp_noise_var_i)
+        c_naive = torch.zeros((num_iterations, 1), dtype=torch.bool).to(device=device_)
+        c_corrector = torch.zeros((num_iterations, 1), dtype=torch.bool).to(device=device_)
+        # if experiments were full batch, just set output of certify.forward_with_distances
+        # to c_naive and c_corrector
+        for batch_i in range(len(sqdist_input_naiveest[kp_noise_var_i])):
+            print("batch_i", batch_i)
+
+            #len 100 or batch size 100
+            sqdist_input_naive = sqdist_input_naiveest[kp_noise_var_i][batch_i]
+            sqdist_input_corrector = sqdist_input_correctorest[kp_noise_var_i][batch_i]
+            sqdist_kp_naive = sqdist_kp_naiveest[kp_noise_var_i][batch_i]
+            sqdist_kp_corrector = sqdist_kp_correctorest[kp_noise_var_i][batch_i]
+            pc_padding = pc_padding_masks[kp_noise_var_i][batch_i]
+            certi_naive_batch, _ = certify.forward_with_distances(
+                sqdist_input_naive[0], sqdist_input_naive[1], None, sqdist_kp_naive, pc_padding)
+            certi_corrector_batch, _ = certify.forward_with_distances(
+                sqdist_input_corrector[0], sqdist_input_corrector[1], None, sqdist_kp_corrector, pc_padding)
+            if full_batch: #full batch
+                c_naive = certi_naive_batch
+                c_corrector = certi_corrector_batch
+            else:
+                print("certi_naive_batch.shape", certi_naive_batch.shape)
+                c_naive[batch_i] = certi_naive_batch
+                c_corrector[batch_i] = certi_corrector_batch
+        certi_naive[kp_noise_var_i, ...] = c_naive.squeeze(-1)
+        certi_corrector[kp_noise_var_i, ...] = c_corrector.squeeze(-1)
+
+    return certi_naive, certi_corrector
 
 if __name__ == '__main__':
 
-    file_names = ["./expt_with_reg_se3pc/20220122_161424_experiment.pickle",
-                  "./expt_with_reg_se3pc/20220122_163754_experiment.pickle"]
+    file_names = ["./expt_with_reg_se3pc/02818832/7c8eb4ab1f2c8bfa2fb46fb8b9b1ac9f/20220209_104103_experiment.pickle",
+                  "./expt_with_reg_se3pc/03001627/1cc6f2ed3d684fa245f213b8994b4a04/20220209_095625_experiment.pickle"]
 
     for name in file_names:
 
@@ -123,8 +170,13 @@ if __name__ == '__main__':
         Rerr_corrector = data['rotation_err_corrector'].to('cpu')
         terr_naive = data['translation_err_naive'].to('cpu')
         terr_corrector = data['translation_err_corrector'].to('cpu')
-        certi_naive = data['certi_naive'].to('cpu')
-        certi_corrector = data['certi_corrector'].to('cpu')
+        # certi_naive = data['certi_naive'].to('cpu')
+        # certi_corrector = data['certi_corrector'].to('cpu')
+        # CALCULATE DYNAMICALLY
+        certi_naive, certi_corrector = certification(data, epsilon=.99, delta=.7, full_batch=True)
+        certi_naive = certi_naive.to('cpu')
+        certi_corrector = certi_corrector.to('cpu')
+
         sqdist_input_naiveest = data['sqdist_input_naiveest']
         sqdist_input_correctorest = data['sqdist_input_correctorest']
 
@@ -215,7 +267,7 @@ if __name__ == '__main__':
         plt.show()
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         rand_string = generate_filename()
-        filename = name[:-7] + '_rotation_error_plot_' + timestamp + '_' + rand_string +'.pdf'
+        filename = name[:-7] + '_rotation_error_plot_' + timestamp + '_' + rand_string +'.jpg'
         fig.savefig(filename)
         plt.close(fig)
 
@@ -247,7 +299,7 @@ if __name__ == '__main__':
         plt.show()
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         rand_string = generate_filename()
-        filename = name[:-7] + '_translation_error_plot_' + timestamp + '_' + rand_string + '.pdf'
+        filename = name[:-7] + '_translation_error_plot_' + timestamp + '_' + rand_string + '.jpg'
         fig.savefig(filename)
         plt.close(fig)
 
@@ -276,7 +328,7 @@ if __name__ == '__main__':
         plt.show()
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         rand_string = generate_filename()
-        filename = name[:-7] + '_fraction_not_certifiable_plot_' + timestamp + '_' + rand_string + '.pdf'
+        filename = name[:-7] + '_fraction_not_certifiable_plot_' + timestamp + '_' + rand_string + '.jpg'
         fig.savefig(filename)
         plt.close(fig)
 
