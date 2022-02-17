@@ -25,6 +25,14 @@ from time import time
 
 
 
+class TrackingMeter():
+    def __init__(self):
+        self.val = []
+
+    def add_item(self, item):
+        self.val.append(item)
+
+
 def display_two_pcs(pc1, pc2):
     """
     pc1 : torch.tensor of shape (3, n)
