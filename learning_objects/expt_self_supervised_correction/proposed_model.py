@@ -75,7 +75,7 @@ class ProposedModel(nn.Module):
                 self.keypoint_detector = RegressionKeypoints(N=self.N, method='pointnet')
 
             elif keypoint_detector == 'point_transformer':
-                self.keypoint_detector = RegressionKeypoints(N=self.N, method='point_transformer', dim=[6, 32, 64, 128])
+                self.keypoint_detector = RegressionKeypoints(N=self.N, method='point_transformer')
 
             else:
                 self.keypoint_detector = keypoint_detector(class_name=class_name, N=self.N)
@@ -192,7 +192,7 @@ class ProposedRegressionModel(nn.Module):
         self.cad_models = cad_models
         self.device_ = self.cad_models.device
         self.viz_keypoint_correction = False
-        self.use_pretrained_regression_model = use_pretrained_regression_model
+        self.use_pretrained_regression_model = use_pretrained_regression_model      #ToDo: This has to be always False. Was written for RSNet.
 
         self.N = self.model_keypoints.shape[-1]  # (1, 1)
         self.K = self.model_keypoints.shape[0]  # (1, 1)
@@ -205,7 +205,7 @@ class ProposedRegressionModel(nn.Module):
             self.keypoint_detector = RegressionKeypoints(N=self.N, method='pointnet')
 
         elif keypoint_detector == 'point_transformer':
-            self.keypoint_detector = RegressionKeypoints(N=self.N, method='point_transformer', dim=[6, 32, 64, 128])
+            self.keypoint_detector = RegressionKeypoints(N=self.N, method='point_transformer')
 
         else:
             self.keypoint_detector = keypoint_detector(class_name=class_name, N=self.N)

@@ -12,7 +12,7 @@ from datetime import datetime
 
 import os
 import sys
-sys.path.append("../../")
+sys.path.append("../../../")
 
 from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPC, CLASS_NAME
 from learning_objects.utils.general import display_results
@@ -338,7 +338,7 @@ if __name__ == "__main__":
     class_id = "03001627"  # chair          #ToDo: HP
     class_name = CLASS_NAME[class_id]
     model_id = "1e3fba4500d20bb49b9f2eb77f5e247e"  # a particular chair model #ToDo: HP
-    dataset_dir = '../../data/learning_objects/' #ToDo: HP
+    dataset_dir = '../../../data/learning_objects/'  #ToDo: HP
 
     # optimization parameters
     lr_sgd = 0.02   #ToDo: HP

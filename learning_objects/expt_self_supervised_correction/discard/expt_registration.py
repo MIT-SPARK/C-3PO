@@ -21,7 +21,7 @@ from datetime import datetime
 
 import os
 import sys
-sys.path.append("../../")
+sys.path.append("../../../")
 
 from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPointCloud2, DepthPC, CLASS_NAME
 
@@ -488,7 +488,7 @@ if __name__ == "__main__":
     class_id = "03001627"  # chair
     class_name = CLASS_NAME[class_id]
     model_id = "1e3fba4500d20bb49b9f2eb77f5e247e"  # a particular chair model
-    dataset_dir = '../../data/learning_objects/'
+    dataset_dir = '../../../data/learning_objects/'
     # correction_flag = True
 
     # optimization parameters

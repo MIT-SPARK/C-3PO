@@ -157,7 +157,7 @@ def self_supervised_loss(input_point_cloud, predicted_point_cloud, keypoint_corr
     # return pc_loss + theta*kp_loss, pc_loss, kp_loss, fra_certi   # for the first 20 epochs
     return 25*pc_loss + kp_loss, pc_loss, kp_loss, fra_certi        # for the next 20 epochs
 
-
+# validation loss:
 def validation_loss(input, output):
     """
     inputs:
@@ -186,6 +186,93 @@ def validation_loss(input, output):
 
     # return pc_loss + kp_loss + R_loss + t_loss
     return pc_loss
+
+# evaluation metrics:
+def translation_error(t, t_):
+    """
+    inputs:
+    t: torch.tensor of shape (3, 1) or (B, 3, 1)
+    t_: torch.tensor of shape (3, 1) or (B, 3, 1)
+
+    output:
+    t_err: torch.tensor of shape (1, 1) or (B, 1)
+    """
+    if t.dim() == 2:
+        return torch.norm(t - t_, p=2)/3.0
+    elif t.dim() == 3:
+        return torch.norm(t-t_, p=2, dim=1)/3.0
+    else:
+        return ValueError
+
+
+def rotation_error(R, R_):
+    """
+    inputs:
+    R: torch.tensor of shape (3, 3) or (B, 3, 3)
+    R_: torch.tensor of shape (3, 3) or (B, 3, 3)
+
+    output:
+    R_err: torch.tensor of shape (1, 1) or (B, 1)
+    """
+
+    if R.dim() == 2:
+        return torch.arccos(0.5*(torch.trace(R.T @ R)-1))
+        # return transforms.matrix_to_euler_angles(torch.matmul(R.T, R_), "XYZ").abs().sum()/3.0
+        # return torch.abs(0.5*(torch.trace(R.T @ R_) - 1).unsqueeze(-1))
+        # return 1 - 0.5*(torch.trace(R.T @ R_) - 1).unsqueeze(-1)
+        # return torch.norm(R.T @ R_ - torch.eye(3, device=R.device), p='fro')
+    elif R.dim() == 3:
+        # return transforms.matrix_to_euler_angles(torch.transpose(R, 1, 2) @ R_, "XYZ").abs().mean(1).unsqueeze(1)
+        return torch.acos(0.5*(torch.einsum('bii->b', torch.transpose(R, -1, -2) @ R_) - 1).unsqueeze(-1))
+        # return 1 - 0.5 * (torch.einsum('bii->b', torch.transpose(R, 1, 2) @ R_) - 1).unsqueeze(-1)
+        # return torch.norm(R.transpose(-1, -2) @ R_ - torch.eye(3, device=R.device), p='fro', dim=[1, 2])
+    else:
+        return ValueError
+
+def keypoints_error(kp, kp_):
+    """
+    kp  : torch.tensor of shape (B, 3, N)
+    kp_ : torch.tensor of shape (B, 3, N)
+
+    """
+
+    lossMSE = torch.nn.MSELoss(reduction='none')
+
+    return lossMSE(kp, kp_).sum(1).mean(1).unsqueeze(-1)
+
+
+def evaluation_error(input, output):
+    """
+    inputs:
+        input   : tuple of length 4 : input[0]  : torch.tensor of shape (B, 3, m) : input_point_cloud
+                                      input[1]  : torch.tensor of shape (B, 3, N) : keypoints_true
+                                      input[2]  : torch.tensor of shape (B, 3, 3) : rotation_true
+                                      input[3]  : torch.tensor of shape (B, 3, 1) : translation_true
+        output  : tuple of length 4 : output[0]  : torch.tensor of shape (B, 3, m) : predicted_point_cloud
+                                      output[1]  : torch.tensor of shape (B, 3, N) : detected/corrected_keypoints
+                                      output[2]  : torch.tensor of shape (B, 3, 3) : rotation
+                                      output[3]  : torch.tensor of shape (B, 3, 1) : translation
+
+    outputs:
+    loss    : torch.tensor of shape (1,)
+
+    """
+
+    pc_loss = chamfer_loss(pc=input[0], pc_=output[0])
+    pc_err = pc_loss
+
+    kp_err = keypoints_error(input[1], output[1])
+
+    R_err = rotation_error(input[2], output[2])
+    t_err = translation_error(input[3], output[3])
+
+    print("pc_err shape: ", pc_err.shape)
+    print("kp_err shape: ", kp_err.shape)
+    print("R_err shape: ", R_err.shape)
+    print("t_err shape: ", t_err.shape)
+
+    return pc_err, kp_err, R_err, t_err
+    # return pc_loss
 
 
 # Training code
@@ -378,6 +465,99 @@ def visual_test(test_loader, model, correction_flag=False):
 # Evaluation. Use the fact that you know rotation, translation, and shape of the generated data.
 
 
+def evaluate(eval_loader, model, certification=True):
+
+    with torch.no_grad():
+
+        pc_err = 0.0
+        kp_err = 0.0
+        R_err = 0.0
+        t_err = 0.0
+
+        pc_err_cert = 0.0
+        kp_err_cert = 0.0
+        R_err_cert = 0.0
+        t_err_cert = 0.0
+
+        num_cert = 0.0
+        num_batches = len(eval_loader)
+
+        for i, vdata in enumerate(eval_loader):
+            input_point_cloud, keypoints_target, R_target, t_target = vdata
+            input_point_cloud = input_point_cloud.to(device)
+            keypoints_target = keypoints_target.to(device)
+            R_target = R_target.to(device)
+            t_target = t_target.to(device)
+            batch_size = input_point_cloud.shape[0]
+
+            # Make predictions for this batch
+            predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted, correction, predicted_model_keypoints\
+                = model(input_point_cloud, correction_flag=True, need_predicted_keypoints=True)
+
+            if certification:
+                certi = certify(input_point_cloud=input_point_cloud,
+                                predicted_point_cloud=predicted_point_cloud,
+                                corrected_keypoints=predicted_keypoints,
+                                predicted_model_keypoints=predicted_model_keypoints)
+
+            # fraction certifiable
+            # error of all objects
+            # error of certified objects
+
+            pc_err_, kp_err_, R_err_, t_err_ = \
+                evaluation_error(input=(input_point_cloud, keypoints_target, R_target, t_target),
+                                   output=(predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted))
+
+            # error for all objects
+            pc_err += pc_err_.sum()
+            kp_err += kp_err_.sum()
+            R_err += R_err_.sum()
+            t_err += t_err_.sum()
+
+            if certification:
+                # fraction certifiable
+                num_cert += certi.sum()
+
+                # error for certifiable objects
+                pc_err_cert += (pc_err_ * certi).sum()
+                kp_err_cert += (kp_err_ * certi).sum()
+                R_err_cert += (R_err_ * certi).sum()
+                t_err_cert += (t_err_ * certi).sum()
+
+            del input_point_cloud, keypoints_target, R_target, t_target, \
+                predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted
+
+        # avg_vloss = running_vloss / (i + 1)
+        ave_pc_err = pc_err / ((i + 1)*batch_size)
+        ave_kp_err = kp_err / ((i + 1)*batch_size)
+        ave_R_err = R_err / ((i + 1)*batch_size)
+        ave_t_err = t_err / ((i + 1)*batch_size)
+
+        if certification:
+            ave_pc_err_cert = pc_err_cert / num_cert
+            ave_kp_err_cert = kp_err_cert / num_cert
+            ave_R_err_cert = R_err_cert / num_cert
+            ave_t_err_cert = t_err_cert / num_cert
+
+            fra_cert = num_cert / ((i + 1)*batch_size)
+
+        print(">>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>")
+        print("Evaluating performance across all objects:")
+        print("pc error: ", ave_pc_err.item())
+        print("kp error: ", ave_kp_err.item())
+        print("R error: ", ave_R_err.item())
+        print("t error: ", ave_t_err.item())
+        print("Evaulating certification: ")
+        print("fraction certifiable: ", fra_cert.item())
+        print("Evaluating performance for certifiable objects: ")
+        print("pc error: ", ave_pc_err_cert.item())
+        print("kp error: ", ave_kp_err_cert.item())
+        print("R error: ", ave_R_err_cert.item())
+        print("t error: ", ave_t_err_cert.item())
+
+    return None
+
+
 
 if __name__ == "__main__":
 
@@ -473,9 +653,9 @@ if __name__ == "__main__":
 
     if model.use_pretrained_regression_model:
         print("USING PRETRAINED REGRESSION MODEL, ONLY USE THIS WITH SELF-SUPERVISION")
-        # best_model_checkpoint = os.path.join(SAVE_LOCATION, '_best_supervised_keypoint_detect_pointnet_se3.pth')
+        best_model_checkpoint = os.path.join(SAVE_LOCATION, '_best_supervised_keypoint_detect_pointnet_se3.pth')
         # best_model_checkpoint = os.path.join(SAVE_LOCATION, 'best_self_supervised_keypoint_detect_pointnet.pth')
-        best_model_checkpoint = os.path.join(SAVE_LOCATION, 'best_self_supervised_keypoint_detect_pointnet2.pth')
+        # best_model_checkpoint = os.path.join(SAVE_LOCATION, 'best_self_supervised_keypoint_detect_pointnet2.pth')
         if not os.path.isfile(best_model_checkpoint):
             print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")
         state_dict = torch.load(best_model_checkpoint)
@@ -502,24 +682,40 @@ if __name__ == "__main__":
 
     del optimizer, self_supervised_train_dataset, self_supervised_train_loader, val_dataset, val_loader
 
-    # test
-    print("Visualizing the trained model.")
-    dataset_len = 20
-    dataset_batch_size = 1
-    dataset = DepthPC(class_id=class_id,
-                                            model_id=model_id,
-                                            n=num_of_points_selfsupervised,
-                                            num_of_points_to_sample=num_of_points_to_sample,
-                                            dataset_len=dataset_len)
-    # self_supervised_train_dataset = DepthPointCloud2(class_id=class_id,
-    #                                         model_id=model_id,
-    #                                         num_of_points=num_of_points_selfsupervised,
-    #                                         dataset_len=self_supervised_train_dataset_len)
-    loader = torch.utils.data.DataLoader(dataset, batch_size=dataset_batch_size, shuffle=False)
 
-    # visual_test(test_loader=supervised_train_loader, model=model, correction_flag=False)
-    visual_test(test_loader=loader, model=model, correction_flag=False)
-    visual_test(test_loader=loader, model=model, correction_flag=True)
+
+    # Evaluation
+    # validation dataset:
+    eval_dataset_len = 50
+    eval_batch_size = 50
+    eval_dataset = DepthPC(class_id=class_id, model_id=model_id,
+                          n=num_of_points_selfsupervised,
+                          num_of_points_to_sample=num_of_points_to_sample,
+                          dataset_len=eval_dataset_len)
+    eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=eval_batch_size, shuffle=False)
+
+    evaluate(eval_loader=eval_loader, model=model, certification=True)
+
+
+
+    # # Visual Test
+    # print("Visualizing the trained model.")
+    # dataset_len = 20
+    # dataset_batch_size = 1
+    # dataset = DepthPC(class_id=class_id,
+    #                                         model_id=model_id,
+    #                                         n=num_of_points_selfsupervised,
+    #                                         num_of_points_to_sample=num_of_points_to_sample,
+    #                                         dataset_len=dataset_len)
+    # # self_supervised_train_dataset = DepthPointCloud2(class_id=class_id,
+    # #                                         model_id=model_id,
+    # #                                         num_of_points=num_of_points_selfsupervised,
+    # #                                         dataset_len=self_supervised_train_dataset_len)
+    # loader = torch.utils.data.DataLoader(dataset, batch_size=dataset_batch_size, shuffle=False)
+    #
+    # # visual_test(test_loader=supervised_train_loader, model=model, correction_flag=False)
+    # visual_test(test_loader=loader, model=model, correction_flag=False)
+    # visual_test(test_loader=loader, model=model, correction_flag=True)
 
 
 
