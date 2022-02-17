@@ -45,6 +45,7 @@ CLASS_NAME: dict = {"02691156": 'airplane',
 
 import csv
 import torch
+import math
 import pandas as pd
 import open3d as o3d
 import json
@@ -735,7 +736,7 @@ class DepthPointCloud2(torch.utils.data.Dataset):
         input_point_cloud, keypoints, rotation, translation
     """
     def __init__(self, class_id, model_id, radius_multiple=torch.tensor([1.2, 3.0]),
-                 num_of_points=1000, dataset_len=10000):
+                 num_of_points=1000, dataset_len=10000, rotate_about_z=False):
         super().__init__()
         """
         class_id        : str   : class id of a ShapeNetCore object
@@ -752,6 +753,8 @@ class DepthPointCloud2(torch.utils.data.Dataset):
         self.radius_multiple = radius_multiple
         self.num_of_points = num_of_points
         self.len = dataset_len
+        self.rotate_about_z = rotate_about_z
+        self.pi = torch.tensor([math.pi])
 
         # get model
         self.model_mesh, _, self.keypoints_xyz = get_model_and_keypoints(class_id, model_id)
@@ -783,7 +786,32 @@ class DepthPointCloud2(torch.utils.data.Dataset):
 
         # Randomly rotate the self.model_mesh
         model_mesh = copy.deepcopy(self.model_mesh)
-        R = transforms.random_rotation()
+        if self.rotate_about_z:
+            R = torch.eye(3)
+            angle = 2 * self.pi * torch.rand(1)
+            c = torch.cos(angle)
+            s = torch.sin(angle)
+
+            # # z
+            # R[0, 0] = c
+            # R[0, 1] = -s
+            # R[1, 0] = s
+            # R[1, 1] = c
+
+            # # x
+            # R[1, 1] = c
+            # R[1, 2] = -s
+            # R[2, 1] = s
+            # R[2, 2] = c
+
+            # y
+            R[0, 0] = c
+            R[0, 2] = s
+            R[2, 0] = -s
+            R[2, 2] = c
+
+        else:
+            R = transforms.random_rotation()
         # Rnumpy = R.detach()
         # Rnumpy = Rnumpy.numpy()
         model_mesh = model_mesh.rotate(R=R.numpy())
@@ -806,6 +834,7 @@ class DepthPointCloud2(torch.utils.data.Dataset):
 
         # Translate by a random t
         t = torch.rand(3, 1)
+        # t = torch.zeros(3, 1)
 
         depth_pcd_torch = depth_pcd_torch + t
         keypoints_xyz = keypoints_xyz + t
@@ -906,7 +935,7 @@ class DepthPC(torch.utils.data.Dataset):
     """
 
     def __init__(self, class_id, model_id, n=1000, radius_multiple=torch.tensor([1.2, 3.0]),
-                 num_of_points_to_sample=10000, dataset_len=10000):
+                 num_of_points_to_sample=10000, dataset_len=10000, rotate_about_z=False):
         super().__init__()
         """
         class_id        : str   : class id of a ShapeNetCore object
@@ -925,13 +954,15 @@ class DepthPC(torch.utils.data.Dataset):
         self.radius_multiple = radius_multiple
         self.num_of_points_to_sample = num_of_points_to_sample
         self.len = dataset_len
+        self.rotate_about_z = rotate_about_z
 
         # ToDo: This is temporary. We will move the DepthPointCloud2() here when we completely deprecate it.
         self.dataset = DepthPointCloud2(class_id=self.class_id,
                                         model_id=self.model_id,
                                         radius_multiple=self.radius_multiple,
                                         num_of_points=self.num_of_points_to_sample,
-                                        dataset_len=self.len)
+                                        dataset_len=self.len,
+                                        rotate_about_z=rotate_about_z)
 
     def __len__(self):
 
