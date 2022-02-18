@@ -346,7 +346,7 @@ if __name__ == "__main__":
     class_name = CLASS_NAME[class_id]
     model_id = "1e3fba4500d20bb49b9f2eb77f5e247e"  # a particular chair model
 
-    stream = open("supervised_training_kp_detector.yml", "r")
+    stream = open("supervised_training.yml", "r")
     hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
 
     train_detector(detector_type='pointnet', class_id=class_id, model_id=model_id, hyper_param=hyper_param)

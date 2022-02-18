@@ -1,0 +1,15 @@
+save_folder: './'
+
+lr_sgd: 0.02
+momentum_sgd: 0.99
+
+train_dataset_len: 50000
+train_batch_size: 100
+train_num_of_points: 1000
+
+val_dataset_len: 1000
+val_batch_size: 50
+val_num_of_points: 1000
+
+num_epochs: 6
+

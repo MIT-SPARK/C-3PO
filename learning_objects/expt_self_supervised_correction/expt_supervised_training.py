@@ -24,7 +24,7 @@ def train_kp_detectors(detector_type, model_class_ids):
         class_id = CLASS_ID[key]
         model_id = str(value)
 
-        stream = open("supervised_training_kp_detector.yml", "r")
+        stream = open("supervised_training.yml", "r")
         hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
 
         print(">>"*40)
@@ -39,7 +39,7 @@ if __name__ == "__main__":
 
     stream = open("class_model_ids.yml", "r")
     model_class_ids = yaml.load(stream=stream, Loader=yaml.Loader)
-    train_kp_detectors(detector_type='pointnet', model_class_ids=model_class_ids)
+    # train_kp_detectors(detector_type='pointnet', model_class_ids=model_class_ids)
     train_kp_detectors(detector_type='point_transformer', model_class_ids=model_class_ids)
 
 

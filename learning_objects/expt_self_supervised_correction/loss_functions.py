@@ -75,7 +75,6 @@ def chamfer_loss(pc, pc_, pc_padding=None, max_loss=False):
     return loss.unsqueeze(-1)
 
 
-
 # supervised training and validation losses
 def supervised_training_loss(input, output):
     """
@@ -106,6 +105,7 @@ def supervised_training_loss(input, output):
 
     return pc_loss + kp_loss + R_loss + t_loss
     # return kp_loss
+
 
 def supervised_validation_loss(input, output):
     """
@@ -139,3 +139,89 @@ def supervised_validation_loss(input, output):
 
 
 # self-supervised training and validation losses
+def certify(input_point_cloud, predicted_point_cloud, corrected_keypoints, predicted_model_keypoints, epsilon=0.99):
+    """
+    inputs:
+    input_point_cloud           : torch.tensor of shape (B, 3, m)
+    predicted_point_cloud       : torch.tensor of shape (B, 3, n)
+    corrected_keypoints         : torch.tensor of shape (B, 3, N)
+    predicted_model_keypoints   : torch.tensor of shape (B, 3, N)
+
+    outputs:
+    certificate     : torch.tensor of shape (B, 1)  : dtype = torch.bool
+
+    """
+
+    confidence_ = confidence(input_point_cloud, predicted_point_cloud)
+    confidence_kp_ = confidence_kp(corrected_keypoints, predicted_model_keypoints)
+
+    return (confidence_ >= epsilon) & (confidence_kp_ >= epsilon)
+
+
+def self_supervised_training_loss(input_point_cloud, predicted_point_cloud, keypoint_correction, certi, theta=25.0):
+    """
+    inputs:
+    input_point_cloud       : torch.tensor of shape (B, 3, m)
+    predicted_point_cloud   : torch.tensor of shape (B, 3, n)
+    keypoint_correction     : torch.tensor of shape (B, 3, N)
+    predicted_model_keypoints   : torch.tensor of shape (B, 3, N)
+
+    outputs:
+    loss    : torch.tensor of shape (1,)
+
+    """
+    # theta = 25.0
+    device_ = input_point_cloud.device
+
+    if certi.sum() == 0:
+        print("NO DATA POINT CERTIFIABLE IN THIS BATCH")
+        pc_loss, kp_loss, fra_certi = 0.0, 0.0, 0.0
+
+    else:
+        # fra certi
+        num_certi = certi.sum()
+        fra_certi = num_certi / certi.shape[0]  # not to be used for training
+
+        # pc loss
+        pc_loss = chamfer_loss(pc=input_point_cloud,
+                               pc_=predicted_point_cloud)  # Using normal chamfer loss here, as the max chamfer is used in certification
+        pc_loss = pc_loss * certi
+        pc_loss = pc_loss.sum() / num_certi
+
+        lossMSE = torch.nn.MSELoss(reduction='none')
+        if keypoint_correction is None:
+            kp_loss = torch.zeros(pc_loss.shape)
+        else:
+            kp_loss = lossMSE(keypoint_correction, torch.zeros_like(keypoint_correction))
+            kp_loss = kp_loss.sum(dim=1).mean(dim=1)    # (B,)
+            kp_loss = kp_loss * certi
+            kp_loss = kp_loss.mean()
+
+    # return pc_loss + theta*kp_loss, pc_loss, kp_loss, fra_certi   # pointnet
+    return theta*pc_loss + kp_loss, pc_loss, kp_loss, fra_certi        # point_transformer: we will try this, as the first gave worse performance for pointnet.
+
+
+def self_supervised_validation_loss(input, output, certi=None):
+    """
+    inputs:
+        input   : tuple of length 4 : input[0]  : torch.tensor of shape (B, 3, m) : input_point_cloud
+                                      input[1]  : torch.tensor of shape (B, 3, N) : keypoints_true
+                                      input[2]  : torch.tensor of shape (B, 3, 3) : rotation_true
+                                      input[3]  : torch.tensor of shape (B, 3, 1) : translation_true
+        output  : tuple of length 4 : output[0]  : torch.tensor of shape (B, 3, m) : predicted_point_cloud
+                                      output[1]  : torch.tensor of shape (B, 3, N) : detected/corrected_keypoints
+                                      output[2]  : torch.tensor of shape (B, 3, 3) : rotation
+                                      output[3]  : torch.tensor of shape (B, 3, 1) : translation
+
+    outputs:
+    loss    : torch.tensor of shape (1,)
+
+    """
+
+    if certi == None:
+        pc_loss = chamfer_loss(pc=input[0], pc_=output[0])
+        vloss = pc_loss.mean()
+    else:
+        vloss = -certi
+
+    return vloss
