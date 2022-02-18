@@ -55,12 +55,12 @@ def self_supervised_train_one_epoch(training_loader, model, optimizer, correctio
             model(input_point_cloud, correction_flag=correction_flag, need_predicted_keypoints=True)
 
         # Certification
-        # certification
         certi = certify(input_point_cloud=input_point_cloud,
                         predicted_point_cloud=predicted_point_cloud,
                         corrected_keypoints=corrected_keypoints,
                         predicted_model_keypoints=predicted_model_keypoints,
-                        epsilon=hyper_param['epsilon'])
+                        epsilon=hyper_param['epsilon'],
+                        is_symmetric=hyper_param["is_symmetric"])
         certi = certi.squeeze(-1)  # (B,)
 
         # Compute the loss and its gradients
@@ -82,7 +82,7 @@ def self_supervised_train_one_epoch(training_loader, model, optimizer, correctio
         fra_certi_track.append(fra_cert)
 
         del input_point_cloud, predicted_point_cloud, correction
-        torch.cuda.empty_cache()
+        # torch.cuda.empty_cache()
 
     ave_tloss = running_loss / (i + 1)
 
@@ -112,7 +112,7 @@ def validate(validation_loader, model, correction_flag, device, hyper_param):
                             predicted_point_cloud=predicted_point_cloud,
                             corrected_keypoints=corrected_keypoints,
                             predicted_model_keypoints=predicted_model_keypoints,
-                            epsilon=hyper_param['epsilon'])
+                            epsilon=hyper_param['epsilon'], is_symmetric=hyper_param["is_symmetric"])
 
             vloss = validation_loss(input_point_cloud,
                                     predicted_point_cloud,
@@ -171,7 +171,7 @@ def train_without_supervision(self_supervised_train_loader, validation_loader, m
 
         epoch_number += 1
 
-        torch.cuda.empty_cache()
+        # torch.cuda.empty_cache()
 
     return train_loss, val_loss, certi_all_train_batches
 
@@ -189,7 +189,7 @@ def train_detector(hyper_param, detector_type='pointnet', class_id="03001627",
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print('device is ', device)
     print('-' * 20)
-    torch.cuda.empty_cache()
+    # torch.cuda.empty_cache()
 
     # shapenet
     class_name = CLASS_NAME[class_id]
@@ -207,6 +207,12 @@ def train_detector(hyper_param, detector_type='pointnet', class_id="03001627",
     # optimization parameters
     lr_sgd = hyper_param['lr_sgd']
     momentum_sgd = hyper_param['momentum_sgd']
+
+    # object symmetry
+    if class_name == "bottle":
+        hyper_param["is_symmetric"] = True
+    else:
+        hyper_param["is_symmetric"] = False
 
     # real dataset:
     self_supervised_train_dataset_len = hyper_param['self_supervised_train_dataset_len']
@@ -284,7 +290,7 @@ def visual_test(test_loader, model, correction_flag=False, device=None):
 
     if device == None:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        torch.cuda.empty_cache()
+        # torch.cuda.empty_cache()
 
     for i, vdata in enumerate(test_loader):
         input_point_cloud, keypoints_target, R_target, t_target = vdata
@@ -332,7 +338,7 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print('device is ', device)
     print('-' * 20)
-    torch.cuda.empty_cache()
+    # torch.cuda.empty_cache()
 
     class_name = CLASS_NAME[class_id]
     save_folder = hyper_param['save_folder']

@@ -47,7 +47,8 @@ def supervised_train_one_epoch(training_loader, model, optimizer, correction_fla
 
         # Zero your gradients for every batch!
         optimizer.zero_grad()
-
+        # print("Test:: pc_shape: ", pc.shape)
+        # print(pc[0, ...])
         out = model(pc, correction_flag=correction_flag)
         kp_pred = out[1]
 
@@ -228,6 +229,9 @@ def train_detector(hyper_param, detector_type='pointnet', class_id="03001627",
 
     with open(val_loss_save_file, 'wb') as outp:
         pickle.dump(val_loss, outp, pickle.HIGHEST_PROTOCOL)
+
+    del supervised_train_dataset, supervised_train_loader, val_dataset, val_loader, cad_models, model_keypoints, \
+        optimizer, model
 
     return None
 

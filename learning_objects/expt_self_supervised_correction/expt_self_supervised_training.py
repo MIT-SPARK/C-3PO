@@ -40,7 +40,10 @@ def train_kp_detectors(detector_type, model_class_ids, only_categories=None):
 if __name__ == "__main__":
 
     # only_categories = ["airplane", "bathtub", "car", "chair", "guitar", "knife", "motorcycle", "skateboard", "table"]
-    only_categories = ["car", "chair", "guitar", "motorcycle"]
+    only_categories = ["airplane", "chair", "guitar", "car"]
+    # only_categories = ["bottle", "chair", "guitar", "car"]
+    # only_categories = ["bottle", "chair", "guitar", "car"]
+    # only_categories = ["bottle", "chair", "guitar", "car"]
 
     stream = open("class_model_ids.yml", "r")
     model_class_ids = yaml.load(stream=stream, Loader=yaml.Loader)
