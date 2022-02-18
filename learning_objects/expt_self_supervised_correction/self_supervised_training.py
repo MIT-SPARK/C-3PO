@@ -25,8 +25,6 @@ from learning_objects.models.certifiability import confidence, confidence_kp
 
 from learning_objects.utils.general import display_results, TrackingMeter
 
-SAVE_LOCATION = '../../data/learning_objects/expt_registration/runs/'
-
 # loss functions
 from learning_objects.expt_self_supervised_correction.loss_functions import chamfer_loss
 from learning_objects.expt_self_supervised_correction.loss_functions import certify
@@ -41,6 +39,7 @@ from learning_objects.expt_self_supervised_correction.evaluation_metrics import 
 # Train
 def self_supervised_train_one_epoch(training_loader, model, optimizer, correction_flag, device, hyper_param):
     running_loss = 0.
+    fra_certi_track = []
 
     for i, data in enumerate(training_loader):
         # Every data instance is an input + label pair
@@ -80,12 +79,14 @@ def self_supervised_train_one_epoch(training_loader, model, optimizer, correctio
             print("Batch ", (i+1), " loss: ", loss.item(), " pc loss: ", pc_loss.item(), " kp loss: ", kp_loss.item())
             print("Batch ", (i + 1), " fra cert: ", fra_cert.item())
 
+        fra_certi_track.append(fra_cert)
+
         del input_point_cloud, predicted_point_cloud, correction
         torch.cuda.empty_cache()
 
     ave_tloss = running_loss / (i + 1)
 
-    return ave_tloss
+    return ave_tloss, fra_certi_track
 
 
 # Val
@@ -113,8 +114,8 @@ def validate(validation_loader, model, correction_flag, device, hyper_param):
                             predicted_model_keypoints=predicted_model_keypoints,
                             epsilon=hyper_param['epsilon'])
 
-            vloss = validation_loss(input=(input_point_cloud, keypoints_target, R_target, t_target),
-                                    output=(predicted_point_cloud, corrected_keypoints, R_predicted, t_predicted),
+            vloss = validation_loss(input_point_cloud,
+                                    predicted_point_cloud,
                                     certi=certi)
 
             running_vloss += vloss
@@ -136,6 +137,7 @@ def train_without_supervision(self_supervised_train_loader, validation_loader, m
 
     train_loss = TrackingMeter()
     val_loss = TrackingMeter()
+    certi_all_train_batches = TrackingMeter()
     epoch_number = 0
 
     for epoch in range(num_epochs):
@@ -144,7 +146,7 @@ def train_without_supervision(self_supervised_train_loader, validation_loader, m
         # Make sure gradient tracking is on, and do a pass over the data
         model.train(True)
         print("Training on real data with self-supervision: ")
-        ave_loss_self_supervised = self_supervised_train_one_epoch(self_supervised_train_loader,
+        ave_loss_self_supervised, _fra_cert = self_supervised_train_one_epoch(self_supervised_train_loader,
                                                                    model,
                                                                    optimizer,
                                                                    correction_flag=correction_flag,
@@ -160,6 +162,7 @@ def train_without_supervision(self_supervised_train_loader, validation_loader, m
         print('LOSS self-supervised train {}, valid (%cert) {}'.format(ave_loss_self_supervised, -avg_vloss))
         train_loss.add_item(ave_loss_self_supervised)
         val_loss.add_item(-avg_vloss)
+        certi_all_train_batches.add_item(_fra_cert)
 
         # Saving the model with the best vloss
         if avg_vloss < best_vloss:
@@ -170,7 +173,7 @@ def train_without_supervision(self_supervised_train_loader, validation_loader, m
 
         torch.cuda.empty_cache()
 
-    return train_loss, val_loss
+    return train_loss, val_loss, certi_all_train_batches
 
 
 # Train
@@ -199,6 +202,7 @@ def train_detector(hyper_param, detector_type='pointnet', class_id="03001627",
     best_model_save_file = best_model_save_location + '_best_self_supervised_kp_' + detector_type + '.pth'
     train_loss_save_file = best_model_save_location + '_sstrain_loss_' + detector_type + '.pkl'
     val_loss_save_file = best_model_save_location + '_ssval_loss_' + detector_type + '.pkl'
+    cert_save_file = best_model_save_location + '_certi_all_batches_' + detector_type + '.pkl'
 
     # optimization parameters
     lr_sgd = hyper_param['lr_sgd']
@@ -254,20 +258,23 @@ def train_detector(hyper_param, detector_type='pointnet', class_id="03001627",
     optimizer = torch.optim.SGD(model.parameters(), lr=lr_sgd, momentum=momentum_sgd)
 
     # training
-    train_loss, val_loss = train_without_supervision(self_supervised_train_loader=self_supervised_train_loader,
-                                                     validation_loader=val_loader,
-                                                     model=model,
-                                                     optimizer=optimizer,
-                                                     correction_flag=True,
-                                                     best_model_save_file=best_model_save_file,
-                                                     device=device,
-                                                     hyper_param=hyper_param)
+    train_loss, val_loss, fra_cert_ = train_without_supervision(self_supervised_train_loader=self_supervised_train_loader,
+                                                                validation_loader=val_loader,
+                                                                model=model,
+                                                                optimizer=optimizer,
+                                                                correction_flag=True,
+                                                                best_model_save_file=best_model_save_file,
+                                                                device=device,
+                                                                hyper_param=hyper_param)
 
     with open(train_loss_save_file, 'wb') as outp:
         pickle.dump(train_loss, outp, pickle.HIGHEST_PROTOCOL)
 
     with open(val_loss_save_file, 'wb') as outp:
         pickle.dump(val_loss, outp, pickle.HIGHEST_PROTOCOL)
+
+    with open(cert_save_file, 'wb') as outp:
+        pickle.dump(fra_cert_, outp, pickle.HIGHEST_PROTOCOL)
 
     return None
 
@@ -493,10 +500,10 @@ if __name__ == "__main__":
     train_detector(detector_type='pointnet', class_id=class_id, model_id=model_id, hyper_param=hyper_param)
     visualize_detector(detector_type='pointnet', class_id=class_id, model_id=model_id, hyper_param=hyper_param)
 
-    stream = open("self_supervised_training_point_transformer.yml", 'r')
-    hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
-    train_detector(detector_type='point_transformer', class_id=class_id, model_id=model_id, hyper_param=hyper_param)
-    visualize_detector(detector_type='point_transformer', class_id=class_id, model_id=model_id, hyper_param=hyper_param)
+    # stream = open("self_supervised_training_point_transformer.yml", 'r')
+    # hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
+    # train_detector(detector_type='point_transformer', class_id=class_id, model_id=model_id, hyper_param=hyper_param)
+    # visualize_detector(detector_type='point_transformer', class_id=class_id, model_id=model_id, hyper_param=hyper_param)
 
 
 

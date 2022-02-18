@@ -2,6 +2,10 @@
 
 import torch
 from pytorch3d import ops
+import sys
+sys.path.append('../..')
+
+from learning_objects.models.certifiability import confidence, confidence_kp
 
 def keypoints_loss(kp, kp_):
     """
@@ -53,7 +57,7 @@ def chamfer_loss(pc, pc_, pc_padding=None, max_loss=False):
     """
 
     if pc_padding == None:
-        print(pc.shape)
+        # print(pc.shape)
         batch_size, _, n = pc.shape
         device_ = pc.device
 
@@ -201,27 +205,25 @@ def self_supervised_training_loss(input_point_cloud, predicted_point_cloud, keyp
     return theta*pc_loss + kp_loss, pc_loss, kp_loss, fra_certi        # point_transformer: we will try this, as the first gave worse performance for pointnet.
 
 
-def self_supervised_validation_loss(input, output, certi=None):
+def self_supervised_validation_loss(input_pc, predicted_pc, certi=None):
     """
     inputs:
-        input   : tuple of length 4 : input[0]  : torch.tensor of shape (B, 3, m) : input_point_cloud
-                                      input[1]  : torch.tensor of shape (B, 3, N) : keypoints_true
-                                      input[2]  : torch.tensor of shape (B, 3, 3) : rotation_true
-                                      input[3]  : torch.tensor of shape (B, 3, 1) : translation_true
-        output  : tuple of length 4 : output[0]  : torch.tensor of shape (B, 3, m) : predicted_point_cloud
-                                      output[1]  : torch.tensor of shape (B, 3, N) : detected/corrected_keypoints
-                                      output[2]  : torch.tensor of shape (B, 3, 3) : rotation
-                                      output[3]  : torch.tensor of shape (B, 3, 1) : translation
+        input_pc        : torch.tensor of shape (B, 3, m) : input_point_cloud
+        predicted_pc    : torch.tensor of shape (B, 3, n) : predicted_point_cloud
+        certi           : None or torch.tensor(dtype=torch.bool) of shape (B,)  : certification
 
     outputs:
-    loss    : torch.tensor of shape (1,)
+        loss    : torch.tensor of shape (1,)
 
     """
 
     if certi == None:
-        pc_loss = chamfer_loss(pc=input[0], pc_=output[0])
+        pc_loss = chamfer_loss(pc=input_pc, pc_=predicted_pc)
         vloss = pc_loss.mean()
     else:
-        vloss = -certi
+        # fra certi
+        num_certi = certi.sum()
+        fra_certi = num_certi / certi.shape[0]
+        vloss = -fra_certi
 
     return vloss
