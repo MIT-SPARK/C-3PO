@@ -130,7 +130,8 @@ def validate(validation_loader, model, correction_flag, device, hyper_param):
 
 # Train + Val Loop
 def train_without_supervision(self_supervised_train_loader, validation_loader, model, optimizer, correction_flag,
-                              best_model_save_file, device, hyper_param):
+                              best_model_save_file, device, hyper_param, train_loss_save_file,
+                              val_loss_save_file, cert_save_file):
 
     num_epochs = hyper_param['num_epochs']
     best_vloss = 1_000_000.
@@ -171,7 +172,19 @@ def train_without_supervision(self_supervised_train_loader, validation_loader, m
 
         epoch_number += 1
 
+        with open(train_loss_save_file, 'wb') as outp:
+            pickle.dump(train_loss, outp, pickle.HIGHEST_PROTOCOL)
+
+        with open(val_loss_save_file, 'wb') as outp:
+            pickle.dump(val_loss, outp, pickle.HIGHEST_PROTOCOL)
+
+        with open(cert_save_file, 'wb') as outp:
+            pickle.dump(_fra_cert, outp, pickle.HIGHEST_PROTOCOL)
+
         # torch.cuda.empty_cache()
+        if -avg_vloss > 0.99:
+            print("ENDING TRAINING. REACHED > 99% CERTIFICATION (VALIDATION).")
+            break
 
     return train_loss, val_loss, certi_all_train_batches
 
@@ -271,7 +284,10 @@ def train_detector(hyper_param, detector_type='pointnet', class_id="03001627",
                                                                 correction_flag=True,
                                                                 best_model_save_file=best_model_save_file,
                                                                 device=device,
-                                                                hyper_param=hyper_param)
+                                                                hyper_param=hyper_param,
+                                                                train_loss_save_file=train_loss_save_file,
+                                                                val_loss_save_file=val_loss_save_file,
+                                                                cert_save_file=cert_save_file)
 
     with open(train_loss_save_file, 'wb') as outp:
         pickle.dump(train_loss, outp, pickle.HIGHEST_PROTOCOL)
@@ -329,21 +345,25 @@ def visual_test(test_loader, model, correction_flag=False, device=None):
             break
 
 
-def visualize_detector(hyper_param, detector_type, class_id, model_id):
+def visualize_detector(hyper_param, detector_type, class_id, model_id,
+                       visualize_without_corrector=True, visualize_with_corrector=True,
+                       visualize_before=True, visualize_after=True, device=None):
     """
 
     """
 
-    print('-' * 20)
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print('device is ', device)
-    print('-' * 20)
+    # print('-' * 20)
+    if device==None:
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    # print('device is ', device)
+    # print('-' * 20)
     # torch.cuda.empty_cache()
 
     class_name = CLASS_NAME[class_id]
     save_folder = hyper_param['save_folder']
     best_model_save_location = save_folder + class_name + '/' + model_id + '/'
-    best_model_save_file = best_model_save_location + '_best_self_supervised_kp_' + detector_type + '.pth'
+    best_pre_model_save_file = best_model_save_location + '_best_supervised_kp_' + detector_type + '.pth'
+    best_post_model_save_file = best_model_save_location + '_best_self_supervised_kp_' + detector_type + '.pth'
 
     # Evaluation
     # validation dataset:
@@ -362,23 +382,28 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id):
     model_keypoints = eval_dataset._get_model_keypoints().to(torch.float).to(device=device)
 
     from learning_objects.expt_self_supervised_correction.proposed_model import ProposedRegressionModel as ProposedModel
-    model = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,
-                          keypoint_detector=detector_type, use_pretrained_regression_model=False).to(device)            # ToDo: use_pretrained_regression_model needs to be depreciated.
+    model_before = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,
+                                 keypoint_detector=detector_type, use_pretrained_regression_model=False).to(device)            # ToDo: use_pretrained_regression_model needs to be depreciated.
+    model_after = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,
+                                 keypoint_detector=detector_type, use_pretrained_regression_model=False).to(device)
 
-    if not os.path.isfile(best_model_save_file):
+    if not os.path.isfile(best_pre_model_save_file) or not os.path.isfile(best_post_model_save_file):
         print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")
-    state_dict = torch.load(best_model_save_file)
-    model.load_state_dict(state_dict)
+    state_dict_pre = torch.load(best_pre_model_save_file)
+    state_dict_post = torch.load(best_post_model_save_file)
+    model_before.load_state_dict(state_dict_pre)
+    model_after.load_state_dict(state_dict_post)
 
-    num_parameters = sum(param.numel() for param in model.parameters() if param.requires_grad)
+    num_parameters = sum(param.numel() for param in model_after.parameters() if param.requires_grad)
     print("Number of trainable parameters: ", num_parameters)
 
-    # Evaluatiion:
-    print("Evaluating model: ")
-    evaluate(eval_loader=eval_loader, model=model, hyper_param=hyper_param, certification=True, device=device)
+    # Evaluation:
+    print("Evaluating the pre-trained model: ")
+    evaluate(eval_loader=eval_loader, model=model_before, hyper_param=hyper_param, certification=True, device=device)
+    print("Evaluating the (self-supervised) trained model: ")
+    evaluate(eval_loader=eval_loader, model=model_after, hyper_param=hyper_param, certification=True, device=device)
 
     # # Visual Test
-    print("Visualizing the trained model.")
     dataset_len = 20
     dataset_batch_size = 1
     dataset = DepthPC(class_id=class_id,
@@ -389,108 +414,31 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id):
                       rotate_about_z=True)
     loader = torch.utils.data.DataLoader(dataset, batch_size=dataset_batch_size, shuffle=False)
 
-    visual_test(test_loader=loader, model=model, correction_flag=False)
-    visual_test(test_loader=loader, model=model, correction_flag=True)
+    if visualize_before:
+        print("Visualizing the pre-trained model.")
+        if visualize_without_corrector:
+            print("Without corrector")
+            visual_test(test_loader=loader, model=model_before, correction_flag=False)
+        if visualize_with_corrector:
+            print("With corrector")
+            visual_test(test_loader=loader, model=model_before, correction_flag=True)
+
+    if visualize_after:
+        print("Visualizing the (self-supervised) trained model.")
+        if visualize_without_corrector:
+            print("Without corrector")
+            visual_test(test_loader=loader, model=model_after, correction_flag=False)
+        if visualize_with_corrector:
+            print("With corrector")
+            visual_test(test_loader=loader, model=model_after, correction_flag=True)
+
+    del model_before, model_after, state_dict_pre, state_dict_post
 
     return None
 
 
 # Evaluation. Use the fact that you know rotation, translation, and shape of the generated data.
-def evaluate(eval_loader, model, hyper_param, certification=True, device=None):
-
-    if device==None:
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-    with torch.no_grad():
-
-        pc_err = 0.0
-        kp_err = 0.0
-        R_err = 0.0
-        t_err = 0.0
-
-        pc_err_cert = 0.0
-        kp_err_cert = 0.0
-        R_err_cert = 0.0
-        t_err_cert = 0.0
-
-        num_cert = 0.0
-        num_batches = len(eval_loader)
-
-        for i, vdata in enumerate(eval_loader):
-            input_point_cloud, keypoints_target, R_target, t_target = vdata
-            input_point_cloud = input_point_cloud.to(device)
-            keypoints_target = keypoints_target.to(device)
-            R_target = R_target.to(device)
-            t_target = t_target.to(device)
-            batch_size = input_point_cloud.shape[0]
-
-            # Make predictions for this batch
-            predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted, correction, predicted_model_keypoints\
-                = model(input_point_cloud, correction_flag=True, need_predicted_keypoints=True)
-
-            if certification:
-                certi = certify(input_point_cloud=input_point_cloud,
-                                predicted_point_cloud=predicted_point_cloud,
-                                corrected_keypoints=predicted_keypoints,
-                                predicted_model_keypoints=predicted_model_keypoints,
-                                epsilon=hyper_param['epsilon'])
-
-            # fraction certifiable
-            # error of all objects
-            # error of certified objects
-
-            pc_err_, kp_err_, R_err_, t_err_ = \
-                evaluation_error(input=(input_point_cloud, keypoints_target, R_target, t_target),
-                                   output=(predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted))
-
-            # error for all objects
-            pc_err += pc_err_.sum()
-            kp_err += kp_err_.sum()
-            R_err += R_err_.sum()
-            t_err += t_err_.sum()
-
-            if certification:
-                # fraction certifiable
-                num_cert += certi.sum()
-
-                # error for certifiable objects
-                pc_err_cert += (pc_err_ * certi).sum()
-                kp_err_cert += (kp_err_ * certi).sum()
-                R_err_cert += (R_err_ * certi).sum()
-                t_err_cert += (t_err_ * certi).sum()
-
-            del input_point_cloud, keypoints_target, R_target, t_target, \
-                predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted
-
-        # avg_vloss = running_vloss / (i + 1)
-        ave_pc_err = pc_err / ((i + 1)*batch_size)
-        ave_kp_err = kp_err / ((i + 1)*batch_size)
-        ave_R_err = R_err / ((i + 1)*batch_size)
-        ave_t_err = t_err / ((i + 1)*batch_size)
-
-        if certification:
-            ave_pc_err_cert = pc_err_cert / num_cert
-            ave_kp_err_cert = kp_err_cert / num_cert
-            ave_R_err_cert = R_err_cert / num_cert
-            ave_t_err_cert = t_err_cert / num_cert
-
-            fra_cert = num_cert / ((i + 1)*batch_size)
-
-        print(">>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>")
-        print("Evaluating performance across all objects:")
-        print("pc error: ", ave_pc_err.item())
-        print("kp error: ", ave_kp_err.item())
-        print("R error: ", ave_R_err.item())
-        print("t error: ", ave_t_err.item())
-        print("Evaulating certification: ")
-        print("fraction certifiable: ", fra_cert.item())
-        print("Evaluating performance for certifiable objects: ")
-        print("pc error: ", ave_pc_err_cert.item())
-        print("kp error: ", ave_kp_err_cert.item())
-        print("R error: ", ave_R_err_cert.item())
-        print("t error: ", ave_t_err_cert.item())
-
-    return None
+from learning_objects.expt_self_supervised_correction.evaluation import evaluate
 
 
 

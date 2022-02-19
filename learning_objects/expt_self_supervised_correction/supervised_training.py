@@ -274,16 +274,18 @@ def visual_test(test_loader, model, correction_flag=False, device=None):
 def visualize_detector(hyper_param,
                        detector_type='pointnet',
                        class_id="03001627",
-                       model_id="1e3fba4500d20bb49b9f2eb77f5e247e"):
+                       model_id="1e3fba4500d20bb49b9f2eb77f5e247e",
+                       visualize_without_corrector=True, visualize_with_corrector=True, device=None):
     """
 
     """
 
-    print('-' * 20)
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print('device is ', device)
-    print('-' * 20)
-    torch.cuda.empty_cache()
+    # print('-' * 20)
+    if device==None:
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    # print('device is ', device)
+    # print('-' * 20)
+    # torch.cuda.empty_cache()
 
     class_name = CLASS_NAME[class_id]
     save_folder = hyper_param['save_folder']
@@ -340,8 +342,16 @@ def visualize_detector(hyper_param,
     real_dataset = DepthPC(class_id=class_id, model_id=model_id, n=2000, num_of_points_to_sample=1000,
                            dataset_len=10)
     real_loader = torch.utils.data.DataLoader(real_dataset, batch_size=1, shuffle=False)
-    visual_test(test_loader=real_loader, model=model, correction_flag=False, device=device)
-    visual_test(test_loader=real_loader, model=model, correction_flag=True, device=device)
+
+    if visualize_without_corrector:
+        visual_test(test_loader=real_loader, model=model, correction_flag=False, device=device)
+
+    if visualize_with_corrector:
+        visual_test(test_loader=real_loader, model=model, correction_flag=True, device=device)
+
+    del model, state_dict
+
+    return None
 
 
 if __name__ == "__main__":
