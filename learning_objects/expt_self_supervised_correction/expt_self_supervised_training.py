@@ -37,7 +37,18 @@ def train_kp_detectors(detector_type, model_class_ids, only_categories=None):
                            hyper_param=hyper_param)
 
 
-def visualize_kp_detectors(detector_type, model_class_ids, only_categories=None):
+def visualize_kp_detectors(detector_type, model_class_ids, only_categories=None,
+                           evaluate_models=True,
+                           models_to_analyze='both',
+                           visualize=True,
+                           visualize_without_corrector=False,
+                           visualize_with_corrector=True,
+                           visualize_before=True,
+                           visualize_after=True):
+
+    if not visualize:
+        visualize_with_corrector, visualize_without_corrector, visualize_before, visualize_after \
+            = False, False, False, False
 
     for key, value in model_class_ids.items():
         if key in only_categories:
@@ -60,10 +71,12 @@ def visualize_kp_detectors(detector_type, model_class_ids, only_categories=None)
                                class_id=class_id,
                                model_id=model_id,
                                hyper_param=hyper_param,
-                               visualize_without_corrector=False,
-                               visualize_with_corrector=True,
-                               visualize_before=True,
-                               visualize_after=True)
+                               evaluate_models=evaluate_models,
+                               models_to_analyze=models_to_analyze,
+                               visualize_without_corrector=visualize_without_corrector,
+                               visualize_with_corrector=visualize_with_corrector,
+                               visualize_before=visualize_before,
+                               visualize_after=visualize_after)
 
 
 if __name__ == "__main__":

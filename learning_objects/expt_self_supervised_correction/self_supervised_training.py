@@ -346,6 +346,7 @@ def visual_test(test_loader, model, correction_flag=False, device=None):
 
 
 def visualize_detector(hyper_param, detector_type, class_id, model_id,
+                       evaluate_models=True, models_to_analyze='both',
                        visualize_without_corrector=True, visualize_with_corrector=True,
                        visualize_before=True, visualize_after=True, device=None):
     """
@@ -358,6 +359,19 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
     # print('device is ', device)
     # print('-' * 20)
     # torch.cuda.empty_cache()
+    if models_to_analyze=='both':
+        pre_ = True
+        post_ = True
+    elif models_to_analyze == 'pre':
+        pre_ = True
+        post_ = False
+    elif models_to_analyze == 'post':
+        pre_ = False
+        post_ = True
+    else:
+        return NotImplementedError
+
+
 
     class_name = CLASS_NAME[class_id]
     save_folder = hyper_param['save_folder']
@@ -382,26 +396,47 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
     model_keypoints = eval_dataset._get_model_keypoints().to(torch.float).to(device=device)
 
     from learning_objects.expt_self_supervised_correction.proposed_model import ProposedRegressionModel as ProposedModel
-    model_before = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,
-                                 keypoint_detector=detector_type, use_pretrained_regression_model=False).to(device)            # ToDo: use_pretrained_regression_model needs to be depreciated.
-    model_after = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,
-                                 keypoint_detector=detector_type, use_pretrained_regression_model=False).to(device)
 
-    if not os.path.isfile(best_pre_model_save_file) or not os.path.isfile(best_post_model_save_file):
-        print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")
-    state_dict_pre = torch.load(best_pre_model_save_file)
-    state_dict_post = torch.load(best_post_model_save_file)
-    model_before.load_state_dict(state_dict_pre)
-    model_after.load_state_dict(state_dict_post)
+    if pre_:
+        model_before = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,
+                                     keypoint_detector=detector_type, use_pretrained_regression_model=False).to(device)
 
-    num_parameters = sum(param.numel() for param in model_after.parameters() if param.requires_grad)
-    print("Number of trainable parameters: ", num_parameters)
+        if not os.path.isfile(best_pre_model_save_file):
+            print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")
+
+        state_dict_pre = torch.load(best_pre_model_save_file)
+        model_before.load_state_dict(state_dict_pre)
+
+        num_parameters = sum(param.numel() for param in model_before.parameters() if param.requires_grad)
+        print("Number of trainable parameters: ", num_parameters)
+
+    if post_:
+        model_after = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,
+                                    keypoint_detector=detector_type, use_pretrained_regression_model=False).to(device)
+
+        if not os.path.isfile(best_post_model_save_file):
+            print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")
+
+        state_dict_post = torch.load(best_post_model_save_file)
+        model_after.load_state_dict(state_dict_post)
+
+        num_parameters = sum(param.numel() for param in model_after.parameters() if param.requires_grad)
+        print("Number of trainable parameters: ", num_parameters)
 
     # Evaluation:
-    print("Evaluating the pre-trained model: ")
-    evaluate(eval_loader=eval_loader, model=model_before, hyper_param=hyper_param, certification=True, device=device)
-    print("Evaluating the (self-supervised) trained model: ")
-    evaluate(eval_loader=eval_loader, model=model_after, hyper_param=hyper_param, certification=True, device=device)
+    if evaluate_models:
+        if pre_:
+            print(">>"*40)
+            print("PRE-TRAINED MODEL:")
+            print(">>" * 40)
+            evaluate(eval_loader=eval_loader, model=model_before, hyper_param=hyper_param, certification=True,
+                     device=device)
+        if post_:
+            print(">>" * 40)
+            print("(SELF-SUPERVISED) TRAINED MODEL:")
+            print(">>" * 40)
+            evaluate(eval_loader=eval_loader, model=model_after, hyper_param=hyper_param, certification=True,
+                     device=device)
 
     # # Visual Test
     dataset_len = 20
@@ -414,8 +449,10 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
                       rotate_about_z=True)
     loader = torch.utils.data.DataLoader(dataset, batch_size=dataset_batch_size, shuffle=False)
 
-    if visualize_before:
-        print("Visualizing the pre-trained model.")
+    if visualize_before and pre_:
+        print(">>" * 40)
+        print("VISUALIZING PRE-TRAINED MODEL:")
+        print(">>" * 40)
         if visualize_without_corrector:
             print("Without corrector")
             visual_test(test_loader=loader, model=model_before, correction_flag=False)
@@ -423,8 +460,10 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
             print("With corrector")
             visual_test(test_loader=loader, model=model_before, correction_flag=True)
 
-    if visualize_after:
-        print("Visualizing the (self-supervised) trained model.")
+    if visualize_after and post_:
+        print(">>" * 40)
+        print("(SELF-SUPERVISED) TRAINED MODEL:")
+        print(">>" * 40)
         if visualize_without_corrector:
             print("Without corrector")
             visual_test(test_loader=loader, model=model_after, correction_flag=False)
@@ -432,7 +471,10 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
             print("With corrector")
             visual_test(test_loader=loader, model=model_after, correction_flag=True)
 
-    del model_before, model_after, state_dict_pre, state_dict_post
+    if pre_:
+        del model_before, state_dict_pre
+    if post_:
+        del model_after, state_dict_post
 
     return None
 

@@ -14,8 +14,40 @@ if __name__ == "__main__":
     stream = open("class_model_ids.yml", "r")
     model_class_ids = yaml.load(stream=stream, Loader=yaml.Loader)
 
-    only_categories = ["bottle", "chair", "guitar", "car"]
+    # only_categories = ["bottle", "chair", "guitar", "car"]
+    # visualize_kp_detectors(detector_type='pointnet', model_class_ids=model_class_ids, only_categories=only_categories,
+    #                        evaluate_models=True, models_to_analyze='both', visualize=False)
 
-    visualize_kp_detectors(detector_type='pointnet', model_class_ids=model_class_ids, only_categories=only_categories)
+
+    only_categories = ["bottle"]
     # visualize_kp_detectors(detector_type='point_transformer', model_class_ids=model_class_ids,
-    #                        only_categories=only_categories)
+    #                        only_categories=only_categories, visualize=False, evaluate_models=True,
+    #                        models_to_analyze='pre')
+    visualize_kp_detectors(detector_type='point_transformer', model_class_ids=model_class_ids,
+                           only_categories=only_categories, visualize=False, evaluate_models=True,
+                           models_to_analyze='post')
+
+    # only_categories = ["chair"]
+    # visualize_kp_detectors(detector_type='point_transformer', model_class_ids=model_class_ids,
+    #                        only_categories=only_categories, visualize=False, evaluate_models=True,
+    #                        models_to_analyze='pre')
+    # visualize_kp_detectors(detector_type='point_transformer', model_class_ids=model_class_ids,
+    #                        only_categories=only_categories, visualize=False, evaluate_models=True,
+    #                        models_to_analyze='post')
+    #
+    # only_categories = ["guitar"]
+    # visualize_kp_detectors(detector_type='point_transformer', model_class_ids=model_class_ids,
+    #                        only_categories=only_categories, visualize=False, evaluate_models=True,
+    #                        models_to_analyze='pre')
+    # visualize_kp_detectors(detector_type='point_transformer', model_class_ids=model_class_ids,
+    #                        only_categories=only_categories, visualize=False, evaluate_models=True,
+    #                        models_to_analyze='post')
+    #
+    # only_categories = ["car"]
+    # visualize_kp_detectors(detector_type='point_transformer', model_class_ids=model_class_ids,
+    #                        only_categories=only_categories, visualize=False, evaluate_models=True,
+    #                        models_to_analyze='pre')
+    # visualize_kp_detectors(detector_type='point_transformer', model_class_ids=model_class_ids,
+    #                        only_categories=only_categories, visualize=False, evaluate_models=True,
+    #                        models_to_analyze='post')
+

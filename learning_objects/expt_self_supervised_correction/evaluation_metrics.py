@@ -85,10 +85,10 @@ def evaluation_error(input, output):
     R_err = rotation_error(input[2], output[2])
     t_err = translation_error(input[3], output[3])
 
-    print("pc_err shape: ", pc_err.shape)
-    print("kp_err shape: ", kp_err.shape)
-    print("R_err shape: ", R_err.shape)
-    print("t_err shape: ", t_err.shape)
+    # print("pc_err shape: ", pc_err.shape)
+    # print("kp_err shape: ", kp_err.shape)
+    # print("R_err shape: ", R_err.shape)
+    # print("t_err shape: ", t_err.shape)
 
     return pc_err, kp_err, R_err, t_err
     # return pc_loss
