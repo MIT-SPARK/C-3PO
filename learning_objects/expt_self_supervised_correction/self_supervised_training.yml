@@ -1,0 +1,97 @@
+point_transformer:
+  save_folder: './'
+
+  lr_sgd: 0.02
+  momentum_sgd: 0.9
+
+  self_supervised_train_dataset_len: 500
+  self_supervised_train_batch_size: 50
+  num_of_points_to_sample: 1000
+  num_of_points_selfsupervised: 2048
+  # train_dataset_len: 50000
+  # train_batch_size: 100
+  # train_num_of_points: 1000
+
+  train_stop_cert_threshold: 0.99
+
+  val_dataset_len: 50
+  val_batch_size: 50
+  #val_dataset_len: 1000
+  #val_batch_size: 50
+  #val_num_of_points: 1000
+
+  num_epochs: 10
+
+  theta: 25.0       # self-supervised loss function, pc_loss coefficient
+  epsilon:
+    airplane: 0.99
+    bathtub: 0.99
+    bed: 0.99
+    bottle: 0.99
+    cap: 0.99
+    chair: 0.99
+    guitar: 0.99
+    helmet: 0.99
+    knife: 0.99
+    laptop: 0.99
+    motorcycle: 0.99
+    mug: 0.99
+    skateboard: 0.99
+    table: 0.99
+    vessel: 0.99
+
+
+  eval_dataset_len: 50
+  eval_batch_size: 50
+
+  adds_threshold: 0.001
+  adds_max: True      # unused
+
+pointnet:
+  save_folder: './'
+
+  lr_sgd: 0.02
+  momentum_sgd: 0.9
+
+  self_supervised_train_dataset_len: 500
+  self_supervised_train_batch_size: 50
+  num_of_points_to_sample: 1000
+  num_of_points_selfsupervised: 2048
+  # train_dataset_len: 50000
+  # train_batch_size: 100
+  # train_num_of_points: 1000
+
+  train_stop_cert_threshold: 0.99
+
+  val_dataset_len: 50
+  val_batch_size: 50
+  #val_dataset_len: 1000
+  #val_batch_size: 50
+  #val_num_of_points: 1000
+
+  num_epochs: 10
+
+  theta: 25.0       # self-supervised loss function, pc_loss coefficient
+  epsilon:
+    airplane: 0.99
+    bathtub: 0.99
+    bed: 0.99
+    bottle: 0.99
+    cap: 0.99
+    chair: 0.99
+    guitar: 0.99
+    helmet: 0.99
+    knife: 0.99
+    laptop: 0.99
+    motorcycle: 0.99
+    mug: 0.99
+    skateboard: 0.99
+    table: 0.99
+    vessel: 0.99
+
+
+  eval_dataset_len: 50
+  eval_batch_size: 50
+
+  adds_threshold: 0.001
+  adds_max: True      # unused

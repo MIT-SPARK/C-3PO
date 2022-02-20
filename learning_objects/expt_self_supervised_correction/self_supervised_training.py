@@ -493,9 +493,11 @@ def train_kp_detectors(detector_type, model_class_ids, only_categories=None):
             class_id = CLASS_ID[key]
             model_id = str(value)
 
-            hyper_param_file = "self_supervised_training_" + detector_type + ".yml"
+            hyper_param_file = "self_supervised_training.yml"
             stream = open(hyper_param_file, "r")
             hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
+            hyper_param = hyper_param[detector_type]
+            hyper_param['epsilon'] = hyper_param['epsilon'][key]
 
             print(">>"*40)
             print("Training: ", key, "; Model ID:", str(model_id))
@@ -524,9 +526,11 @@ def visualize_kp_detectors(detector_type, model_class_ids, only_categories=None,
             model_id = str(value)
             class_name = CLASS_NAME[class_id]
 
-            hyper_param_file = "self_supervised_training_" + detector_type + ".yml"
+            hyper_param_file = "self_supervised_training.yml"
             stream = open(hyper_param_file, "r")
             hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
+            hyper_param = hyper_param[detector_type]
+            hyper_param['epsilon'] = hyper_param['epsilon'][key]
 
             if class_name == 'bottle':
                 hyper_param["is_symmetric"] = True

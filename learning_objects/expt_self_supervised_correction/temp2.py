@@ -3,19 +3,20 @@ import torch
 import pickle
 import sys
 import argparse
+import yaml
 
 sys.path.append("../..")
 
 if __name__ == "__main__":
 
-    print("test")
+    hyper_param_file = "self_supervised_training.yml"
+    detector_type = "point_transformer"
+    key = "guitar"
+    stream = open(hyper_param_file, "r")
+    hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
+    hyper_param = hyper_param[detector_type]
+    hyper_param['epsilon'] = hyper_param['epsilon'][key]
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("detector_type", help="specify the detector type.", type=str)
-    parser.add_argument("class_name", help="specify the ShapeNet class name.", type=str)
+    print(hyper_param)
 
-    args = parser.parse_args()
-
-    print("KP detector type: ", args.detector_type)
-    print("CAD Model class: ", args.class_name)
 
