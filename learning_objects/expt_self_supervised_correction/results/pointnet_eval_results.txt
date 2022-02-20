@@ -1,0 +1,160 @@
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  bottle ; Model ID: 41a2005b595ae783be1868124d5ddbcb
+Number of trainable parameters:  1616956
+Number of trainable parameters:  1616956
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.005983173847198486
+kp error:  0.25050434470176697
+R error:  2.0086045265197754
+t error:  0.060185689479112625
+ADD-S (%):  52.0
+Evaluating certification: 
+% certifiable:  52.0
+Evaluating performance for certifiable objects: 
+pc error:  0.0001535626215627417
+kp error:  0.01147659495472908
+R error:  1.403246521949768
+t error:  0.002995478454977274
+ADD-S (%):  100.0
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.0012189963599666953
+kp error:  0.051384005695581436
+R error:  1.6820929050445557
+t error:  0.011401908472180367
+ADD-S (%):  92.0
+Evaluating certification: 
+% certifiable:  92.0
+Evaluating performance for certifiable objects: 
+pc error:  0.0001473021402489394
+kp error:  0.013558589853346348
+R error:  1.6011483669281006
+t error:  0.002803612733259797
+ADD-S (%):  100.0
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  car ; Model ID: ad45b2d40c7801ef2074a73831d8a3a2
+Number of trainable parameters:  1620811
+Number of trainable parameters:  1620811
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.0012793743517249823
+kp error:  0.17008911073207855
+R error:  2.1344854831695557
+t error:  0.05940346047282219
+ADD-S (%):  16.0
+Evaluating certification: 
+% certifiable:  90.0
+Evaluating performance for certifiable objects: 
+pc error:  0.000677475065458566
+kp error:  0.16570676863193512
+R error:  2.144256830215454
+t error:  0.059291038662195206
+ADD-S (%):  17.77777862548828
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.0010876498417928815
+kp error:  0.22188013792037964
+R error:  2.555267810821533
+t error:  0.06470795720815659
+ADD-S (%):  4.0
+Evaluating certification: 
+% certifiable:  96.0
+Evaluating performance for certifiable objects: 
+pc error:  0.0007088845013640821
+kp error:  0.22195635735988617
+R error:  2.569519281387329
+t error:  0.06503147631883621
+ADD-S (%):  4.166666507720947
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  chair ; Model ID: 1cc6f2ed3d684fa245f213b8994b4a04
+Number of trainable parameters:  1611559
+Number of trainable parameters:  1611559
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.0055926525965332985
+kp error:  0.2811647057533264
+R error:  2.218261957168579
+t error:  0.0576898455619812
+ADD-S (%):  16.0
+Evaluating certification: 
+% certifiable:  16.0
+Evaluating performance for certifiable objects: 
+pc error:  0.00014991029456723481
+kp error:  0.00020974549988750368
+R error:  0.03237131983041763
+t error:  0.0038835012819617987
+ADD-S (%):  100.0
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.002379268640652299
+kp error:  0.06341413408517838
+R error:  0.672982931137085
+t error:  0.019160810858011246
+ADD-S (%):  68.0
+Evaluating certification: 
+% certifiable:  68.0
+Evaluating performance for certifiable objects: 
+pc error:  0.0001450838171876967
+kp error:  0.0001834064460126683
+R error:  0.03247101977467537
+t error:  0.003338608890771866
+ADD-S (%):  100.0
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  guitar ; Model ID: 5df08ba7af60e7bfe72db292d4e13056
+Number of trainable parameters:  1610788
+Number of trainable parameters:  1610788
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.003798085730522871
+kp error:  0.2169916033744812
+R error:  2.1453311443328857
+t error:  0.04243861138820648
+ADD-S (%):  36.0
+Evaluating certification: 
+% certifiable:  38.0
+Evaluating performance for certifiable objects: 
+pc error:  0.00013318513811100274
+kp error:  0.024885328486561775
+R error:  0.6653751730918884
+t error:  0.005495470482856035
+ADD-S (%):  94.7368392944336
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.0006448454805649817
+kp error:  0.0453861765563488
+R error:  1.9113085269927979
+t error:  0.010879690758883953
+ADD-S (%):  92.0
+Evaluating certification: 
+% certifiable:  92.0
+Evaluating performance for certifiable objects: 
+pc error:  0.00013665450387634337
+kp error:  0.01861291378736496
+R error:  1.8156263828277588
+t error:  0.00628022151067853
+ADD-S (%):  100.0

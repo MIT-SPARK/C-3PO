@@ -1,35 +1,56 @@
-#echo "working on: airplane, pre"
-#python evaluate_trained_model.py "pointnet" "airplane" "pre" >> pointnet_eval_pre_models.txt
-#
-#echo "working on: bathtub, pre"
-#python evaluate_trained_model.py "pointnet" "bathtub" "pre" >> pointnet_eval_pre_models.txt
-#
-#echo "working on: bed, pre"
-#python evaluate_trained_model.py "pointnet" "bed" "pre" >> pointnet_eval_pre_models.txt
-#
-#echo "working on: cap, pre"
-#python evaluate_trained_model.py "pointnet" "cap" "pre" >> pointnet_eval_pre_models.txt
-#
-#echo "working on: helmet, pre"
-#python evaluate_trained_model.py "pointnet" "helmet" "pre" >> pointnet_eval_pre_models.txt
-#
-#echo "working on: knife, pre"
-#python evaluate_trained_model.py "pointnet" "knife" "pre" >> pointnet_eval_pre_models.txt
-#
-#echo "working on: laptop, pre"
-#python evaluate_trained_model.py "pointnet" "laptop" "pre" >> pointnet_eval_pre_models.txt
-#
-#echo "working on: motorcycle, pre"
-#python evaluate_trained_model.py "pointnet" "motorcycle" "pre" >> pointnet_eval_pre_models.txt
-#
-#echo "working on: mug, pre"
-#python evaluate_trained_model.py "pointnet" "mug" "pre" >> pointnet_eval_pre_models.txt
+#echo "pre-training: motorcycle"
+#python supervised_training.py "point_transformer" "motorcycle"
 
-echo "working on: skateboard, pre"
-python evaluate_trained_model.py "pointnet" "skateboard" "pre" >> pointnet_eval_pre_models.txt
+#echo "pre-training: mug"
+#python supervised_training.py "point_transformer" "mug"
 
-echo "working on: table, pre"
-python evaluate_trained_model.py "pointnet" "table" "pre" >> pointnet_eval_pre_models.txt
+#echo "pre-training: skateboard"
+#python supervised_training.py "point_transformer" "skateboard"
 
-echo "working on: vessel, pre"
-python evaluate_trained_model.py "pointnet" "vessel" "pre" >> pointnet_eval_pre_models.txt
+#echo "pre-training: table"
+#python supervised_training.py "point_transformer" "table"
+
+#echo "pre-training: vessel"
+#python supervised_training.py "point_transformer" "vessel"
+
+# evaluating point_transformer pre-trained models
+
+#echo "Evaluating: airplane, pre"
+#python evaluate_trained_model.py "point_transformer" "airplane" "pre" >> pt_eval_results.txt
+#
+#echo "Evaluating: bathtub, pre"
+#python evaluate_trained_model.py "point_transformer" "bathtub" "pre" >> pt_eval_results.txt
+#
+#echo "Evaluating: bed, pre"
+#python evaluate_trained_model.py "point_transformer" "bed" "pre" >> pt_eval_results.txt
+#
+#echo "Evaluating: cap, pre"
+#python evaluate_trained_model.py "point_transformer" "cap" "pre" >> pt_eval_results.txt
+#
+#echo "Evaluating: car, pre"
+#python evaluate_trained_model.py "point_transformer" "car" "pre" >> pt_eval_results.txt
+#
+#echo "Evaluating: helmet, pre"
+#python evaluate_trained_model.py "point_transformer" "helmet" "pre" >> pt_eval_results.txt
+#
+#echo "Evaluating: knife, pre"
+#python evaluate_trained_model.py "point_transformer" "knife" "pre" >> pt_eval_results.txt
+#
+#echo "Evaluating: laptop, pre"
+#python evaluate_trained_model.py "point_transformer" "laptop" "pre" >> pt_eval_results.txt
+#
+#echo "Evaluating: motorcycle, pre"
+#python evaluate_trained_model.py "point_transformer" "motorcycle" "pre" >> pt_eval_results.txt
+#
+#echo "Evaluating: mug, pre"
+#python evaluate_trained_model.py "point_transformer" "mug" "pre" >> pt_eval_results.txt
+#
+#echo "Evaluating: skateboard, pre"
+#python evaluate_trained_model.py "point_transformer" "skateboard" "pre" >> pt_eval_results.txt
+#
+#echo "Evaluating: table, pre"
+#python evaluate_trained_model.py "point_transformer" "table" "pre" >> pt_eval_results.txt
+
+#echo "Evaluating: vessel, pre"
+#python evaluate_trained_model.py "point_transformer" "vessel" "pre" >> pt_eval_results.txt
+

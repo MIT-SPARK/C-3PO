@@ -24,21 +24,22 @@ point_transformer:
 
   theta: 25.0       # self-supervised loss function, pc_loss coefficient
   epsilon:
-    airplane: 0.99
-    bathtub: 0.99
-    bed: 0.99
+    airplane: 0.999
+    bathtub: 0.999
+    bed: 0.997
     bottle: 0.99
     cap: 0.99
+    car: 0.999
     chair: 0.99
     guitar: 0.99
-    helmet: 0.99
-    knife: 0.99
-    laptop: 0.99
-    motorcycle: 0.99
-    mug: 0.99
-    skateboard: 0.99
+    helmet: 0.999
+    knife: 0.995
+    laptop: 0.995
+    motorcycle: 0.995
+    mug: 0.999
+    skateboard: 0.999
     table: 0.99
-    vessel: 0.99
+    vessel: 0.999
 
 
   eval_dataset_len: 50
@@ -73,21 +74,22 @@ pointnet:
 
   theta: 25.0       # self-supervised loss function, pc_loss coefficient
   epsilon:
-    airplane: 0.99
-    bathtub: 0.99
-    bed: 0.99
+    airplane: 0.999
+    bathtub: 0.999
+    bed: 0.997
     bottle: 0.99
     cap: 0.99
+    car: 0.999
     chair: 0.99
     guitar: 0.99
-    helmet: 0.99
-    knife: 0.99
-    laptop: 0.99
-    motorcycle: 0.99
-    mug: 0.99
-    skateboard: 0.99
+    helmet: 0.999
+    knife: 0.995
+    laptop: 0.995
+    motorcycle: 0.995
+    mug: 0.999
+    skateboard: 0.999
     table: 0.99
-    vessel: 0.99
+    vessel: 0.999
 
 
   eval_dataset_len: 50

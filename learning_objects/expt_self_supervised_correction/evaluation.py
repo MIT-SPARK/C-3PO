@@ -115,6 +115,7 @@ def evaluate(eval_loader, model, hyper_param, certification=True, device=None):
         print("ADD-S (%): ", ave_adds_err.item())
 
         print("Evaluating certification: ")
+        print("epsilon parameter: ", hyper_param['epsilon'])
         print("% certifiable: ", fra_cert.item())
         print("Evaluating performance for certifiable objects: ")
         print("pc error: ", ave_pc_err_cert.item())

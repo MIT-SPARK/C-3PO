@@ -185,11 +185,13 @@ def self_supervised_training_loss(input_point_cloud, predicted_point_cloud, keyp
 
     if certi.sum() == 0:
         print("NO DATA POINT CERTIFIABLE IN THIS BATCH")
-        pc_loss, kp_loss, fra_certi = 0.0, 0.0, 0.0
+        # pc_loss, kp_loss, fra_certi = 0.0, 0.0, 0.0
         pc_loss = torch.tensor([0.0]).to(device=device_)
         kp_loss = torch.tensor([0.0]).to(device=device_)
+        fra_certi = torch.tensor([0.0]).to(device=device_)
         pc_loss.requires_grad = True
         kp_loss.requires_grad = True
+        fra_certi.requires_grad = True
 
     else:
         # fra certi

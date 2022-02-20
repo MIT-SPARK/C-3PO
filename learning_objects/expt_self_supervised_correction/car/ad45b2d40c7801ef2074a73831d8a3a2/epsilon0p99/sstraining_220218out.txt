@@ -1,0 +1,57 @@
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Training:  car ; Model ID: ad45b2d40c7801ef2074a73831d8a3a2
+--------------------
+Running self_supervised_training:  2022-02-18 13:49:31.137783
+--------------------
+device is  cuda
+--------------------
+Number of trainable parameters:  913090
+EPOCH : 1 TIME:  2022-02-18 13:49:33.505689
+Training on real data with self-supervision: 
+Batch  1  loss:  1.4945181608200073  pc loss:  0.056582484394311905  kp loss:  0.07995610684156418
+Batch  1  fra cert:  0.8999999761581421
+Batch  2  loss:  1.4745254516601562  pc loss:  0.05593213438987732  kp loss:  0.07622209191322327
+Batch  2  fra cert:  0.9799999594688416
+Batch  3  loss:  0.9931834936141968  pc loss:  0.03717338666319847  kp loss:  0.06384887546300888
+Batch  3  fra cert:  1.0
+Batch  4  loss:  1.283935308456421  pc loss:  0.04938510060310364  kp loss:  0.049307823181152344
+Batch  4  fra cert:  0.9799999594688416
+Batch  5  loss:  0.9174600839614868  pc loss:  0.03485558554530144  kp loss:  0.046070437878370285
+Batch  5  fra cert:  1.0
+Batch  6  loss:  0.8808728456497192  pc loss:  0.03409615904092789  kp loss:  0.02846887707710266
+Batch  6  fra cert:  1.0
+Batch  7  loss:  0.8686466813087463  pc loss:  0.03361021354794502  kp loss:  0.028391340747475624
+Batch  7  fra cert:  0.9799999594688416
+Batch  8  loss:  0.8443350791931152  pc loss:  0.032158736139535904  kp loss:  0.040366653352975845
+Batch  8  fra cert:  1.0
+Batch  9  loss:  0.8992342948913574  pc loss:  0.03417215868830681  kp loss:  0.04493033140897751
+Batch  9  fra cert:  1.0
+Batch  10  loss:  0.8336872458457947  pc loss:  0.03183359280228615  kp loss:  0.0378473736345768
+Batch  10  fra cert:  1.0
+Validation on real data: 
+LOSS self-supervised train 1.0490398645401, valid (%cert) 0.9799999594688416
+EPOCH : 2 TIME:  2022-02-18 14:14:27.506628
+Training on real data with self-supervision: 
+Batch  1  loss:  0.8390732407569885  pc loss:  0.03251336142420769  kp loss:  0.026239192113280296
+Batch  1  fra cert:  1.0
+Batch  2  loss:  0.7888959646224976  pc loss:  0.03059373050928116  kp loss:  0.024052690714597702
+Batch  2  fra cert:  1.0
+Batch  3  loss:  0.8179302215576172  pc loss:  0.03186412900686264  kp loss:  0.021327000111341476
+Batch  3  fra cert:  1.0
+Batch  4  loss:  0.8492630124092102  pc loss:  0.03322920948266983  kp loss:  0.018532773479819298
+Batch  4  fra cert:  1.0
+Batch  5  loss:  0.7689481377601624  pc loss:  0.030082250013947487  kp loss:  0.01689191721379757
+Batch  5  fra cert:  1.0
+Batch  6  loss:  0.7193554639816284  pc loss:  0.02804497256875038  kp loss:  0.01823115348815918
+Batch  6  fra cert:  1.0
+Batch  7  loss:  0.7169045209884644  pc loss:  0.02783481776714325  kp loss:  0.021034032106399536
+Batch  7  fra cert:  1.0
+Batch  8  loss:  0.7214236855506897  pc loss:  0.02809041552245617  kp loss:  0.01916332170367241
+Batch  8  fra cert:  1.0
+Batch  9  loss:  0.7116140127182007  pc loss:  0.027767255902290344  kp loss:  0.017432644963264465
+Batch  9  fra cert:  1.0
+Batch  10  loss:  0.6822152137756348  pc loss:  0.026585951447486877  kp loss:  0.01756644994020462
+Batch  10  fra cert:  1.0
+Validation on real data: 
+LOSS self-supervised train 0.7615623474121094, valid (%cert) 0.9799999594688416
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
