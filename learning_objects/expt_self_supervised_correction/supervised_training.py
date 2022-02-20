@@ -8,6 +8,7 @@ It can use registration during supervised training.
 import torch
 import pickle
 import yaml
+import argparse
 from pytorch3d import ops
 from torch.utils.tensorboard import SummaryWriter
 from datetime import datetime
@@ -16,7 +17,7 @@ import os
 import sys
 sys.path.append("../../")
 
-from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPC, CLASS_NAME
+from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPC, CLASS_NAME, CLASS_ID
 from learning_objects.utils.general import display_results
 
 # SAVE_LOCATION = '../../data/learning_objects/expt_registration/runs/'
@@ -354,18 +355,72 @@ def visualize_detector(hyper_param,
     return None
 
 
+
+### Wrappers:
+
+def train_kp_detectors(detector_type, model_class_ids, only_categories=None):
+
+    for key, value in model_class_ids.items():
+        if key in only_categories:
+            class_id = CLASS_ID[key]
+            model_id = str(value)
+
+            stream = open("supervised_training.yml", "r")
+            hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
+
+            print(">>"*40)
+            print("Training: ", key, "; Model ID:", str(model_id))
+            train_detector(hyper_param=hyper_param,
+                           detector_type=detector_type,
+                           class_id=class_id,
+                           model_id=model_id)
+            torch.cuda.empty_cache()
+
+
+def visualize_kp_detectors(detector_type, model_class_ids, only_categories=None):
+
+    for key, value in model_class_ids.items():
+        if key in only_categories:
+            class_id = CLASS_ID[key]
+            model_id = str(value)
+
+            stream = open("supervised_training.yml", "r")
+            hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
+
+            print(">>"*40)
+            print("Visualizing: ", key, "; Model ID:", str(model_id))
+
+            visualize_detector(detector_type=detector_type,
+                               class_id=class_id,
+                               model_id=model_id,
+                               hyper_param=hyper_param)
+            torch.cuda.empty_cache()
+
+
 if __name__ == "__main__":
 
-    class_id = "03001627"  # chair
-    class_name = CLASS_NAME[class_id]
-    model_id = "1e3fba4500d20bb49b9f2eb77f5e247e"  # a particular chair model
+    """
+    usage: 
+    >> python supervised_training.py "point_transformer" "chair"
+    >> python supervised_training.py "pointnet" "chair"
+    
+    """
 
-    stream = open("supervised_training.yml", "r")
-    hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("detector_type", help="specify the detector type.", type=str)
+    parser.add_argument("class_name", help="specify the ShapeNet class name.", type=str)
 
-    train_detector(detector_type='pointnet', class_id=class_id, model_id=model_id, hyper_param=hyper_param)
-    visualize_detector(detector_type='pointnet', class_id=class_id, model_id=model_id, hyper_param=hyper_param)
+    args = parser.parse_args()
 
-    train_detector(detector_type='point_transformer', class_id=class_id, model_id=model_id, hyper_param=hyper_param)
-    visualize_detector(detector_type='point_transformer', class_id=class_id, model_id=model_id, hyper_param=hyper_param)
+    # print("KP detector type: ", args.detector_type)
+    # print("CAD Model class: ", args.class_name)
+    detector_type = args.detector_type
+    class_name = args.class_name
+    only_categories = [class_name]
+
+    stream = open("class_model_ids.yml", "r")
+    model_class_ids = yaml.load(stream=stream, Loader=yaml.Loader)
+
+    train_kp_detectors(detector_type=detector_type, model_class_ids=model_class_ids,
+                       only_categories=only_categories)
 

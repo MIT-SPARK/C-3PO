@@ -1,25 +1,18 @@
 
 
 import torch
+import yaml
+import pickle
+import os
+
 import sys
 sys.path.append("../..")
 
+from learning_objects.datasets.keypointnet import CLASS_NAME, CLASS_ID, DepthPC
+
 from learning_objects.expt_self_supervised_correction.loss_functions import certify
-from learning_objects.expt_self_supervised_correction.evaluation_metrics import evaluation_error
-
+from learning_objects.expt_self_supervised_correction.evaluation_metrics import evaluation_error, add_s_error
 from learning_objects.expt_self_supervised_correction.loss_functions import chamfer_loss
-
-def add_s_error(predicted_point_cloud, ground_truth_point_cloud):
-    """
-    predicted_point_cloud       : torch.tensor of shape (B, 3, m)
-    ground_truth_point_cloud    : torch.tensor of shape (B, 3, m)
-
-    """
-
-    # compute chamfer loss between the two
-    #ToDo: Verify that this is indeed the ADD-S metric. We have used half-chamfer loss here.
-
-    return chamfer_loss(predicted_point_cloud, ground_truth_point_cloud)
 
 
 def evaluate(eval_loader, model, hyper_param, certification=True, device=None):
@@ -73,7 +66,8 @@ def evaluate(eval_loader, model, hyper_param, certification=True, device=None):
                                  output=(predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted))
 
             ground_truth_point_cloud = R_target @ model.cad_models + t_target
-            adds_err_ = add_s_error(predicted_point_cloud, ground_truth_point_cloud)
+            adds_err_ = add_s_error(predicted_point_cloud, ground_truth_point_cloud,
+                                    threshold=hyper_param["adds_threshold"])
 
             # error for all objects
             pc_err += pc_err_.sum()
@@ -101,16 +95,16 @@ def evaluate(eval_loader, model, hyper_param, certification=True, device=None):
         ave_kp_err = kp_err / ((i + 1)*batch_size)
         ave_R_err = R_err / ((i + 1)*batch_size)
         ave_t_err = t_err / ((i + 1)*batch_size)
-        ave_adds_err = adds_err / ((i + 1) * batch_size)
+        ave_adds_err = 100 * adds_err / ((i + 1) * batch_size)
 
         if certification:
             ave_pc_err_cert = pc_err_cert / num_cert
             ave_kp_err_cert = kp_err_cert / num_cert
             ave_R_err_cert = R_err_cert / num_cert
             ave_t_err_cert = t_err_cert / num_cert
-            ave_adds_err_cert = adds_err_cert / num_cert
+            ave_adds_err_cert = 100 * adds_err_cert / num_cert
 
-            fra_cert = num_cert / ((i + 1)*batch_size)
+            fra_cert = 100 * num_cert / ((i + 1)*batch_size)
 
         print(">>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>")
         print("Evaluating performance across all objects:")
@@ -118,20 +112,66 @@ def evaluate(eval_loader, model, hyper_param, certification=True, device=None):
         print("kp error: ", ave_kp_err.item())
         print("R error: ", ave_R_err.item())
         print("t error: ", ave_t_err.item())
-        print("ADD-S error: ", ave_adds_err.item())
+        print("ADD-S (%): ", ave_adds_err.item())
 
         print("Evaluating certification: ")
-        print("fraction certifiable: ", fra_cert.item())
+        print("% certifiable: ", fra_cert.item())
         print("Evaluating performance for certifiable objects: ")
         print("pc error: ", ave_pc_err_cert.item())
         print("kp error: ", ave_kp_err_cert.item())
         print("R error: ", ave_R_err_cert.item())
         print("t error: ", ave_t_err_cert.item())
-        print("ADD-S error: ", ave_adds_err_cert.item())
+        print("ADD-S (%): ", ave_adds_err_cert.item())
 
     return None
 
 
+def generate_depthpc_eval_data(model_class_ids, param):
+
+    base_dataset_folder = param['dataset_folder']
+
+    for key, value in model_class_ids.items():
+        class_id = CLASS_ID[key]
+        model_id = str(value)
+        class_name = CLASS_NAME[class_id]
+
+        dataset_folder = base_dataset_folder + class_name + '/' + model_id + '/'
+        if not os.path.exists(dataset_folder):
+            os.makedirs(dataset_folder)
+
+        dataset = DepthPC(class_id=class_id,
+                          model_id=model_id,
+                          n=param['num_of_points_selfsupervised'],
+                          num_of_points_to_sample=param['num_of_points_to_sample'],
+                          dataset_len=param["eval_dataset_len"],
+                          rotate_about_z=True)
+        loader = torch.utils.data.DataLoader(dataset, batch_size=1,
+                                             shuffle=False)
+
+        for idx, data in enumerate(loader):
+
+            filename = dataset_folder + 'item_' + str(idx) + '.pkl'
+            print(class_name, ':: ', "generating: ", filename)
+
+            with open(filename, 'wb') as outp:
+                pickle.dump(data, outp, pickle.HIGHEST_PROTOCOL)
+
+
+def plot_cert():
+
+    #ToDo: plot %cert during training
+
+    return None
+
 if __name__ == "__main__":
 
-    print("test")
+    print("THIS CODE WILL GENERATE AND STORE DATA FOR EVALUATION")
+
+    stream = open("class_model_ids.yml", "r")
+    model_class_ids = yaml.load(stream=stream, Loader=yaml.Loader)
+    stream = open("evaluation_datagen.yml", "r")
+    param = yaml.load(stream=stream, Loader=yaml.Loader)
+
+    # run this to generate evaluation data
+    # generate_depthpc_eval_data(model_class_ids=model_class_ids, param=param)
+

@@ -10,6 +10,7 @@ import torch.nn.functional as F
 import torchvision
 import torchvision.transforms as transforms
 import yaml
+import argparse
 import pickle
 from pytorch3d import ops
 
@@ -20,7 +21,8 @@ import os
 import sys
 sys.path.append("../../")
 
-from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPointCloud2, DepthPC, CLASS_NAME
+from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPointCloud2, DepthPC, CLASS_NAME, \
+    FixedDepthPC, CLASS_ID
 from learning_objects.models.certifiability import confidence, confidence_kp
 
 from learning_objects.utils.general import display_results, TrackingMeter
@@ -182,8 +184,8 @@ def train_without_supervision(self_supervised_train_loader, validation_loader, m
             pickle.dump(_fra_cert, outp, pickle.HIGHEST_PROTOCOL)
 
         # torch.cuda.empty_cache()
-        if -avg_vloss > 0.99:
-            print("ENDING TRAINING. REACHED > 99% CERTIFICATION (VALIDATION).")
+        if -avg_vloss > hyper_param['train_stop_cert_threshold']:
+            print("ENDING TRAINING. REACHED MAX. CERTIFICATION (AT VALIDATION).")
             break
 
     return train_loss, val_loss, certi_all_train_batches
@@ -383,11 +385,11 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
     # validation dataset:
     eval_dataset_len = hyper_param['eval_dataset_len']
     eval_batch_size = hyper_param['eval_batch_size']
-    eval_dataset = DepthPC(class_id=class_id, model_id=model_id,
-                           n=hyper_param['num_of_points_selfsupervised'],
-                           num_of_points_to_sample=hyper_param['num_of_points_to_sample'],
-                           dataset_len=eval_dataset_len,
-                           rotate_about_z=True)
+    eval_dataset = FixedDepthPC(class_id=class_id, model_id=model_id,
+                                n=hyper_param['num_of_points_selfsupervised'],
+                                num_of_points_to_sample=hyper_param['num_of_points_to_sample'],
+                                dataset_len=eval_dataset_len,
+                                rotate_about_z=True)
     eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=eval_batch_size, shuffle=False)
 
 
@@ -483,23 +485,94 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
 from learning_objects.expt_self_supervised_correction.evaluation import evaluate
 
 
+## Wrapper
+def train_kp_detectors(detector_type, model_class_ids, only_categories=None):
+
+    for key, value in model_class_ids.items():
+        if key in only_categories:
+            class_id = CLASS_ID[key]
+            model_id = str(value)
+
+            hyper_param_file = "self_supervised_training_" + detector_type + ".yml"
+            stream = open(hyper_param_file, "r")
+            hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
+
+            print(">>"*40)
+            print("Training: ", key, "; Model ID:", str(model_id))
+            train_detector(detector_type=detector_type,
+                           class_id=class_id,
+                           model_id=model_id,
+                           hyper_param=hyper_param)
+
+
+def visualize_kp_detectors(detector_type, model_class_ids, only_categories=None,
+                           evaluate_models=True,
+                           models_to_analyze='both',
+                           visualize=True,
+                           visualize_without_corrector=False,
+                           visualize_with_corrector=True,
+                           visualize_before=True,
+                           visualize_after=True):
+
+    if not visualize:
+        visualize_with_corrector, visualize_without_corrector, visualize_before, visualize_after \
+            = False, False, False, False
+
+    for key, value in model_class_ids.items():
+        if key in only_categories:
+            class_id = CLASS_ID[key]
+            model_id = str(value)
+            class_name = CLASS_NAME[class_id]
+
+            hyper_param_file = "self_supervised_training_" + detector_type + ".yml"
+            stream = open(hyper_param_file, "r")
+            hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
+
+            if class_name == 'bottle':
+                hyper_param["is_symmetric"] = True
+            else:
+                hyper_param["is_symmetric"] = False
+
+            print(">>"*40)
+            print("Analyzing Trained Model for Object: ", key, "; Model ID:", str(model_id))
+            visualize_detector(detector_type=detector_type,
+                               class_id=class_id,
+                               model_id=model_id,
+                               hyper_param=hyper_param,
+                               evaluate_models=evaluate_models,
+                               models_to_analyze=models_to_analyze,
+                               visualize_without_corrector=visualize_without_corrector,
+                               visualize_with_corrector=visualize_with_corrector,
+                               visualize_before=visualize_before,
+                               visualize_after=visualize_after)
+
+
 
 
 if __name__ == "__main__":
 
-    class_id = "03001627"  # chair
-    class_name = CLASS_NAME[class_id]
-    model_id = "1e3fba4500d20bb49b9f2eb77f5e247e"  # a particular chair model
+    """
+    usage: 
+    >> python self_supervised_training.py "point_transformer" "chair"
+    >> python self_supervised_training.py "pointnet" "chair"
+    """
 
-    stream = open("self_supervised_training_pointnet.yml", 'r')
-    hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
-    train_detector(detector_type='pointnet', class_id=class_id, model_id=model_id, hyper_param=hyper_param)
-    visualize_detector(detector_type='pointnet', class_id=class_id, model_id=model_id, hyper_param=hyper_param)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("detector_type", help="specify the detector type.", type=str)
+    parser.add_argument("class_name", help="specify the ShapeNet class name.", type=str)
 
-    # stream = open("self_supervised_training_point_transformer.yml", 'r')
-    # hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
-    # train_detector(detector_type='point_transformer', class_id=class_id, model_id=model_id, hyper_param=hyper_param)
-    # visualize_detector(detector_type='point_transformer', class_id=class_id, model_id=model_id, hyper_param=hyper_param)
+    args = parser.parse_args()
+
+    # print("KP detector type: ", args.detector_type)
+    # print("CAD Model class: ", args.class_name)
+    detector_type = args.detector_type
+    class_name = args.class_name
+    only_categories = [class_name]
+
+    stream = open("class_model_ids.yml", "r")
+    model_class_ids = yaml.load(stream=stream, Loader=yaml.Loader)
+
+    train_kp_detectors(detector_type=detector_type, model_class_ids=model_class_ids, only_categories=only_categories)
 
 
 

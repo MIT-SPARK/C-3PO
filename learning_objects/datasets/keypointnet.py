@@ -1,4 +1,5 @@
 import copy
+import pickle
 from enum import Enum
 
 ANNOTATIONS_FOLDER: str = '../../data/KeypointNet/KeypointNet/annotations/'
@@ -1072,7 +1073,7 @@ class FixedDepthPC(torch.utils.data.Dataset):
         """
 
     def __init__(self, class_id, model_id, n=1000, radius_multiple=torch.tensor([1.2, 3.0]),
-                 num_of_points_to_sample=10000, dataset_len=500, rotate_about_z=False):
+                 num_of_points_to_sample=10000, dataset_len=1, rotate_about_z=False):
         super().__init__()
         """
         class_id        : str   : class id of a ShapeNetCore object
@@ -1084,26 +1085,24 @@ class FixedDepthPC(torch.utils.data.Dataset):
         dataset_len     : int   : size of the dataset  
 
         """
-
+        self.base_dataset_folder = '../../data/learning_objects/shapenet_depthpc_eval_data/'
         self.class_id = class_id
+        self.class_name = CLASS_NAME[self.class_id]
         self.model_id = model_id
+        self.dataset_folder = self.base_dataset_folder + self.class_name + '/' + self.model_id + '/'
+
         self.n = n
         self.radius_multiple = radius_multiple
-        self.num_of_points_to_sample = num_of_points_to_sample
-        self.len = dataset_len
+        self.num_of_points_to_sample = 1000
+        self.len = len(os.listdir(self.dataset_folder))
         self.rotate_about_z = rotate_about_z
 
-        # ToDo: This is temporary. We will move the DepthPointCloud2() here when we completely deprecate it.
         self.dataset = DepthPointCloud2(class_id=self.class_id,
                                         model_id=self.model_id,
                                         radius_multiple=self.radius_multiple,
                                         num_of_points=self.num_of_points_to_sample,
                                         dataset_len=self.len,
                                         rotate_about_z=rotate_about_z)
-        # loader = torch.utils.data.DataLoader(self.dataset, batch_size=1, shuffle=False)
-        # for idx, data in enumerate(loader):
-        #     #ToDo: Write to save the data, if no folder exists.
-
 
     def __len__(self):
 
@@ -1111,49 +1110,11 @@ class FixedDepthPC(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
 
-        pc, keypoints, R, t = self.dataset.__getitem__(idx)
+        filename = self.dataset_folder + 'item_' + str(idx) + '.pkl'
+        with open(filename, 'rb') as inp:
+            data = pickle.load(inp)
 
-        point_cloud, padding = self._convert_to_fixed_sized_pc(pc, n=self.n)
-
-        # return point_cloud, keypoints, R, t, padding          # We don't need padding. Instead, let's be consistent.
-        return point_cloud, keypoints, R, t
-
-    def _convert_to_fixed_sized_pc(self, pc, n):
-        """
-        Adds (0,0,0) points to the point cloud if the number of points is less than
-        n such that the resulting point cloud has n points.
-
-        inputs:
-        pc  : torch.tensor of shape (3, m)  : input point cloud of size m (m could be anything)
-        n   : int                           : number of points the output point cloud should have
-
-        outputs:
-        point_cloud     : torch.tensor of shape (3, n)
-        padding         : torch.tensor of shape (n)
-
-        """
-
-        m = pc.shape[-1]
-
-        if m > n:
-            idx = torch.randperm(m)
-            point_cloud = pc[:, idx[:n]]
-            padding = torch.zeros(size=(n,), dtype=torch.bool)
-
-        elif m < n:
-
-            pc_pad = torch.zeros(3, n - m)
-            point_cloud = torch.cat([pc, pc_pad], dim=1)
-            padding1 = torch.zeros(size=(m,), dtype=torch.bool)
-            padding2 = torch.ones(size=(n - m,), dtype=torch.bool)
-            padding = torch.cat([padding1, padding2], dim=0)
-            # Write code to pad pc with (n-m) zeros
-
-        else:
-            point_cloud = pc
-            padding = torch.zeros(size=(n,), dtype=torch.bool)
-
-        return point_cloud, padding
+        return data[0].squeeze(0), data[1].squeeze(0), data[2].squeeze(0), data[3].squeeze(0)
 
     def _get_cad_models(self):
         """
@@ -1195,7 +1156,6 @@ class FixedDepthPC(torch.utils.data.Dataset):
         self.dataset._visualize()
 
         return 0
-
 
 
 class DepthPointCloud(torch.utils.data.Dataset):
@@ -1318,7 +1278,6 @@ class SE3PointCloud(torch.utils.data.Dataset):
         # size of the model
         self.diameter = np.linalg.norm(np.asarray(self.model_mesh.get_max_bound()) - np.asarray(self.model_mesh.get_min_bound()))
 
-
     def __len__(self):
 
         return self.len
@@ -1340,7 +1299,6 @@ class SE3PointCloud(torch.utils.data.Dataset):
 
         # return R @ model_pcd_torch + t, R, t
         return R @ model_pcd_torch + t, R @ self.keypoints_xyz.squeeze(0) + t, R, t
-
 
     def _get_cad_models_as_point_clouds(self):
         """
@@ -1449,7 +1407,6 @@ class SE3nIsotorpicShapePointCloud(torch.utils.data.Dataset):
         # size of the model
         self.diameter = np.linalg.norm(np.asarray(self.model_mesh.get_max_bound()) - np.asarray(self.model_mesh.get_min_bound()))
 
-
     def __len__(self):
 
         return self.len
@@ -1491,7 +1448,6 @@ class SE3nIsotorpicShapePointCloud(torch.utils.data.Dataset):
         shape[1] = alpha
 
         return model_pcd_torch, keypoints_xyz.squeeze(0), R, t, shape
-
 
     def _get_cad_models(self):
         """
@@ -1710,7 +1666,6 @@ class SE3nAnisotropicScalingPointCloud(torch.utils.data.Dataset):
         visualize_torch_model_n_keypoints(cad_models=cad_models, model_keypoints=model_keypoints)
 
         return 0
-
 
 
 # This dataset is for the heatmap keypoint detector

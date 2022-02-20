@@ -2,16 +2,20 @@
 import torch
 import pickle
 import sys
-sys.path.append("../..")
+import argparse
 
+sys.path.append("../..")
 
 if __name__ == "__main__":
 
     print("test")
-    # plotting %certifiable during training
-    filename = './chair/1e3fba4500d20bb49b9f2eb77f5e247e/_certi_all_batches_pointnet.pkl'
 
-    with open(filename, 'rb') as f:
-        fra_cert = pickle.load(f)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("detector_type", help="specify the detector type.", type=str)
+    parser.add_argument("class_name", help="specify the ShapeNet class name.", type=str)
 
-    print(fra_cert.val)
+    args = parser.parse_args()
+
+    print("KP detector type: ", args.detector_type)
+    print("CAD Model class: ", args.class_name)
+

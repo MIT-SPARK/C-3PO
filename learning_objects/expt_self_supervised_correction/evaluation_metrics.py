@@ -92,3 +92,19 @@ def evaluation_error(input, output):
 
     return pc_err, kp_err, R_err, t_err
     # return pc_loss
+
+
+def add_s_error(predicted_point_cloud, ground_truth_point_cloud, threshold):
+    """
+    predicted_point_cloud       : torch.tensor of shape (B, 3, m)
+    ground_truth_point_cloud    : torch.tensor of shape (B, 3, m)
+
+    output:
+    torch.tensor(dtype=torch.bool) of shape (B, 1)
+    """
+
+    # compute chamfer loss between the two
+    #ToDo: Verify that this is indeed the ADD-S metric. We have used half-chamfer loss here.
+
+    return chamfer_loss(predicted_point_cloud, ground_truth_point_cloud) <= threshold
+

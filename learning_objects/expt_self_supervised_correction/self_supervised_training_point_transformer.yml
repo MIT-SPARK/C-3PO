@@ -11,6 +11,8 @@ num_of_points_selfsupervised: 2048
 # train_batch_size: 100
 # train_num_of_points: 1000
 
+train_stop_cert_threshold: 0.99
+
 val_dataset_len: 50
 val_batch_size: 50
 #val_dataset_len: 1000
@@ -24,3 +26,6 @@ epsilon: 0.99     # certifiability parameter
 
 eval_dataset_len: 50
 eval_batch_size: 50
+
+adds_threshold: 0.001
+adds_max: True      # unused
