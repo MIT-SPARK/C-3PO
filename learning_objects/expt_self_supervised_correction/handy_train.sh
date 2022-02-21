@@ -1,27 +1,27 @@
 
 ##########################################################################
 
-echo "CAR:: POINT TRANSFORMER"
-python self_supervised_training.py "point_transformer" "car"
-
-echo "CAR:: POINTNET"
-python self_supervised_training.py "pointnet" "car"
-
-##########################################################################
-
-echo "MOTORCYCLE:: POINT TRANSFORMER"
-python self_supervised_training.py "point_transformer" "motorcycle"
-
-echo "MOTORCYCLE:: POINTNET"
-python self_supervised_training.py "pointnet" "motorcycle"
+#echo "CAR:: POINT TRANSFORMER"
+#python self_supervised_training.py "point_transformer" "car"
+#
+#echo "CAR:: POINTNET"
+#python self_supervised_training.py "pointnet" "car"
 
 ##########################################################################
 
-echo "TABLE:: POINT TRANSFORMER"
-python self_supervised_training.py "point_transformer" "table"
+#echo "MOTORCYCLE:: POINT TRANSFORMER"
+#python self_supervised_training.py "point_transformer" "motorcycle"
+#
+#echo "MOTORCYCLE:: POINTNET"
+#python self_supervised_training.py "pointnet" "motorcycle"
 
-echo "TABLE:: POINTNET"
-python self_supervised_training.py "pointnet" "table"
+##########################################################################
+
+#echo "TABLE:: POINT TRANSFORMER"
+#python self_supervised_training.py "point_transformer" "table"
+#
+#echo "TABLE:: POINTNET"
+#python self_supervised_training.py "pointnet" "table"
 
 ##########################################################################
 

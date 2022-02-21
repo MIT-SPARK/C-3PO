@@ -1,3 +1,16 @@
+echo "Evaluating: pointnet, motorcycle, post"
+python evaluate_trained_model.py "pointnet" "motorcycle" "post" >> pointnet_eval_results.txt
+
+echo "Evaluating: pt, motorcycle, post"
+python evaluate_trained_model.py "point_transformer" "motorcycle" "post" >> pt_eval_results.txt
+
+echo "Evaluating: pointnet, table, post"
+python evaluate_trained_model.py "pointnet" "table" "post" >> pointnet_eval_results.txt
+
+echo "Evaluating: pt, table, post"
+python evaluate_trained_model.py "point_transformer" "table" "post" >> pt_eval_results.txt
+
+
 #echo "Evaluating: airplane, pre"
 #python evaluate_trained_model.py "pointnet" "airplane" "pre" >> pointnet_eval_pre_models2.txt
 
@@ -7,8 +20,8 @@
 #echo "Evaluating: bed, pre"
 #python evaluate_trained_model.py "pointnet" "bed" "pre" >> pointnet_eval_pre_models2.txt
 
-echo "Evaluating: bed, pre"
-python evaluate_trained_model.py "point_transformer" "bed" "pre" >> pointnet_eval_pre_models2.txt
+#echo "Evaluating: bed, pre"
+#python evaluate_trained_model.py "point_transformer" "bed" "pre" >> pointnet_eval_pre_models2.txt
 
 #echo "Evaluating: cap, pre"
 #python evaluate_trained_model.py "pointnet" "cap" "pre" >> pointnet_eval_pre_models2.txt

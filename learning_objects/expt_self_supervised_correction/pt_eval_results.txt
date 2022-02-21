@@ -501,3 +501,51 @@ kp error:  0.0001242554426426068
 R error:  0.029184650629758835
 t error:  0.0030333325266838074
 ADD-S (%):  100.0
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  motorcycle ; Model ID: 481f7a57a12517e0fe1b9fad6c90c7bf
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  motorcycle ; Model ID: 481f7a57a12517e0fe1b9fad6c90c7bf
+Number of trainable parameters:  900778
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.00031101348577067256
+kp error:  0.1458500474691391
+R error:  1.39210045337677
+t error:  0.013162967748939991
+ADD-S (%):  98.0
+Evaluating certification: 
+epsilon parameter:  0.995
+% certifiable:  100.0
+Evaluating performance for certifiable objects: 
+pc error:  0.00031101348577067256
+kp error:  0.1458500623703003
+R error:  1.3921005725860596
+t error:  0.013162967748939991
+ADD-S (%):  98.0
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  table ; Model ID: 3f5daa8fe93b68fa87e2d08958d6900c
+Number of trainable parameters:  891544
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.0006703634280711412
+kp error:  0.383442759513855
+R error:  1.3622987270355225
+t error:  0.011288917623460293
+ADD-S (%):  96.0
+Evaluating certification: 
+epsilon parameter:  0.99
+% certifiable:  98.0
+Evaluating performance for certifiable objects: 
+pc error:  0.00021700306388083845
+kp error:  0.379907488822937
+R error:  1.3542094230651855
+t error:  0.01040696818381548
+ADD-S (%):  97.95918273925781
