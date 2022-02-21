@@ -13,7 +13,7 @@ SCANNET_OBJECT_ID = 63
 PATH_TO_DEPTH_CAMERA_INTRINSIC = '../../dataset/scan_net/scans/scene0000_00/exported_data/intrinsic/intrinsic_depth.txt'
 PATH_TO_CUSTOM_IMGS = '../../dataset/custom/'
 
-VISUALIZE = False
+VISUALIZE = True
 
 def read_camera_intrinsic_extrinsic_params(path):
     matrix = []
@@ -36,10 +36,10 @@ def depth_img_to_pcl(depth_o3d, camera_intrinsic, cv2_depth_filepath = None):
     #     assert os.path.exists(cv2_depth_filepath)
     #     depth_o3d = o3d.io.read_image(cv2_depth_filepath)
 
-    # print(depth_o3d)
-    # plt.subplot()
-    # plt.imshow(depth_o3d)
-    # plt.show()
+    print(depth_o3d)
+    plt.subplot()
+    plt.imshow(depth_o3d)
+    plt.show()
     cam = o3d.camera.PinholeCameraIntrinsic()
     cam.intrinsic_matrix = camera_intrinsic
     pcd = o3d.geometry.PointCloud.create_from_depth_image(depth_o3d, cam)
@@ -58,7 +58,7 @@ def depth_img_to_pcl(depth_o3d, camera_intrinsic, cv2_depth_filepath = None):
     return pcd
 
 
-def img_to_pcl(rgbd, camera_intrinsic):
+def img_to_pcl(rgbd, camera_intrinsic, viz=False):
     cam = o3d.camera.PinholeCameraIntrinsic()
     cam.intrinsic_matrix = camera_intrinsic
     pcd = o3d.geometry.PointCloud.create_from_rgbd_image(rgbd, cam)
@@ -69,7 +69,7 @@ def img_to_pcl(rgbd, camera_intrinsic):
     o3d.geometry.PointCloud.orient_normals_towards_camera_location(pcd, camera_location=np.array([0., 0., 0.]))
     # pcd.paint_uniform_color([.5, .5, 1])
     print(pcd)
-    if VISUALIZE:
+    if viz:
         o3d.visualization.draw_geometries([pcd])
     return pcd
 
