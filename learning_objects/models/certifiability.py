@@ -11,7 +11,7 @@ import os
 import sys
 sys.path.append("../../")
 
-
+#ToDo: change max_loss to False!!
 def chamfer_loss(pc, pc_, pc_padding=None, max_loss=True):
     """
     inputs:

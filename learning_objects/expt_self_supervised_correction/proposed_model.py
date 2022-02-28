@@ -6,6 +6,8 @@ This writes a proposed model for expt_registration
 
 import torch
 import torch.nn as nn
+import numpy as np
+import open3d as o3d
 import torch.nn.functional as F
 import torchvision
 import torchvision.transforms as transforms
@@ -24,7 +26,7 @@ from learning_objects.models.keypoint_corrector import kp_corrector_reg
 from learning_objects.models.point_transformer import kNN_torch, index_points
 
 from learning_objects.utils.ddn.node import ParamDeclarativeFunction
-from learning_objects.utils.general import display_results
+from learning_objects.utils.general import display_results, pos_tensor_to_o3d
 
 
 # Proposed Model
@@ -161,6 +163,78 @@ class ProposedModel(nn.Module):
                 display_results(inp, det_kp, inp, corrected_kp)
 
             return predicted_point_cloud, corrected_keypoints, R, t, correction
+
+
+class BaselineRegressionModel(nn.Module):
+
+    def __init__(self, class_name, model_keypoints, cad_models, regression_model=None,
+                 use_pretrained_regression_model=False):
+        super().__init__()
+        """ 
+        model_keypoints     : torch.tensor of shape (K, 3, N)
+        cad_models          : torch.tensor of shape (K, 3, n)  
+        keypoint_detector   : torch.nn.Module   : detects N keypoints for any sized point cloud input       
+                                                  should take input : torch.tensor of shape (B, 3, m)
+                                                  should output     : torch.tensor of shape (B, 3, N)
+
+        keypoint_detector_type  : 'regression' or 'heatmap'
+
+        """
+
+        # Parameters
+        self.class_name = class_name
+        self.model_keypoints = model_keypoints
+        self.cad_models = cad_models
+        self.device_ = self.cad_models.device
+
+        self.N = self.model_keypoints.shape[-1]  # (1, 1)
+        self.K = self.model_keypoints.shape[0]  # (1, 1)
+
+        # Keypoint Detector
+        if regression_model == None:
+            self.regression_model = RegressionKeypoints(N=9 + self.K, method='pointnet')
+
+        elif regression_model == 'pointnet':
+            self.regression_model = RegressionKeypoints(N=9 + self.K, method='pointnet')
+
+        elif regression_model == 'point_transformer':
+            self.regression_model = RegressionKeypoints(N=9 + self.K, method='point_transformer')
+
+        else:
+            raise NotImplementedError
+
+    def forward(self, input_point_cloud, need_predicted_model=False):
+        """
+        point_cloud : torch.tensor of shape (B, 3, m)
+
+        output:
+        rotation        : torch.tensor of shape (B, 3, 3)
+        translation     : torch.tensor of shape (B, 3, 1)
+        predicted_pc    :   torch.tensor of shape (B, 3, n)
+
+        """
+
+        batch_size, _, m = input_point_cloud.shape
+        # device_ = input_point_cloud.device
+
+        num_zero_pts = torch.sum(input_point_cloud == 0, dim=1)
+        num_zero_pts = torch.sum(num_zero_pts == 3, dim=1)
+        num_nonzero_pts = m - num_zero_pts
+        num_nonzero_pts = num_nonzero_pts.unsqueeze(-1)
+
+        center = torch.sum(input_point_cloud, dim=-1) / num_nonzero_pts
+        center = center.unsqueeze(-1)
+        pc_centered = input_point_cloud - center
+        x = self.regression_model(pc_centered)
+
+        R = x[:, 9].reshape(-1, 3, 3)
+        t = x[:, 9:]
+        t += center
+
+        if need_predicted_model:
+            return R, t, R @ self.cad_models + t
+        else:
+            return R, t, None
 
 
 class ProposedRegressionModel(nn.Module):
@@ -407,3 +481,65 @@ class ProposedHeatmapModel(nn.Module):
             else:
                 predicted_model_keypoints = R @ self.model_keypoints + t
                 return predicted_point_cloud, corrected_keypoints, R, t, correction, heatmap, predicted_model_keypoints
+
+
+# Baseline Implementations:
+class ICP():
+    def __init__(self, cad_models):
+        super().__init__()
+        """
+        cad_models : torch.tensor of shape (1, 3, m)
+        
+        """
+        self.cad_models = cad_models
+        self.source_points = pos_tensor_to_o3d(pos=cad_models.squeeze(0).to('cpu'), estimate_normals=False)
+        self.threshold = 0.02
+        self.trans_init = np.asarray([[1.0, 0.0, 0.0, 0.0],
+                                      [0.0, 1.0, 0.0, 0.0],
+                                      [0.0, 0.0, 0.0, 1.0], [0.0, 0.0, 0.0, 1.0]])
+
+    def forward(self, input_point_cloud):
+        """
+        input_point_cloud   : torch.tensor of shape (B, 3, n)
+
+        output:
+        predicted_point_cloud   : torch.tensor of shape (B, 3, m)
+        rotation                : torch.tensor of shape (B, 3, 3)
+        translation             : torch.tensor of shape (B, 3, 1)
+
+        """
+
+        device_ = input_point_cloud.device
+        batch_size = input_point_cloud.shape[0]
+
+        pc = input_point_cloud.to('cpu')
+        R = torch.zeros(batch_size, 3, 3).to('cpu')
+        t = torch.zeros(batch_size, 3, 1).to('cpu')
+
+        for b in range(batch_size):
+            target_points = pc[b, ...]
+            target_points = pos_tensor_to_o3d(pos=target_points, estimate_normals=False)
+
+            reg_p2p = o3d.pipelines.registration.registration_icp(self.source_points,
+                                                        target_points,
+                                                        self.threshold,
+                                                        self.trans_init,
+                                                        o3d.pipelines.registration.TransformationEstimationPointToPoint())
+
+            T = reg_p2p.transformation
+            R_ = T[:3, :3]
+            t_ = T[3, :3]
+            print(R_)
+            # print(t_)
+            # print(R.shape)
+            # x = torch.from_numpy(R_)
+            # print(x.shape)
+            R[b, ...] = torch.from_numpy(R_)
+            t[b, :, 0] = torch.from_numpy(t_)
+
+        R = R.to(device=device_)
+        t = t.to(device=device_)
+
+        return R @ self.cad_models + t, R, t
+
+

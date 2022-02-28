@@ -15,7 +15,9 @@ from learning_objects.expt_self_supervised_correction.evaluation_metrics import 
 from learning_objects.expt_self_supervised_correction.loss_functions import chamfer_loss
 
 
-def evaluate(eval_loader, model, hyper_param, certification=True, device=None):
+def evaluate(eval_loader, model, hyper_param, certification=True, device=None, correction_flag=True):
+
+    model.eval()
 
     if device==None:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -27,12 +29,14 @@ def evaluate(eval_loader, model, hyper_param, certification=True, device=None):
         R_err = 0.0
         t_err = 0.0
         adds_err = 0.0
+        auc = 0.0
 
         pc_err_cert = 0.0
         kp_err_cert = 0.0
         R_err_cert = 0.0
         t_err_cert = 0.0
         adds_err_cert = 0.0
+        auc_cert = 0.0
 
         num_cert = 0.0
         num_batches = len(eval_loader)
@@ -47,7 +51,7 @@ def evaluate(eval_loader, model, hyper_param, certification=True, device=None):
 
             # Make predictions for this batch
             predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted, correction, predicted_model_keypoints\
-                = model(input_point_cloud, correction_flag=True, need_predicted_keypoints=True)
+                = model(input_point_cloud, correction_flag=correction_flag, need_predicted_keypoints=True)
 
             if certification:
                 certi = certify(input_point_cloud=input_point_cloud,
@@ -66,8 +70,8 @@ def evaluate(eval_loader, model, hyper_param, certification=True, device=None):
                                  output=(predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted))
 
             ground_truth_point_cloud = R_target @ model.cad_models + t_target
-            adds_err_ = add_s_error(predicted_point_cloud, ground_truth_point_cloud,
-                                    threshold=hyper_param["adds_threshold"])
+            adds_err_, auc_ = add_s_error(predicted_point_cloud, ground_truth_point_cloud,
+                                         threshold=hyper_param["adds_threshold"])
 
             # error for all objects
             pc_err += pc_err_.sum()
@@ -75,6 +79,7 @@ def evaluate(eval_loader, model, hyper_param, certification=True, device=None):
             R_err += R_err_.sum()
             t_err += t_err_.sum()
             adds_err += adds_err_.sum()
+            auc += auc_
 
             if certification:
                 # fraction certifiable
@@ -87,6 +92,10 @@ def evaluate(eval_loader, model, hyper_param, certification=True, device=None):
                 t_err_cert += (t_err_ * certi).sum()
                 adds_err_cert += (adds_err_ * certi).sum()
 
+                _, auc_cert_ = add_s_error(predicted_point_cloud, ground_truth_point_cloud,
+                                          threshold=hyper_param['adds_threshold'], certi=certi)
+                auc_cert += auc_cert_
+
             del input_point_cloud, keypoints_target, R_target, t_target, \
                 predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted
 
@@ -96,6 +105,7 @@ def evaluate(eval_loader, model, hyper_param, certification=True, device=None):
         ave_R_err = R_err / ((i + 1)*batch_size)
         ave_t_err = t_err / ((i + 1)*batch_size)
         ave_adds_err = 100 * adds_err / ((i + 1) * batch_size)
+        ave_auc = 100 * auc / (i + 1)
 
         if certification:
             ave_pc_err_cert = pc_err_cert / num_cert
@@ -103,6 +113,7 @@ def evaluate(eval_loader, model, hyper_param, certification=True, device=None):
             ave_R_err_cert = R_err_cert / num_cert
             ave_t_err_cert = t_err_cert / num_cert
             ave_adds_err_cert = 100 * adds_err_cert / num_cert
+            ave_auc_cert = 100 * auc_cert / (i + 1)
 
             fra_cert = 100 * num_cert / ((i + 1)*batch_size)
 
@@ -113,6 +124,7 @@ def evaluate(eval_loader, model, hyper_param, certification=True, device=None):
         print("R error: ", ave_R_err.item())
         print("t error: ", ave_t_err.item())
         print("ADD-S (%): ", ave_adds_err.item())
+        print("ADD-S AUC: ", ave_auc.item())
 
         print("Evaluating certification: ")
         print("epsilon parameter: ", hyper_param['epsilon'])
@@ -123,6 +135,7 @@ def evaluate(eval_loader, model, hyper_param, certification=True, device=None):
         print("R error: ", ave_R_err_cert.item())
         print("t error: ", ave_t_err_cert.item())
         print("ADD-S (%): ", ave_adds_err_cert.item())
+        print("ADD-S AUC: ", ave_auc_cert.item())
 
     return None
 

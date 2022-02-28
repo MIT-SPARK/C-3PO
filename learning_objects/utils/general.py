@@ -341,7 +341,7 @@ def tensor_to_o3d(normals, pos):
     return object
 
 
-def pos_tensor_to_o3d(pos):
+def pos_tensor_to_o3d(pos, estimate_normals=True):
     """
     inputs:
     pos: torch.tensor of shape (3, N)
@@ -353,7 +353,8 @@ def pos_tensor_to_o3d(pos):
 
     object = o3d.geometry.PointCloud()
     object.points = pos_o3d
-    object.estimate_normals()
+    if estimate_normals:
+        object.estimate_normals()
 
     return object
 

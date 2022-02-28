@@ -35,7 +35,7 @@ from learning_objects.expt_self_supervised_correction.loss_functions import self
 from learning_objects.expt_self_supervised_correction.loss_functions import self_supervised_validation_loss \
     as validation_loss
 # evaluation metrics
-from learning_objects.expt_self_supervised_correction.evaluation_metrics import evaluation_error
+from learning_objects.expt_self_supervised_correction.evaluation_metrics import evaluation_error, add_s_error
 
 
 # Train
@@ -304,11 +304,14 @@ def train_detector(hyper_param, detector_type='pointnet', class_id="03001627",
 
 
 # Visualize
-def visual_test(test_loader, model, correction_flag=False, device=None):
+def visual_test(test_loader, model, hyper_param, correction_flag=False, device=None):
 
     if device == None:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         # torch.cuda.empty_cache()
+
+    cad_models = test_loader.dataset._get_cad_models()
+    cad_models = cad_models.to(device)
 
     for i, vdata in enumerate(test_loader):
         input_point_cloud, keypoints_target, R_target, t_target = vdata
@@ -330,27 +333,35 @@ def visual_test(test_loader, model, correction_flag=False, device=None):
 
         print("Certifiable: ", certi)
 
+        # add-s
+        pc_t = R_target @ cad_models + t_target
+        add_s = add_s_error(predicted_point_cloud=predicted_point_cloud,
+                            ground_truth_point_cloud=pc_t,
+                            threshold=hyper_param['adds_threshold'])
+        print("ADD-S: ", add_s)
+
         pc = input_point_cloud.clone().detach().to('cpu')
         pc_p = predicted_point_cloud.clone().detach().to('cpu')
+        pc_t = pc_t.clone().detach().to('cpu')
         kp = keypoints_target.clone().detach().to('cpu')
         kp_p = predicted_keypoints.clone().detach().to('cpu')
-        # display_results(input_point_cloud=pc_p, detected_keypoints=kp_p, target_point_cloud=pc,
-        #                 target_keypoints=kp)
-        display_results(input_point_cloud=pc, detected_keypoints=kp_p, target_point_cloud=pc,
+        display_results(input_point_cloud=pc_p, detected_keypoints=kp_p, target_point_cloud=pc_t,
                         target_keypoints=kp)
+        # display_results(input_point_cloud=pc, detected_keypoints=kp_p, target_point_cloud=pc,
+        #                 target_keypoints=kp)
 
-        del pc, pc_p, kp, kp_p
+        del pc, pc_p, kp, kp_p, pc_t
         del input_point_cloud, keypoints_target, R_target, t_target, \
             predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted
 
-        if i >= 10:
+        if i >= 9:
             break
 
 
 def visualize_detector(hyper_param, detector_type, class_id, model_id,
                        evaluate_models=True, models_to_analyze='both',
                        visualize_without_corrector=True, visualize_with_corrector=True,
-                       visualize_before=True, visualize_after=True, device=None):
+                       visualize=False, device=None):
     """
 
     """
@@ -451,27 +462,27 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
                       rotate_about_z=True)
     loader = torch.utils.data.DataLoader(dataset, batch_size=dataset_batch_size, shuffle=False)
 
-    if visualize_before and pre_:
+    if visualize and pre_:
         print(">>" * 40)
         print("VISUALIZING PRE-TRAINED MODEL:")
         print(">>" * 40)
         if visualize_without_corrector:
             print("Without corrector")
-            visual_test(test_loader=loader, model=model_before, correction_flag=False)
+            visual_test(test_loader=loader, model=model_before, hyper_param=hyper_param, correction_flag=False)
         if visualize_with_corrector:
             print("With corrector")
-            visual_test(test_loader=loader, model=model_before, correction_flag=True)
+            visual_test(test_loader=loader, model=model_before, hyper_param=hyper_param, correction_flag=True)
 
-    if visualize_after and post_:
+    if visualize and post_:
         print(">>" * 40)
         print("(SELF-SUPERVISED) TRAINED MODEL:")
         print(">>" * 40)
         if visualize_without_corrector:
             print("Without corrector")
-            visual_test(test_loader=loader, model=model_after, correction_flag=False)
+            visual_test(test_loader=loader, model=model_after, hyper_param=hyper_param, correction_flag=False)
         if visualize_with_corrector:
             print("With corrector")
-            visual_test(test_loader=loader, model=model_after, correction_flag=True)
+            visual_test(test_loader=loader, model=model_after, hyper_param=hyper_param, correction_flag=True)
 
     if pre_:
         del model_before, state_dict_pre
@@ -512,13 +523,10 @@ def visualize_kp_detectors(detector_type, model_class_ids, only_categories=None,
                            models_to_analyze='both',
                            visualize=True,
                            visualize_without_corrector=False,
-                           visualize_with_corrector=True,
-                           visualize_before=True,
-                           visualize_after=True):
+                           visualize_with_corrector=True):
 
     if not visualize:
-        visualize_with_corrector, visualize_without_corrector, visualize_before, visualize_after \
-            = False, False, False, False
+        visualize_with_corrector, visualize_without_corrector = False, False
 
     for key, value in model_class_ids.items():
         if key in only_categories:
@@ -547,8 +555,7 @@ def visualize_kp_detectors(detector_type, model_class_ids, only_categories=None,
                                models_to_analyze=models_to_analyze,
                                visualize_without_corrector=visualize_without_corrector,
                                visualize_with_corrector=visualize_with_corrector,
-                               visualize_before=visualize_before,
-                               visualize_after=visualize_after)
+                               visualize=visualize)
 
 
 
