@@ -1,4 +1,4 @@
-FILE_NAME="pt_eval_2pcent."
+FILE_NAME="./eval/eval_max_adds.txt"
 
 echo "Evaluating: pt, airplane, pre"
 python evaluate_trained_model.py "point_transformer" "airplane" "pre" >> $FILE_NAME
@@ -126,3 +126,134 @@ python evaluate_trained_model.py "point_transformer" "vessel" "pre" >> $FILE_NAM
 echo "Evaluating: pt, vessel, post"
 python evaluate_trained_model.py "point_transformer" "vessel" "post" >> $FILE_NAME
 
+
+
+
+############################################################################################
+############################################################################################
+
+echo "Evaluating: pointnet, airplane, pre"
+python evaluate_trained_model.py "pointnet" "airplane" "pre" >> $FILE_NAME
+
+echo "Evaluating: pointnet, airplane, post"
+python evaluate_trained_model.py "pointnet" "airplane" "post" >> $FILE_NAME
+
+############################################################################################
+
+echo "Evaluating: pointnet, bathtub, pre"
+python evaluate_trained_model.py "pointnet" "bathtub" "pre" >> $FILE_NAME
+
+echo "Evaluating: pointnet, bathtub, post"
+python evaluate_trained_model.py "pointnet" "bathtub" "post" >> $FILE_NAME
+
+############################################################################################
+
+echo "Evaluating: pointnet, bed, pre"
+python evaluate_trained_model.py "pointnet" "bed" "pre" >> $FILE_NAME
+
+echo "Evaluating: pointnet, bed, post"
+python evaluate_trained_model.py "pointnet" "bed" "post" >> $FILE_NAME
+
+############################################################################################
+
+echo "Evaluating: pointnet, bottle, pre"
+python evaluate_trained_model.py "pointnet" "bottle" "pre" >> $FILE_NAME
+
+echo "Evaluating: pointnet, bottle, post"
+python evaluate_trained_model.py "pointnet" "bottle" "post" >> $FILE_NAME
+
+############################################################################################
+
+echo "Evaluating: pointnet, cap, pre"
+python evaluate_trained_model.py "pointnet" "cap" "pre" >> $FILE_NAME
+
+echo "Evaluating: pointnet, cap, post"
+python evaluate_trained_model.py "pointnet" "cap" "post" >> $FILE_NAME
+
+############################################################################################
+
+echo "Evaluating: pointnet, car, pre"
+python evaluate_trained_model.py "pointnet" "car" "pre" >> $FILE_NAME
+
+echo "Evaluating: pointnet, car, post"
+python evaluate_trained_model.py "pointnet" "car" "post" >> $FILE_NAME
+
+############################################################################################
+
+echo "Evaluating: pointnet, chair, pre"
+python evaluate_trained_model.py "pointnet" "chair" "pre" >> $FILE_NAME
+
+echo "Evaluating: pointnet, chair, post"
+python evaluate_trained_model.py "pointnet" "chair" "post" >> $FILE_NAME
+
+############################################################################################
+
+echo "Evaluating: pointnet, guitar, pre"
+python evaluate_trained_model.py "pointnet" "guitar" "pre" >> $FILE_NAME
+
+echo "Evaluating: pointnet, guitar, post"
+python evaluate_trained_model.py "pointnet" "guitar" "post" >> $FILE_NAME
+
+############################################################################################
+
+echo "Evaluating: pointnet, helmet, pre"
+python evaluate_trained_model.py "pointnet" "helmet" "pre" >> $FILE_NAME
+
+echo "Evaluating: pointnet, helmet, post"
+python evaluate_trained_model.py "pointnet" "helmet" "post" >> $FILE_NAME
+
+############################################################################################
+
+echo "Evaluating: pointnet, knife, pre"
+python evaluate_trained_model.py "pointnet" "knife" "pre" >> $FILE_NAME
+
+echo "Evaluating: pointnet, knife, post"
+python evaluate_trained_model.py "pointnet" "knife" "post" >> $FILE_NAME
+
+############################################################################################
+
+echo "Evaluating: pointnet, laptop, pre"
+python evaluate_trained_model.py "pointnet" "laptop" "pre" >> $FILE_NAME
+
+echo "Evaluating: pointnet, laptop, post"
+python evaluate_trained_model.py "pointnet" "laptop" "post" >> $FILE_NAME
+
+############################################################################################
+
+echo "Evaluating: pointnet, motorcycle, pre"
+python evaluate_trained_model.py "pointnet" "motorcycle" "pre" >> $FILE_NAME
+
+echo "Evaluating: pointnet, motorcycle, post"
+python evaluate_trained_model.py "pointnet" "motorcycle" "post" >> $FILE_NAME
+
+############################################################################################
+
+echo "Evaluating: pointnet, mug, pre"
+python evaluate_trained_model.py "pointnet" "mug" "pre" >> $FILE_NAME
+
+echo "Evaluating: pointnet, mug, post"
+python evaluate_trained_model.py "pointnet" "mug" "post" >> $FILE_NAME
+
+############################################################################################
+
+echo "Evaluating: pointnet, skateboard, pre"
+python evaluate_trained_model.py "pointnet" "skateboard" "pre" >> $FILE_NAME
+
+echo "Evaluating: pointnet, skateboard, post"
+python evaluate_trained_model.py "pointnet" "skateboard" "post" >> $FILE_NAME
+
+############################################################################################
+
+echo "Evaluating: pointnet, table, pre"
+python evaluate_trained_model.py "pointnet" "table" "pre" >> $FILE_NAME
+
+echo "Evaluating: pointnet, table, post"
+python evaluate_trained_model.py "pointnet" "table" "post" >> $FILE_NAME
+
+############################################################################################
+
+echo "Evaluating: pointnet, vessel, pre"
+python evaluate_trained_model.py "pointnet" "vessel" "pre" >> $FILE_NAME
+
+echo "Evaluating: pointnet, vessel, post"
+python evaluate_trained_model.py "pointnet" "vessel" "post" >> $FILE_NAME

@@ -45,3 +45,53 @@ python evaluate_baseline.py "pointnet" "table" >> supervised_baseline_eval.txt
 
 echo "EVALUATING BASELINE: POINTNET, VESSEL"
 python evaluate_baseline.py "pointnet" "vessel" >> supervised_baseline_eval.txt
+
+
+
+echo "EVALUATING BASELINE: POINT_TRANSFORMER, AIRPLANE"
+python evaluate_baseline.py "point_transformer" "airplane" >> supervised_baseline_eval.txt
+
+echo "EVALUATING BASELINE: POINT_TRANSFORMER, BATHTUB"
+python evaluate_baseline.py "point_transformer" "bathtub" >> supervised_baseline_eval.txt
+
+echo "EVALUATING BASELINE: POINT_TRANSFORMER, BED"
+python evaluate_baseline.py "point_transformer" "bed" >> supervised_baseline_eval.txt
+
+echo "EVALUATING BASELINE: POINT_TRANSFORMER, BOTTLE"
+python evaluate_baseline.py "point_transformer" "bottle" >> supervised_baseline_eval.txt
+
+echo "EVALUATING BASELINE: POINT_TRANSFORMER, CAP"
+python evaluate_baseline.py "point_transformer" "cap" >> supervised_baseline_eval.txt
+
+echo "EVALUATING BASELINE: POINT_TRANSFORMER, CAR"
+python evaluate_baseline.py "point_transformer" "car" >> supervised_baseline_eval.txt
+
+echo "EVALUATING BASELINE: POINT_TRANSFORMER, CHAIR"
+python evaluate_baseline.py "point_transformer" "chair" >> supervised_baseline_eval.txt
+
+echo "EVALUATING BASELINE: POINT_TRANSFORMER, GUITAR"
+python evaluate_baseline.py "point_transformer" "guitar" >> supervised_baseline_eval.txt
+
+echo "EVALUATING BASELINE: POINT_TRANSFORMER, HELMET"
+python evaluate_baseline.py "point_transformer" "helmet" >> supervised_baseline_eval.txt
+
+echo "EVALUATING BASELINE: POINT_TRANSFORMER, KNIFE"
+python evaluate_baseline.py "point_transformer" "knife" >> supervised_baseline_eval.txt
+
+echo "EVALUATING BASELINE: POINT_TRANSFORMER, LAPTOP"
+python evaluate_baseline.py "point_transformer" "laptop" >> supervised_baseline_eval.txt
+
+echo "EVALUATING BASELINE: POINT_TRANSFORMER, MOTORCYCLE"
+python evaluate_baseline.py "point_transformer" "motorcycle" >> supervised_baseline_eval.txt
+
+echo "EVALUATING BASELINE: POINT_TRANSFORMER, MUG"
+python evaluate_baseline.py "point_transformer" "mug" >> supervised_baseline_eval.txt
+
+echo "EVALUATING BASELINE: POINT_TRANSFORMER, SKATEBOARD"
+python evaluate_baseline.py "point_transformer" "skateboard" >> supervised_baseline_eval.txt
+
+echo "EVALUATING BASELINE: POINT_TRANSFORMER, TABLE"
+python evaluate_baseline.py "point_transformer" "table" >> supervised_baseline_eval.txt
+
+echo "EVALUATING BASELINE: POINT_TRANSFORMER, VESSEL"
+python evaluate_baseline.py "point_transformer" "vessel" >> supervised_baseline_eval.txt

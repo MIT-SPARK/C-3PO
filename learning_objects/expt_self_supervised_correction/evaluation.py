@@ -73,6 +73,14 @@ def evaluate(eval_loader, model, hyper_param, certification=True, device=None, c
             adds_err_, auc_ = add_s_error(predicted_point_cloud, ground_truth_point_cloud,
                                          threshold=hyper_param["adds_threshold"])
 
+            # gt_cert_all = certify(input_point_cloud=ground_truth_point_cloud,
+            #                       predicted_point_cloud=predicted_point_cloud,
+            #                       corrected_keypoints=predicted_keypoints,
+            #                       predicted_model_keypoints=predicted_model_keypoints,
+            #                       epsilon=hyper_param['epsilon'],
+            #                       is_symmetric=hyper_param['is_symmetric'])
+
+
             # error for all objects
             pc_err += pc_err_.sum()
             kp_err += kp_err_.sum()
@@ -125,6 +133,7 @@ def evaluate(eval_loader, model, hyper_param, certification=True, device=None, c
         print("t error: ", ave_t_err.item())
         print("ADD-S (%): ", ave_adds_err.item())
         print("ADD-S AUC: ", ave_auc.item())
+        print("GT-certifiable: ")
 
         print("Evaluating certification: ")
         print("epsilon parameter: ", hyper_param['epsilon'])
@@ -136,6 +145,7 @@ def evaluate(eval_loader, model, hyper_param, certification=True, device=None, c
         print("t error: ", ave_t_err_cert.item())
         print("ADD-S (%): ", ave_adds_err_cert.item())
         print("ADD-S AUC: ", ave_auc_cert.item())
+        print("GT-certifiable: ")
 
     return None
 
@@ -162,10 +172,12 @@ def generate_depthpc_eval_data(model_class_ids, param):
         loader = torch.utils.data.DataLoader(dataset, batch_size=1,
                                              shuffle=False)
 
+        print("Generating data for: ", class_name)
+
         for idx, data in enumerate(loader):
 
             filename = dataset_folder + 'item_' + str(idx) + '.pkl'
-            print(class_name, ':: ', "generating: ", filename)
+            # print(class_name, ':: ', "generating: ", filename)
 
             with open(filename, 'wb') as outp:
                 pickle.dump(data, outp, pickle.HIGHEST_PROTOCOL)
@@ -179,13 +191,23 @@ def plot_cert():
 
 if __name__ == "__main__":
 
-    print("THIS CODE WILL GENERATE AND STORE DATA FOR EVALUATION")
+    # print("THIS CODE WILL GENERATE AND STORE DATA FOR EVALUATION")
+    #
+    # stream = open("class_model_ids.yml", "r")
+    # model_class_ids = yaml.load(stream=stream, Loader=yaml.Loader)
+    # stream = open("evaluation_datagen.yml", "r")
+    # param = yaml.load(stream=stream, Loader=yaml.Loader)
+    #
+    # run this to generate evaluation data
+    # generate_depthpc_eval_data(model_class_ids=model_class_ids, param=param)
+
+    print("THIS CODE WILL GENERATE AND STORE DATA FOR SUPERVISED BASELINE TRAINING")
 
     stream = open("class_model_ids.yml", "r")
     model_class_ids = yaml.load(stream=stream, Loader=yaml.Loader)
-    stream = open("evaluation_datagen.yml", "r")
+    stream = open("baseline_training.yml", "r")
     param = yaml.load(stream=stream, Loader=yaml.Loader)
 
     # run this to generate evaluation data
-    # generate_depthpc_eval_data(model_class_ids=model_class_ids, param=param)
+    generate_depthpc_eval_data(model_class_ids=model_class_ids, param=param)
 

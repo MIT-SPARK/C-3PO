@@ -1,0 +1,1549 @@
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  airplane ; Model ID: 3db61220251b3c9de719b5362fe06bbb
+Number of trainable parameters:  900778
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.029199320822954178
+kp error:  0.18184737861156464
+R error:  nan
+t error:  0.030621539801359177
+ADD-S (%):  32.0
+ADD-S AUC:  18.221363067626953
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  32.0
+Evaluating performance for certifiable objects: 
+pc error:  0.005325334146618843
+kp error:  0.005491848569363356
+R error:  nan
+t error:  0.0014138009864836931
+ADD-S (%):  100.0
+ADD-S AUC:  56.9417610168457
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  airplane ; Model ID: 3db61220251b3c9de719b5362fe06bbb
+Number of trainable parameters:  900778
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.01982126384973526
+kp error:  0.21951881051063538
+R error:  1.709035038948059
+t error:  0.030137723311781883
+ADD-S (%):  40.0
+ADD-S AUC:  26.832639694213867
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  40.0
+Evaluating performance for certifiable objects: 
+pc error:  0.004786652512848377
+kp error:  0.004988298285752535
+R error:  0.014782738871872425
+t error:  0.001473732991144061
+ADD-S (%):  100.0
+ADD-S AUC:  67.08160400390625
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  bathtub ; Model ID: 90b6e958b359c1592ad490d4d7fae486
+Number of trainable parameters:  897700
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.023586120456457138
+kp error:  0.39438292384147644
+R error:  1.8141428232192993
+t error:  0.027383944019675255
+ADD-S (%):  6.0
+ADD-S AUC:  2.695113182067871
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  12.0
+Evaluating performance for certifiable objects: 
+pc error:  0.013880740851163864
+kp error:  0.01579003781080246
+R error:  0.04710840806365013
+t error:  0.0030773356556892395
+ADD-S (%):  50.0
+ADD-S AUC:  22.45927619934082
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  bathtub ; Model ID: 90b6e958b359c1592ad490d4d7fae486
+Number of trainable parameters:  897700
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.01599634438753128
+kp error:  0.3395553529262543
+R error:  1.5091663599014282
+t error:  0.008450036868453026
+ADD-S (%):  12.0
+ADD-S AUC:  6.562250137329102
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  48.0
+Evaluating performance for certifiable objects: 
+pc error:  0.013521481305360794
+kp error:  0.01936921291053295
+R error:  0.05569564178586006
+t error:  0.004180307034403086
+ADD-S (%):  20.83333396911621
+ADD-S AUC:  11.866403579711914
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  bed ; Model ID: 7c8eb4ab1f2c8bfa2fb46fb8b9b1ac9f
+Number of trainable parameters:  894622
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.02909640222787857
+kp error:  0.517818808555603
+R error:  1.9929749965667725
+t error:  0.031649399548769
+ADD-S (%):  0.0
+ADD-S AUC:  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.997
+% certifiable:  34.0
+Evaluating performance for certifiable objects: 
+pc error:  0.0212935172021389
+kp error:  0.3675423860549927
+R error:  1.3174539804458618
+t error:  0.024257062003016472
+ADD-S (%):  0.0
+ADD-S AUC:  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  bed ; Model ID: 7c8eb4ab1f2c8bfa2fb46fb8b9b1ac9f
+Number of trainable parameters:  894622
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.018796902149915695
+kp error:  0.0388028547167778
+R error:  0.07501374930143356
+t error:  0.009313886985182762
+ADD-S (%):  2.0
+ADD-S AUC:  2.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.997
+% certifiable:  98.0
+Evaluating performance for certifiable objects: 
+pc error:  0.01856444962322712
+kp error:  0.034575361758470535
+R error:  0.0657307580113411
+t error:  0.008448719047009945
+ADD-S (%):  2.040816307067871
+ADD-S AUC:  2.040816307067871
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  bottle ; Model ID: 41a2005b595ae783be1868124d5ddbcb
+Number of trainable parameters:  905395
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.014303170144557953
+kp error:  0.12049100548028946
+R error:  1.492014765739441
+t error:  0.010468943975865841
+ADD-S (%):  0.0
+ADD-S AUC:  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99
+% certifiable:  94.0
+Evaluating performance for certifiable objects: 
+pc error:  0.01134481094777584
+kp error:  0.08282360434532166
+R error:  1.3975569009780884
+t error:  0.002951814793050289
+ADD-S (%):  0.0
+ADD-S AUC:  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  bottle ; Model ID: 41a2005b595ae783be1868124d5ddbcb
+Number of trainable parameters:  905395
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.011136873625218868
+kp error:  0.0925304964184761
+R error:  1.6746337413787842
+t error:  0.002518857130780816
+ADD-S (%):  2.0
+ADD-S AUC:  1.999999761581421
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99
+% certifiable:  100.0
+Evaluating performance for certifiable objects: 
+pc error:  0.011136873625218868
+kp error:  0.0925304964184761
+R error:  1.6746337413787842
+t error:  0.002518857130780816
+ADD-S (%):  2.0
+ADD-S AUC:  1.999999761581421
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  cap ; Model ID: 3dec0d851cba045fbf444790f25ea3db
+Number of trainable parameters:  888466
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.03620433807373047
+kp error:  0.3025690019130707
+R error:  1.5315717458724976
+t error:  0.047085464000701904
+ADD-S (%):  10.0
+ADD-S AUC:  4.565662860870361
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99
+% certifiable:  44.0
+Evaluating performance for certifiable objects: 
+pc error:  0.010590746998786926
+kp error:  0.14397400617599487
+R error:  0.6604036092758179
+t error:  0.020890312269330025
+ADD-S (%):  22.727272033691406
+ADD-S AUC:  10.376506805419922
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  cap ; Model ID: 3dec0d851cba045fbf444790f25ea3db
+Number of trainable parameters:  888466
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.012770190834999084
+kp error:  0.16263602674007416
+R error:  0.7730192542076111
+t error:  0.010673532262444496
+ADD-S (%):  8.0
+ADD-S AUC:  2.911489248275757
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99
+% certifiable:  96.0
+Evaluating performance for certifiable objects: 
+pc error:  0.011633801274001598
+kp error:  0.14917220175266266
+R error:  0.6970400810241699
+t error:  0.009040354751050472
+ADD-S (%):  8.333333015441895
+ADD-S AUC:  3.032801389694214
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  car ; Model ID: ad45b2d40c7801ef2074a73831d8a3a2
+Number of trainable parameters:  913090
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.02508840337395668
+kp error:  0.40430575609207153
+R error:  2.220449447631836
+t error:  0.0690714418888092
+ADD-S (%):  2.0
+ADD-S AUC:  2.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.9978
+% certifiable:  8.0
+Evaluating performance for certifiable objects: 
+pc error:  0.017670363187789917
+kp error:  0.2376205176115036
+R error:  1.449459433555603
+t error:  0.0442090705037117
+ADD-S (%):  25.0
+ADD-S AUC:  24.999998092651367
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  car ; Model ID: ad45b2d40c7801ef2074a73831d8a3a2
+Number of trainable parameters:  913090
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.017162855714559555
+kp error:  0.2705891728401184
+R error:  1.3448584079742432
+t error:  0.014608568511903286
+ADD-S (%):  12.0
+ADD-S AUC:  3.835019826889038
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.9978
+% certifiable:  90.0
+Evaluating performance for certifiable objects: 
+pc error:  0.016500594094395638
+kp error:  0.2796073853969574
+R error:  1.4112318754196167
+t error:  0.012531587854027748
+ADD-S (%):  13.333333015441895
+ADD-S AUC:  4.261133670806885
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  chair ; Model ID: 1cc6f2ed3d684fa245f213b8994b4a04
+Number of trainable parameters:  894622
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.02290194481611252
+kp error:  0.1268698126077652
+R error:  0.9526253342628479
+t error:  0.011997663415968418
+ADD-S (%):  44.0
+ADD-S AUC:  14.563549041748047
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99
+% certifiable:  70.0
+Evaluating performance for certifiable objects: 
+pc error:  0.014992390759289265
+kp error:  0.06455989927053452
+R error:  0.5401855707168579
+t error:  0.0058678193017840385
+ADD-S (%):  62.85714340209961
+ADD-S AUC:  20.805068969726562
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  chair ; Model ID: 1cc6f2ed3d684fa245f213b8994b4a04
+Number of trainable parameters:  894622
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.01245804037898779
+kp error:  0.018098009750247
+R error:  0.06249319016933441
+t error:  0.004131924360990524
+ADD-S (%):  56.0
+ADD-S AUC:  17.566184997558594
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99
+% certifiable:  96.0
+Evaluating performance for certifiable objects: 
+pc error:  0.01145231258124113
+kp error:  0.012882024049758911
+R error:  0.03328709304332733
+t error:  0.003674108535051346
+ADD-S (%):  58.33333206176758
+ADD-S AUC:  18.298110961914062
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  guitar ; Model ID: 5df08ba7af60e7bfe72db292d4e13056
+Number of trainable parameters:  893083
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.01258909236639738
+kp error:  0.11176877468824387
+R error:  1.9138894081115723
+t error:  0.009093115106225014
+ADD-S (%):  34.0
+ADD-S AUC:  17.550277709960938
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99
+% certifiable:  96.0
+Evaluating performance for certifiable objects: 
+pc error:  0.01052634883671999
+kp error:  0.09638288617134094
+R error:  1.864415168762207
+t error:  0.006543791387230158
+ADD-S (%):  35.41666793823242
+ADD-S AUC:  18.281539916992188
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  guitar ; Model ID: 5df08ba7af60e7bfe72db292d4e13056
+Number of trainable parameters:  893083
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.01022355630993843
+kp error:  0.08988732844591141
+R error:  1.7366809844970703
+t error:  0.006134651135653257
+ADD-S (%):  40.0
+ADD-S AUC:  19.281888961791992
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99
+% certifiable:  100.0
+Evaluating performance for certifiable objects: 
+pc error:  0.01022355630993843
+kp error:  0.089887335896492
+R error:  1.7366811037063599
+t error:  0.006134651135653257
+ADD-S (%):  40.0
+ADD-S AUC:  19.281888961791992
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  helmet ; Model ID: 3621cf047be0d1ae52fafb0cab311e6a
+Number of trainable parameters:  893083
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.029462376609444618
+kp error:  0.3199772834777832
+R error:  1.6406521797180176
+t error:  0.01898375153541565
+ADD-S (%):  0.0
+ADD-S AUC:  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  4.0
+Evaluating performance for certifiable objects: 
+pc error:  0.013388724997639656
+kp error:  0.0289403535425663
+R error:  0.11516785621643066
+t error:  0.004920790437608957
+ADD-S (%):  0.0
+ADD-S AUC:  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  helmet ; Model ID: 3621cf047be0d1ae52fafb0cab311e6a
+Number of trainable parameters:  893083
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.017435947433114052
+kp error:  0.13119085133075714
+R error:  0.7067847847938538
+t error:  0.008178045973181725
+ADD-S (%):  6.0
+ADD-S AUC:  2.81129789352417
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  38.0
+Evaluating performance for certifiable objects: 
+pc error:  0.012570270337164402
+kp error:  0.019096722826361656
+R error:  0.07351715862751007
+t error:  0.003322079312056303
+ADD-S (%):  10.526315689086914
+ADD-S AUC:  6.347404479980469
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  knife ; Model ID: 819e16fd120732f4609e2d916fa0da27
+Number of trainable parameters:  888466
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.024505674839019775
+kp error:  0.24745707213878632
+R error:  2.097736120223999
+t error:  0.08026508241891861
+ADD-S (%):  28.0
+ADD-S AUC:  13.933955192565918
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.995
+% certifiable:  64.0
+Evaluating performance for certifiable objects: 
+pc error:  0.010420137085020542
+kp error:  0.13960430026054382
+R error:  1.6664104461669922
+t error:  0.039711691439151764
+ADD-S (%):  43.75
+ADD-S AUC:  21.771804809570312
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  knife ; Model ID: 819e16fd120732f4609e2d916fa0da27
+Number of trainable parameters:  888466
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.00753761176019907
+kp error:  0.048729557543992996
+R error:  1.2612707614898682
+t error:  0.004590427037328482
+ADD-S (%):  56.0
+ADD-S AUC:  27.99755859375
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.995
+% certifiable:  100.0
+Evaluating performance for certifiable objects: 
+pc error:  0.00753761176019907
+kp error:  0.048729557543992996
+R error:  1.2612708806991577
+t error:  0.004590427502989769
+ADD-S (%):  56.0
+ADD-S AUC:  27.99755859375
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  laptop ; Model ID: 519e98268bee56dddbb1de10c9529bf7
+Number of trainable parameters:  888466
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.042588990181684494
+kp error:  0.6124345064163208
+R error:  2.6272759437561035
+t error:  0.04544253647327423
+ADD-S (%):  0.0
+ADD-S AUC:  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.995
+% certifiable:  24.0
+Evaluating performance for certifiable objects: 
+pc error:  0.014190609566867352
+kp error:  0.7993855476379395
+R error:  2.8634274005889893
+t error:  0.029672807082533836
+ADD-S (%):  0.0
+ADD-S AUC:  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  laptop ; Model ID: 519e98268bee56dddbb1de10c9529bf7
+Number of trainable parameters:  888466
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.01671312004327774
+kp error:  0.6715949773788452
+R error:  2.3707945346832275
+t error:  0.029005059972405434
+ADD-S (%):  4.0
+ADD-S AUC:  2.6282787322998047
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.995
+% certifiable:  94.0
+Evaluating performance for certifiable objects: 
+pc error:  0.013729351572692394
+kp error:  0.6709505319595337
+R error:  2.403672933578491
+t error:  0.026911133900284767
+ADD-S (%):  4.255319118499756
+ADD-S AUC:  2.796041250228882
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  motorcycle ; Model ID: 481f7a57a12517e0fe1b9fad6c90c7bf
+Number of trainable parameters:  900778
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.01795528084039688
+kp error:  0.2568991482257843
+R error:  1.5458849668502808
+t error:  0.019332611933350563
+ADD-S (%):  26.0
+ADD-S AUC:  7.456249713897705
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.995
+% certifiable:  88.0
+Evaluating performance for certifiable objects: 
+pc error:  0.015797220170497894
+kp error:  0.25090649724006653
+R error:  1.4654844999313354
+t error:  0.01757912151515484
+ADD-S (%):  29.545454025268555
+ADD-S AUC:  8.47301197052002
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  motorcycle ; Model ID: 481f7a57a12517e0fe1b9fad6c90c7bf
+Number of trainable parameters:  900778
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.015854408964514732
+kp error:  0.23875123262405396
+R error:  1.388573169708252
+t error:  0.013439840637147427
+ADD-S (%):  18.0
+ADD-S AUC:  7.412226676940918
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.995
+% certifiable:  100.0
+Evaluating performance for certifiable objects: 
+pc error:  0.01585441082715988
+kp error:  0.23875123262405396
+R error:  1.388573169708252
+t error:  0.013439841568470001
+ADD-S (%):  18.0
+ADD-S AUC:  7.412226676940918
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  mug ; Model ID: f3a7f8198cc50c225f5e789acd4d1122
+Number of trainable parameters:  896161
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.028825348243117332
+kp error:  0.21376726031303406
+R error:  1.2997350692749023
+t error:  0.031016863882541656
+ADD-S (%):  6.0
+ADD-S AUC:  2.847151279449463
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  22.0
+Evaluating performance for certifiable objects: 
+pc error:  0.013986069709062576
+kp error:  0.1499304622411728
+R error:  1.0477814674377441
+t error:  0.024314792826771736
+ADD-S (%):  18.18181800842285
+ADD-S AUC:  11.788049697875977
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  mug ; Model ID: f3a7f8198cc50c225f5e789acd4d1122
+Number of trainable parameters:  896161
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.022530635818839073
+kp error:  0.12671838700771332
+R error:  0.7377750873565674
+t error:  0.019951535388827324
+ADD-S (%):  10.0
+ADD-S AUC:  3.802997350692749
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  30.0
+Evaluating performance for certifiable objects: 
+pc error:  0.014003381133079529
+kp error:  0.15220709145069122
+R error:  0.9791213274002075
+t error:  0.024355944246053696
+ADD-S (%):  20.0
+ADD-S AUC:  9.772561073303223
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  skateboard ; Model ID: 98222a1e5f59f2098745e78dbc45802e
+Number of trainable parameters:  894622
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.017569638788700104
+kp error:  0.28304287791252136
+R error:  nan
+t error:  0.011463051661849022
+ADD-S (%):  46.0
+ADD-S AUC:  20.809707641601562
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  50.0
+Evaluating performance for certifiable objects: 
+pc error:  0.007876732386648655
+kp error:  0.009034696035087109
+R error:  nan
+t error:  0.002328288508579135
+ADD-S (%):  92.0
+ADD-S AUC:  41.619415283203125
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  skateboard ; Model ID: 98222a1e5f59f2098745e78dbc45802e
+Number of trainable parameters:  894622
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.018348518759012222
+kp error:  0.211492121219635
+R error:  0.8276790976524353
+t error:  0.007788189686834812
+ADD-S (%):  68.0
+ADD-S AUC:  25.880578994750977
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  70.0
+Evaluating performance for certifiable objects: 
+pc error:  0.007845873944461346
+kp error:  0.008791683241724968
+R error:  0.02910866029560566
+t error:  0.002080535050481558
+ADD-S (%):  97.14286041259766
+ADD-S AUC:  36.97226333618164
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  table ; Model ID: 3f5daa8fe93b68fa87e2d08958d6900c
+Number of trainable parameters:  891544
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.03226260468363762
+kp error:  0.48303523659706116
+R error:  nan
+t error:  0.019843431189656258
+ADD-S (%):  16.0
+ADD-S AUC:  6.367706298828125
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99
+% certifiable:  78.0
+Evaluating performance for certifiable objects: 
+pc error:  0.012582679279148579
+kp error:  0.4427327513694763
+R error:  nan
+t error:  0.009934681467711926
+ADD-S (%):  20.512821197509766
+ADD-S AUC:  8.163726806640625
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  table ; Model ID: 3f5daa8fe93b68fa87e2d08958d6900c
+Number of trainable parameters:  891544
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.01335925329476595
+kp error:  0.4051196277141571
+R error:  1.3277382850646973
+t error:  0.00976531207561493
+ADD-S (%):  14.0
+ADD-S AUC:  4.704555034637451
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99
+% certifiable:  100.0
+Evaluating performance for certifiable objects: 
+pc error:  0.01335925329476595
+kp error:  0.4051196277141571
+R error:  1.3277382850646973
+t error:  0.009765313006937504
+ADD-S (%):  14.0
+ADD-S AUC:  4.704555034637451
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  vessel ; Model ID: 5c54100c798dd681bfeb646a8eadb57
+Number of trainable parameters:  903856
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.03354613855481148
+kp error:  0.3348027765750885
+R error:  2.142137289047241
+t error:  0.07255754619836807
+ADD-S (%):  2.0
+ADD-S AUC:  2.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  2.0
+Evaluating performance for certifiable objects: 
+pc error:  0.00829816609621048
+kp error:  0.008769693784415722
+R error:  0.03421970084309578
+t error:  0.002202464733272791
+ADD-S (%):  100.0
+ADD-S AUC:  100.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  vessel ; Model ID: 5c54100c798dd681bfeb646a8eadb57
+Number of trainable parameters:  903856
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.018527451902627945
+kp error:  0.22188711166381836
+R error:  1.1560205221176147
+t error:  0.03476547822356224
+ADD-S (%):  30.0
+ADD-S AUC:  7.101341247558594
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  50.0
+Evaluating performance for certifiable objects: 
+pc error:  0.011016709730029106
+kp error:  0.014839982613921165
+R error:  0.04351019859313965
+t error:  0.0041435640305280685
+ADD-S (%):  60.0
+ADD-S AUC:  14.202682495117188
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  airplane ; Model ID: 3db61220251b3c9de719b5362fe06bbb
+Number of trainable parameters:  1614643
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.03250093385577202
+kp error:  0.2557600438594818
+R error:  2.886390209197998
+t error:  0.04435498267412186
+ADD-S (%):  2.0
+ADD-S AUC:  2.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  2.0
+Evaluating performance for certifiable objects: 
+pc error:  0.004225907847285271
+kp error:  0.004348354879766703
+R error:  0.007993529550731182
+t error:  0.0014939326792955399
+ADD-S (%):  100.0
+ADD-S AUC:  100.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  airplane ; Model ID: 3db61220251b3c9de719b5362fe06bbb
+ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  bathtub ; Model ID: 90b6e958b359c1592ad490d4d7fae486
+Number of trainable parameters:  1613101
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.0318913497030735
+kp error:  0.43252143263816833
+R error:  2.1435842514038086
+t error:  0.03305749222636223
+ADD-S (%):  0.0
+ADD-S AUC:  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  8.0
+Evaluating performance for certifiable objects: 
+pc error:  0.0135082071647048
+kp error:  0.01980600878596306
+R error:  0.0556863434612751
+t error:  0.004661554470658302
+ADD-S (%):  0.0
+ADD-S AUC:  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  bathtub ; Model ID: 90b6e958b359c1592ad490d4d7fae486
+ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  bed ; Model ID: 7c8eb4ab1f2c8bfa2fb46fb8b9b1ac9f
+Number of trainable parameters:  1611559
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.0317486934363842
+kp error:  0.5912731885910034
+R error:  1.9782195091247559
+t error:  0.03029482252895832
+ADD-S (%):  0.0
+ADD-S AUC:  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.997
+% certifiable:  22.0
+Evaluating performance for certifiable objects: 
+pc error:  0.020840179175138474
+kp error:  0.43984195590019226
+R error:  1.4653041362762451
+t error:  0.019272558391094208
+ADD-S (%):  0.0
+ADD-S AUC:  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  bed ; Model ID: 7c8eb4ab1f2c8bfa2fb46fb8b9b1ac9f
+Number of trainable parameters:  1611559
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.026649584993720055
+kp error:  0.34303978085517883
+R error:  1.2185561656951904
+t error:  0.02533753402531147
+ADD-S (%):  4.0
+ADD-S AUC:  2.029453992843628
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.997
+% certifiable:  44.0
+Evaluating performance for certifiable objects: 
+pc error:  0.01892022043466568
+kp error:  0.06125088781118393
+R error:  0.20786891877651215
+t error:  0.008572641760110855
+ADD-S (%):  9.090909004211426
+ADD-S AUC:  4.612395763397217
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  bottle ; Model ID: 41a2005b595ae783be1868124d5ddbcb
+Number of trainable parameters:  1616956
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.08746703714132309
+kp error:  0.5382406711578369
+R error:  2.10225510597229
+t error:  0.12200429290533066
+ADD-S (%):  2.0
+ADD-S AUC:  2.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99
+% certifiable:  22.0
+Evaluating performance for certifiable objects: 
+pc error:  0.011067431420087814
+kp error:  0.08127038925886154
+R error:  1.434191107749939
+t error:  0.0030416047666221857
+ADD-S (%):  9.090909004211426
+ADD-S AUC:  9.090909004211426
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  bottle ; Model ID: 41a2005b595ae783be1868124d5ddbcb
+Number of trainable parameters:  1616956
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.013080906122922897
+kp error:  0.11648744344711304
+R error:  1.6274768114089966
+t error:  0.007598361931741238
+ADD-S (%):  0.0
+ADD-S AUC:  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99
+% certifiable:  96.0
+Evaluating performance for certifiable objects: 
+pc error:  0.011032876558601856
+kp error:  0.09166350215673447
+R error:  1.575731873512268
+t error:  0.002530066529288888
+ADD-S (%):  0.0
+ADD-S AUC:  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  cap ; Model ID: 3dec0d851cba045fbf444790f25ea3db
+Number of trainable parameters:  1608475
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.04776044562458992
+kp error:  0.3670283555984497
+R error:  1.7436822652816772
+t error:  0.06302652508020401
+ADD-S (%):  2.0
+ADD-S AUC:  2.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99
+% certifiable:  20.0
+Evaluating performance for certifiable objects: 
+pc error:  0.013912779279053211
+kp error:  0.08817318826913834
+R error:  0.33100980520248413
+t error:  0.00839141197502613
+ADD-S (%):  10.0
+ADD-S AUC:  10.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  cap ; Model ID: 3dec0d851cba045fbf444790f25ea3db
+Number of trainable parameters:  1608475
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.02367468737065792
+kp error:  0.2537749111652374
+R error:  1.2607685327529907
+t error:  0.02483902871608734
+ADD-S (%):  8.0
+ADD-S AUC:  2.7449002265930176
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99
+% certifiable:  70.0
+Evaluating performance for certifiable objects: 
+pc error:  0.01354772038757801
+kp error:  0.19734495878219604
+R error:  0.9673097729682922
+t error:  0.01456318236887455
+ADD-S (%):  11.428571701049805
+ADD-S AUC:  3.921286106109619
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  car ; Model ID: ad45b2d40c7801ef2074a73831d8a3a2
+Number of trainable parameters:  1620811
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.029606293886899948
+kp error:  0.4106563329696655
+R error:  2.1559741497039795
+t error:  0.07167958468198776
+ADD-S (%):  0.0
+ADD-S AUC:  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.9978
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+pc error:  nan
+kp error:  nan
+R error:  nan
+t error:  nan
+ADD-S (%):  nan
+ADD-S AUC:  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  car ; Model ID: ad45b2d40c7801ef2074a73831d8a3a2
+Number of trainable parameters:  1620811
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.02565683238208294
+kp error:  0.39355650544166565
+R error:  2.19191837310791
+t error:  0.05444662272930145
+ADD-S (%):  0.0
+ADD-S AUC:  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.9978
+% certifiable:  12.0
+Evaluating performance for certifiable objects: 
+pc error:  0.018237678334116936
+kp error:  0.30966833233833313
+R error:  1.6139898300170898
+t error:  0.021826982498168945
+ADD-S (%):  0.0
+ADD-S AUC:  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  chair ; Model ID: 1cc6f2ed3d684fa245f213b8994b4a04
+Number of trainable parameters:  1611559
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.0542820580303669
+kp error:  0.3369271457195282
+R error:  1.7543281316757202
+t error:  0.04415200278162956
+ADD-S (%):  10.0
+ADD-S AUC:  4.381321430206299
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99
+% certifiable:  22.0
+Evaluating performance for certifiable objects: 
+pc error:  0.01293448731303215
+kp error:  0.042310044169425964
+R error:  0.32045987248420715
+t error:  0.004958398640155792
+ADD-S (%):  45.45454406738281
+ADD-S AUC:  19.915098190307617
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  chair ; Model ID: 1cc6f2ed3d684fa245f213b8994b4a04
+Number of trainable parameters:  1611559
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.01806817203760147
+kp error:  0.058949097990989685
+R error:  0.27669185400009155
+t error:  0.007819518446922302
+ADD-S (%):  54.0
+ADD-S AUC:  15.396891593933105
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99
+% certifiable:  88.0
+Evaluating performance for certifiable objects: 
+pc error:  0.011633041314780712
+kp error:  0.012603345327079296
+R error:  0.035216618329286575
+t error:  0.0034734681248664856
+ADD-S (%):  61.3636360168457
+ADD-S AUC:  17.49647331237793
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  guitar ; Model ID: 5df08ba7af60e7bfe72db292d4e13056
+Number of trainable parameters:  1610788
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.042505159974098206
+kp error:  0.3395732343196869
+R error:  2.685588836669922
+t error:  0.04477958008646965
+ADD-S (%):  12.0
+ADD-S AUC:  6.605949878692627
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99
+% certifiable:  36.0
+Evaluating performance for certifiable objects: 
+pc error:  0.012595701962709427
+kp error:  0.12691007554531097
+R error:  2.0562684535980225
+t error:  0.009273610077798367
+ADD-S (%):  33.33333206176758
+ADD-S AUC:  18.34986114501953
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  guitar ; Model ID: 5df08ba7af60e7bfe72db292d4e13056
+Number of trainable parameters:  1610788
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.017495444044470787
+kp error:  0.14774689078330994
+R error:  2.0314788818359375
+t error:  0.013974284753203392
+ADD-S (%):  32.0
+ADD-S AUC:  19.396862030029297
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99
+% certifiable:  86.0
+Evaluating performance for certifiable objects: 
+pc error:  0.010335021652281284
+kp error:  0.09536445885896683
+R error:  1.870314121246338
+t error:  0.005513389594852924
+ADD-S (%):  37.20930099487305
+ADD-S AUC:  22.55449104309082
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  helmet ; Model ID: 3621cf047be0d1ae52fafb0cab311e6a
+Number of trainable parameters:  1610788
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.025043372064828873
+kp error:  0.2675166428089142
+R error:  1.496290683746338
+t error:  0.01617446169257164
+ADD-S (%):  2.0
+ADD-S AUC:  1.999999761581421
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  14.0
+Evaluating performance for certifiable objects: 
+pc error:  0.012293899431824684
+kp error:  0.021768132224678993
+R error:  0.090943343937397
+t error:  0.0026737318839877844
+ADD-S (%):  0.0
+ADD-S AUC:  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  helmet ; Model ID: 3621cf047be0d1ae52fafb0cab311e6a
+ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  knife ; Model ID: 819e16fd120732f4609e2d916fa0da27
+Number of trainable parameters:  1608475
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.02697649970650673
+kp error:  0.19352436065673828
+R error:  2.0131750106811523
+t error:  0.05611052364110947
+ADD-S (%):  32.0
+ADD-S AUC:  12.413276672363281
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.995
+% certifiable:  68.0
+Evaluating performance for certifiable objects: 
+pc error:  0.009042652323842049
+kp error:  0.09058264642953873
+R error:  1.6374757289886475
+t error:  0.018153641372919083
+ADD-S (%):  47.05882263183594
+ADD-S AUC:  18.254819869995117
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  knife ; Model ID: 819e16fd120732f4609e2d916fa0da27
+Number of trainable parameters:  1608475
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.00826740451157093
+kp error:  0.06733892858028412
+R error:  1.8574236631393433
+t error:  0.0042327651754021645
+ADD-S (%):  34.0
+ADD-S AUC:  16.002521514892578
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.995
+% certifiable:  100.0
+Evaluating performance for certifiable objects: 
+pc error:  0.008267405442893505
+kp error:  0.06733892858028412
+R error:  1.8574236631393433
+t error:  0.0042327651754021645
+ADD-S (%):  34.0
+ADD-S AUC:  16.002521514892578
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  laptop ; Model ID: 519e98268bee56dddbb1de10c9529bf7
+Number of trainable parameters:  1608475
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.04542268067598343
+kp error:  0.6015511751174927
+R error:  nan
+t error:  0.05214742571115494
+ADD-S (%):  0.0
+ADD-S AUC:  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.995
+% certifiable:  14.0
+Evaluating performance for certifiable objects: 
+pc error:  0.01421999093145132
+kp error:  0.7077969908714294
+R error:  nan
+t error:  0.04221241921186447
+ADD-S (%):  0.0
+ADD-S AUC:  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  laptop ; Model ID: 519e98268bee56dddbb1de10c9529bf7
+Number of trainable parameters:  1608475
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.02087193913757801
+kp error:  0.5116433501243591
+R error:  1.8412328958511353
+t error:  0.030170653015375137
+ADD-S (%):  4.0
+ADD-S AUC:  2.0526089668273926
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.995
+% certifiable:  76.0
+Evaluating performance for certifiable objects: 
+pc error:  0.013461587019264698
+kp error:  0.48239365220069885
+R error:  1.7404218912124634
+t error:  0.02286292426288128
+ADD-S (%):  5.263157844543457
+ADD-S AUC:  2.700800895690918
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  motorcycle ; Model ID: 481f7a57a12517e0fe1b9fad6c90c7bf
+Number of trainable parameters:  1614643
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.021421099081635475
+kp error:  0.28643786907196045
+R error:  1.645422339439392
+t error:  0.02187168039381504
+ADD-S (%):  12.0
+ADD-S AUC:  5.0183796882629395
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.995
+% certifiable:  82.0
+Evaluating performance for certifiable objects: 
+pc error:  0.016330039128661156
+kp error:  0.2681659460067749
+R error:  1.603219985961914
+t error:  0.01547499094158411
+ADD-S (%):  14.634146690368652
+ADD-S AUC:  6.119975566864014
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  motorcycle ; Model ID: 481f7a57a12517e0fe1b9fad6c90c7bf
+Number of trainable parameters:  1614643
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.017118453979492188
+kp error:  0.27916082739830017
+R error:  1.6858795881271362
+t error:  0.01676952838897705
+ADD-S (%):  30.0
+ADD-S AUC:  9.32394027709961
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.995
+% certifiable:  96.0
+Evaluating performance for certifiable objects: 
+pc error:  0.016218071803450584
+kp error:  0.2771003544330597
+R error:  1.6859220266342163
+t error:  0.016539426520466805
+ADD-S (%):  31.25
+ADD-S AUC:  9.712438583374023
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  mug ; Model ID: f3a7f8198cc50c225f5e789acd4d1122
+Number of trainable parameters:  1612330
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.038873568177223206
+kp error:  0.6310937404632568
+R error:  2.7515289783477783
+t error:  0.0617867186665535
+ADD-S (%):  0.0
+ADD-S AUC:  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+pc error:  nan
+kp error:  nan
+R error:  nan
+t error:  nan
+ADD-S (%):  nan
+ADD-S AUC:  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  mug ; Model ID: f3a7f8198cc50c225f5e789acd4d1122
+Number of trainable parameters:  1612330
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.038197439163923264
+kp error:  0.47570547461509705
+R error:  2.315609931945801
+t error:  0.047358740121126175
+ADD-S (%):  0.0
+ADD-S AUC:  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  8.0
+Evaluating performance for certifiable objects: 
+pc error:  0.014342469163239002
+kp error:  0.16723474860191345
+R error:  1.0274848937988281
+t error:  0.02724543586373329
+ADD-S (%):  0.0
+ADD-S AUC:  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  skateboard ; Model ID: 98222a1e5f59f2098745e78dbc45802e
+Number of trainable parameters:  1611559
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.01690002717077732
+kp error:  0.32380035519599915
+R error:  1.5601699352264404
+t error:  0.010380551218986511
+ADD-S (%):  46.0
+ADD-S AUC:  23.535123825073242
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  50.0
+Evaluating performance for certifiable objects: 
+pc error:  0.007737481966614723
+kp error:  0.008083137683570385
+R error:  0.027150768786668777
+t error:  0.002040872583165765
+ADD-S (%):  92.0
+ADD-S AUC:  47.070247650146484
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  skateboard ; Model ID: 98222a1e5f59f2098745e78dbc45802e
+ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  table ; Model ID: 3f5daa8fe93b68fa87e2d08958d6900c
+Number of trainable parameters:  1610017
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.045203905552625656
+kp error:  0.564622700214386
+R error:  1.6885827779769897
+t error:  0.021325862035155296
+ADD-S (%):  10.0
+ADD-S AUC:  3.1215782165527344
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99
+% certifiable:  72.0
+Evaluating performance for certifiable objects: 
+pc error:  0.013002966530621052
+kp error:  0.5051983594894409
+R error:  1.6726305484771729
+t error:  0.010557270608842373
+ADD-S (%):  13.88888931274414
+ADD-S AUC:  4.3355255126953125
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  table ; Model ID: 3f5daa8fe93b68fa87e2d08958d6900c
+Number of trainable parameters:  1610017
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.05590452998876572
+kp error:  0.6092157363891602
+R error:  1.7705847024917603
+t error:  0.026617497205734253
+ADD-S (%):  6.0
+ADD-S AUC:  3.190502643585205
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99
+% certifiable:  64.0
+Evaluating performance for certifiable objects: 
+pc error:  0.01353558711707592
+kp error:  0.5660755038261414
+R error:  1.8703622817993164
+t error:  0.010881914757192135
+ADD-S (%):  9.375
+ADD-S AUC:  4.9851603507995605
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  vessel ; Model ID: 5c54100c798dd681bfeb646a8eadb57
+Number of trainable parameters:  1616185
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.0376456044614315
+kp error:  0.36211955547332764
+R error:  2.433488368988037
+t error:  0.06198812276124954
+ADD-S (%):  4.0
+ADD-S AUC:  2.249652147293091
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  6.0
+Evaluating performance for certifiable objects: 
+pc error:  0.01069575548171997
+kp error:  0.016380904242396355
+R error:  0.06115956977009773
+t error:  0.004594672936946154
+ADD-S (%):  66.66666412353516
+ADD-S AUC:  37.494205474853516
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  vessel ; Model ID: 5c54100c798dd681bfeb646a8eadb57
+ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST
