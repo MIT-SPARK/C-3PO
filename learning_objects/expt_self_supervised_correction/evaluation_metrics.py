@@ -184,7 +184,7 @@ def add_s_error(predicted_point_cloud, ground_truth_point_cloud, threshold, cert
     """
 
     # compute the chamfer distance between the two
-    d = chamfer_dist(predicted_point_cloud, ground_truth_point_cloud, max_loss=True)
+    d = chamfer_dist(predicted_point_cloud, ground_truth_point_cloud, max_loss=False)
 
     if certi==None:
         auc = VOCap(d.squeeze(-1), threshold=threshold)
