@@ -16,7 +16,7 @@ import os
 import sys
 sys.path.append("../../")
 
-from learning_objects.datasets.ycb import SE3PointCloudYCB
+from learning_objects.datasets.ycb import SE3PointCloudYCB, DepthYCB
 from learning_objects.utils.general import display_results
 
 
@@ -64,11 +64,11 @@ def supervised_train_one_epoch(training_loader, model, optimizer, correction_fla
         if i % 10 == 0:
             print("Batch ", (i+1), " loss: ", loss.item())
 
-        del pc, kp, R, t, kp_pred
+        del pc, kp, R, t, kp_pred, out
         torch.cuda.empty_cache()
 
     ave_tloss = running_loss / (i + 1)
-
+    
     return ave_tloss
 
 
@@ -137,7 +137,7 @@ def train_with_supervision(supervised_training_loader, validation_loader, model,
             torch.save(model.state_dict(), best_model_save_file)
 
         epoch_number += 1
-
+        
         torch.cuda.empty_cache()
 
     return train_loss, val_loss
@@ -156,7 +156,7 @@ def train_detector(hyper_param, detector_type='pointnet', model_id="019_pitcher_
     print('-' * 20)
     torch.cuda.empty_cache()
 
-    # shapenet
+    # ycb
     save_folder = hyper_param['save_folder']
     best_model_save_location = save_folder + '/' + model_id + '/'
     if not os.path.exists(best_model_save_location):
@@ -226,7 +226,7 @@ def train_detector(hyper_param, detector_type='pointnet', model_id="019_pitcher_
         pickle.dump(val_loss, outp, pickle.HIGHEST_PROTOCOL)
 
     del supervised_train_dataset, supervised_train_loader, val_dataset, val_loader, cad_models, model_keypoints, \
-        optimizer, model
+        optimizer, num_parameters, model.keypoint_detector, model
 
     return None
 
@@ -262,7 +262,7 @@ def visual_test(test_loader, model, correction_flag=False, device=None):
         del input_point_cloud, keypoints_target, R_target, t_target, \
             predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted
 
-        if i >= 10:
+        if i >= 5:
             break
 
 
@@ -329,18 +329,18 @@ def visualize_detector(hyper_param,
     # visual_test(test_loader=loader, model=model, correction_flag=False, device=device)
 
     # Test 3: testing on real dataset
-    # lisa[todo]
-    # real_dataset = DepthPC(class_id=class_id, model_id=model_id, n=2000, num_of_points_to_sample=1000,
-    #                        dataset_len=10)
-    # real_loader = torch.utils.data.DataLoader(real_dataset, batch_size=1, shuffle=False)
-    # visual_test(test_loader=real_loader, model=model, correction_flag=False, device=device)
+    real_dataset = DepthYCB(model_id=model_id, split='test', num_of_points=1000)
+    real_loader = torch.utils.data.DataLoader(real_dataset, batch_size=1, shuffle=False)
+    visual_test(test_loader=real_loader, model=model, correction_flag=False, device=device)
     # visual_test(test_loader=real_loader, model=model, correction_flag=True, device=device)
     #
+    del num_parameters, model.keypoint_detector, model
+
 
 if __name__ == "__main__":
 
-    model_id = "021_bleach_cleanser"  # a particular chair model
-    for model_id in ["052_extra_large_clamp"]: #todo visualize detector for both
+    # model_id = "006_mustard_bottle"  # a particular chair model
+    for model_id in ["001_chips_can"]: #, "019_pitcher_base", "052_extra_large_clamp"]: #["052_extra_large_clamp"]: #todo visualize detector for both
         stream = open("supervised_training.yml", "r")
         hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
 

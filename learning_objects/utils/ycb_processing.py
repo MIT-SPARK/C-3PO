@@ -16,6 +16,9 @@ from scipy.spatial import ConvexHull
 import pickle as pkl
 import open3d as o3d
 import random
+import torch
+from pytorch3d import ops
+
 
 sys.path.append(os.path.join(os.path.dirname(sys.path[0]),'..','third_party','ycb-tools'))
 # Define folders
@@ -42,13 +45,14 @@ import apollo_stereo_utils
 from get_3d_keypoints import project2d, plot_pts_on_image
 from depth_to_pcl_processing import depth_img_to_pcl, save_pcl, img_to_pcl
 import learning_objects.utils.general as gu
+from learning_objects.datasets.ycb import DepthYCB
 
 ycb_data_folder = "../../third_party/ycb-tools/models/ycb/"  # Folder that contains the ycb data.
 
 
 def load_mesh(target_object, viz=True, calculate_data=False):
-    mesh_filename = os.path.join(ycb_data_folder + target_object, "google_16k", "nontextured.ply")
-    # mesh_filename = os.path.join(ycb_data_folder + target_object, "poisson", "nontextured.ply")
+    # mesh_filename = os.path.join(ycb_data_folder + target_object, "google_16k", "nontextured.ply")
+    mesh_filename = os.path.join(ycb_data_folder + target_object, "poisson", "nontextured.ply")
     #pitcher google_16k is fine, drill is not
 
 
@@ -144,15 +148,55 @@ def load_intrinsics(target_object, viewpoint_camera):
     rgbK = calibration["{0}_rgb_K".format(viewpoint_camera)][:]
     return rgbK
 
+def get_closest_cluster(input_pcd, gt_pcd, viz=False):
+    # downsample pcd
+    if len(input_pcd.points) > 70000:  # maybe cap at 80000?
+        print("DOWNSAMPLING to do clustering")
+        input_pcd = input_pcd.voxel_down_sample(voxel_size=0.001)
+        print("pcd now has reduced number of points", len(input_pcd.points))
 
-def get_largest_cluster(pcd, viz=False):
+    input_points = torch.Tensor(np.array(input_pcd.points)).unsqueeze(0)
+    gt_pcd = torch.Tensor(np.array(gt_pcd.points)).unsqueeze(0)
+    print(input_points.shape)
+    print(gt_pcd.shape)
+    sq_dist, _, _ = ops.knn_points(input_points, gt_pcd, K=1, return_sorted=False)
+    #mask sq_dist (if it is a numpy array)
+    print("sq_dist", sq_dist.shape)
+    mask_dist = torch.sqrt(sq_dist).le(0.01).squeeze(0) #keep points within a centimeter to the closest point
+    print("mask_dist shape", mask_dist.shape)
+    mask_dist = torch.hstack((mask_dist, mask_dist, mask_dist))
+    print("mask_dist shape", mask_dist.shape)
+    output_points = torch.masked_select(input_points.squeeze(0), mask_dist)
+    output_points = output_points.reshape((-1, 3))
+    print("output points shape", output_points.shape)
+    output_pcd = o3d.geometry.PointCloud()
+    output_pcd.points = o3d.utility.Vector3dVector(output_points.numpy()) #nts: .numpy() is optimized conversion to numpy array
+
+    if viz:
+        input_pcd.paint_uniform_color([.5, 0, 0])
+
+        o3d.visualization.draw_geometries([input_pcd])
+        output_pcd.paint_uniform_color([0, .5, 0])
+
+        o3d.visualization.draw_geometries([output_pcd])
+
+    if len(output_pcd.points) < 500:
+        print("less than 500 points in this point cloud after closest point clustering, skipping")
+        return None
+
+
+    return output_pcd
+
+
+
+def get_largest_cluster(pcd, viz=False, eps=0.5):
     #downsample pcd
     if len(pcd.points) > 70000: #maybe cap at 80000?
         print("DOWNSAMPLING to do clustering")
         pcd = pcd.voxel_down_sample(voxel_size=0.001)
         print("pcd now has reduced number of points", len(pcd.points))
 
-    cluster = np.array(pcd.cluster_dbscan(eps=.2, min_points=300, print_progress=True))
+    cluster = np.array(pcd.cluster_dbscan(eps=eps, min_points=400, print_progress=True))
     max_label = cluster.max()
     print("number of clusters", max_label + 1)
     if max_label + 1 == 0:
@@ -193,7 +237,6 @@ def load_image_and_model2(target_object, viewpoint_camera, viewpoint_angle):
         print(
             "The rgbd data is not available for the target object \"%s\". Please download the data first." % target_object)
         exit(1)
-    # pts = 2d projection of 3d mesh model
     mesh = load_mesh(target_object)
     points = mesh.vertices #these are mesh model points (we assume 0,0,0 is at the center bottom)?
     points_array = np.asarray(points)
@@ -238,7 +281,15 @@ def load_image_and_model2(target_object, viewpoint_camera, viewpoint_angle):
     ##I have gt coordinates of the poses in objFromRef, I need to save instead a npy file 4x4 transformation
     ## of obj from rgbCamera to compare against points on pcl
 
-def save_rgbFromObj(target_object, viewpoint_camera, viewpoint_angle):
+def save_rgbFromObj(target_object, viewpoint_camera, viewpoint_angle, only_return = False):
+    '''
+    Calculates the transformation matrix from the object origin of the poisson reconstructed mesh model wrt the rgb viewpoint camera at framew viewpoint_angle
+    :param target_object: the object we're calculating transformations from
+    :param viewpoint_camera: the rgb camera ("NP1", "NP2", etc.) of interest
+    :param viewpoint_angle: the angle the camera is viewing the object from (only used to locate files due to naming conventions)
+    :param only_return:
+    :return:
+    '''
     basename = "{0}_{1}".format(viewpoint_camera, viewpoint_angle)
     rgbFilename = os.path.join(ycb_data_folder + target_object, basename + ".jpg")
     if not os.path.isfile(rgbFilename):
@@ -248,6 +299,9 @@ def save_rgbFromObj(target_object, viewpoint_camera, viewpoint_angle):
     rgbFromRef, objFromRef = load_obj_from_ref_H(target_object, viewpoint_camera, viewpoint_angle)
     objFromRGB = objFromRef @ np.linalg.inv(rgbFromRef)  # we want transformation from camera to ref, then ref to table
     rgbFromObj = rgbFromRef @ np.linalg.inv(objFromRef)
+    if only_return:
+        return rgbFromObj
+
     if not os.path.exists(ycb_data_folder + "/" + target_object + "/poses/gt_wrt_rgb"):
         os.makedirs(ycb_data_folder + "/" + target_object + "/poses/gt_wrt_rgb")
 
@@ -257,43 +311,93 @@ def save_rgbFromObj(target_object, viewpoint_camera, viewpoint_angle):
     print("saved and loaded array", loaded_array)
     return rgbFromObj
 
+def viz_and_save_depth_pc(model_id, split='train', save_loc='./temp'):
+    save_loc = save_loc + "/" + str(model_id) + '/' + str(split) + '/'
+    dataset = DepthYCB(model_id=model_id,
+                       split=split,
+                       num_of_points=500)
+    dataloader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
+
+
+    for i, data in enumerate(dataloader):
+        input_point_cloud, keypoints_target, R_target, t_target = data
+        # displaying only the first item in the batch
+        input_point_cloud = input_point_cloud[0, ...].to('cpu')
+        target_keypoints = keypoints_target[0, ...].to('cpu')
+
+        input_point_cloud = gu.pos_tensor_to_o3d(input_point_cloud)
+        input_point_cloud.paint_uniform_color([0.7, 0.7, 0.7])
+
+        target_keypoints = target_keypoints.numpy().transpose()
+        keypoint_markers = []
+        for xyz in target_keypoints:
+            kpt_mesh = o3d.geometry.TriangleMesh.create_sphere(radius=.01)
+            kpt_mesh.translate(xyz)
+            kpt_mesh.paint_uniform_color([0, 0.8, 0.0])
+            keypoint_markers.append(kpt_mesh)
+        target_keypoints = keypoint_markers
+
+        vis = o3d.visualization.Visualizer()
+        vis.create_window()
+        pcl_for_vis = o3d.geometry.PointCloud()
+        pcl_for_vis.points = input_point_cloud.points
+        vis.add_geometry(pcl_for_vis)
+        for keypoint in target_keypoints:
+            vis.add_geometry(keypoint)
+        # image = vis.capture_screen_image(save_loc + '/' + str(i) + '.png', True)
+        vis.run()
+        vis.destroy_window()
+
+        # o3d.visualization.draw_geometries([input_point_cloud] + target_keypoints)
+
 
 if __name__=="__main__":
-    target_object = "021_bleach_cleanser"#"021_bleach_cleanser" #"019_pitcher_base"#"035_power_drill"	# Full name of the target object.
-    # mesh = load_mesh(target_object, viz=False)
-    # points = mesh.vertices
-    # pcd = o3d.geometry.PointCloud()
-    # pcd.points = points
-    # picked_points_idx = pick_points(pcd)
-    # save_kpts(picked_points_idx, points, target_object)
+    target_object = "001_chips_can"#"021_bleach_cleanser" #"019_pitcher_base"#"035_power_drill"	# Full name of the target object.
+    # for target_object in ["007_tuna_fish_can", "008_pudding_box", "009_gelatin_box", "010_potted_meat_can", "011_banana"]:
+    # for target_object in ["024_bowl", "036_wood_block", "040_large_marker", "051_large_clamp", "052_extra_large_clamp", "061_foam_brick"]:
+    # for target_object in ["004_sugar_box", "005_tomato_soup_can", "006_mustard_bottle"]:
+    # for target_object in ["021_bleach_cleanser"]: # ["021_bleach_cleanser", "052_extra_large_clamp", "006_mustard_bottle"]:
+    for target_object in ["011_banana", \
+                          "019_pitcher_base", "021_bleach_cleanser", \
+                          "035_power_drill", "036_wood_block", "037_scissors", \
+                          "040_large_marker", "051_large_clamp", "061_foam_brick"]:
+        mesh = load_mesh(target_object, viz=True)
+        points = mesh.vertices
+        pcd = o3d.geometry.PointCloud()
+        pcd.points = points
+        picked_points_idx = pick_points(pcd)
+        save_kpts(picked_points_idx, points, target_object)
 
-    #### testing transformations
-    # load_image_and_model2(target_object, "NP1", 30)
+        # ### testing transformations
+        # load_image_and_model2(target_object, "NP1", 30)
 
-    #### saving ground truth transformations wrt saved point cloud frame of reference
-    # for viewpoint_camera in ["NP1", "NP2", "NP3", "NP4", "NP5"]:
-    #     for viewpoint_angle in range(358):
-    #         if viewpoint_angle%3 != 0:
-    #             continue
-    #         save_rgbFromObj(target_object, viewpoint_camera, viewpoint_angle)
+        # ### saving ground truth transformations wrt saved point cloud frame of reference
+        # for viewpoint_camera in ["NP1", "NP2", "NP3", "NP4", "NP5"]:
+        #     for viewpoint_angle in range(358):
+        #         if viewpoint_angle%3 != 0:
+        #             continue
+        #         save_rgbFromObj(target_object, viewpoint_camera, viewpoint_angle)
 
-    #### making train/val/testing splits:
-    pcd_filepath = os.path.join(ycb_data_folder + target_object, "clouds", "largest_cluster")
+        ### making train/val/testing splits:
+        pcd_filepath = os.path.join(ycb_data_folder + target_object, "clouds", "largest_cluster")
 
-    saved_point_clouds = []
-    for filename in os.listdir(pcd_filepath):
-        saved_point_clouds.append(filename)
-    random.shuffle(saved_point_clouds)
-    num_test = int(.15 * len(saved_point_clouds))
-    num_val = num_test
-    num_train = len(saved_point_clouds) - num_test - num_val
+        saved_point_clouds = []
+        for filename in os.listdir(pcd_filepath):
+            saved_point_clouds.append(filename)
+        random.shuffle(saved_point_clouds)
+        num_test = int(.1 * len(saved_point_clouds))
+        num_val = num_test
+        num_train = len(saved_point_clouds) - num_test - num_val
 
+        train_split = saved_point_clouds[:num_train]
+        val_split = saved_point_clouds[num_train:num_train+num_val]
+        test_split = saved_point_clouds[num_train+num_val:]
+        #save splits in npy
+        split_path = os.path.join(ycb_data_folder + target_object, "clouds", "largest_cluster")
+        np.save(split_path + '/train_split.npy', train_split)
+        np.save(split_path + '/val_split.npy', val_split)
+        np.save(split_path + '/test_split.npy', test_split)
 
-    train_split = saved_point_clouds[:num_train]
-    val_split = saved_point_clouds[num_train:num_train+num_val]
-    test_split = saved_point_clouds[num_train+num_val:]
-    #save splits in npy
-    split_path = os.path.join(ycb_data_folder + target_object, "clouds", "largest_cluster")
-    np.save(split_path + '/train_split.npy', train_split)
-    np.save(split_path + '/val_split.npy', val_split)
-    np.save(split_path + '/test_split.npy', test_split)
+        # ### vis and save images
+        # for obj in ["019_pitcher_base", "021_bleach_cleanser"]:
+        #     viz_and_save_depth_pc(obj, 'test')

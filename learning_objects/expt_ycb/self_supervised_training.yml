@@ -1,0 +1,41 @@
+point_transformer:
+  save_folder: './'
+
+  lr_sgd: 0.02
+  momentum_sgd: 0.9
+
+  self_supervised_train_batch_size:
+    006_mustard_bottle: 60
+    021_bleach_cleanser: 60
+    052_extra_large_clamp: 64 #43
+    019_pitcher_base: 60
+  num_of_points_to_sample: 500
+  #num_of_points_selfsupervised: 2048
+  # train_dataset_len: 50000
+  # train_batch_size: 100
+  # train_num_of_points: 1000
+
+  train_stop_cert_threshold: 0.99
+
+  val_batch_size:
+    006_mustard_bottle: 20
+    021_bleach_cleanser: 20
+    052_extra_large_clamp: 26 #11 #59 # 10 #11
+
+  num_epochs: 20
+
+  theta: 25.0       # self-supervised loss function, pc_loss coefficient
+  epsilon:
+    006_mustard_bottle: .999
+    019_pitcher_base: 0.999
+    021_bleach_cleanser: 0.999
+    052_extra_large_clamp: 0.9998 #tuned
+
+
+  eval_batch_size:
+    006_mustard_bottle: 20
+    021_bleach_cleanser: 20
+    052_extra_large_clamp: 26 #11 #59 # 11
+
+  adds_threshold: .05
+  adds_max: True      # unused
