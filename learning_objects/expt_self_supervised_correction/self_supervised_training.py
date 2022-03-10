@@ -329,7 +329,8 @@ def visual_test(test_loader, model, hyper_param, correction_flag=False, device=N
         certi = certify(input_point_cloud=input_point_cloud,
                         predicted_point_cloud=predicted_point_cloud,
                         corrected_keypoints=predicted_keypoints,
-                        predicted_model_keypoints=predicted_model_keypoints)
+                        predicted_model_keypoints=predicted_model_keypoints,
+                        epsilon=hyper_param['epsilon'], is_symmetric=hyper_param["is_symmetric"])
 
         print("Certifiable: ", certi)
 
@@ -345,10 +346,12 @@ def visual_test(test_loader, model, hyper_param, correction_flag=False, device=N
         pc_t = pc_t.clone().detach().to('cpu')
         kp = keypoints_target.clone().detach().to('cpu')
         kp_p = predicted_keypoints.clone().detach().to('cpu')
+        print("DISPLAY: INPUT AND PREDICTED PC")
+        display_results(input_point_cloud=pc, detected_keypoints=kp_p, target_point_cloud=pc_p,
+                        target_keypoints=kp)
+        print("DISPLAY: TRUE AND PREDICTED PC")
         display_results(input_point_cloud=pc_p, detected_keypoints=kp_p, target_point_cloud=pc_t,
                         target_keypoints=kp)
-        # display_results(input_point_cloud=pc, detected_keypoints=kp_p, target_point_cloud=pc,
-        #                 target_keypoints=kp)
 
         del pc, pc_p, kp, kp_p, pc_t
         del input_point_cloud, keypoints_target, R_target, t_target, \

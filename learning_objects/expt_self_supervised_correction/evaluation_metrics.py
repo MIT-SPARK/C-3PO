@@ -143,34 +143,36 @@ def VOCap(rec, threshold):
     rec = torch.sort(rec)[0]
     rec = torch.where(rec <= threshold, rec, torch.tensor([float("inf")]).to(device=device_))
 
-    # print(rec)
-
     n = rec.shape[0]
     prec = torch.cumsum(torch.ones(n)/n, dim=0)
 
     index = torch.isfinite(rec)
     rec = rec[index]
     prec = prec[index]
+    # print(prec)
+    # print(prec.shape)
+    if rec.nelement() == 0:
+        ap = torch.zeros(1)
+    else:
+        mrec = torch.zeros(rec.shape[0] + 2)
+        mrec[0] = 0
+        mrec[-1] = threshold
+        mrec[1:-1] = rec
 
-    mrec = torch.zeros(rec.shape[0] + 2)
-    mrec[0] = 0
-    mrec[-1] = threshold
-    mrec[1:-1] = rec
+        mpre = torch.zeros(prec.shape[0]+2)
+        mpre[1:-1] = prec
+        mpre[-1] = prec[-1]
 
-    mpre = torch.zeros(prec.shape[0]+2)
-    mpre[1:-1] = prec
-    mpre[-1] = prec[-1]
+        for i in range(1, mpre.shape[0]):
+            mpre[i] = max(mpre[i], mpre[i-1])
 
-    for i in range(1, mpre.shape[0]):
-        mpre[i] = max(mpre[i], mpre[i-1])
+        ap = 0
+        for i in range(mrec.shape[0]-1):
+            # print("mrec[i+1] ", mrec[i+1])
+            # print("mpre[i+1] ", mpre[i+1])
+            ap += (mrec[i+1] - mrec[i]) * mpre[i+1] * (1/threshold)
 
-    ap = 0
-    for i in range(mrec.shape[0]-1):
-        # print("mrec[i+1] ", mrec[i+1])
-        # print("mpre[i+1] ", mpre[i+1])
-        ap += (mrec[i+1] - mrec[i]) * mpre[i+1] * (1/threshold)
-
-    # print("ap: ", ap)
+        # print("ap: ", ap)
 
     return ap
 
@@ -185,7 +187,7 @@ def add_s_error(predicted_point_cloud, ground_truth_point_cloud, threshold, cert
     """
 
     # compute the chamfer distance between the two
-    d = chamfer_dist(predicted_point_cloud, ground_truth_point_cloud)
+    d = chamfer_dist(predicted_point_cloud, ground_truth_point_cloud, max_loss=False)
 
     if certi==None:
         auc = VOCap(d.squeeze(-1), threshold=threshold)

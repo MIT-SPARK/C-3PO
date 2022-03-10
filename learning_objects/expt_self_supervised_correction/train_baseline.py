@@ -84,12 +84,12 @@ def train_detector(hyper_param, detector_type='pointnet', class_id="03001627",
     num_of_points_to_sample = hyper_param['num_of_points_to_sample']
     num_of_points = hyper_param['num_of_points_selfsupervised']
 
-    train_dataset = DepthPC(class_id=class_id,
-                            model_id=model_id,
-                            n=num_of_points,
-                            num_of_points_to_sample=num_of_points_to_sample,
-                            dataset_len=train_dataset_len,
-                            rotate_about_z=True)
+    train_dataset = FixedDepthPC(class_id=class_id,
+                                        model_id=model_id,
+                                        n=num_of_points,
+                                        num_of_points_to_sample=num_of_points_to_sample,
+                                        base_dataset_folder=hyper_param['dataset_folder'],
+                                        rotate_about_z=True)
     train_loader = torch.utils.data.DataLoader(train_dataset,
                                                batch_size=train_batch_size,
                                                shuffle=False)
@@ -304,7 +304,7 @@ def train_kp_detectors(detector_type, model_class_ids, only_categories=None):
             class_id = CLASS_ID[key]
             model_id = str(value)
 
-            hyper_param_file = "self_supervised_training.yml"
+            hyper_param_file = "baseline_training.yml"
             stream = open(hyper_param_file, "r")
             hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
             hyper_param = hyper_param[detector_type]

@@ -1073,7 +1073,8 @@ class FixedDepthPC(torch.utils.data.Dataset):
         """
 
     def __init__(self, class_id, model_id, n=1000, radius_multiple=torch.tensor([1.2, 3.0]),
-                 num_of_points_to_sample=10000, dataset_len=1, rotate_about_z=False):
+                 num_of_points_to_sample=10000, dataset_len=1, rotate_about_z=False,
+                 base_dataset_folder='../../data/learning_objects/shapenet_depthpc_eval_data/'):
         super().__init__()
         """
         class_id        : str   : class id of a ShapeNetCore object
@@ -1085,7 +1086,7 @@ class FixedDepthPC(torch.utils.data.Dataset):
         dataset_len     : int   : size of the dataset  
 
         """
-        self.base_dataset_folder = '../../data/learning_objects/shapenet_depthpc_eval_data/'
+        self.base_dataset_folder = base_dataset_folder
         self.class_id = class_id
         self.class_name = CLASS_NAME[self.class_id]
         self.model_id = model_id
