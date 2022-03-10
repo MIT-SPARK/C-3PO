@@ -24,6 +24,8 @@ from learning_objects.models.certifiability import certifiability
 from learning_objects.utils.ddn.node import ParamDeclarativeFunction
 from learning_objects.utils.general import display_two_pcs
 
+from learning_objects.expt_keypoint_corrector_analysis.evaluation_metrics import chamfer_metric
+
 #ToDo: This code does not use batch sizes. It would be faster using batch sizes, as now the keypoint_corrector can
 # work for large batch sizes.
 
@@ -130,7 +132,7 @@ class experiment():
     def __init__(self, class_id, model_id, num_points, num_iterations, kp_noise_var_range,
                  kp_noise_type='sporadic', kp_noise_fra=0.2,
                  certify=certifiability(epsilon=0.8, delta=0.5, radius=0.3),
-                 theta=50.0, kappa=10.0, device='cpu'):
+                 theta=50.0, kappa=10.0, device='cpu', do_certification=False):
         super().__init__()
 
         # model parameters
@@ -158,6 +160,8 @@ class experiment():
 
         # device
         self.device_ = device
+
+        self.do_certification = do_certification
 
         # setting up data
         # n is the desired number of points in the pcl,
@@ -201,9 +205,9 @@ class experiment():
         rotation_err_corrector = torch.zeros(self.num_iterations, 1).to(device=self.device_)
         translation_err_naive = torch.zeros(self.num_iterations, 1).to(device=self.device_)
         translation_err_corrector = torch.zeros(self.num_iterations, 1).to(device=self.device_)
-
-        certi_naive = torch.zeros((self.num_iterations, 1), dtype=torch.bool).to(device=self.device_)
-        certi_corrector = torch.zeros((self.num_iterations, 1), dtype=torch.bool).to(device=self.device_)
+        if self.do_certification:
+            certi_naive = torch.zeros((self.num_iterations, 1), dtype=torch.bool).to(device=self.device_)
+            certi_corrector = torch.zeros((self.num_iterations, 1), dtype=torch.bool).to(device=self.device_)
 
         sqdist_input_naiveest = []
         sqdist_input_correctorest = []
@@ -212,6 +216,10 @@ class experiment():
         sqdist_kp_correctorest = []
 
         pc_padding_masks = []
+
+        chamfer_pose_naive_to_gt_pose_list = []
+        chamfer_pose_corrected_to_gt_pose_list = []
+
 
         # experiment loop
         for i, data in enumerate(self.se3_dataset_loader):
@@ -275,26 +283,37 @@ class experiment():
             pc_padding = ((input_point_cloud == torch.zeros(3, 1).to(device=self.device_)).sum(dim=1) == 3)
             pc_padding_masks.append(pc_padding)
 
-            # certification
-            certi, _ = self.certify.forward(X=input_point_cloud, Z=model_estimate_naive,
-                                            kp=keypoint_estimate_naive, kp_=detected_keypoints)
-            # certi_naive[i] = certi
-            certi_naive = certi
+            model_true = rotation_true @ self.cad_models + translation_true
+            #save mean chamfer loss between model_estimate_naive and model_true
+            #save mean chamfer loss between model_estimate and model_true
+            chamfer_pose_naive_to_gt_pose = chamfer_metric(model_estimate_naive, model_true, max_dist=False)
+            chamfer_pose_corrected_to_gt_pose = chamfer_metric(model_estimate, model_true, max_dist=False)
+            chamfer_pose_naive_to_gt_pose_list.append(chamfer_pose_naive_to_gt_pose)
+            chamfer_pose_corrected_to_gt_pose_list.append(chamfer_pose_corrected_to_gt_pose)
 
-            certi, _ = self.certify.forward(X=input_point_cloud, Z=model_estimate,
-                                            kp=keypoint_estimate, kp_=detected_keypoints + correction)
-            # certi_corrector[i] = certi
-            certi_corrector = certi
+            # certification
+            if self.do_certification:
+                certi, _ = self.certify.forward(X=input_point_cloud, Z=model_estimate_naive,
+                                                kp=keypoint_estimate_naive, kp_=detected_keypoints)
+                # certi_naive[i] = certi
+                certi_naive = certi
+
+                certi, _ = self.certify.forward(X=input_point_cloud, Z=model_estimate,
+                                                kp=keypoint_estimate, kp_=detected_keypoints + correction)
+                # certi_corrector[i] = certi
+                certi_corrector = certi
 
             if visualization and i >= 5:
                 break
 
-
-        return rotation_err_naive, rotation_err_corrector, translation_err_naive, translation_err_corrector, \
+        if self.do_certification:
+            return rotation_err_naive, rotation_err_corrector, translation_err_naive, translation_err_corrector, \
                certi_naive, certi_corrector, sqdist_input_naiveest, sqdist_input_correctorest, sqdist_kp_naiveest, \
-               sqdist_kp_correctorest, pc_padding_masks
-
-
+               sqdist_kp_correctorest, pc_padding_masks, chamfer_pose_naive_to_gt_pose_list, chamfer_pose_corrected_to_gt_pose_list
+        else:
+            return rotation_err_naive, rotation_err_corrector, translation_err_naive, translation_err_corrector, \
+                   sqdist_input_naiveest, sqdist_input_correctorest, sqdist_kp_naiveest, \
+                   sqdist_kp_correctorest, pc_padding_masks, chamfer_pose_naive_to_gt_pose_list, chamfer_pose_corrected_to_gt_pose_list
 
     def execute(self):
 
@@ -302,13 +321,16 @@ class experiment():
         translation_err_naive = torch.zeros(len(self.kp_noise_var_range), self.num_iterations).to(device=self.device_)
         rotation_err_corrector = torch.zeros(len(self.kp_noise_var_range), self.num_iterations).to(device=self.device_)
         translation_err_corrector = torch.zeros(len(self.kp_noise_var_range), self.num_iterations).to(device=self.device_)
-        certi_naive = torch.zeros(size=(len(self.kp_noise_var_range), self.num_iterations), dtype=torch.bool).to(device=self.device_)
-        certi_corrector = torch.zeros(size=(len(self.kp_noise_var_range), self.num_iterations), dtype=torch.bool).to(device=self.device_)
+        if self.do_certification:
+            certi_naive = torch.zeros(size=(len(self.kp_noise_var_range), self.num_iterations), dtype=torch.bool).to(device=self.device_)
+            certi_corrector = torch.zeros(size=(len(self.kp_noise_var_range), self.num_iterations), dtype=torch.bool).to(device=self.device_)
         sqdist_input_naiveest = []
         sqdist_input_correctorest = []
         sqdist_kp_naiveest = []
         sqdist_kp_correctorest = []
         pc_padding_masks = []
+        chamfer_pose_naive_to_gt_pose_list = []
+        chamfer_pose_corrected_to_gt_pose_list = []
 
         for i, kp_noise_var in enumerate(self.kp_noise_var_range):
 
@@ -317,9 +339,17 @@ class experiment():
             print("-"*40)
 
             start = time.perf_counter()
-            Rerr_naive, Rerr_corrector, terr_naive, terr_corrector, \
-            c_naive, c_corrector, sqdist_in_naive, sq_dist_in_corrector, sqdist_kp_naive, \
-            sqdist_kp_corrector, pc_padding_mask = self._single_loop(kp_noise_var=kp_noise_var)
+            if self.do_certification:
+                Rerr_naive, Rerr_corrector, terr_naive, terr_corrector, \
+                c_naive, c_corrector, sqdist_in_naive, sq_dist_in_corrector, sqdist_kp_naive, \
+                sqdist_kp_corrector, pc_padding_mask,  chamfer_pose_naive_to_gt_pose, \
+                chamfer_pose_corrected_to_gt_pose = self._single_loop(kp_noise_var=kp_noise_var)
+            else:
+                Rerr_naive, Rerr_corrector, terr_naive, terr_corrector, \
+                sqdist_in_naive, sq_dist_in_corrector, sqdist_kp_naive, \
+                sqdist_kp_corrector, pc_padding_mask, chamfer_pose_naive_to_gt_pose, \
+                chamfer_pose_corrected_to_gt_pose = self._single_loop(kp_noise_var=kp_noise_var)
+
             end = time.perf_counter()
             print("Time taken: ", (end-start)/60, ' min')
 
@@ -329,8 +359,9 @@ class experiment():
             translation_err_naive[i, ...] = terr_naive.squeeze(-1)
             translation_err_corrector[i, ...] = terr_corrector.squeeze(-1)
 
-            certi_naive[i, ...] = c_naive.squeeze(-1)
-            certi_corrector[i, ...] = c_corrector.squeeze(-1)
+            if self.do_certification:
+                certi_naive[i, ...] = c_naive.squeeze(-1)
+                certi_corrector[i, ...] = c_corrector.squeeze(-1)
 
             sqdist_input_naiveest.append(sqdist_in_naive)
             sqdist_input_correctorest.append(sq_dist_in_corrector)
@@ -340,21 +371,34 @@ class experiment():
 
             pc_padding_masks.append(pc_padding_mask)
 
+            chamfer_pose_naive_to_gt_pose_list.append(chamfer_pose_naive_to_gt_pose)
+            chamfer_pose_corrected_to_gt_pose_list.append(chamfer_pose_corrected_to_gt_pose)
+
         self.data['rotation_err_naive'] = rotation_err_naive
         self.data['rotation_err_corrector'] = rotation_err_corrector
         self.data['translation_err_naive'] = translation_err_naive
         self.data['translation_err_corrector'] = translation_err_corrector
-        self.data['certi_naive'] = certi_naive
-        self.data['certi_corrector'] = certi_corrector
+        if self.do_certification:
+            self.data['certi_naive'] = certi_naive
+            self.data['certi_corrector'] = certi_corrector
         self.data['sqdist_input_naiveest'] = sqdist_input_naiveest
         self.data['sqdist_input_correctorest'] = sqdist_input_correctorest
         self.data['sqdist_kp_naiveest'] = sqdist_kp_naiveest
         self.data['sqdist_kp_correctorest'] = sqdist_kp_correctorest
         self.data['pc_padding_masks'] = pc_padding_masks
+        self.data['chamfer_pose_naive_to_gt_pose_list'] = chamfer_pose_naive_to_gt_pose_list
+        self.data['chamfer_pose_corrected_to_gt_pose_list'] = chamfer_pose_corrected_to_gt_pose_list
 
-        return rotation_err_naive, rotation_err_corrector, translation_err_naive, translation_err_corrector, \
-               certi_naive, certi_corrector, sqdist_input_naiveest, sqdist_input_correctorest, \
-               sqdist_kp_naiveest, sqdist_kp_correctorest, pc_padding_masks
+        if self.do_certification:
+            return rotation_err_naive, rotation_err_corrector, translation_err_naive, translation_err_corrector, \
+                   certi_naive, certi_corrector, sqdist_input_naiveest, sqdist_input_correctorest, \
+                   sqdist_kp_naiveest, sqdist_kp_correctorest, pc_padding_masks, chamfer_pose_naive_to_gt_pose_list, \
+                   chamfer_pose_corrected_to_gt_pose_list
+        else:
+            return rotation_err_naive, rotation_err_corrector, translation_err_naive, translation_err_corrector, \
+                   sqdist_input_naiveest, sqdist_input_correctorest, \
+                   sqdist_kp_naiveest, sqdist_kp_correctorest, pc_padding_masks, chamfer_pose_naive_to_gt_pose_list, \
+                   chamfer_pose_corrected_to_gt_pose_list
 
     def execute_n_save(self):
 
@@ -362,21 +406,21 @@ class experiment():
         self.execute()
 
         # saving the experiment and data
-        location = './expt_with_reg_depthpc/' + str(self.class_id) + '/' + str(self.model_id) + '/'
+        location = './expt_with_reg_depthpc/' + str(self.class_id) + '/' + str(self.model_id) + '_wchamfer/'
         if not os.path.isdir(location):
             os.makedirs(location)
 
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        filemane = timestamp + '_experiment.pickle'
+        filename = timestamp + '_experiment.pickle'
 
-        file = open(location + filemane, 'wb')
+        file = open(location + filename, 'wb')
         pickle.dump([self.parameters, self.data], file)
         file.close()
 
-        return location + filemane
+        return location + filename
 
 
-def run_experiments_on(class_id, model_id, kp_noise_type, kp_noise_fra=0.2, only_visualize=False):
+def run_experiments_on(class_id, model_id, kp_noise_type, kp_noise_fra=0.2, only_visualize=False, do_certification=False):
 
     # model parameters
     num_points = 500
@@ -412,7 +456,7 @@ def run_experiments_on(class_id, model_id, kp_noise_type, kp_noise_fra=0.2, only
     expt = experiment(class_id=class_id, model_id=model_id, num_points=num_points,
                       num_iterations=num_iterations, kp_noise_var_range=kp_noise_var_range,
                       kp_noise_type=kp_noise_type, kp_noise_fra=kp_noise_fra,
-                      certify=certify, theta=theta, kappa=kappa, device=device)
+                      certify=certify, theta=theta, kappa=kappa, device=device, do_certification=do_certification)
 
     if only_visualize:
         while True:
@@ -433,7 +477,7 @@ def run_experiments_on(class_id, model_id, kp_noise_type, kp_noise_fra=0.2, only
         expt['filename'] = filename
         expt['num_iterations'] = num_iterations
 
-        expt_filename = './expt_with_reg_depthpc/' + str(class_id) + '/' + str(model_id) + '/' + 'experiments.csv'
+        expt_filename = './expt_with_reg_depthpc/' + str(class_id) + '/' + str(model_id) + '_wchamfer/' + 'experiments.csv'
         field_names = ['class_id', 'model_id', 'kp_noise_type', 'kp_noise_fra', 'filename', 'num_iterations']
 
         fp = open(expt_filename, 'a')
@@ -457,6 +501,25 @@ def choose_random_models(num_models=10, pcd_path = KEYPOINTNET_PCD_FOLDER_NAME):
     #         }
     # ###
     for class_id in folder_contents:
+        return {'02876657': ['41a2005b595ae783be1868124d5ddbcb']} #bottle
+        # hardcoded:
+        return {'02691156': ['3db61220251b3c9de719b5362fe06bbb'],
+                '02808440': ['90b6e958b359c1592ad490d4d7fae486'],
+                '02818832': ['7c8eb4ab1f2c8bfa2fb46fb8b9b1ac9f'],
+                '02876657': ['41a2005b595ae783be1868124d5ddbcb'], #bottle
+                '02954340': ['3dec0d851cba045fbf444790f25ea3db'],
+                '02958343': ['ad45b2d40c7801ef2074a73831d8a3a2'],
+                '03001627': ['1cc6f2ed3d684fa245f213b8994b4a04'],
+                '03467517': ['5df08ba7af60e7bfe72db292d4e13056'],
+                '03513137': ['3621cf047be0d1ae52fafb0cab311e6a'],
+                '03624134': ['819e16fd120732f4609e2d916fa0da27'],
+                '03642806': ['519e98268bee56dddbb1de10c9529bf7'],
+                '03790512': ['481f7a57a12517e0fe1b9fad6c90c7bf'],
+                '03797390': ['f3a7f8198cc50c225f5e789acd4d1122'],
+                '04225987': ['98222a1e5f59f2098745e78dbc45802e'],
+                '04379243': ['3f5daa8fe93b68fa87e2d08958d6900c'],
+                '04530566': ['5c54100c798dd681bfeb646a8eadb57']
+                }
         models = os.listdir(pcd_path + str(class_id) + '/')
         #choose random num_models from models without replacement
         model_id_samples = random.sample(models, num_models)
@@ -464,11 +527,11 @@ def choose_random_models(num_models=10, pcd_path = KEYPOINTNET_PCD_FOLDER_NAME):
         class_id_to_model_id_samples[class_id] = model_id_samples
     return class_id_to_model_id_samples
 
-def run_full_experiment(kp_noise_fra=0.8):
+def run_full_experiment(kp_noise_fra=0.8, do_certification=False):
     class_id_to_model_id_samples = choose_random_models(num_models=1)
     for class_id, model_id_samples in class_id_to_model_id_samples.items():
         for model_id in model_id_samples:
-            run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='sporadic', kp_noise_fra=kp_noise_fra)
+            run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='sporadic', kp_noise_fra=kp_noise_fra, do_certification=do_certification)
 
 
 if __name__ == "__main__":

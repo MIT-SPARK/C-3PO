@@ -3,6 +3,7 @@ import torch
 from pytorch3d import ops, transforms
 
 from datetime import datetime
+import time
 import pickle
 import csv
 
@@ -40,14 +41,17 @@ def get_sq_distances(X, Y):
     sq_dist_yz  : torch.tensor of shape (B, m)  : for every point in Y, the sq. distance to the closest point in X
     """
 
-    sq_dist_xy, _, _ = ops.knn_points(torch.transpose(X, -1, -2), torch.transpose(Y, -1, -2), K=1)
+    sq_dist_xy, _, _ = ops.knn_points(torch.transpose(X, -1, -2), torch.transpose(Y, -1, -2), K=1, return_sorted=False)
     # dist (B, n, 1): distance from point in X to the nearest point in Y
 
-    sq_dist_yx, _, _ = ops.knn_points(torch.transpose(Y, -1, -2), torch.transpose(X, -1, -2), K=1)
+    sq_dist_yx, yx_nn_idxs, _ = ops.knn_points(torch.transpose(Y, -1, -2), torch.transpose(X, -1, -2), K=1, return_sorted=False)
     # dist (B, n, 1): distance from point in Y to the nearest point in X
 
-    return sq_dist_xy, sq_dist_yx
+    return sq_dist_xy, sq_dist_yx, yx_nn_idxs
 
+def get_kp_sq_distances(kp, kp_):
+    sq_dist = ((kp-kp_)**2).sum(dim=1)
+    return sq_dist #check output dimensions
 
 def keypoint_perturbation(keypoints_true, var=0.8, type='uniform', fra=0.2):
     """
@@ -120,12 +124,17 @@ def rotation_error(R, R_):
     """
 
     if R.dim() == 2:
-        return transforms.matrix_to_euler_angles(torch.matmul(R.T, R_), "XYZ").abs().sum()/3.0
+        return torch.arccos(0.5*(torch.trace(R.T @ R)-1))
+        # return transforms.matrix_to_euler_angles(torch.matmul(R.T, R_), "XYZ").abs().sum()/3.0
         # return torch.abs(0.5*(torch.trace(R.T @ R_) - 1).unsqueeze(-1))
         # return 1 - 0.5*(torch.trace(R.T @ R_) - 1).unsqueeze(-1)
         # return torch.norm(R.T @ R_ - torch.eye(3, device=R.device), p='fro')
     elif R.dim() == 3:
-        return transforms.matrix_to_euler_angles(torch.transpose(R, 1, 2) @ R_, "XYZ").abs().mean(1).unsqueeze(1)
+        error = 0.5*(torch.einsum('bii->b', torch.transpose(R, -1, -2) @ R_) - 1).unsqueeze(-1)
+        epsilon = 1e-8
+        return torch.acos(torch.clamp(error, -1 + epsilon, 1 - epsilon))
+        # return torch.acos(0.5*(torch.einsum('bii->b', torch.transpose(R, -1, -2) @ R_) - 1).unsqueeze(-1))
+        # return transforms.matrix_to_euler_angles(torch.transpose(R, 1, 2) @ R_, "XYZ").abs().mean(1).unsqueeze(1)
         # return torch.abs(0.5*(torch.einsum('bii->b', torch.transpose(R, 1, 2) @ R_) - 1).unsqueeze(-1))
         # return 1 - 0.5 * (torch.einsum('bii->b', torch.transpose(R, 1, 2) @ R_) - 1).unsqueeze(-1)
         # return torch.norm(R.transpose(-1, -2) @ R_ - torch.eye(3, device=R.device), p='fro', dim=[1, 2])
@@ -165,7 +174,7 @@ class experiment():
         self.kappa = kappa
 
         # experiment name
-        self.name = 'Analyzing keypoint corrector with simple registration on SE3nIsotropicShapePointCloud dataset'
+        self.name = 'Analyzing keypoint corrector with simple registration on DepthAndAnisotropicScalingPointCloud dataset'
 
 
         # setting up data
@@ -189,8 +198,8 @@ class experiment():
         self.N = self.model_keypoints.shape[-1]
         self.K = self.model_keypoints.shape[0]
         self.weights = torch.ones(self.N, 1)
-        self.pace = PACEbp(weights=self.weights,model_keypoints=self.model_keypoints,batch_size=1)
-        # self.pace = PACEmodule(weights=self.weights, model_keypoints=self.model_keypoints)
+        self.pace = PACEmodule(weights=self.weights, model_keypoints=self.model_keypoints,
+                               use_optimized_lambda_constant=True, class_id=self.class_id)
 
         # setting up keypoint corrector
         corrector_node = kp_corrector_pace(cad_models=self.cad_models, model_keypoints=self.model_keypoints,
@@ -234,10 +243,16 @@ class experiment():
         sqdist_input_naiveest = []
         sqdist_input_correctorest = []
 
+        sqdist_kp_naiveest = []
+        sqdist_kp_correctorest = []
+
+        pc_padding_masks = []
+
         # experiment loop
         for i, data in enumerate(self.se3_dataset_loader):
 
-            print("Testing at kp_noise_var: ", kp_noise_var, ". Iteration: ", i)
+            if i % 10 == 0:
+                print("Testing at kp_noise_var: ", kp_noise_var, ". Iteration: ", i)
 
             # extracting data
             input_point_cloud, keypoints_true, rotation_true, translation_true, shape_true = data
@@ -282,18 +297,26 @@ class experiment():
 
             kp_detected_naive = R_naive @ keypoint_estimate_naive + t_naive
             kp_detected_corrected = R @ keypoint_estimate + t
-            # certification
-            certi, _ = self.certify.forward(X=input_point_cloud, Z=model_estimate_naive, kp=kp_detected_naive, kp_=detected_keypoints)
-            certi_naive[i] = certi
-            certi, _ = self.certify.forward(X=input_point_cloud, Z=model_estimate, kp=kp_detected_corrected, kp_=detected_keypoints + correction)
-            certi_corrector[i] = certi
+
+            sq_dist_kp_naive = get_kp_sq_distances(kp=kp_detected_naive, kp_=detected_keypoints)
+            sq_dist_kp_corrector = get_kp_sq_distances(kp=kp_detected_corrected, kp_=detected_keypoints + correction)
+            sqdist_kp_naiveest.append(sq_dist_kp_naive)
+            sqdist_kp_correctorest.append(sq_dist_kp_corrector)
+            pc_padding_masks.append(((input_point_cloud == torch.zeros(3, 1)).sum(dim=1) == 3))
+
+            # # certification
+            # certi, _ = self.certify.forward(X=input_point_cloud, Z=model_estimate_naive, kp=kp_detected_naive, kp_=detected_keypoints)
+            # certi_naive[i] = certi
+            # certi, _ = self.certify.forward(X=input_point_cloud, Z=model_estimate, kp=kp_detected_corrected, kp_=detected_keypoints + correction)
+            # certi_corrector[i] = certi
 
             if visualization and i >= 5:
                 break
 
         return rotation_err_naive, rotation_err_corrector, translation_err_naive, translation_err_corrector, \
                shape_err_naive, shape_err_corrector, \
-               certi_naive, certi_corrector, sqdist_input_naiveest, sqdist_input_correctorest
+               certi_naive, certi_corrector, sqdist_input_naiveest, sqdist_input_correctorest, sqdist_kp_naiveest, \
+               sqdist_kp_correctorest, pc_padding_masks
 
 
 
@@ -309,15 +332,23 @@ class experiment():
         certi_corrector = torch.zeros(size=(len(self.kp_noise_var_range), self.num_iterations), dtype=torch.bool)
         sqdist_input_naiveest = []
         sqdist_input_correctorest = []
+        sqdist_kp_naiveest = []
+        sqdist_kp_correctorest = []
+        pc_padding_masks = []
 
         for i, kp_noise_var in enumerate(self.kp_noise_var_range):
+            if i % 10 == 0:
+                print("-"*40)
+                print("Testing at kp_noise_var: ", kp_noise_var)
+                print("-"*40)
 
-            print("-"*40)
-            print("Testing at kp_noise_var: ", kp_noise_var)
-            print("-"*40)
+            start = time.perf_counter()
 
             Rerr_naive, Rerr_corrector, terr_naive, terr_corrector, shapeerr_naive, shapeerr_corrector, \
-            c_naive, c_corrector, sqdist_in_naive, sq_dist_in_corrector = self._single_loop(kp_noise_var=kp_noise_var)
+            c_naive, c_corrector, sqdist_in_naive, sq_dist_in_corrector, sqdist_kp_naive, sqdist_kp_corrector, pc_padding_mask = self._single_loop(kp_noise_var=kp_noise_var)
+
+            end = time.perf_counter()
+            print("Time taken: ", (end-start)/60, ' min')
 
             rotation_err_naive[i, ...] = Rerr_naive.squeeze(-1)
             rotation_err_corrector[i, ...] = Rerr_corrector.squeeze(-1)
@@ -334,6 +365,11 @@ class experiment():
             sqdist_input_naiveest.append(sqdist_in_naive)
             sqdist_input_correctorest.append(sq_dist_in_corrector)
 
+            sqdist_kp_naiveest.append(sqdist_kp_naive)
+            sqdist_kp_correctorest.append(sqdist_kp_corrector)
+
+            pc_padding_masks.append(pc_padding_mask)
+
 
         self.data['rotation_err_naive'] = rotation_err_naive
         self.data['rotation_err_corrector'] = rotation_err_corrector
@@ -345,10 +381,14 @@ class experiment():
         self.data['certi_corrector'] = certi_corrector
         self.data['sqdist_input_naiveest'] = sqdist_input_naiveest
         self.data['sqdist_input_correctorest'] = sqdist_input_correctorest
+        self.data['sqdist_kp_naiveest'] = sqdist_kp_naiveest
+        self.data['sqdist_kp_correctorest'] = sqdist_kp_correctorest
+        self.data['pc_padding_masks'] = pc_padding_masks
 
         return rotation_err_naive, rotation_err_corrector, translation_err_naive, translation_err_corrector, \
                shape_err_naive, shape_err_corrector, \
-               certi_naive, certi_corrector, sqdist_input_naiveest, sqdist_input_correctorest
+               certi_naive, certi_corrector, sqdist_input_naiveest, sqdist_input_correctorest, \
+               sqdist_kp_naiveest, sqdist_kp_correctorest, pc_padding_masks
 
     def execute_n_save(self):
 
@@ -433,8 +473,6 @@ def run_experiments_on(class_id, model_id, kp_noise_type, kp_noise_fra=0.2, only
         fp.close()
 
 
-#ToDo: Write the code to run this experiment for 10 models in each of the 16 model categories. The result will be the average error.
-
 def choose_random_models(num_models=10, pcd_path = KEYPOINTNET_PCD_FOLDER_NAME):
     """
     For each class_id in pcd_path, choose num_models models randomly from each class.
@@ -443,28 +481,44 @@ def choose_random_models(num_models=10, pcd_path = KEYPOINTNET_PCD_FOLDER_NAME):
     """
     class_id_to_model_id_samples = {}
     folder_contents = os.listdir(pcd_path)
+    # hardcoded:
+    return {'02691156': ['3db61220251b3c9de719b5362fe06bbb'],
+            '02808440': ['90b6e958b359c1592ad490d4d7fae486'],
+            '02818832': ['7c8eb4ab1f2c8bfa2fb46fb8b9b1ac9f'],
+            '02876657': ['41a2005b595ae783be1868124d5ddbcb'],
+            '02954340': ['3dec0d851cba045fbf444790f25ea3db'],
+            '02958343': ['ad45b2d40c7801ef2074a73831d8a3a2'],
+            '03001627': ['1cc6f2ed3d684fa245f213b8994b4a04'],
+            '03467517': ['5df08ba7af60e7bfe72db292d4e13056'],
+            '03513137': ['3621cf047be0d1ae52fafb0cab311e6a'],
+            '03624134': ['819e16fd120732f4609e2d916fa0da27'],
+            '03642806': ['519e98268bee56dddbb1de10c9529bf7'],
+            '03790512': ['481f7a57a12517e0fe1b9fad6c90c7bf'],
+            '03797390': ['f3a7f8198cc50c225f5e789acd4d1122'],
+            '04225987': ['98222a1e5f59f2098745e78dbc45802e'],
+            '04379243': ['3f5daa8fe93b68fa87e2d08958d6900c'],
+            '04530566': ['5c54100c798dd681bfeb646a8eadb57']
+            }
     for class_id in folder_contents:
         models = os.listdir(pcd_path + str(class_id) + '/')
         #choose random num_models from models without replacement
         model_id_samples = random.sample(models, num_models)
+        model_id_samples = [path[:-4] for path in model_id_samples]
         class_id_to_model_id_samples[class_id] = model_id_samples
     return class_id_to_model_id_samples
 
 def run_full_experiment(kp_noise_fra=0.8):
-    class_id_to_model_id_samples = choose_random_models(10)
+    class_id_to_model_id_samples = choose_random_models(1)
     for class_id, model_id_samples in class_id_to_model_id_samples.items():
         for model_id in model_id_samples:
             run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='sporadic', kp_noise_fra=kp_noise_fra)
 
 
 if __name__ == "__main__":
+    run_full_experiment()
 
-    # model parameters
-    class_id = "03001627"  # chair
-    model_id = "1e3fba4500d20bb49b9f2eb77f5e247e"  # a particular chair model
-
-    run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='sporadic', kp_noise_fra=0.2)
-    run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='sporadic', kp_noise_fra=0.8)
+    # run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='sporadic', kp_noise_fra=0.2)
+    # run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='sporadic', kp_noise_fra=0.8, only_visualize=False)
     # run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='uniform')
 
     # run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='sporadic', kp_noise_fra=0.2,

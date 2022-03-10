@@ -106,7 +106,7 @@ def varul_mean(data):
 
     return var, mean.squeeze(-1)
 
-def certification(data, epsilon, delta, num_iterations=100, full_batch=False):
+def certification(data, epsilon, delta, num_iterations=100, full_batch=False, symmetry=False):
     device_ = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     certify=certifiability(epsilon=epsilon, delta=delta, radius=0.3)
     ###
@@ -138,9 +138,9 @@ def certification(data, epsilon, delta, num_iterations=100, full_batch=False):
             sqdist_kp_corrector = sqdist_kp_correctorest[kp_noise_var_i][batch_i]
             pc_padding = pc_padding_masks[kp_noise_var_i][batch_i]
             certi_naive_batch, _ = certify.forward_with_distances(
-                sqdist_input_naive[0], sqdist_input_naive[1], None, sqdist_kp_naive, pc_padding)
+                sqdist_input_naive[0], sqdist_input_naive[1], None, sqdist_kp_naive, pc_padding, symmetry=symmetry)
             certi_corrector_batch, _ = certify.forward_with_distances(
-                sqdist_input_corrector[0], sqdist_input_corrector[1], None, sqdist_kp_corrector, pc_padding)
+                sqdist_input_corrector[0], sqdist_input_corrector[1], None, sqdist_kp_corrector, pc_padding, symmetry=symmetry)
             if full_batch: #full batch
                 c_naive = certi_naive_batch
                 c_corrector = certi_corrector_batch
@@ -154,9 +154,10 @@ def certification(data, epsilon, delta, num_iterations=100, full_batch=False):
     return certi_naive, certi_corrector
 
 if __name__ == '__main__':
-
-    file_names = ["./expt_with_reg_se3pc/02818832/7c8eb4ab1f2c8bfa2fb46fb8b9b1ac9f/20220209_104103_experiment.pickle",
-                  "./expt_with_reg_se3pc/03001627/1cc6f2ed3d684fa245f213b8994b4a04/20220209_095625_experiment.pickle"]
+    file_names = ["./expt_with_reg_se3pc/02958343/ad45b2d40c7801ef2074a73831d8a3a2/20220209_220517_experiment.pickle", #car
+                  "./expt_with_reg_se3pc/03467517/5df08ba7af60e7bfe72db292d4e13056/20220209_181138_experiment.pickle", #guitar
+                  "./expt_with_reg_se3pc/03001627/1cc6f2ed3d684fa245f213b8994b4a04/20220209_095625_experiment.pickle", #chair
+                  "./expt_with_reg_se3pc/02876657/41a2005b595ae783be1868124d5ddbcb/20220209_212146_experiment.pickle"] #bottle
 
     for name in file_names:
 
@@ -173,7 +174,7 @@ if __name__ == '__main__':
         # certi_naive = data['certi_naive'].to('cpu')
         # certi_corrector = data['certi_corrector'].to('cpu')
         # CALCULATE DYNAMICALLY
-        certi_naive, certi_corrector = certification(data, epsilon=.99, delta=.7, full_batch=True)
+        certi_naive, certi_corrector = certification(data, epsilon=.995, delta=.7, full_batch=True)
         certi_naive = certi_naive.to('cpu')
         certi_corrector = certi_corrector.to('cpu')
 
