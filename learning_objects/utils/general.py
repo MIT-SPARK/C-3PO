@@ -359,7 +359,7 @@ def pos_tensor_to_o3d(pos, estimate_normals=True):
     return object
 
 
-def display_results(input_point_cloud, detected_keypoints, target_point_cloud, target_keypoints):
+def display_results(input_point_cloud, detected_keypoints, target_point_cloud, target_keypoints=None):
     """
     inputs:
     input_point_cloud   :   torch.tensor of shape (B, 3, m)
@@ -373,6 +373,10 @@ def display_results(input_point_cloud, detected_keypoints, target_point_cloud, t
     m = number of points in the input point cloud
     n = number of points in the target point cloud
     """
+    target_keypoints_flag = 1
+    if target_keypoints==None:
+        target_keypoints = detected_keypoints
+        target_keypoints_flag = 0
 
     # displaying only the first item in the batch
     input_point_cloud = input_point_cloud[0, ...].to('cpu')
@@ -405,7 +409,10 @@ def display_results(input_point_cloud, detected_keypoints, target_point_cloud, t
     for xyz in target_keypoints:
         kpt_mesh = o3d.geometry.TriangleMesh.create_sphere(radius=.01)
         kpt_mesh.translate(xyz)
-        kpt_mesh.paint_uniform_color([0, 0.8, 0.0])
+        if target_keypoints_flag == 0:
+            kpt_mesh.paint_uniform_color([0.8, 0.0, 0.0])
+        else:
+            kpt_mesh.paint_uniform_color([0, 0.8, 0.0])
         keypoint_markers.append(kpt_mesh)
     target_keypoints = keypoint_markers
 

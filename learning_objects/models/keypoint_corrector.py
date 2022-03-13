@@ -181,6 +181,7 @@ class kp_corrector_reg():
         self.theta = theta
         self.kappa = kappa
         self.algo = algo
+        self.device_ = model_keypoints.device
 
         self.point_set_registration_fn = PointSetRegistration(source_points=self.model_keypoints)
 
@@ -226,10 +227,11 @@ class kp_corrector_reg():
         input_point_cloud = torch.from_numpy(input_point_cloud).unsqueeze(0).to(torch.float)
         correction = torch.from_numpy(correction).unsqueeze(0).to(torch.float)
 
-        loss = self.objective(detected_keypoints=detected_keypoints, input_point_cloud=input_point_cloud,
-                              correction=correction)
+        loss = self.objective(detected_keypoints=detected_keypoints.to(device=self.device_),
+                              input_point_cloud=input_point_cloud.to(device=self.device_),
+                              correction=correction.to(device=self.device_))
 
-        return loss.squeeze(0).numpy()
+        return loss.squeeze(0).to('cpu').numpy()
 
     def solve(self, detected_keypoints, input_point_cloud):
         """
@@ -263,6 +265,7 @@ class kp_corrector_reg():
         N = detected_keypoints.shape[-1]
         batch_size = detected_keypoints.shape[0]
         correction = torch.zeros_like(detected_keypoints)
+        device_ = input_point_cloud.device
 
         with torch.enable_grad():
 
@@ -306,8 +309,7 @@ class kp_corrector_reg():
 
                 correction[batch, ...] = batch_correction
 
-
-        return correction.clone().detach()
+        return correction.to(device=device_)
 
     def solve_algo2(self, detected_keypoints, input_point_cloud, lr=0.1, max_iterations=1000, tol=1e-12):
         """
