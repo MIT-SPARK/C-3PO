@@ -28,16 +28,17 @@ def chamfer_dist(pc, pc_, pc_padding=None, max_loss=False):
         # pc_padding = torch.zeros(batch_size, n).to(device=device_)
 
     sq_dist, _, _ = ops.knn_points(torch.transpose(pc, -1, -2), torch.transpose(pc_, -1, -2), K=1)
-    sq_dist = torch.sqrt(sq_dist)
     # dist (B, n, 1): distance from point in X to the nearest point in Y
 
     sq_dist = sq_dist.squeeze(-1)*torch.logical_not(pc_padding)
+    dist = torch.sqrt(sq_dist)
+
     a = torch.logical_not(pc_padding)
 
     if max_loss:
-        loss = sq_dist.max(dim=1)[0]
+        loss = dist.max(dim=1)[0]
     else:
-        loss = sq_dist.sum(dim=1)/a.sum(dim=1)
+        loss = dist.sum(dim=1)/a.sum(dim=1)
 
     return loss.unsqueeze(-1)
 
@@ -78,7 +79,9 @@ def rotation_error(R, R_):
         # return torch.norm(R.T @ R_ - torch.eye(3, device=R.device), p='fro')
     elif R.dim() == 3:
         # return transforms.matrix_to_euler_angles(torch.transpose(R, 1, 2) @ R_, "XYZ").abs().mean(1).unsqueeze(1)
-        return torch.acos(0.5*(torch.einsum('bii->b', torch.transpose(R, -1, -2) @ R_) - 1).unsqueeze(-1))
+        error = 0.5 * (torch.einsum('bii->b', torch.transpose(R, -1, -2) @ R_) - 1).unsqueeze(-1)
+        epsilon = 1e-8
+        return torch.acos(torch.clamp(error, -1 + epsilon, 1 - epsilon))
         # return 1 - 0.5 * (torch.einsum('bii->b', torch.transpose(R, 1, 2) @ R_) - 1).unsqueeze(-1)
         # return torch.norm(R.transpose(-1, -2) @ R_ - torch.eye(3, device=R.device), p='fro', dim=[1, 2])
     else:

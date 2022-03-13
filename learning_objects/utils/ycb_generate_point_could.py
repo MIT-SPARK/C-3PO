@@ -16,7 +16,7 @@ import IPython
 import math
 import open3d as o3d
 import matplotlib.pyplot as plt
-from ycb_processing import get_largest_cluster
+from ycb_processing import get_largest_cluster, load_mesh, get_closest_cluster, save_rgbFromObj
 
 
 
@@ -49,9 +49,10 @@ import learning_objects.utils.general as gu
 
 # Parameters
 ycb_data_folder = "../../third_party/ycb-tools/models/ycb/"			# Folder that contains the ycb data.
-target_object = "048_hammer"	# Full name of the target object.
-viewpoint_camera = "NP1"				# Camera which the viewpoint will be generated.
-viewpoint_angle = "81"					# Relative angle of the object w.r.t the camera (angle of the turntable).
+target_object = "052_extra_large_clamp" #"021_bleach_cleanser"	# Full name of the target object. ["021_bleach_cleanser", "052_extra_large_clamp", "006_mustard_bottle"]:
+
+# viewpoint_camera = "NP1"				# Camera which the viewpoint will be generated.
+# viewpoint_angle = "81"					# Relative angle of the object w.r.t the camera (angle of the turntable).
 
 
 def im2col(im, psize):
@@ -218,7 +219,7 @@ def registeredDepthMapToPointCloud(depthMap, rgbImage, rgbK,  refFromRGB, objFro
             cloud[row,col,3] = rgbImage[v,u,0]
             cloud[row,col,4] = rgbImage[v,u,1]
             cloud[row,col,5] = rgbImage[v,u,2]
-            #NEW TRANFORMED to obj frame of reference
+            #IF you desire the pointcloud TRANFORMED to obj frame of reference
             # x = (u - rgbCx) * depth * invRGBFx
             # y = (v - rgbCy) * depth * invRGBFy
             # z = depth
@@ -389,92 +390,130 @@ def getRGBFromDepthTransform(calibration, camera, referenceCamera):
 
 
 if __name__ == "__main__":
-    referenceCamera = "NP5"
-    for viewpoint_camera in ["NP1", "NP2", "NP3", "NP4", "NP5"]:
-        for viewpoint_angle in range(358):
-            if viewpoint_angle%3 != 0:
-                continue
-            viewpoint_angle = str(viewpoint_angle)
-            print("processing viewpoint_camera", viewpoint_camera)
-            print("viewpoint_angle", viewpoint_angle)
+    #smoke test done
+    #file existance test
+    for target_object in ["001_chips_can", "002_master_chef_can", "003_cracker_box", \
+                          "004_sugar_box", "005_tomato_soup_can", \
+                          "006_mustard_bottle", "007_tuna_fish_can", \
+                          "008_pudding_box", "009_gelatin_box", \
+                          "010_potted_meat_can", "011_banana", \
+                          "019_pitcher_base", "021_bleach_cleanser", \
+                          "035_power_drill", "036_wood_block", "037_scissors", \
+                          "040_large_marker", "051_large_clamp", "061_foam_brick"]:
+        model_mesh = load_mesh(target_object, viz=False)
+    # for target_object in ["001_chips_can", "002_master_chef_can", "003_cracker_box", \
+    #                       "004_sugar_box", "005_tomato_soup_can", \
+    #                       "006_mustard_bottle", "007_tuna_fish_can", \
+    #                       "008_pudding_box", "009_gelatin_box", \
+    #                       "010_potted_meat_can", "011_banana", \
+    #                       "019_pitcher_base", "021_bleach_cleanser", \
+    #                       "035_power_drill", "036_wood_block", "037_scissors", \
+    #                       "040_large_marker", "051_large_clamp", "061_foam_brick"]:
+    for target_object in ["019_pitcher_base", "021_bleach_cleanser", \
+                          "035_power_drill", "036_wood_block", "037_scissors", \
+                          "040_large_marker", "051_large_clamp", "061_foam_brick"]:
+        print("target_object", target_object)
+        model_mesh = load_mesh(target_object, viz=False)
 
-            if not os.path.exists(ycb_data_folder+"/"+target_object+"/clouds"):
-                os.makedirs(ycb_data_folder+"/"+target_object+"/clouds")
+        referenceCamera = "NP5"
+        for viewpoint_camera in ["NP1", "NP2", "NP3", "NP4", "NP5"]:
+            for viewpoint_angle in range(358):
+                # segmentation masks only exist for every third degree, so we sip the rest
+                if viewpoint_angle%3 != 0:
+                    continue
+                viewpoint_angle = str(viewpoint_angle)
+                print("processing viewpoint_camera", viewpoint_camera)
+                print("viewpoint_angle", viewpoint_angle)
 
+                if not os.path.exists(ycb_data_folder+"/"+target_object+"/clouds"):
+                    os.makedirs(ycb_data_folder+"/"+target_object+"/clouds")
 
-            basename = "{0}_{1}".format(viewpoint_camera, viewpoint_angle)
-            depthFilename = os.path.join(ycb_data_folder+ target_object, basename + ".h5")
-            rgbFilename = os.path.join(ycb_data_folder + target_object, basename + ".jpg")
-            print("depthFilename", depthFilename)
+                basename = "{0}_{1}".format(viewpoint_camera, viewpoint_angle)
+                depthFilename = os.path.join(ycb_data_folder+ target_object, basename + ".h5")
+                rgbFilename = os.path.join(ycb_data_folder + target_object, basename + ".jpg")
+                print("depthFilename", depthFilename)
 
-            calibrationFilename = os.path.join(ycb_data_folder+target_object, "calibration.h5")
-            calibration = h5.File(calibrationFilename)
-            objFromRefFilename = os.path.join(ycb_data_folder+target_object, 'poses', '{0}_{1}_pose.h5'.format(referenceCamera, viewpoint_angle))
+                calibrationFilename = os.path.join(ycb_data_folder+target_object, "calibration.h5")
+                calibration = h5.File(calibrationFilename)
+                objFromRefFilename = os.path.join(ycb_data_folder+target_object, 'poses', '{0}_{1}_pose.h5'.format(referenceCamera, viewpoint_angle))
 
-            objFromRef = h5.File(objFromRefFilename)['H_table_from_reference_camera'][:]
+                objFromRef = h5.File(objFromRefFilename)['H_table_from_reference_camera'][:]
 
-            mask_filename = os.path.join(ycb_data_folder + target_object, "masks", basename + "_mask.pbm")
-            mask = cv2.imread(mask_filename)
-            kernel = np.ones((10,10), np.uint8)
-            erosion = cv2.erode(mask, kernel, iterations=1)
-            temp_mask = np.asarray(erosion)
-            # temp_mask = np.asarray(mask)
-            obj_mask = np.zeros((temp_mask.shape[0], temp_mask.shape[1])).astype(np.uint8)
-            for row in range(temp_mask.shape[0]):
-                for col in range(temp_mask.shape[1]):
-                    if temp_mask[row,col,0] == 0: #we want to keep black points
-                        obj_mask[row,col] = 1
-                    else:
-                        obj_mask[row,col] = 0
+                mask_filename = os.path.join(ycb_data_folder + target_object, "masks", basename + "_mask.pbm")
+                mask = cv2.imread(mask_filename)
+                kernel = np.ones((10,10), np.uint8)
+                erosion = cv2.erode(mask, kernel, iterations=1)
+                temp_mask = np.asarray(erosion)
+                obj_mask = np.zeros((temp_mask.shape[0], temp_mask.shape[1])).astype(np.uint8)
+                for row in range(temp_mask.shape[0]):
+                    for col in range(temp_mask.shape[1]):
+                        if temp_mask[row,col,0] == 0: #we want to keep black points
+                            obj_mask[row,col] = 1
+                        else:
+                            obj_mask[row,col] = 0
 
-            if not os.path.isfile(rgbFilename):
-                print("The rgbd data is not available for the target object \"%s\". Please download the data first." % target_object)
-                exit(1)
-            with Image.open(rgbFilename) as image:
-                    rgbImage = np.array(image)
-                    depthK = calibration["{0}_depth_K".format(viewpoint_camera)][:]
+                if not os.path.isfile(rgbFilename):
+                    print("The rgbd data is not available for the target object \"%s\". Please download the data first." % target_object)
+                    exit(1)
+                with Image.open(rgbFilename) as image:
+                        rgbImage = np.array(image)
+                        depthK = calibration["{0}_depth_K".format(viewpoint_camera)][:]
 
-                    rgbK = calibration["{0}_rgb_K".format(viewpoint_camera)][:]
+                        rgbK = calibration["{0}_rgb_K".format(viewpoint_camera)][:]
 
-                    depthScale = np.array(calibration["{0}_ir_depth_scale".format(viewpoint_camera)]) * .0001 # 100um to meters
-                    H_RGBFromDepth, refFromRGB = getRGBFromDepthTransform(calibration, viewpoint_camera, referenceCamera)
+                        depthScale = np.array(calibration["{0}_ir_depth_scale".format(viewpoint_camera)]) * .0001 # 100um to meters
+                        H_RGBFromDepth, refFromRGB = getRGBFromDepthTransform(calibration, viewpoint_camera, referenceCamera)
 
-                    unregisteredDepthMap = h5.File(depthFilename)["depth"][:]
+                        unregisteredDepthMap = h5.File(depthFilename)["depth"][:]
 
-                    unregisteredDepthMap = filterDiscontinuities(unregisteredDepthMap) * depthScale
+                        unregisteredDepthMap = filterDiscontinuities(unregisteredDepthMap) * depthScale
 
-                    registeredDepthMap = registerDepthMap(unregisteredDepthMap,
-                                                          rgbImage,
-                                                          depthK,
-                                                          rgbK,
-                                                          H_RGBFromDepth)
-                    #mask both rgbImage and depthMap with mask
+                        registeredDepthMap = registerDepthMap(unregisteredDepthMap,
+                                                              rgbImage,
+                                                              depthK,
+                                                              rgbK,
+                                                              H_RGBFromDepth)
+                        #mask both rgbImage and depthMap with mask
 
-                    #
-                    # print("registeredDepthMap.shape", registeredDepthMap.shape)
-                    # print("unregisteredDepthMap.shape", unregisteredDepthMap.shape)
-                    # #
-                    # # plt.subplot()
-                    # # registered_depth_o3d = o3d.geometry.Image(registeredDepthMap.astype(np.float32))
-                    # # plt.imshow(registered_depth_o3d)
-                    # # plt.show()
-                    masked_depth = cv2.bitwise_and(registeredDepthMap, registeredDepthMap, mask=obj_mask)
-                    # depth_o3d = o3d.geometry.Image(masked_depth.astype(np.float32))
-                    #
-                    # segmented_pcd = depth_img_to_pcl(depth_o3d, rgbK)
+                        #
+                        # print("registeredDepthMap.shape", registeredDepthMap.shape)
+                        # print("unregisteredDepthMap.shape", unregisteredDepthMap.shape)
+                        # #
+                        # # plt.subplot()
+                        # # registered_depth_o3d = o3d.geometry.Image(registeredDepthMap.astype(np.float32))
+                        # # plt.imshow(registered_depth_o3d)
+                        # # plt.show()
+                        masked_depth = cv2.bitwise_and(registeredDepthMap, registeredDepthMap, mask=obj_mask)
+                        # depth_o3d = o3d.geometry.Image(masked_depth.astype(np.float32))
+                        #
+                        # segmented_pcd = depth_img_to_pcl(depth_o3d, rgbK)
+                        # pointCloud = registeredDepthMapToPointCloud(registeredDepthMap, rgbImage, rgbK)
+                        # saving point cloud wrt the RGB camera pose
+                        pointCloud = registeredDepthMapToPointCloud(masked_depth, rgbImage, rgbK, refFromRGB, objFromRef, organized=False)
+                        writePLY(ycb_data_folder+target_object+"/clouds/pc_"+viewpoint_camera+"_"+referenceCamera+"_"+viewpoint_angle+"_masked.ply", pointCloud)
+                        print("pointCloud.shape", pointCloud.shape)
+                        print("Testing IO for point cloud ...")
+                pcd = o3d.io.read_point_cloud(ycb_data_folder+target_object+"/clouds/pc_"+viewpoint_camera+"_"+referenceCamera+"_"+viewpoint_angle+"_masked.ply")
+                # if clustering with dbscan, uncomment the below
+                # diameter = np.linalg.norm(
+                #     np.asarray(model_mesh.get_max_bound()) - np.asarray(model_mesh.get_min_bound()))
+                # eps = np.min(diameter)
+                # print("eps", eps)
+                # largest_cluster_pcd = get_largest_cluster(pcd, viz=False, eps=eps)
 
-                    # pointCloud = registeredDepthMapToPointCloud(registeredDepthMap, rgbImage, rgbK)
-                    pointCloud = registeredDepthMapToPointCloud(masked_depth, rgbImage, rgbK, refFromRGB, objFromRef, organized=False)
+                largest_cluster_pcd = pcd #get_largest_cluster(pcd, viz=False, eps=eps)
 
+                # further clustering with euclidian distance based thresholding
+                if largest_cluster_pcd is not None:
+                    rgbFromObj = save_rgbFromObj(target_object, viewpoint_camera, viewpoint_angle, only_return=False) #save gt poses!
+                    R_true = rgbFromObj[:3, :3]
+                    t_true = np.expand_dims(rgbFromObj[:3, 3], axis=1)
 
-                    writePLY(ycb_data_folder+target_object+"/clouds/pc_"+viewpoint_camera+"_"+referenceCamera+"_"+viewpoint_angle+"_masked.ply", pointCloud)
-                    print("pointCloud.shape", pointCloud.shape)
-                    print("Testing IO for point cloud ...")
-            pcd = o3d.io.read_point_cloud(ycb_data_folder+target_object+"/clouds/pc_"+viewpoint_camera+"_"+referenceCamera+"_"+viewpoint_angle+"_masked.ply")
-            # downpcd = pcd.voxel_down_sample(voxel_size=0.01)
-            # o3d.visualization.draw_geometries([pcd])
-            largest_cluster_pcd = get_largest_cluster(pcd, viz=True)
-            if largest_cluster_pcd is not None:
-                if not os.path.exists(ycb_data_folder + "/" + target_object + "/clouds/largest_cluster"):
-                    os.makedirs(ycb_data_folder + "/" + target_object + "/clouds/largest_cluster")
-                o3d.io.write_point_cloud(ycb_data_folder + target_object + "/clouds/largest_cluster/pc_" + viewpoint_camera + "_" + referenceCamera + "_" + viewpoint_angle + "_masked.ply", largest_cluster_pcd)
+                    model_pcd = model_mesh.sample_points_uniformly(number_of_points=3000)
+                    model_pcd.points = o3d.utility.Vector3dVector(
+                        (R_true @ np.asarray(model_pcd.points).transpose() + t_true).transpose())
+                    largest_cluster_pcd = get_closest_cluster(largest_cluster_pcd, model_pcd, viz=False)
+                    if largest_cluster_pcd is not None:
+                        if not os.path.exists(ycb_data_folder + "/" + target_object + "/clouds/largest_cluster"):
+                            os.makedirs(ycb_data_folder + "/" + target_object + "/clouds/largest_cluster")
+                        o3d.io.write_point_cloud(ycb_data_folder + target_object + "/clouds/largest_cluster/pc_" + viewpoint_camera + "_" + referenceCamera + "_" + viewpoint_angle + "_masked.ply", largest_cluster_pcd)

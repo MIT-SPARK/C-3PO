@@ -21,11 +21,6 @@ from learning_objects.models.modelgen import ModelFromShape
 from learning_objects.utils.general import pos_tensor_to_o3d
 import learning_objects.utils.general as gu
 
-
-class ScaleAxis(Enum):
-    X = 0
-    Y = 1
-    Z = 2
 def display_two_pcs(pc1, pc2):
     """
     pc1 : torch.tensor of shape (3, n)
@@ -58,7 +53,7 @@ def get_model_and_keypoints(model_id):
     keypoints   : o3d.utils.Vector3dVector(nx3)
     """
 
-    object_mesh_file = DATASET_PATH + model_id + '/google_16k/nontextured.ply'
+    object_mesh_file = DATASET_PATH + model_id + '/poisson/nontextured.ply'
     mesh = o3d.io.read_triangle_mesh(filename=object_mesh_file)
     mesh.compute_vertex_normals() #how long does this take
     pcd = None
@@ -260,8 +255,8 @@ class DepthYCB(torch.utils.data.Dataset):
         self.pcd_data_root = os.path.join(DATASET_PATH + model_id, "clouds/largest_cluster/")
 
         self.split_filenames = np.load(self.pcd_data_root + split + '_split.npy')
-        print("dataset len",  self.split_filenames.shape[0])
         self.len = self.split_filenames.shape[0]
+        print("dataset len", self.len)
 
         # get model
         self.model_mesh, _, self.keypoints_xyz = get_model_and_keypoints(model_id)
@@ -297,9 +292,14 @@ class DepthYCB(torch.utils.data.Dataset):
         if m > self.num_of_points:
             shuffle_idxs = torch.randperm(m)
             point_cloud = pcd_torch[:, shuffle_idxs[:self.num_of_points]]
+        elif m < self.num_of_points:
+            #pad with zeros
+            pc_pad = torch.zeros(3, self.num_of_points - m) #how many additional points to add
+            point_cloud = torch.cat([pcd_torch, pc_pad], dim=1)
+        else:
+            point_cloud = pcd_torch
 
         #load ground truth R, ground truth t
-        print(self.split_filenames[idx])#.split('_'))
         _, viewpoint_camera, reference_camera, viewpoint_angle, _ = tuple(self.split_filenames[idx].split('_'))
         # return R @ model_pcd_torch + t, R, t
         rgbFromObj_filename = os.path.join(DATASET_PATH + self.model_id, "poses/gt_wrt_rgb/",
@@ -308,11 +308,6 @@ class DepthYCB(torch.utils.data.Dataset):
         R_true = torch.from_numpy(rgbFromObj[:3, :3]).to(torch.float)
         t_true = torch.from_numpy(rgbFromObj[:3,3]).unsqueeze(-1).to(torch.float)
 
-        print("inside DepthYCB dataloader getitem")
-        print("point_cloud.shape", point_cloud.shape)
-        print("keypoints_xyz.shape", self.keypoints_xyz.shape)
-        print("R_true.shape", R_true.shape)
-        print("t_true.shape", t_true.shape)
         return point_cloud, R_true @ self.keypoints_xyz.squeeze(0) + t_true, R_true, t_true
 
     def _get_cad_models_as_mesh(self):
@@ -376,13 +371,13 @@ if __name__ == "__main__":
 
     # Testing the workings of DepthPointCloud(torch.utils.data.Dataset) and SE3PointCloud(torch.utils.data.Dataset)
     dir_location = '../../data/learning_objects/ycb_datasets/'
-    model_id = "019_pitcher_base"  # a particular chair model
+    model_id = "021_bleach_cleanser"  # a particular chair model
     batch_size = 5
     #
     #
-    print("Test: DepthPC()")
-    dataset = DepthYCB(model_id=model_id)
-    loader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
+    print("Test: DepthYCB()")
+    dataset = DepthYCB(model_id=model_id, split='test')
+    loader = torch.utils.data.DataLoader(dataset, batch_size=10, shuffle=False)
 
     for i, data in enumerate(loader):
         pc, kp, R, t = data
