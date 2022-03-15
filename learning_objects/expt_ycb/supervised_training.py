@@ -8,6 +8,7 @@ It can use registration during supervised training.
 import torch
 import pickle
 import yaml
+import argparse
 from pytorch3d import ops
 from torch.utils.tensorboard import SummaryWriter
 from datetime import datetime
@@ -339,14 +340,31 @@ def visualize_detector(hyper_param,
 
 if __name__ == "__main__":
 
-    # model_id = "006_mustard_bottle"  # a particular chair model
-    for model_id in ["001_chips_can"]: #, "019_pitcher_base", "052_extra_large_clamp"]: #["052_extra_large_clamp"]: #todo visualize detector for both
-        stream = open("supervised_training.yml", "r")
-        hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("detector_type", help="specify the detector type.", type=str)
+    parser.add_argument("model_id", help="specify the ycb model id.", type=str)
 
-        # train_detector(detector_type='pointnet', model_id=model_id, hyper_param=hyper_param)
-        # visualize_detector(detector_type='pointnet', model_id=model_id, hyper_param=hyper_param)
+    args = parser.parse_args()
 
-        train_detector(detector_type='point_transformer', model_id=model_id, hyper_param=hyper_param)
-        # visualize_detector(detector_type='point_transformer', model_id=model_id, hyper_param=hyper_param)
+    print("KP detector type: ", args.detector_type)
+    print("CAD Model class: ", args.model_id)
+    detector_type = args.detector_type
+    model_id = args.model_id
+
+    stream = open("supervised_training.yml", "r")
+    hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
+
+    # train_detector(detector_type=detector_type, model_id=model_id, hyper_param=hyper_param)
+    visualize_detector(detector_type=detector_type, model_id=model_id, hyper_param=hyper_param)
+
+    # #manual definition without command line
+    # for model_id in ["006_mustard_bottle"]: #, "019_pitcher_base", "052_extra_large_clamp"]: #["052_extra_large_clamp"]: #todo visualize detector for both
+    #     stream = open("supervised_training.yml", "r")
+    #     hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
+    #
+    #     # train_detector(detector_type='pointnet', model_id=model_id, hyper_param=hyper_param)
+    #     # visualize_detector(detector_type='pointnet', model_id=model_id, hyper_param=hyper_param)
+    #
+    #     train_detector(detector_type='point_transformer', model_id=model_id, hyper_param=hyper_param)
+    #     # visualize_detector(detector_type='point_transformer', model_id=model_id, hyper_param=hyper_param)
 

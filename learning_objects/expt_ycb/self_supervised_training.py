@@ -38,6 +38,10 @@ from learning_objects.expt_self_supervised_correction.loss_functions import self
 # evaluation metrics
 from learning_objects.expt_self_supervised_correction.evaluation_metrics import evaluation_error, add_s_error
 
+SYMMETRIC_MODEL_IDS = ["001_chips_can", "002_master_chef_can", "004_sugar_box", \
+                       "005_tomato_soup_can", "006_mustard_bottle", "007_tuna_fish_can", "008_pudding_box" \
+                       "009_gelatin_box", "010_potted_meat_can", "036_wood_block", "040_large_marker", \
+                       "051_large_clamp", "052_extra_large_clamp", "061_foam_brick"]
 
 # Train
 def self_supervised_train_one_epoch(training_loader, model, optimizer, correction_flag, device, hyper_param):
@@ -224,7 +228,7 @@ def train_detector(hyper_param, detector_type='point_transformer', model_id="019
     momentum_sgd = hyper_param['momentum_sgd']
 
     # object symmetry
-    if model_id == "052_extra_large_clamp":
+    if model_id in SYMMETRIC_MODEL_IDS:
         hyper_param["is_symmetric"] = True
     else:
         hyper_param["is_symmetric"] = False
@@ -513,7 +517,7 @@ def visualize_kp_detectors(detector_type, model_ids, only_models=None,
             hyper_param = hyper_param[detector_type]
             hyper_param['epsilon'] = hyper_param['epsilon'][model_id]
 
-            if model_id == '052_extra_large_clamp':
+            if model_id in SYMMETRIC_MODEL_IDS:
                 hyper_param["is_symmetric"] = True
             else:
                 hyper_param["is_symmetric"] = False
@@ -557,8 +561,8 @@ if __name__ == "__main__":
     with open("class_model_ids.yml", 'r') as stream:
         model_ids = yaml.load(stream=stream, Loader=yaml.Loader)['model_ids']
 
-    # train_kp_detectors(detector_type=detector_type, model_ids=model_ids, only_models=only_models)
-    visualize_kp_detectors(detector_type=detector_type, model_ids=model_ids, only_models=only_models, models_to_analyze='post')
+    train_kp_detectors(detector_type=detector_type, model_ids=model_ids, only_models=only_models)
+    # visualize_kp_detectors(detector_type=detector_type, model_ids=model_ids, only_models=only_models, models_to_analyze='pre')
 
 
 
