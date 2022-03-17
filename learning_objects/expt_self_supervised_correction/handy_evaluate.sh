@@ -1,4 +1,8 @@
-FILE_NAME="./eval/eval_max_adds.txt"
+FILE_NAME="./eval/model_eval.txt"
+
+############################################################################################
+echo "EVALUATING POINT TRANSFORMER" >> $FILE_NAME
+############################################################################################
 
 echo "Evaluating: pt, airplane, pre"
 python evaluate_trained_model.py "point_transformer" "airplane" "pre" >> $FILE_NAME
@@ -130,6 +134,7 @@ python evaluate_trained_model.py "point_transformer" "vessel" "post" >> $FILE_NA
 
 
 ############################################################################################
+echo "EVALUATING POINTNET" >> $FILE_NAME
 ############################################################################################
 
 echo "Evaluating: pointnet, airplane, pre"

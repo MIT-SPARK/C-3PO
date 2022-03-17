@@ -213,7 +213,11 @@ def train_detector(hyper_param, detector_type='pointnet', class_id="03001627",
     if not os.path.exists(best_model_save_location):
         os.makedirs(best_model_save_location)
 
-    sim_trained_model_file = best_model_save_location + '_best_supervised_kp_' + detector_type + '.pth'
+    if class_name == 'car':
+        sim_trained_model_file = best_model_save_location + '_best_self_supervised_kp_' + detector_type + '_mid.pth'
+    else:
+        sim_trained_model_file = best_model_save_location + '_best_supervised_kp_' + detector_type + '.pth'
+
     best_model_save_file = best_model_save_location + '_best_self_supervised_kp_' + detector_type + '.pth'
     train_loss_save_file = best_model_save_location + '_sstrain_loss_' + detector_type + '.pkl'
     val_loss_save_file = best_model_save_location + '_ssval_loss_' + detector_type + '.pkl'
@@ -235,12 +239,18 @@ def train_detector(hyper_param, detector_type='pointnet', class_id="03001627",
     num_of_points_to_sample = hyper_param['num_of_points_to_sample']
     num_of_points_selfsupervised = hyper_param['num_of_points_selfsupervised']
 
-    self_supervised_train_dataset = DepthPC(class_id=class_id,
-                                            model_id=model_id,
-                                            n=num_of_points_selfsupervised,
-                                            num_of_points_to_sample=num_of_points_to_sample,
-                                            dataset_len=self_supervised_train_dataset_len,
-                                            rotate_about_z=True)
+    # self_supervised_train_dataset = DepthPC(class_id=class_id,
+    #                                         model_id=model_id,
+    #                                         n=num_of_points_selfsupervised,
+    #                                         num_of_points_to_sample=num_of_points_to_sample,
+    #                                         dataset_len=self_supervised_train_dataset_len,
+    #                                         rotate_about_z=True)
+    self_supervised_train_dataset = FixedDepthPC(class_id=class_id,
+                                                 model_id=model_id,
+                                                 n=num_of_points_selfsupervised,
+                                                 num_of_points_to_sample=num_of_points_to_sample,
+                                                 base_dataset_folder=hyper_param['dataset_folder'])
+    print("Dataset length: ", self_supervised_train_dataset.len)
     self_supervised_train_loader = torch.utils.data.DataLoader(self_supervised_train_dataset,
                                                                batch_size=self_supervised_train_batch_size,
                                                                shuffle=False)
@@ -346,6 +356,9 @@ def visual_test(test_loader, model, hyper_param, correction_flag=False, device=N
         pc_t = pc_t.clone().detach().to('cpu')
         kp = keypoints_target.clone().detach().to('cpu')
         kp_p = predicted_keypoints.clone().detach().to('cpu')
+        print("DISPLAY: INPUT PC")
+        display_results(input_point_cloud=pc, detected_keypoints=kp, target_point_cloud=pc,
+                        target_keypoints=None)
         print("DISPLAY: INPUT AND PREDICTED PC")
         display_results(input_point_cloud=pc, detected_keypoints=kp_p, target_point_cloud=pc_p,
                         target_keypoints=kp)

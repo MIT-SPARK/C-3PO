@@ -70,8 +70,12 @@ def evaluate(eval_loader, model, hyper_param, certification=True, device=None, c
                                  output=(predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted))
 
             ground_truth_point_cloud = R_target @ model.cad_models + t_target
-            adds_err_, auc_ = add_s_error(predicted_point_cloud, ground_truth_point_cloud,
-                                         threshold=hyper_param["adds_threshold"])
+            # adds_err_, auc_ = add_s_error(predicted_point_cloud, ground_truth_point_cloud,
+            #                              threshold=hyper_param["adds_threshold"])
+            adds_err_, _ = add_s_error(predicted_point_cloud, ground_truth_point_cloud,
+                                       threshold=hyper_param["adds_threshold"])
+            _, auc_ = add_s_error(predicted_point_cloud, ground_truth_point_cloud,
+                                  threshold=hyper_param["adds_auc_threshold"])
 
             # gt_cert_all = certify(input_point_cloud=ground_truth_point_cloud,
             #                       predicted_point_cloud=predicted_point_cloud,
@@ -101,7 +105,7 @@ def evaluate(eval_loader, model, hyper_param, certification=True, device=None, c
                 adds_err_cert += (adds_err_ * certi).sum()
 
                 _, auc_cert_ = add_s_error(predicted_point_cloud, ground_truth_point_cloud,
-                                          threshold=hyper_param['adds_threshold'], certi=certi)
+                                          threshold=hyper_param['adds_auc_threshold'], certi=certi)
                 auc_cert += auc_cert_
 
             del input_point_cloud, keypoints_target, R_target, t_target, \
@@ -131,8 +135,8 @@ def evaluate(eval_loader, model, hyper_param, certification=True, device=None, c
         print("kp error: ", ave_kp_err.item())
         print("R error: ", ave_R_err.item())
         print("t error: ", ave_t_err.item())
-        print("ADD-S (%): ", ave_adds_err.item())
-        print("ADD-S AUC: ", ave_auc.item())
+        print("ADD-S (", int(hyper_param["adds_threshold"]*100), "%): ", ave_adds_err.item())
+        print("ADD-S AUC (", int(hyper_param["adds_auc_threshold"]*100), "%): ", ave_auc.item())
         print("GT-certifiable: ")
 
         print("Evaluating certification: ")
@@ -143,8 +147,8 @@ def evaluate(eval_loader, model, hyper_param, certification=True, device=None, c
         print("kp error: ", ave_kp_err_cert.item())
         print("R error: ", ave_R_err_cert.item())
         print("t error: ", ave_t_err_cert.item())
-        print("ADD-S (%): ", ave_adds_err_cert.item())
-        print("ADD-S AUC: ", ave_auc_cert.item())
+        print("ADD-S (", int(hyper_param["adds_threshold"]*100), "%): ", ave_adds_err_cert.item())
+        print("ADD-S AUC (", int(hyper_param["adds_auc_threshold"]*100), "%): ", ave_auc_cert.item())
         print("GT-certifiable: ")
 
     return None

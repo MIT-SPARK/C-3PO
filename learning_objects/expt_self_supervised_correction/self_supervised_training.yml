@@ -1,5 +1,6 @@
 point_transformer:
   save_folder: './'
+  dataset_folder: '../../data/learning_objects/shapenet_depthpc_train_data/'
 
   lr_sgd: 0.02
   momentum_sgd: 0.9
@@ -23,23 +24,23 @@ point_transformer:
   #val_batch_size: 50
   #val_num_of_points: 1000
 
-  num_epochs: 10
+  num_epochs: 1    #ToDo: Change to 25
 
   theta: 25.0       # self-supervised loss function, pc_loss coefficient
   epsilon:
     airplane: 0.999
-    bathtub: 0.999
-    bed: 0.997
+    bathtub: 0.998
+    bed: 0.998
     bottle: 0.99
     cap: 0.99
-    car: 0.9978
-    chair: 0.99
-    guitar: 0.99
-    helmet: 0.999
-    knife: 0.995
+    car: 0.999
+    chair: 0.999
+    guitar: 0.9995
+    helmet: 0.998
+    knife: 0.9995
     laptop: 0.995
-    motorcycle: 0.995
-    mug: 0.999
+    motorcycle: 0.999
+    mug: 0.995
     skateboard: 0.999
     table: 0.99
     vessel: 0.999
@@ -48,11 +49,13 @@ point_transformer:
   eval_dataset_len: 50
   eval_batch_size: 50
 
-  adds_threshold: 0.02  # 2% of the object diameter
+  adds_threshold: 0.02  # 5% of the object diameter
+  adds_auc_threshold: 0.05  # 5% of the object diameter
   adds_max: True      # unused
 
 pointnet:
   save_folder: './'
+  dataset_folder: '../../data/learning_objects/shapenet_depthpc_train_data/'
 
   lr_sgd: 0.02
   momentum_sgd: 0.9
@@ -76,23 +79,23 @@ pointnet:
   #val_batch_size: 50
   #val_num_of_points: 1000
 
-  num_epochs: 10
+  num_epochs: 1    #ToDo: Change to 25
 
   theta: 25.0       # self-supervised loss function, pc_loss coefficient
   epsilon:
     airplane: 0.999
-    bathtub: 0.999
-    bed: 0.997
+    bathtub: 0.998
+    bed: 0.998
     bottle: 0.99
     cap: 0.99
-    car: 0.9978
-    chair: 0.99
-    guitar: 0.99
-    helmet: 0.999
-    knife: 0.995
+    car: 0.999
+    chair: 0.999
+    guitar: 0.9995
+    helmet: 0.998
+    knife: 0.9995
     laptop: 0.995
-    motorcycle: 0.995
-    mug: 0.999
+    motorcycle: 0.999
+    mug: 0.995
     skateboard: 0.999
     table: 0.99
     vessel: 0.999
@@ -102,4 +105,5 @@ pointnet:
   eval_batch_size: 50
 
   adds_threshold: 0.02  # 2% of object diameter
+  adds_auc_threshold: 0.05
   adds_max: True      # unused
