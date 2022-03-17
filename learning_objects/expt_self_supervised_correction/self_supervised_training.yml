@@ -1,3 +1,11 @@
+dataset_folder: '../../data/learning_objects/shapenet_depthpc_train_data/'
+
+num_of_points_to_sample: 1000         # Make sure to keep this same as in training
+num_of_points_selfsupervised: 2048    # Make sure to keep this same as in training
+
+eval_dataset_len: 5000
+eval_batch_size: 1
+
 point_transformer:
   save_folder: './'
   dataset_folder: '../../data/learning_objects/shapenet_depthpc_train_data/'
@@ -24,7 +32,7 @@ point_transformer:
   #val_batch_size: 50
   #val_num_of_points: 1000
 
-  num_epochs: 1    #ToDo: Change to 25
+  num_epochs: 20
 
   theta: 25.0       # self-supervised loss function, pc_loss coefficient
   epsilon:
@@ -79,7 +87,7 @@ pointnet:
   #val_batch_size: 50
   #val_num_of_points: 1000
 
-  num_epochs: 1    #ToDo: Change to 25
+  num_epochs: 20
 
   theta: 25.0       # self-supervised loss function, pc_loss coefficient
   epsilon:

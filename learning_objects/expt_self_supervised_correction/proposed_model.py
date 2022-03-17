@@ -537,7 +537,7 @@ class ICP():
         for b in range(batch_size):
             target_points = pc[b, ...]
             target_points = pos_tensor_to_o3d(pos=target_points, estimate_normals=False)
-            
+
             target_down, target_fpfh = self.preprocess_point_cloud(target_points)
             result_ransac = self.execute_global_registration(target_down, target_fpfh)
             # print("/////////////////////////////////////// GLOBAL REGISTRATION")
