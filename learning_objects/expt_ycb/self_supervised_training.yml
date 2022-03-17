@@ -5,11 +5,15 @@ point_transformer:
   momentum_sgd: 0.9
 
   self_supervised_train_batch_size:
+    001_chips_can: 60
+    002_master_chef_can: 60
+    003_cracker_box: 60
+    005_tomato_soup_can: 60
     006_mustard_bottle: 60
     021_bleach_cleanser: 60
     052_extra_large_clamp: 64 #43
     019_pitcher_base: 60
-  num_of_points_to_sample: 500
+  num_of_points_to_sample: 1000
   #num_of_points_selfsupervised: 2048
   # train_dataset_len: 50000
   # train_batch_size: 100
@@ -18,6 +22,10 @@ point_transformer:
   train_stop_cert_threshold: 0.99
 
   val_batch_size:
+    001_chips_can: 20
+    002_master_chef_can: 20
+    003_cracker_box: 20
+    005_tomato_soup_can: 20
     006_mustard_bottle: 20
     021_bleach_cleanser: 20
     052_extra_large_clamp: 26 #11 #59 # 10 #11
@@ -26,6 +34,10 @@ point_transformer:
 
   theta: 25.0       # self-supervised loss function, pc_loss coefficient
   epsilon:
+    001_chips_can: .9999
+    002_master_chef_can: .9999
+    003_cracker_box: .9998 #degeneracy.... but not in the way we expect from mugs
+    005_tomato_soup_can: .9999 #top of can matches bottom of can issue
     006_mustard_bottle: .999
     019_pitcher_base: 0.999
     021_bleach_cleanser: 0.999
@@ -33,6 +45,10 @@ point_transformer:
 
 
   eval_batch_size:
+    001_chips_can: 20
+    002_master_chef_can: 20
+    003_cracker_box: 20
+    005_tomato_soup_can: 20
     006_mustard_bottle: 20
     021_bleach_cleanser: 20
     052_extra_large_clamp: 26 #11 #59 # 11
