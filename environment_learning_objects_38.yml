@@ -241,7 +241,6 @@ dependencies:
     - portalocker==2.3.2
     - pybind11==2.8.1
     - pymanopt==0.2.5
-    - pytorch3d==0.6.1
     - tabulate==0.8.9
     - termcolor==1.1.0
 prefix: /home/spark-agent/anaconda3/envs/learning-objects-01
