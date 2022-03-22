@@ -15,7 +15,7 @@ from learning_objects.expt_self_supervised_correction.evaluation_metrics import 
 from learning_objects.expt_self_supervised_correction.loss_functions import chamfer_loss
 
 
-def evaluate(eval_loader, model, hyper_param, certification=True, device=None, correction_flag=True):
+def evaluate(eval_loader, model, hyper_param, certification=True, device=None, correction_flag=True, normalize_adds=False):
 
     model.eval()
 
@@ -40,6 +40,15 @@ def evaluate(eval_loader, model, hyper_param, certification=True, device=None, c
 
         num_cert = 0.0
         num_batches = len(eval_loader)
+
+        model_diameter = eval_loader.dataset._get_diameter()
+        print("model diameter is", model_diameter)
+        if normalize_adds:
+            print("normalizing adds thresholds")
+            hyper_param["adds_auc_threshold"] = hyper_param["adds_auc_threshold"]*model_diameter
+            print(hyper_param["adds_auc_threshold"])
+            hyper_param["adds_threshold"]= hyper_param["adds_threshold"]*model_diameter
+            print(hyper_param["adds_threshold"])
 
         for i, vdata in enumerate(eval_loader):
             input_point_cloud, keypoints_target, R_target, t_target = vdata

@@ -139,7 +139,7 @@ def validate(validation_loader, model, correction_flag, device, hyper_param):
 # Train + Val Loop
 def train_without_supervision(self_supervised_train_loader, validation_loader, model, optimizer, correction_flag,
                               best_model_save_file, device, hyper_param, train_loss_save_file,
-                              val_loss_save_file, cert_save_file):
+                              val_loss_save_file, cert_save_file, last_epoch_model_dict_file):
 
     num_epochs = hyper_param['num_epochs']
     best_vloss = 1_000_000.
@@ -177,6 +177,10 @@ def train_without_supervision(self_supervised_train_loader, validation_loader, m
         if avg_vloss < best_vloss:
             best_vloss = avg_vloss
             torch.save(model.state_dict(), best_model_save_file)
+
+        # Saving the model of the last epoch
+        if epoch == num_epochs-1:
+            torch.save(model.state_dict(), last_epoch_model_dict_file)
 
         epoch_number += 1
 
@@ -222,6 +226,7 @@ def train_detector(hyper_param, detector_type='point_transformer', model_id="019
     train_loss_save_file = best_model_save_location + '_sstrain_loss_' + detector_type + '.pkl'
     val_loss_save_file = best_model_save_location + '_ssval_loss_' + detector_type + '.pkl'
     cert_save_file = best_model_save_location + '_certi_all_batches_' + detector_type + '.pkl'
+    last_epoch_model_dict_file = best_model_save_location + '_last_epoch_self_supervised_kp_' + detector_type + '.pth'
 
     # optimization parameters
     lr_sgd = hyper_param['lr_sgd']
@@ -284,7 +289,8 @@ def train_detector(hyper_param, detector_type='point_transformer', model_id="019
                                                                 hyper_param=hyper_param,
                                                                 train_loss_save_file=train_loss_save_file,
                                                                 val_loss_save_file=val_loss_save_file,
-                                                                cert_save_file=cert_save_file)
+                                                                cert_save_file=cert_save_file,
+                                                                last_epoch_model_dict_file=last_epoch_model_dict_file)
 
     with open(train_loss_save_file, 'wb') as outp:
         pickle.dump(train_loss, outp, pickle.HIGHEST_PROTOCOL)
@@ -431,13 +437,13 @@ def visualize_detector(hyper_param, detector_type, model_id,
             print("PRE-TRAINED MODEL:")
             print(">>" * 40)
             evaluate(eval_loader=eval_loader, model=model_before, hyper_param=hyper_param, certification=True,
-                     device=device)
+                     device=device, normalize_adds=True)
         if post_:
             print(">>" * 40)
             print("(SELF-SUPERVISED) TRAINED MODEL:")
             print(">>" * 40)
             evaluate(eval_loader=eval_loader, model=model_after, hyper_param=hyper_param, certification=True,
-                     device=device)
+                     device=device, normalize_adds=True)
 
     # # Visual Test
     dataset_batch_size = 1
@@ -561,8 +567,8 @@ if __name__ == "__main__":
     with open("class_model_ids.yml", 'r') as stream:
         model_ids = yaml.load(stream=stream, Loader=yaml.Loader)['model_ids']
 
-    train_kp_detectors(detector_type=detector_type, model_ids=model_ids, only_models=only_models)
-    # visualize_kp_detectors(detector_type=detector_type, model_ids=model_ids, only_models=only_models, models_to_analyze='pre')
+    # train_kp_detectors(detector_type=detector_type, model_ids=model_ids, only_models=only_models)
+    visualize_kp_detectors(detector_type=detector_type, model_ids=model_ids, only_models=only_models, models_to_analyze='pre')
 
 
 
