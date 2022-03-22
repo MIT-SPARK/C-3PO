@@ -152,7 +152,7 @@ def VOCap(rec, threshold):
     # print(prec)
     # print(prec.shape)
     if rec.nelement() == 0:
-        ap = torch.zeros(1)
+        ap = torch.zeros(1)[0]
     else:
         mrec = torch.zeros(rec.shape[0] + 2)
         mrec[0] = 0
@@ -172,7 +172,6 @@ def VOCap(rec, threshold):
             # print("mpre[i+1] ", mpre[i+1])
             ap += (mrec[i+1] - mrec[i]) * mpre[i+1] * (1/threshold)
 
-        # print("ap: ", ap)
 
     return ap
 

@@ -350,54 +350,115 @@ def viz_and_save_depth_pc(model_id, split='train', save_loc='./temp'):
 
         # o3d.visualization.draw_geometries([input_point_cloud] + target_keypoints)
 
+def get_degenerate_angles(): #+/- 10 degrees, -1 means all angles
+    def is_degenerate(target_object, filename, obj_to_degenerate_cam_angles):
+        # returns true if in hardcoded dictionary, o.w. false
+        _, reference_cam, _, angle, _ = filename.split("_")
+        ref_idx = int(reference_cam[-1])-1
+        ref_angle = int(angle)
+        for degenerate_angle in obj_to_degenerate_cam_angles[target_object][ref_idx]:
+            if degenerate_angle == -1:
+                return True
+            if degenerate_angle - 10 < ref_angle and degenerate_angle + 10 > ref_angle:
+                return True
+        return False
+    obj_to_degenerate_cam_angles = {"003_cracker_box": [[0, 96, 186, 270, 357],[],[],[],[-1]],
+     "004_sugar_box": [[3,93,183, 273, 357],[],[],[],[-1]],
+     "008_pudding_box": [[0,177,267,357],[],[],[219,348],[-1]],
+     "009_gelatin_box": [[6,186,357], [], [], [], [-1]],
+     "036_wood_block": [[6,99,189,279], [], [], [], [-1]],
+     "061_foam_brick": [[], [], [], [], [-1]],
+     "001_chips_can": [[], [], [], [], [-1]],
+     "002_master_chef_can": [[], [], [], [], [-1]],
+     "005_tomato_soup_can": [[], [], [], [], [-1]],
+     "007_tuna_fish_can": [[], [], [], [], [-1]]
+     }
+    for target_object in obj_to_degenerate_cam_angles:
+        train_split_new_filename = os.path.join(ycb_data_folder + target_object, "clouds", "largest_cluster", \
+                                                "train_split_wo_degeneracy.npy")
+        val_split_new_filename = os.path.join(ycb_data_folder + target_object, "clouds", "largest_cluster", \
+                                                "val_split_wo_degeneracy.npy")
+        test_split_new_filename = os.path.join(ycb_data_folder + target_object, "clouds", "largest_cluster", \
+                                                "test_split_wo_degeneracy.npy")
+        train_split_filename = os.path.join(ycb_data_folder + target_object, "clouds", "largest_cluster", \
+                                                "train_split.npy")
+        val_split_filename = os.path.join(ycb_data_folder + target_object, "clouds", "largest_cluster", \
+                                            "val_split.npy")
+        test_split_filename = os.path.join(ycb_data_folder + target_object, "clouds", "largest_cluster", \
+                                            "test_split.npy")
+        train_array = np.load(train_split_filename)
+        val_array = np.load(val_split_filename)
+        test_array = np.load(test_split_filename)
+        train_wo_degeneracy_array = []
+        val_wo_degeneracy_array = []
+        test_wo_degeneracy_array = []
+        for filename in train_array:
+            if not is_degenerate(target_object, filename, obj_to_degenerate_cam_angles):
+                train_wo_degeneracy_array.append(filename)
+        for filename in val_array:
+            if not is_degenerate(target_object, filename, obj_to_degenerate_cam_angles):
+                val_wo_degeneracy_array.append(filename)
+        for filename in test_array:
+            if not is_degenerate(target_object, filename, obj_to_degenerate_cam_angles):
+                test_wo_degeneracy_array.append(filename)
+        print("target_object", target_object)
+        print("number of pcls in new train_wo_degeneracy_array", len(train_wo_degeneracy_array))
+        print("number of pcls in new val_wo_degeneracy_array", len(val_wo_degeneracy_array))
+        print("number of pcls in new test_wo_degeneracy_array", len(test_wo_degeneracy_array))
+
+        np.save(train_split_new_filename, np.array(train_wo_degeneracy_array))
+        np.save(val_split_new_filename, np.array(val_wo_degeneracy_array))
+        np.save(test_split_new_filename, np.array(test_wo_degeneracy_array))
+
 
 if __name__=="__main__":
+    get_degenerate_angles()
     target_object = "001_chips_can"#"021_bleach_cleanser" #"019_pitcher_base"#"035_power_drill"	# Full name of the target object.
     # for target_object in ["007_tuna_fish_can", "008_pudding_box", "009_gelatin_box", "010_potted_meat_can", "011_banana"]:
     # for target_object in ["024_bowl", "036_wood_block", "040_large_marker", "051_large_clamp", "052_extra_large_clamp", "061_foam_brick"]:
     # for target_object in ["004_sugar_box", "005_tomato_soup_can", "006_mustard_bottle"]:
     # for target_object in ["021_bleach_cleanser"]: # ["021_bleach_cleanser", "052_extra_large_clamp", "006_mustard_bottle"]:
-    for target_object in ["011_banana", \
-                          "019_pitcher_base", "021_bleach_cleanser", \
-                          "035_power_drill", "036_wood_block", "037_scissors", \
-                          "040_large_marker", "051_large_clamp", "061_foam_brick"]:
-        mesh = load_mesh(target_object, viz=True)
-        points = mesh.vertices
-        pcd = o3d.geometry.PointCloud()
-        pcd.points = points
-        picked_points_idx = pick_points(pcd)
-        save_kpts(picked_points_idx, points, target_object)
-
-        # ### testing transformations
-        # load_image_and_model2(target_object, "NP1", 30)
-
-        # ### saving ground truth transformations wrt saved point cloud frame of reference
-        # for viewpoint_camera in ["NP1", "NP2", "NP3", "NP4", "NP5"]:
-        #     for viewpoint_angle in range(358):
-        #         if viewpoint_angle%3 != 0:
-        #             continue
-        #         save_rgbFromObj(target_object, viewpoint_camera, viewpoint_angle)
-
-        ### making train/val/testing splits:
-        pcd_filepath = os.path.join(ycb_data_folder + target_object, "clouds", "largest_cluster")
-
-        saved_point_clouds = []
-        for filename in os.listdir(pcd_filepath):
-            saved_point_clouds.append(filename)
-        random.shuffle(saved_point_clouds)
-        num_test = int(.1 * len(saved_point_clouds))
-        num_val = num_test
-        num_train = len(saved_point_clouds) - num_test - num_val
-
-        train_split = saved_point_clouds[:num_train]
-        val_split = saved_point_clouds[num_train:num_train+num_val]
-        test_split = saved_point_clouds[num_train+num_val:]
-        #save splits in npy
-        split_path = os.path.join(ycb_data_folder + target_object, "clouds", "largest_cluster")
-        np.save(split_path + '/train_split.npy', train_split)
-        np.save(split_path + '/val_split.npy', val_split)
-        np.save(split_path + '/test_split.npy', test_split)
-
-        # ### vis and save images
-        # for obj in ["019_pitcher_base", "021_bleach_cleanser"]:
-        #     viz_and_save_depth_pc(obj, 'test')
+    # for target_object in ["011_banana", \
+    #                       "019_pitcher_base", "021_bleach_cleanser", \
+    #                       "035_power_drill", "036_wood_block", "037_scissors", \
+    #                       "040_large_marker", "051_large_clamp", "061_foam_brick"]:
+    #     mesh = load_mesh(target_object, viz=True)
+    #     points = mesh.vertices
+    #     pcd = o3d.geometry.PointCloud()
+    #     pcd.points = points
+    #     picked_points_idx = pick_points(pcd)
+    #     save_kpts(picked_points_idx, points, target_object)
+    #
+    #     # ### testing transformations
+    #     # load_image_and_model2(target_object, "NP1", 30)
+    #
+    #     # ### saving ground truth transformations wrt saved point cloud frame of reference
+    #     # for viewpoint_camera in ["NP1", "NP2", "NP3", "NP4", "NP5"]:
+    #     #     for viewpoint_angle in range(358):
+    #     #         if viewpoint_angle%3 != 0:
+    #     #             continue
+    #     #         save_rgbFromObj(target_object, viewpoint_camera, viewpoint_angle)
+    #
+    #     ### making train/val/testing splits:
+    #     pcd_filepath = os.path.join(ycb_data_folder + target_object, "clouds", "largest_cluster")
+    #
+    #     saved_point_clouds = []
+    #     for filename in os.listdir(pcd_filepath):
+    #         saved_point_clouds.append(filename)
+    #     random.shuffle(saved_point_clouds)
+    #     num_test = int(.1 * len(saved_point_clouds))
+    #     num_val = num_test
+    #     num_train = len(saved_point_clouds) - num_test - num_val
+    #
+    #     train_split = saved_point_clouds[:num_train]
+    #     val_split = saved_point_clouds[num_train:num_train+num_val]
+    #     test_split = saved_point_clouds[num_train+num_val:]
+    #     #save splits in npy
+    #     split_path = os.path.join(ycb_data_folder + target_object, "clouds", "largest_cluster")
+    #     np.save(split_path + '/train_split.npy', train_split)
+    #     np.save(split_path + '/val_split.npy', val_split)
+    #     np.save(split_path + '/test_split.npy', test_split)
+    #
+    #     # ### vis and save images
+    #     # for obj in ["019_pitcher_base", "021_bleach_cleanser"]:
+    #     #     viz_and_save_depth_pc(obj, 'test')
