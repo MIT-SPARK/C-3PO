@@ -214,7 +214,8 @@ def train_detector(hyper_param, detector_type='pointnet', class_id="03001627",
         os.makedirs(best_model_save_location)
 
     if class_name == 'car':
-        sim_trained_model_file = best_model_save_location + '_best_self_supervised_kp_' + detector_type + '_mid.pth'
+        sim_trained_model_file = best_model_save_location + '_best_supervised_kp_' + detector_type + '.pth'
+        # sim_trained_model_file = best_model_save_location + '_best_self_supervised_kp_' + detector_type + '_mid.pth'
     else:
         sim_trained_model_file = best_model_save_location + '_best_supervised_kp_' + detector_type + '.pth'
 

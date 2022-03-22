@@ -1,33 +1,35 @@
-python train_baseline.py "point_transformer" "airplane"
-python train_baseline.py "point_transformer" "bathtub"
-python train_baseline.py "point_transformer" "bed"
-python train_baseline.py "point_transformer" "bottle"
-python train_baseline.py "point_transformer" "cap"
-python train_baseline.py "point_transformer" "car"
-python train_baseline.py "point_transformer" "chair"
-python train_baseline.py "point_transformer" "guitar"
-python train_baseline.py "point_transformer" "helmet"
-python train_baseline.py "point_transformer" "knife"
-python train_baseline.py "point_transformer" "laptop"
-python train_baseline.py "point_transformer" "motorcycle"
-python train_baseline.py "point_transformer" "mug"
-python train_baseline.py "point_transformer" "skateboard"
-python train_baseline.py "point_transformer" "table"
-python train_baseline.py "point_transformer" "vessel"
+FILE_NAME="./eval/handy_train_baseline_output.txt"
 
-python train_baseline.py "pointnet" "airplane"
-python train_baseline.py "pointnet" "bathtub"
-python train_baseline.py "pointnet" "bed"
-python train_baseline.py "pointnet" "bottle"
-python train_baseline.py "pointnet" "cap"
-python train_baseline.py "pointnet" "car"
-python train_baseline.py "pointnet" "chair"
-python train_baseline.py "pointnet" "guitar"
-python train_baseline.py "pointnet" "helmet"
-python train_baseline.py "pointnet" "knife"
-python train_baseline.py "pointnet" "laptop"
-python train_baseline.py "pointnet" "motorcycle"
-python train_baseline.py "pointnet" "mug"
-python train_baseline.py "pointnet" "skateboard"
-python train_baseline.py "pointnet" "table"
-python train_baseline.py "pointnet" "vessel"
+python train_baseline.py "point_transformer" "airplane" >> $FILE_NAME
+python train_baseline.py "point_transformer" "bathtub" >> $FILE_NAME
+python train_baseline.py "point_transformer" "bed" >> $FILE_NAME
+python train_baseline.py "point_transformer" "bottle" >> $FILE_NAME
+python train_baseline.py "point_transformer" "cap" >> $FILE_NAME
+python train_baseline.py "point_transformer" "car" >> $FILE_NAME
+python train_baseline.py "point_transformer" "chair" >> $FILE_NAME
+python train_baseline.py "point_transformer" "guitar" >> $FILE_NAME
+python train_baseline.py "point_transformer" "helmet" >> $FILE_NAME
+python train_baseline.py "point_transformer" "knife" >> $FILE_NAME
+python train_baseline.py "point_transformer" "laptop" >> $FILE_NAME
+python train_baseline.py "point_transformer" "motorcycle" >> $FILE_NAME
+python train_baseline.py "point_transformer" "mug" >> $FILE_NAME
+python train_baseline.py "point_transformer" "skateboard" >> $FILE_NAME
+python train_baseline.py "point_transformer" "table" >> $FILE_NAME
+python train_baseline.py "point_transformer" "vessel" >> $FILE_NAME
+
+python train_baseline.py "pointnet" "airplane" >> $FILE_NAME
+python train_baseline.py "pointnet" "bathtub" >> $FILE_NAME
+python train_baseline.py "pointnet" "bed" >> $FILE_NAME
+python train_baseline.py "pointnet" "bottle" >> $FILE_NAME
+python train_baseline.py "pointnet" "cap" >> $FILE_NAME
+python train_baseline.py "pointnet" "car" >> $FILE_NAME
+python train_baseline.py "pointnet" "chair" >> $FILE_NAME
+python train_baseline.py "pointnet" "guitar" >> $FILE_NAME
+python train_baseline.py "pointnet" "helmet" >> $FILE_NAME
+python train_baseline.py "pointnet" "knife" >> $FILE_NAME
+python train_baseline.py "pointnet" "laptop" >> $FILE_NAME
+python train_baseline.py "pointnet" "motorcycle" >> $FILE_NAME
+python train_baseline.py "pointnet" "mug" >> $FILE_NAME
+python train_baseline.py "pointnet" "skateboard" >> $FILE_NAME
+python train_baseline.py "pointnet" "table" >> $FILE_NAME
+python train_baseline.py "pointnet" "vessel" >> $FILE_NAME

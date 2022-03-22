@@ -494,7 +494,7 @@ class ICP():
         """
         self.cad_models = cad_models
         self.source_points = pos_tensor_to_o3d(pos=cad_models.squeeze(0).to('cpu'), estimate_normals=False)
-        self.voxel_size = 0.09
+        self.voxel_size = 0.1
         self.threshold = 0.01
 
         self.source_down, self.source_fpfh = self.preprocess_point_cloud(self.source_points)
@@ -609,14 +609,6 @@ class ICP():
             pcd_down,
             o3d.geometry.KDTreeSearchParamHybrid(radius=radius_feature, max_nn=100))
         return pcd_down, pcd_fpfh
-
-    # def prepare_dataset(self, pcd):
-    #
-    #     pcd_down, pcd_fpfh = self.preprocess_point_cloud(pcd)
-    #     target_down, target_fpfh = self.preprocess_point_cloud(target, voxel_size)
-    #     return source, target, source_down, target_down, source_fpfh, target_fpfh
-    #     return pcd_down, pcd_fpfh
-
 
     def draw_registration_result(self, source, target, transformation):
 

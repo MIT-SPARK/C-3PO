@@ -167,6 +167,7 @@ def VOCap(rec, threshold):
             mpre[i] = max(mpre[i], mpre[i-1])
 
         ap = 0
+        ap = torch.zeros(1)
         for i in range(mrec.shape[0]-1):
             # print("mrec[i+1] ", mrec[i+1])
             # print("mpre[i+1] ", mpre[i+1])
