@@ -230,6 +230,7 @@ def train_detector(hyper_param, detector_type='point_transformer', model_id="019
 
     # optimization parameters
     lr_sgd = hyper_param['lr_sgd']
+    print("LR_SGD", lr_sgd)
     momentum_sgd = hyper_param['momentum_sgd']
 
     # object symmetry
@@ -437,13 +438,13 @@ def visualize_detector(hyper_param, detector_type, model_id,
             print("PRE-TRAINED MODEL:")
             print(">>" * 40)
             evaluate(eval_loader=eval_loader, model=model_before, hyper_param=hyper_param, certification=True,
-                     device=device, normalize_adds=True)
+                     device=device, normalize_adds=False)
         if post_:
             print(">>" * 40)
             print("(SELF-SUPERVISED) TRAINED MODEL:")
             print(">>" * 40)
             evaluate(eval_loader=eval_loader, model=model_after, hyper_param=hyper_param, certification=True,
-                     device=device, normalize_adds=True)
+                     device=device, normalize_adds=False)
 
     # # Visual Test
     dataset_batch_size = 1
@@ -567,8 +568,8 @@ if __name__ == "__main__":
     with open("class_model_ids.yml", 'r') as stream:
         model_ids = yaml.load(stream=stream, Loader=yaml.Loader)['model_ids']
 
-    # train_kp_detectors(detector_type=detector_type, model_ids=model_ids, only_models=only_models)
-    visualize_kp_detectors(detector_type=detector_type, model_ids=model_ids, only_models=only_models, models_to_analyze='pre')
+    train_kp_detectors(detector_type=detector_type, model_ids=model_ids, only_models=only_models)
+    # visualize_kp_detectors(detector_type=detector_type, model_ids=model_ids, only_models=only_models, visualize=False, models_to_analyze='pre')
 
 
 
