@@ -5,22 +5,22 @@ This implements various generic classes and functions that are used in our code.
 
 import copy
 import csv
-import os
+# import os
 import random
 import string
 import numpy as np
-import open3d as o3d
-import open3d.visualization.rendering as rendering
-import matplotlib.pyplot as plt
+# import open3d as o3d
+# import open3d.visualization.rendering as rendering
+# import matplotlib.pyplot as plt
 
 
 import torch
-import torch.nn as nn
+# import torch.nn as nn
 import torch.nn.functional as F
 import open3d as o3d
 from pytorch3d import ops
 from pytorch3d import transforms
-from torch_geometric.data import Data
+# from torch_geometric.data import Data
 from time import time
 
 
@@ -634,85 +634,85 @@ def test_get_depth_pcd():
     o3d.visualization.draw_geometries([pcd, coordinate_frame])
 
 
-def test_rendering_depth_images(save_to_folder='../data/tmp/'):
-    """ This code tests rendering depth images from 3D Objects """
-    render = rendering.OffscreenRenderer(640, 480)
-
-    yellow = rendering.Material()
-    yellow.base_color = [1.0, 0.75, 0.0, 1.0]
-    yellow.shader = "defaultLit"
-
-    green = rendering.Material()
-    green.base_color = [0.0, 0.5, 0.0, 1.0]
-    green.shader = "defaultLit"
-
-    grey = rendering.Material()
-    grey.base_color = [0.7, 0.7, 0.7, 1.0]
-    grey.shader = "defaultLit"
-
-    white = rendering.Material()
-    white.base_color = [1.0, 1.0, 1.0, 1.0]
-    white.shader = "defaultLit"
-
-    cyl = o3d.geometry.TriangleMesh.create_cylinder(.05, 3)
-    cyl.compute_vertex_normals()
-    cyl.translate([-2, 0, 1.5])
-    sphere = o3d.geometry.TriangleMesh.create_sphere(.2)
-    sphere.compute_vertex_normals()
-    sphere.translate([-2, 0, 3])
-
-    box = o3d.geometry.TriangleMesh.create_box(2, 2, 1)
-    box.compute_vertex_normals()
-    box.translate([-1, -1, 0])
-    solid = o3d.geometry.TriangleMesh.create_icosahedron(0.5)
-    solid.compute_triangle_normals()
-    solid.compute_vertex_normals()
-    solid.translate([0, 0, 1.75])
-
-    # Adding to renderer
-    render.scene.add_geometry("cyl", cyl, green)
-    render.scene.add_geometry("sphere", sphere, yellow)
-    render.scene.add_geometry("box", box, grey)
-    render.scene.add_geometry("solid", solid, white)
-    render.setup_camera(60.0, [0, 0, 0], [0, 10, 0], [0, 0, 1])
-    render.scene.scene.set_sun_light([0.707, 0.0, -.707], [1.0, 1.0, 1.0],
-                                     75000)
-    render.scene.scene.enable_sun_light(True)
-    render.scene.show_axes(True)
-
-    img = render.render_to_image()
-    o3d.io.write_image(save_to_folder+"test.png", img, 9)
-
-    # camera setup using (intrinsic, extrinsic)
-    # intrinsic = ()
-    # extrinsic = 4x4 matrix pose
-    view_dir = np.array([1, 0, 0])
-    cam_location = np.array([-5, 0, 0])
-    up = np.array([0, 0, 1])
-    extrinsic = get_extrinsic(view_dir=view_dir, up=up, location=cam_location)
-    # print(extrinsic)
-    intrinsic = o3d.camera.PinholeCameraIntrinsic(o3d.camera.PinholeCameraIntrinsicParameters.PrimeSenseDefault)
-    # intrinsic = o3d.camera.PinholeCameraIntrinsic()
-    # intrinsic.set_intrinsics(width=2500, height=2000, fx=1000, fy=1000, cx=500, cy=500)
-    render.setup_camera(intrinsic, extrinsic)
-
-    img = render.render_to_image()
-    depth = render.render_to_depth_image()
-    o3d.io.write_image(save_to_folder+"test2.png", img)
-    # plt.imshow(depth)
-    # plt.show()
-    # o3d.io.write_image("tmp/test2_depth.png", depth, 9)
-    plt.imsave(save_to_folder+"test2_depth.png", depth)
-
-    # generate and save point cloud from the depth image
-    pcd = o3d.geometry.PointCloud.create_from_depth_image(depth, intrinsic=intrinsic, depth_scale=0.01, depth_trunc=0.9,
-                                                          stride=10)
-    pcd.paint_uniform_color([0.5, 0.5, 0.5])
-    o3d.io.write_point_cloud(save_to_folder+"test2_depth.pcd", pcd)
-    o3d.visualization.draw_geometries([pcd])
-
-    # removing hidden points
-    # render.scene.hidden_point_removal()
+# def test_rendering_depth_images(save_to_folder='../data/tmp/'):
+#     """ This code tests rendering depth images from 3D Objects """
+#     render = rendering.OffscreenRenderer(640, 480)
+#
+#     yellow = rendering.Material()
+#     yellow.base_color = [1.0, 0.75, 0.0, 1.0]
+#     yellow.shader = "defaultLit"
+#
+#     green = rendering.Material()
+#     green.base_color = [0.0, 0.5, 0.0, 1.0]
+#     green.shader = "defaultLit"
+#
+#     grey = rendering.Material()
+#     grey.base_color = [0.7, 0.7, 0.7, 1.0]
+#     grey.shader = "defaultLit"
+#
+#     white = rendering.Material()
+#     white.base_color = [1.0, 1.0, 1.0, 1.0]
+#     white.shader = "defaultLit"
+#
+#     cyl = o3d.geometry.TriangleMesh.create_cylinder(.05, 3)
+#     cyl.compute_vertex_normals()
+#     cyl.translate([-2, 0, 1.5])
+#     sphere = o3d.geometry.TriangleMesh.create_sphere(.2)
+#     sphere.compute_vertex_normals()
+#     sphere.translate([-2, 0, 3])
+#
+#     box = o3d.geometry.TriangleMesh.create_box(2, 2, 1)
+#     box.compute_vertex_normals()
+#     box.translate([-1, -1, 0])
+#     solid = o3d.geometry.TriangleMesh.create_icosahedron(0.5)
+#     solid.compute_triangle_normals()
+#     solid.compute_vertex_normals()
+#     solid.translate([0, 0, 1.75])
+#
+#     # Adding to renderer
+#     render.scene.add_geometry("cyl", cyl, green)
+#     render.scene.add_geometry("sphere", sphere, yellow)
+#     render.scene.add_geometry("box", box, grey)
+#     render.scene.add_geometry("solid", solid, white)
+#     render.setup_camera(60.0, [0, 0, 0], [0, 10, 0], [0, 0, 1])
+#     render.scene.scene.set_sun_light([0.707, 0.0, -.707], [1.0, 1.0, 1.0],
+#                                      75000)
+#     render.scene.scene.enable_sun_light(True)
+#     render.scene.show_axes(True)
+#
+#     img = render.render_to_image()
+#     o3d.io.write_image(save_to_folder+"test.png", img, 9)
+#
+#     # camera setup using (intrinsic, extrinsic)
+#     # intrinsic = ()
+#     # extrinsic = 4x4 matrix pose
+#     view_dir = np.array([1, 0, 0])
+#     cam_location = np.array([-5, 0, 0])
+#     up = np.array([0, 0, 1])
+#     extrinsic = get_extrinsic(view_dir=view_dir, up=up, location=cam_location)
+#     # print(extrinsic)
+#     intrinsic = o3d.camera.PinholeCameraIntrinsic(o3d.camera.PinholeCameraIntrinsicParameters.PrimeSenseDefault)
+#     # intrinsic = o3d.camera.PinholeCameraIntrinsic()
+#     # intrinsic.set_intrinsics(width=2500, height=2000, fx=1000, fy=1000, cx=500, cy=500)
+#     render.setup_camera(intrinsic, extrinsic)
+#
+#     img = render.render_to_image()
+#     depth = render.render_to_depth_image()
+#     o3d.io.write_image(save_to_folder+"test2.png", img)
+#     # plt.imshow(depth)
+#     # plt.show()
+#     # o3d.io.write_image("tmp/test2_depth.png", depth, 9)
+#     plt.imsave(save_to_folder+"test2_depth.png", depth)
+#
+#     # generate and save point cloud from the depth image
+#     pcd = o3d.geometry.PointCloud.create_from_depth_image(depth, intrinsic=intrinsic, depth_scale=0.01, depth_trunc=0.9,
+#                                                           stride=10)
+#     pcd.paint_uniform_color([0.5, 0.5, 0.5])
+#     o3d.io.write_point_cloud(save_to_folder+"test2_depth.pcd", pcd)
+#     o3d.visualization.draw_geometries([pcd])
+#
+#     # removing hidden points
+#     # render.scene.hidden_point_removal()
 
 
 

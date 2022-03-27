@@ -1,0 +1,742 @@
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Sun 27 Mar 2022 06:06:51 PM EDT
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  airplane ; Model ID: 3db61220251b3c9de719b5362fe06bbb
+Number of trainable parameters in the keypoint detector:  900778
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.04276265203952789
+kp error:  0.0
+R error:  1.5587432384490967
+t error:  0.028526075184345245
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  23.499671936035156
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+pc error:  nan
+kp error:  nan
+R error:  nan
+t error:  nan
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  bathtub ; Model ID: 90b6e958b359c1592ad490d4d7fae486
+Number of trainable parameters in the keypoint detector:  897700
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.07552938163280487
+kp error:  0.0
+R error:  1.697072148323059
+t error:  0.06626174598932266
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.998
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+pc error:  nan
+kp error:  nan
+R error:  nan
+t error:  nan
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  bed ; Model ID: 7c8eb4ab1f2c8bfa2fb46fb8b9b1ac9f
+Number of trainable parameters in the keypoint detector:  894622
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.045004747807979584
+kp error:  0.0
+R error:  1.689546823501587
+t error:  0.06472334265708923
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  12.116390228271484
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.998
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+pc error:  nan
+kp error:  nan
+R error:  nan
+t error:  nan
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  bottle ; Model ID: 41a2005b595ae783be1868124d5ddbcb
+Number of trainable parameters in the keypoint detector:  905395
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.06242043897509575
+kp error:  0.0
+R error:  1.722540259361267
+t error:  0.08211184293031693
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+pc error:  nan
+kp error:  nan
+R error:  nan
+t error:  nan
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  cap ; Model ID: 3dec0d851cba045fbf444790f25ea3db
+Number of trainable parameters in the keypoint detector:  888466
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.06430938094854355
+kp error:  0.0
+R error:  1.3766614198684692
+t error:  0.0650530457496643
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+pc error:  nan
+kp error:  nan
+R error:  nan
+t error:  nan
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  car ; Model ID: ad45b2d40c7801ef2074a73831d8a3a2
+Number of trainable parameters in the keypoint detector:  913090
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.056241363286972046
+kp error:  0.0
+R error:  1.5721654891967773
+t error:  0.06331910192966461
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  2.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+pc error:  nan
+kp error:  nan
+R error:  nan
+t error:  nan
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  chair ; Model ID: 1cc6f2ed3d684fa245f213b8994b4a04
+Number of trainable parameters in the keypoint detector:  894622
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.06399331241846085
+kp error:  0.0
+R error:  1.5469197034835815
+t error:  0.023002376779913902
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  17.994503021240234
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+pc error:  nan
+kp error:  nan
+R error:  nan
+t error:  nan
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  guitar ; Model ID: 5df08ba7af60e7bfe72db292d4e13056
+Number of trainable parameters in the keypoint detector:  893083
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.05302570387721062
+kp error:  0.0
+R error:  1.746669054031372
+t error:  0.047223225235939026
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  13.377057075500488
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.9995
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+pc error:  nan
+kp error:  nan
+R error:  nan
+t error:  nan
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  helmet ; Model ID: 3621cf047be0d1ae52fafb0cab311e6a
+Number of trainable parameters in the keypoint detector:  893083
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.06943163275718689
+kp error:  0.0
+R error:  1.5161067247390747
+t error:  0.05501832440495491
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.998
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+pc error:  nan
+kp error:  nan
+R error:  nan
+t error:  nan
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  knife ; Model ID: 819e16fd120732f4609e2d916fa0da27
+Number of trainable parameters in the keypoint detector:  888466
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.04138208553195
+kp error:  0.0
+R error:  1.7035566568374634
+t error:  0.0744805708527565
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  44.05491256713867
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.9995
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+pc error:  nan
+kp error:  nan
+R error:  nan
+t error:  nan
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  laptop ; Model ID: 519e98268bee56dddbb1de10c9529bf7
+Number of trainable parameters in the keypoint detector:  888466
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.0829978659749031
+kp error:  0.0
+R error:  1.6513502597808838
+t error:  0.04490046575665474
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  5.11588191986084
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.995
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+pc error:  nan
+kp error:  nan
+R error:  nan
+t error:  nan
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  motorcycle ; Model ID: 481f7a57a12517e0fe1b9fad6c90c7bf
+Number of trainable parameters in the keypoint detector:  900778
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.059312984347343445
+kp error:  0.0
+R error:  1.681921362876892
+t error:  0.03004906140267849
+ADD-S ( 2 %):  6.0
+ADD-S AUC ( 5 %):  22.532482147216797
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+pc error:  nan
+kp error:  nan
+R error:  nan
+t error:  nan
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  mug ; Model ID: f3a7f8198cc50c225f5e789acd4d1122
+Number of trainable parameters in the keypoint detector:  896161
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.0631149560213089
+kp error:  0.0
+R error:  1.3845202922821045
+t error:  0.04876546561717987
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  2.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.995
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+pc error:  nan
+kp error:  nan
+R error:  nan
+t error:  nan
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  skateboard ; Model ID: 98222a1e5f59f2098745e78dbc45802e
+Number of trainable parameters in the keypoint detector:  894622
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.07070668041706085
+kp error:  0.0
+R error:  1.4506546258926392
+t error:  0.04039483144879341
+ADD-S ( 2 %):  6.0
+ADD-S AUC ( 5 %):  19.250446319580078
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+pc error:  nan
+kp error:  nan
+R error:  nan
+t error:  nan
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  table ; Model ID: 3f5daa8fe93b68fa87e2d08958d6900c
+Number of trainable parameters in the keypoint detector:  891544
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.0989627093076706
+kp error:  0.0
+R error:  1.4892678260803223
+t error:  0.03476909548044205
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+pc error:  nan
+kp error:  nan
+R error:  nan
+t error:  nan
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  vessel ; Model ID: 5c54100c798dd681bfeb646a8eadb57
+Number of trainable parameters in the keypoint detector:  903856
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.06529954820871353
+kp error:  0.0
+R error:  1.682948112487793
+t error:  0.06360261887311935
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  8.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+pc error:  nan
+kp error:  nan
+R error:  nan
+t error:  nan
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Sun 27 Mar 2022 06:13:01 PM EDT
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  airplane ; Model ID: 3db61220251b3c9de719b5362fe06bbb
+Number of trainable parameters in the keypoint detector:  900778
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.06913427263498306
+kp error:  0.0
+R error:  1.757332444190979
+t error:  0.028526075184345245
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  4.258265972137451
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+pc error:  nan
+kp error:  nan
+R error:  nan
+t error:  nan
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  bathtub ; Model ID: 90b6e958b359c1592ad490d4d7fae486
+Number of trainable parameters in the keypoint detector:  897700
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.06806868314743042
+kp error:  0.0
+R error:  1.9548306465148926
+t error:  0.06626174598932266
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.998
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+pc error:  nan
+kp error:  nan
+R error:  nan
+t error:  nan
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  bed ; Model ID: 7c8eb4ab1f2c8bfa2fb46fb8b9b1ac9f
+Number of trainable parameters in the keypoint detector:  894622
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.0865730568766594
+kp error:  0.0
+R error:  2.140397787094116
+t error:  0.06472334265708923
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.998
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+pc error:  nan
+kp error:  nan
+R error:  nan
+t error:  nan
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  bottle ; Model ID: 41a2005b595ae783be1868124d5ddbcb
+Number of trainable parameters in the keypoint detector:  905395
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.08485747128725052
+kp error:  0.0
+R error:  1.6768220663070679
+t error:  0.08211184293031693
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+pc error:  nan
+kp error:  nan
+R error:  nan
+t error:  nan
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  cap ; Model ID: 3dec0d851cba045fbf444790f25ea3db
+Number of trainable parameters in the keypoint detector:  888466
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.08345863223075867
+kp error:  0.0
+R error:  2.369248867034912
+t error:  0.0650530457496643
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+pc error:  nan
+kp error:  nan
+R error:  nan
+t error:  nan
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  car ; Model ID: ad45b2d40c7801ef2074a73831d8a3a2
+Number of trainable parameters in the keypoint detector:  913090
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.07005445659160614
+kp error:  0.0
+R error:  2.212827682495117
+t error:  0.06331910192966461
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  2.000000238418579
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+pc error:  nan
+kp error:  nan
+R error:  nan
+t error:  nan
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  chair ; Model ID: 1cc6f2ed3d684fa245f213b8994b4a04
+Number of trainable parameters in the keypoint detector:  894622
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.0507502555847168
+kp error:  0.0
+R error:  1.1172459125518799
+t error:  0.023002376779913902
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  18.960702896118164
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+pc error:  nan
+kp error:  nan
+R error:  nan
+t error:  nan
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  guitar ; Model ID: 5df08ba7af60e7bfe72db292d4e13056
+Number of trainable parameters in the keypoint detector:  893083
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.10782179236412048
+kp error:  0.0
+R error:  1.8462871313095093
+t error:  0.047223225235939026
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  2.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.9995
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+pc error:  nan
+kp error:  nan
+R error:  nan
+t error:  nan
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  helmet ; Model ID: 3621cf047be0d1ae52fafb0cab311e6a
+Number of trainable parameters in the keypoint detector:  893083
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.061918020248413086
+kp error:  0.0
+R error:  1.6472256183624268
+t error:  0.05501832440495491
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.998
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+pc error:  nan
+kp error:  nan
+R error:  nan
+t error:  nan
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  knife ; Model ID: 819e16fd120732f4609e2d916fa0da27
+Number of trainable parameters in the keypoint detector:  888466
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.13516837358474731
+kp error:  0.0
+R error:  1.9606808423995972
+t error:  0.0744805708527565
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.9995
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+pc error:  nan
+kp error:  nan
+R error:  nan
+t error:  nan
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  laptop ; Model ID: 519e98268bee56dddbb1de10c9529bf7
+Number of trainable parameters in the keypoint detector:  888466
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.1103648766875267
+kp error:  0.0
+R error:  2.4623219966888428
+t error:  0.04490046575665474
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.995
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+pc error:  nan
+kp error:  nan
+R error:  nan
+t error:  nan
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  motorcycle ; Model ID: 481f7a57a12517e0fe1b9fad6c90c7bf
+Number of trainable parameters in the keypoint detector:  900778
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.04621007293462753
+kp error:  0.0
+R error:  1.8631175756454468
+t error:  0.03004906140267849
+ADD-S ( 2 %):  4.0
+ADD-S AUC ( 5 %):  25.017192840576172
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+pc error:  nan
+kp error:  nan
+R error:  nan
+t error:  nan
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  mug ; Model ID: f3a7f8198cc50c225f5e789acd4d1122
+Number of trainable parameters in the keypoint detector:  896161
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.06015336140990257
+kp error:  0.0
+R error:  1.56020188331604
+t error:  0.04876546561717987
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.995
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+pc error:  nan
+kp error:  nan
+R error:  nan
+t error:  nan
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  skateboard ; Model ID: 98222a1e5f59f2098745e78dbc45802e
+Number of trainable parameters in the keypoint detector:  894622
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.07185192406177521
+kp error:  0.0
+R error:  1.6826214790344238
+t error:  0.04039483144879341
+ADD-S ( 2 %):  2.0
+ADD-S AUC ( 5 %):  15.621465682983398
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+pc error:  nan
+kp error:  nan
+R error:  nan
+t error:  nan
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  table ; Model ID: 3f5daa8fe93b68fa87e2d08958d6900c
+Number of trainable parameters in the keypoint detector:  891544
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.13070854544639587
+kp error:  0.0
+R error:  1.7439438104629517
+t error:  0.03476909548044205
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+pc error:  nan
+kp error:  nan
+R error:  nan
+t error:  nan
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  vessel ; Model ID: 5c54100c798dd681bfeb646a8eadb57
+Number of trainable parameters in the keypoint detector:  903856
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.043204206973314285
+kp error:  0.0
+R error:  2.142843723297119
+t error:  0.06360261887311935
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  30.109752655029297
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+pc error:  nan
+kp error:  nan
+R error:  nan
+t error:  nan
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 

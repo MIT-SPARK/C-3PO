@@ -1,3 +1,6 @@
+#ToDo: This file has to be deleted for the final version. This does the same function as keypointnet.py, except
+# using a different dataset directory.
+
 import copy
 import pickle
 from enum import Enum

@@ -15,7 +15,7 @@ point_transformer:
   momentum_sgd: 0.9
 
   baseline_lr_sgd: 0.02
-  baseline_momentum_sgd: 0.9
+  baseline_momentum_sgd: 0.95
 
   self_supervised_train_dataset_len: 5000
   self_supervised_train_batch_size: 25
@@ -33,7 +33,7 @@ point_transformer:
   #val_batch_size: 50
   #val_num_of_points: 1000
 
-  num_epochs: 25
+  num_epochs: 100
 
   theta: 25.0       # self-supervised loss function, pc_loss coefficient
   epsilon:
@@ -69,7 +69,7 @@ pointnet:
   momentum_sgd: 0.9
 
   baseline_lr_sgd: 0.02
-  baseline_momentum_sgd: 0.9
+  baseline_momentum_sgd: 0.95
 
   self_supervised_train_dataset_len: 5000
   self_supervised_train_batch_size: 50
@@ -87,7 +87,7 @@ pointnet:
   #val_batch_size: 50
   #val_num_of_points: 1000
 
-  num_epochs: 25
+  num_epochs: 100
 
   theta: 25.0       # self-supervised loss function, pc_loss coefficient
   epsilon:

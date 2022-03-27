@@ -38,6 +38,6 @@ if __name__ == "__main__":
                            only_categories=only_categories,
                            visualize=True,
                            evaluate_models=False,
-                           visualize_with_corrector=True,
-                           visualize_without_corrector=False,
+                           visualize_with_corrector=False,
+                           visualize_without_corrector=True,
                            models_to_analyze=models_to_analyze)

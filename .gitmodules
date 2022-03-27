@@ -31,3 +31,6 @@
 [submodule "point-transformer"]
 	path = point-transformer
 	url = https://github.com/POSTECH-CVLab/point-transformer.git
+[submodule "TEASER-plusplus"]
+	path = TEASER-plusplus
+	url = https://github.com/MIT-SPARK/TEASER-plusplus.git

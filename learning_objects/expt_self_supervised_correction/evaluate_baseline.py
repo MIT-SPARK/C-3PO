@@ -8,7 +8,7 @@ sys.path.append('../..')
 from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPC, CLASS_NAME, CLASS_ID
 from learning_objects.utils.general import display_two_pcs
 # from learning_objects.expt_self_supervised_correction.expt_supervised_training import visualize_kp_detectors
-from learning_objects.expt_self_supervised_correction.self_supervised_training import visualize_kp_detectors
+# from learning_objects.expt_self_supervised_correction.self_supervised_training import visualize_kp_detectors
 from learning_objects.expt_self_supervised_correction.train_baseline import visualize_kp_detectors
 
 if __name__ == "__main__":
