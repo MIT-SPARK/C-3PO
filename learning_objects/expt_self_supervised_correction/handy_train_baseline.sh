@@ -2,8 +2,7 @@ FILE_NAME="./eval/handy_train_baseline_output.txt"
 
 #python train_baseline.py "point_transformer" "airplane" >> $FILE_NAME
 #python train_baseline.py "point_transformer" "bathtub" >> $FILE_NAME
-echo "pt: bed"
-python train_baseline.py "point_transformer" "bed" >> $FILE_NAME
+python train_baseline.py "point_transformer" "bed"
 #python train_baseline.py "point_transformer" "bottle" >> $FILE_NAME
 #python train_baseline.py "point_transformer" "cap" >> $FILE_NAME
 #python train_baseline.py "point_transformer" "car" >> $FILE_NAME
@@ -15,10 +14,8 @@ python train_baseline.py "point_transformer" "bed" >> $FILE_NAME
 #python train_baseline.py "point_transformer" "motorcycle" >> $FILE_NAME
 #python train_baseline.py "point_transformer" "mug" >> $FILE_NAME
 #python train_baseline.py "point_transformer" "skateboard" >> $FILE_NAME
-echo "pt: table"
-python train_baseline.py "point_transformer" "table" >> $FILE_NAME
-echo "pt: vessel"
-python train_baseline.py "point_transformer" "vessel" >> $FILE_NAME
+python train_baseline.py "point_transformer" "table"
+python train_baseline.py "point_transformer" "vessel"
 
 #python train_baseline.py "pointnet" "airplane" >> $FILE_NAME
 #python train_baseline.py "pointnet" "bathtub" >> $FILE_NAME
