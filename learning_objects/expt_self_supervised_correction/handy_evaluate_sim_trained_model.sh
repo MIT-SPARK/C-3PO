@@ -1,5 +1,10 @@
 BASELINE_SUPERVISED_FILE="./eval/sim_trained_model_eval.txt"
 
+now=$(date +'%c')
+echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" >> $FILE_NAME
+echo "$now" >> $FILE_NAME
+echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" >> $FILE_NAME
+
 echo "EVALUATING BASELINE: POINTNET, AIRPLANE"
 python evaluate_sim_supervised_model.py "pointnet" "airplane" >> $BASELINE_SUPERVISED_FILE
 
