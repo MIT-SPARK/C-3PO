@@ -44,7 +44,7 @@ def ransac(source_points, target_points):
         source=src,
         target=tar,
         corres=corres_init,
-        max_correspondence_distance=0.0001)
+        max_correspondence_distance=0.001)
     # The following is from open3d, just for reference: #ToDo: remove in the final version.
     # result = o3d.pipelines.registration.registration_ransac_based_on_feature_matching(
     #     source_down, target_down, source_fpfh, target_fpfh, True,
@@ -60,7 +60,7 @@ def ransac(source_points, target_points):
     # extracting result
     T = result_ransac.transformation
     R_ = np.array(T[:3, :3])
-    t_ = np.array(T[3, :3])
+    t_ = np.array(T[:3, 3])
     R = torch.from_numpy(R_)
     t = torch.from_numpy(t_)
     t = t.unsqueeze(-1)
@@ -146,12 +146,12 @@ def icp(source_points, target_points, R0, t0):
     reg_p2p = o3d.pipelines.registration.registration_icp(src, tar, 0.01, T,
                                                           o3d.pipelines.registration.TransformationEstimationPointToPoint(),
                                                           o3d.pipelines.registration.ICPConvergenceCriteria(
-                                                              max_iteration=20000))
+                                                              max_iteration=200))
 
     # extracting results
     T = reg_p2p.transformation
     R_ = np.array(T[:3, :3])
-    t_ = np.array(T[3, :3])
+    t_ = np.array(T[:3, 3])
     R = torch.from_numpy(R_)
     t = torch.from_numpy(t_)
     t = t.unsqueeze(-1)
@@ -430,5 +430,9 @@ class wICP():
 
         # re-centering
         t = t + center
+
+        #
+        # R = R0
+        # t = t0 + center
 
         return R @ self.cad_models + t, R, t

@@ -18,6 +18,8 @@ from learning_objects.expt_self_supervised_correction.proposed_model import Prop
 def eval_icp(class_id, model_id, detector_type, hyper_param, global_registration='ransac',
              use_corrector=False, certification=True, visualize=False):
 
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
     class_name = CLASS_NAME[class_id]
     save_folder = hyper_param['save_folder']
     best_model_save_location = save_folder + class_name + '/' + model_id + '/'
@@ -40,8 +42,8 @@ def eval_icp(class_id, model_id, detector_type, hyper_param, global_registration
     eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=eval_batch_size, shuffle=False)
 
     # get cad models
-    cad_models = eval_dataset._get_cad_models().to(torch.float)
-    model_keypoints = eval_dataset._get_model_keypoints().to(torch.float)
+    cad_models = eval_dataset._get_cad_models().to(torch.float).to(device=device)
+    model_keypoints = eval_dataset._get_model_keypoints().to(torch.float).to(device=device)
 
     # initialize the ICP model with the cad_models
     # icp = ICP(cad_models=cad_models, model_keypoints=model_keypoints)
@@ -54,13 +56,16 @@ def eval_icp(class_id, model_id, detector_type, hyper_param, global_registration
     else:
         print("INVALID GLOBAL REGISTRATION MODULE NAME.")
 
-    model = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,
-                          keypoint_detector=detector_type, use_pretrained_regression_model=False).to('cpu')
+    model = ProposedModel(class_name=class_name,
+                          model_keypoints=model_keypoints,
+                          cad_models=cad_models,
+                          keypoint_detector=detector_type,
+                          use_pretrained_regression_model=False).to(device=device)
 
     if not os.path.isfile(best_pre_model_save_file):
         print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")
 
-    state_dict_pre = torch.load(best_pre_model_save_file, map_location='cpu')
+    state_dict_pre = torch.load(best_pre_model_save_file, map_location=device)
     model.load_state_dict(state_dict_pre)
 
     num_parameters = sum(param.numel() for param in model.parameters() if param.requires_grad)
@@ -88,14 +93,16 @@ def eval_icp(class_id, model_id, detector_type, hyper_param, global_registration
     with torch.no_grad():
         for i, vdata in enumerate(eval_loader):
             input_point_cloud, keypoints_target, R_target, t_target = vdata
-            # input_point_cloud = input_point_cloud.to(device)
-            # keypoints_target = keypoints_target.to(device)
-            # R_target = R_target.to(device)
-            # t_target = t_target.to(device)
+            input_point_cloud = input_point_cloud.to(device)
+            keypoints_target = keypoints_target.to(device)
+            R_target = R_target.to(device)
+            t_target = t_target.to(device)
             batch_size = input_point_cloud.shape[0]
 
+            print("here")
             _, detected_keypoints, R0, t0, _ \
                 = model(input_point_cloud, correction_flag=use_corrector, need_predicted_keypoints=False)
+            print("here")
 
             if global_registration == 'ransac' or global_registration == 'teaser':
                 predicted_point_cloud, R_predicted, t_predicted = icp.forward(input_point_cloud, detected_keypoints)
