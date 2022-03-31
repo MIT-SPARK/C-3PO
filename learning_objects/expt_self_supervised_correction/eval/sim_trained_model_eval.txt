@@ -1,18 +1,20 @@
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Tue 29 Mar 2022 07:26:51 PM EDT
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 Analyzing Trained Model for Object:  airplane ; Model ID: 3db61220251b3c9de719b5362fe06bbb
 Number of trainable parameters:  1614643
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 PRE-TRAINED MODEL:
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-model diameter is 0.9999994678443352
 >>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
 Evaluating performance across all objects:
-pc error:  0.0724286437034607
+pc error:  0.07251681387424469
 kp error:  0.621711015701294
-R error:  2.4690403938293457
-t error:  0.037618957459926605
+R error:  2.4690098762512207
+t error:  0.0376189649105072
 ADD-S ( 2 %):  0.0
-ADD-S AUC ( 5 %):  6.760095119476318
+ADD-S AUC ( 5 %):  3.458935499191284
 GT-certifiable: 
 Evaluating certification: 
 epsilon parameter:  0.999
@@ -31,13 +33,12 @@ Number of trainable parameters:  1613101
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 PRE-TRAINED MODEL:
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-model diameter is 1.0000001030389585
 >>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
 Evaluating performance across all objects:
-pc error:  0.06042943894863129
+pc error:  0.06034509465098381
 kp error:  0.6125016808509827
-R error:  2.2919280529022217
-t error:  0.053387317806482315
+R error:  2.291922092437744
+t error:  0.053387321531772614
 ADD-S ( 2 %):  0.0
 ADD-S AUC ( 5 %):  2.0
 GT-certifiable: 
@@ -58,15 +59,14 @@ Number of trainable parameters:  1611559
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 PRE-TRAINED MODEL:
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-model diameter is 1.0000004609264193
 >>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
 Evaluating performance across all objects:
-pc error:  0.08402282744646072
+pc error:  0.08409714698791504
 kp error:  1.3077534437179565
-R error:  1.9690518379211426
+R error:  1.969051718711853
 t error:  0.061915721744298935
 ADD-S ( 2 %):  0.0
-ADD-S AUC ( 5 %):  4.000000476837158
+ADD-S AUC ( 5 %):  2.439720392227173
 GT-certifiable: 
 Evaluating certification: 
 epsilon parameter:  0.998
@@ -85,26 +85,25 @@ Number of trainable parameters:  1616956
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 PRE-TRAINED MODEL:
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-model diameter is 1.0000005968281072
 >>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
 Evaluating performance across all objects:
-pc error:  0.20503726601600647
-kp error:  0.756734311580658
-R error:  2.1406517028808594
-t error:  0.17578597366809845
+pc error:  0.20498126745224
+kp error:  0.7567343711853027
+R error:  2.1406519412994385
+t error:  0.17578601837158203
 ADD-S ( 2 %):  0.0
-ADD-S AUC ( 5 %):  6.5578436851501465
+ADD-S AUC ( 5 %):  3.773348331451416
 GT-certifiable: 
 Evaluating certification: 
 epsilon parameter:  0.99
 % certifiable:  4.0
 Evaluating performance for certifiable objects: 
-pc error:  0.0262620747089386
-kp error:  0.09955909848213196
-R error:  0.2551294267177582
-t error:  0.008193982765078545
+pc error:  0.026072680950164795
+kp error:  0.09955920279026031
+R error:  0.2551330626010895
+t error:  0.00819399580359459
 ADD-S ( 2 %):  0.0
-ADD-S AUC ( 5 %):  40.0
+ADD-S AUC ( 5 %):  69.88690948486328
 GT-certifiable: 
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 Analyzing Trained Model for Object:  cap ; Model ID: 3dec0d851cba045fbf444790f25ea3db
@@ -112,12 +111,11 @@ Number of trainable parameters:  1608475
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 PRE-TRAINED MODEL:
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-model diameter is 0.9999999054315314
 >>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
 Evaluating performance across all objects:
-pc error:  0.0885474905371666
-kp error:  0.3146546483039856
-R error:  1.7102450132369995
+pc error:  0.08858248591423035
+kp error:  0.3146546185016632
+R error:  1.71024489402771
 t error:  0.07026014477014542
 ADD-S ( 2 %):  0.0
 ADD-S AUC ( 5 %):  0.0
@@ -139,13 +137,12 @@ Number of trainable parameters:  1620811
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 PRE-TRAINED MODEL:
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-model diameter is 1.000000077547255
 >>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
 Evaluating performance across all objects:
-pc error:  0.11194543540477753
-kp error:  1.577834963798523
+pc error:  0.1118907779455185
+kp error:  1.5778350830078125
 R error:  2.1386070251464844
-t error:  0.13093656301498413
+t error:  0.13093654811382294
 ADD-S ( 2 %):  0.0
 ADD-S AUC ( 5 %):  0.0
 GT-certifiable: 
@@ -166,15 +163,14 @@ Number of trainable parameters:  1611559
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 PRE-TRAINED MODEL:
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-model diameter is 1.0000002532869858
 >>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
 Evaluating performance across all objects:
-pc error:  0.07498544454574585
+pc error:  0.07478337734937668
 kp error:  0.3490450978279114
-R error:  1.9845260381698608
-t error:  0.028636351227760315
+R error:  1.9845259189605713
+t error:  0.028636345639824867
 ADD-S ( 2 %):  2.0
-ADD-S AUC ( 5 %):  14.328506469726562
+ADD-S AUC ( 5 %):  7.958533763885498
 GT-certifiable: 
 Evaluating certification: 
 epsilon parameter:  0.999
@@ -193,15 +189,14 @@ Number of trainable parameters:  1610788
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 PRE-TRAINED MODEL:
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-model diameter is 0.9999993949084086
 >>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
 Evaluating performance across all objects:
-pc error:  0.10895971208810806
-kp error:  0.28105854988098145
-R error:  2.2608323097229004
-t error:  0.0711633712053299
+pc error:  0.10891342163085938
+kp error:  0.28105852007865906
+R error:  2.2608320713043213
+t error:  0.07116337865591049
 ADD-S ( 2 %):  0.0
-ADD-S AUC ( 5 %):  4.408012866973877
+ADD-S AUC ( 5 %):  3.6264090538024902
 GT-certifiable: 
 Evaluating certification: 
 epsilon parameter:  0.9995
@@ -220,13 +215,12 @@ Number of trainable parameters:  1610788
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 PRE-TRAINED MODEL:
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-model diameter is 1.0000004400612337
 >>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
 Evaluating performance across all objects:
-pc error:  0.06501078605651855
-kp error:  0.6072648763656616
-R error:  1.7201576232910156
-t error:  0.05482194572687149
+pc error:  0.06499240547418594
+kp error:  0.6072648167610168
+R error:  1.7201582193374634
+t error:  0.05482194945216179
 ADD-S ( 2 %):  0.0
 ADD-S AUC ( 5 %):  0.0
 GT-certifiable: 
@@ -247,15 +241,14 @@ Number of trainable parameters:  1608475
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 PRE-TRAINED MODEL:
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-model diameter is 1.0000004364937027
 >>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
 Evaluating performance across all objects:
-pc error:  0.13865120708942413
+pc error:  0.13899293541908264
 kp error:  0.2512437403202057
-R error:  2.1481337547302246
-t error:  0.0838969424366951
+R error:  2.1481354236602783
+t error:  0.08389695733785629
 ADD-S ( 2 %):  2.0
-ADD-S AUC ( 5 %):  7.247877597808838
+ADD-S AUC ( 5 %):  5.010515213012695
 GT-certifiable: 
 Evaluating certification: 
 epsilon parameter:  0.9995
@@ -274,12 +267,11 @@ Number of trainable parameters:  1608475
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 PRE-TRAINED MODEL:
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-model diameter is 0.9999999797959148
 >>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
 Evaluating performance across all objects:
-pc error:  0.1125856339931488
-kp error:  0.5250750780105591
-R error:  2.6945574283599854
+pc error:  0.11253160238265991
+kp error:  0.5250751376152039
+R error:  2.69455885887146
 t error:  0.056008949875831604
 ADD-S ( 2 %):  0.0
 ADD-S AUC ( 5 %):  0.0
@@ -301,15 +293,14 @@ Number of trainable parameters:  1614643
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 PRE-TRAINED MODEL:
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-model diameter is 1.0000002491009703
 >>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
 Evaluating performance across all objects:
-pc error:  0.17383916676044464
-kp error:  2.1607015132904053
-R error:  1.907202959060669
-t error:  0.10718734562397003
+pc error:  0.17359559237957
+kp error:  2.160701036453247
+R error:  1.9072026014328003
+t error:  0.10718732327222824
 ADD-S ( 2 %):  0.0
-ADD-S AUC ( 5 %):  8.597871780395508
+ADD-S AUC ( 5 %):  4.233813762664795
 GT-certifiable: 
 Evaluating certification: 
 epsilon parameter:  0.999
@@ -328,12 +319,11 @@ Number of trainable parameters:  1612330
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 PRE-TRAINED MODEL:
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-model diameter is 1.0000002593157957
 >>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
 Evaluating performance across all objects:
-pc error:  0.08090418577194214
+pc error:  0.08079090714454651
 kp error:  0.9995341300964355
-R error:  2.4194657802581787
+R error:  2.419466018676758
 t error:  0.10424531996250153
 ADD-S ( 2 %):  0.0
 ADD-S AUC ( 5 %):  0.0
@@ -355,15 +345,14 @@ Number of trainable parameters:  1611559
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 PRE-TRAINED MODEL:
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-model diameter is 1.0000002348221186
 >>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
 Evaluating performance across all objects:
-pc error:  0.13238845765590668
+pc error:  0.13225474953651428
 kp error:  0.5567762851715088
-R error:  1.9200400114059448
+R error:  1.9200398921966553
 t error:  0.04061732813715935
 ADD-S ( 2 %):  0.0
-ADD-S AUC ( 5 %):  6.392501354217529
+ADD-S AUC ( 5 %):  4.179508209228516
 GT-certifiable: 
 Evaluating certification: 
 epsilon parameter:  0.999
@@ -382,13 +371,12 @@ Number of trainable parameters:  1610017
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 PRE-TRAINED MODEL:
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-model diameter is 0.9999999589316253
 >>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
 Evaluating performance across all objects:
-pc error:  0.15351195633411407
-kp error:  0.5486498475074768
-R error:  1.6871777772903442
-t error:  0.0521768294274807
+pc error:  0.15359121561050415
+kp error:  0.5486499071121216
+R error:  1.6871776580810547
+t error:  0.052176833152770996
 ADD-S ( 2 %):  0.0
 ADD-S AUC ( 5 %):  0.0
 GT-certifiable: 
@@ -409,15 +397,14 @@ Number of trainable parameters:  1616185
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 PRE-TRAINED MODEL:
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-model diameter is 0.999999170780238
 >>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
 Evaluating performance across all objects:
-pc error:  0.059657640755176544
-kp error:  0.5488457679748535
+pc error:  0.059576671570539474
+kp error:  0.5488457083702087
 R error:  2.5660367012023926
-t error:  0.07092079520225525
+t error:  0.07092078775167465
 ADD-S ( 2 %):  0.0
-ADD-S AUC ( 5 %):  14.82214641571045
+ADD-S AUC ( 5 %):  8.55178165435791
 GT-certifiable: 
 Evaluating certification: 
 epsilon parameter:  0.999
@@ -436,15 +423,14 @@ Number of trainable parameters:  900778
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 PRE-TRAINED MODEL:
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-model diameter is 0.9999994678443352
 >>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
 Evaluating performance across all objects:
-pc error:  0.06671378016471863
-kp error:  0.20019790530204773
-R error:  1.7416012287139893
-t error:  0.03194890543818474
+pc error:  0.06545692682266235
+kp error:  0.19973768293857574
+R error:  1.7558703422546387
+t error:  0.03164144977927208
 ADD-S ( 2 %):  0.0
-ADD-S AUC ( 5 %):  6.126786231994629
+ADD-S AUC ( 5 %):  3.502558469772339
 GT-certifiable: 
 Evaluating certification: 
 epsilon parameter:  0.999
@@ -463,15 +449,14 @@ Number of trainable parameters:  897700
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 PRE-TRAINED MODEL:
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-model diameter is 1.0000001030389585
 >>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
 Evaluating performance across all objects:
-pc error:  0.05083540081977844
-kp error:  0.3884153366088867
-R error:  1.9652984142303467
-t error:  0.04505155235528946
+pc error:  0.04976613074541092
+kp error:  0.39039286971092224
+R error:  1.9891092777252197
+t error:  0.04514684900641441
 ADD-S ( 2 %):  0.0
-ADD-S AUC ( 5 %):  2.0
+ADD-S AUC ( 5 %):  2.000000238418579
 GT-certifiable: 
 Evaluating certification: 
 epsilon parameter:  0.998
@@ -490,15 +475,14 @@ Number of trainable parameters:  894622
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 PRE-TRAINED MODEL:
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-model diameter is 1.0000004609264193
 >>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
 Evaluating performance across all objects:
-pc error:  0.08449993282556534
-kp error:  0.47540703415870667
-R error:  2.0856740474700928
-t error:  0.05914844945073128
+pc error:  0.08483627438545227
+kp error:  0.4779709577560425
+R error:  2.209256172180176
+t error:  0.059056270867586136
 ADD-S ( 2 %):  0.0
-ADD-S AUC ( 5 %):  0.0
+ADD-S AUC ( 5 %):  2.000000238418579
 GT-certifiable: 
 Evaluating certification: 
 epsilon parameter:  0.998
@@ -517,13 +501,12 @@ Number of trainable parameters:  905395
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 PRE-TRAINED MODEL:
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-model diameter is 1.0000005968281072
 >>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
 Evaluating performance across all objects:
-pc error:  0.07861461490392685
-kp error:  0.3070376515388489
-R error:  1.6183826923370361
-t error:  0.06544745713472366
+pc error:  0.07693970203399658
+kp error:  0.3064003586769104
+R error:  1.6804040670394897
+t error:  0.06534426659345627
 ADD-S ( 2 %):  0.0
 ADD-S AUC ( 5 %):  0.0
 GT-certifiable: 
@@ -544,13 +527,12 @@ Number of trainable parameters:  888466
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 PRE-TRAINED MODEL:
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-model diameter is 0.9999999054315314
 >>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
 Evaluating performance across all objects:
-pc error:  0.07857538759708405
-kp error:  0.33212459087371826
-R error:  2.3655529022216797
-t error:  0.08064904063940048
+pc error:  0.07811130583286285
+kp error:  0.32996347546577454
+R error:  2.3466453552246094
+t error:  0.08023867756128311
 ADD-S ( 2 %):  0.0
 ADD-S AUC ( 5 %):  0.0
 GT-certifiable: 
@@ -571,13 +553,12 @@ Number of trainable parameters:  913090
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 PRE-TRAINED MODEL:
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-model diameter is 1.000000077547255
 >>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
 Evaluating performance across all objects:
-pc error:  0.05513443052768707
-kp error:  0.4698197841644287
-R error:  2.229151487350464
-t error:  0.10099650174379349
+pc error:  0.05312483757734299
+kp error:  0.4652845561504364
+R error:  2.2014694213867188
+t error:  0.10079013556241989
 ADD-S ( 2 %):  0.0
 ADD-S AUC ( 5 %):  0.0
 GT-certifiable: 
@@ -598,15 +579,14 @@ Number of trainable parameters:  894622
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 PRE-TRAINED MODEL:
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-model diameter is 1.0000002532869858
 >>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
 Evaluating performance across all objects:
-pc error:  0.04726250469684601
-kp error:  0.23904699087142944
-R error:  1.1767075061798096
-t error:  0.024410616606473923
+pc error:  0.04654620960354805
+kp error:  0.24162505567073822
+R error:  1.2240639925003052
+t error:  0.024465885013341904
 ADD-S ( 2 %):  0.0
-ADD-S AUC ( 5 %):  22.379201889038086
+ADD-S AUC ( 5 %):  15.079876899719238
 GT-certifiable: 
 Evaluating certification: 
 epsilon parameter:  0.999
@@ -625,15 +605,14 @@ Number of trainable parameters:  893083
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 PRE-TRAINED MODEL:
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-model diameter is 0.9999993949084086
 >>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
 Evaluating performance across all objects:
-pc error:  0.0983116552233696
-kp error:  0.21842870116233826
-R error:  1.8286826610565186
-t error:  0.04005028307437897
-ADD-S ( 2 %):  2.0
-ADD-S AUC ( 5 %):  4.0
+pc error:  0.09302619844675064
+kp error:  0.21819989383220673
+R error:  1.8164565563201904
+t error:  0.03701835870742798
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  2.6831181049346924
 GT-certifiable: 
 Evaluating certification: 
 epsilon parameter:  0.9995
@@ -652,15 +631,14 @@ Number of trainable parameters:  893083
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 PRE-TRAINED MODEL:
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-model diameter is 1.0000004400612337
 >>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
 Evaluating performance across all objects:
-pc error:  0.07580918073654175
-kp error:  0.4645518958568573
-R error:  1.642154574394226
-t error:  0.04924632981419563
+pc error:  0.07469504326581955
+kp error:  0.46551406383514404
+R error:  1.642171859741211
+t error:  0.04856215789914131
 ADD-S ( 2 %):  0.0
-ADD-S AUC ( 5 %):  6.514004707336426
+ADD-S AUC ( 5 %):  2.6971118450164795
 GT-certifiable: 
 Evaluating certification: 
 epsilon parameter:  0.998
@@ -679,15 +657,14 @@ Number of trainable parameters:  888466
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 PRE-TRAINED MODEL:
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-model diameter is 1.0000004364937027
 >>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
 Evaluating performance across all objects:
-pc error:  0.14155317842960358
-kp error:  0.25217124819755554
-R error:  1.9820916652679443
-t error:  0.09350453317165375
+pc error:  0.14209571480751038
+kp error:  0.24864520132541656
+R error:  1.9487334489822388
+t error:  0.08996517211198807
 ADD-S ( 2 %):  0.0
-ADD-S AUC ( 5 %):  2.000000238418579
+ADD-S AUC ( 5 %):  2.0
 GT-certifiable: 
 Evaluating certification: 
 epsilon parameter:  0.9995
@@ -706,15 +683,14 @@ Number of trainable parameters:  888466
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 PRE-TRAINED MODEL:
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-model diameter is 0.9999999797959148
 >>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
 Evaluating performance across all objects:
-pc error:  0.11397691816091537
-kp error:  0.48834845423698425
-R error:  2.4622395038604736
-t error:  0.05706571415066719
+pc error:  0.10701218992471695
+kp error:  0.49075961112976074
+R error:  2.4797496795654297
+t error:  0.05663306266069412
 ADD-S ( 2 %):  0.0
-ADD-S AUC ( 5 %):  2.0
+ADD-S AUC ( 5 %):  2.401263475418091
 GT-certifiable: 
 Evaluating certification: 
 epsilon parameter:  0.995
@@ -733,15 +709,14 @@ Number of trainable parameters:  900778
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 PRE-TRAINED MODEL:
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-model diameter is 1.0000002491009703
 >>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
 Evaluating performance across all objects:
-pc error:  0.046555399894714355
-kp error:  0.29783523082733154
-R error:  1.881563425064087
-t error:  0.028199445456266403
-ADD-S ( 2 %):  4.0
-ADD-S AUC ( 5 %):  24.764705657958984
+pc error:  0.04655276611447334
+kp error:  0.2953864336013794
+R error:  1.7941006422042847
+t error:  0.028116483241319656
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  18.683273315429688
 GT-certifiable: 
 Evaluating certification: 
 epsilon parameter:  0.999
@@ -760,15 +735,14 @@ Number of trainable parameters:  896161
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 PRE-TRAINED MODEL:
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-model diameter is 1.0000002593157957
 >>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
 Evaluating performance across all objects:
-pc error:  0.050096217542886734
-kp error:  0.3144077658653259
-R error:  1.592930555343628
-t error:  0.04712850600481033
+pc error:  0.050119586288928986
+kp error:  0.3138039708137512
+R error:  1.542731761932373
+t error:  0.047014933079481125
 ADD-S ( 2 %):  0.0
-ADD-S AUC ( 5 %):  6.000000476837158
+ADD-S AUC ( 5 %):  3.0465288162231445
 GT-certifiable: 
 Evaluating certification: 
 epsilon parameter:  0.995
@@ -787,15 +761,14 @@ Number of trainable parameters:  894622
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 PRE-TRAINED MODEL:
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-model diameter is 1.0000002348221186
 >>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
 Evaluating performance across all objects:
-pc error:  0.07421980053186417
-kp error:  0.39349642395973206
-R error:  1.6509346961975098
-t error:  0.03689773380756378
-ADD-S ( 2 %):  2.0
-ADD-S AUC ( 5 %):  17.414106369018555
+pc error:  0.06777385622262955
+kp error:  0.39111751317977905
+R error:  1.6687990427017212
+t error:  0.03731702268123627
+ADD-S ( 2 %):  4.0
+ADD-S AUC ( 5 %):  14.071351051330566
 GT-certifiable: 
 Evaluating certification: 
 epsilon parameter:  0.999
@@ -814,15 +787,14 @@ Number of trainable parameters:  891544
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 PRE-TRAINED MODEL:
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-model diameter is 0.9999999589316253
 >>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
 Evaluating performance across all objects:
-pc error:  0.11627988517284393
-kp error:  0.4982912540435791
-R error:  1.745743751525879
-t error:  0.030584687367081642
+pc error:  0.11750268936157227
+kp error:  0.5012248158454895
+R error:  1.7362258434295654
+t error:  0.03029787912964821
 ADD-S ( 2 %):  0.0
-ADD-S AUC ( 5 %):  6.6526970863342285
+ADD-S AUC ( 5 %):  2.8382160663604736
 GT-certifiable: 
 Evaluating certification: 
 epsilon parameter:  0.99
@@ -841,15 +813,14 @@ Number of trainable parameters:  903856
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 PRE-TRAINED MODEL:
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-model diameter is 0.999999170780238
 >>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
 Evaluating performance across all objects:
-pc error:  0.03509793430566788
-kp error:  0.3144390285015106
-R error:  2.1095476150512695
-t error:  0.08893954008817673
+pc error:  0.03889387845993042
+kp error:  0.3183518946170807
+R error:  2.1541807651519775
+t error:  0.09087331593036652
 ADD-S ( 2 %):  0.0
-ADD-S AUC ( 5 %):  34.40183639526367
+ADD-S AUC ( 5 %):  26.396888732910156
 GT-certifiable: 
 Evaluating certification: 
 epsilon parameter:  0.999

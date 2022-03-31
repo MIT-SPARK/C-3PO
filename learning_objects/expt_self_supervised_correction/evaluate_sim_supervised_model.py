@@ -158,7 +158,7 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
             print("PRE-TRAINED MODEL:")
             print(">>" * 40)
             evaluate(eval_loader=eval_loader, model=model_before, hyper_param=hyper_param, certification=True,
-                     device=device, correction_flag=True) #ToDo: Change correction_flag to False
+                     device=device, correction_flag=False)
         if post_:
             print(">>" * 40)
             print("(SELF-SUPERVISED) TRAINED MODEL:")
