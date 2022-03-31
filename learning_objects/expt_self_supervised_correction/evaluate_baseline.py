@@ -39,4 +39,8 @@ if __name__ == "__main__":
     visualize_kp_detectors(detector_type=detector_type,
                            model_class_ids=model_class_ids,
                            only_categories=only_categories,
-                           visualize=False, evaluate_models=True)
+                           visualize=True, evaluate_models=True,
+                           visualize_without_corrector=True,
+                           visualize_with_corrector=False,
+                           visualize_before=True,
+                           visualize_after=False)
