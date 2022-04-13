@@ -25,7 +25,8 @@ from learning_objects.utils.general import display_results
 from learning_objects.expt_self_supervised_correction.loss_functions import \
     keypoints_loss, rotation_loss, translation_loss, chamfer_loss
 
-from learning_objects.expt_self_supervised_correction.loss_functions import supervised_training_loss as supervised_loss
+from learning_objects.expt_self_supervised_correction.loss_functions import supervised_training_loss as supervised_loss, \
+    avg_kpt_distance_regularizer
 from learning_objects.expt_self_supervised_correction.loss_functions import supervised_validation_loss as validation_loss
 
 from learning_objects.expt_ycb.proposed_model import ProposedRegressionModel as ProposedModel
@@ -52,7 +53,11 @@ def supervised_train_one_epoch(training_loader, model, optimizer, correction_fla
         out = model(pc, correction_flag=correction_flag)
         kp_pred = out[1]
 
-        loss = ((kp - kp_pred)**2).sum(dim=1).mean(dim=1).mean()
+        kp_reg = .1 * avg_kpt_distance_regularizer(kp_pred)
+        loss = 2 * (((kp - kp_pred)**2)).sum(dim=1).mean(dim=1).mean() - kp_reg
+        print("kp_reg", kp_reg)
+        print("LOSS", loss)
+        print()
         # loss = keypoints_loss(kp, kp_pred)
         # loss = supervised_loss(kp, kp_pred)
         loss.backward()

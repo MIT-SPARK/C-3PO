@@ -20,6 +20,15 @@ def keypoints_loss(kp, kp_):
 
     return kp_loss
 
+def avg_kpt_distance_regularizer(kp):
+    kp_contiguous = torch.transpose(kp, -1, -2).contiguous()
+    euclidian_dists = torch.cdist(kp_contiguous, kp_contiguous, p=2)
+    euclidian_dists_squared = torch.square(euclidian_dists)
+    #this takes euclidian norms of all pairs, so I want the maximum
+    #we want to maximize distance from one point to all others, so sum up
+    #all rows (distance to itself will be 0)
+    #take avg of that sum, subtract it from the loss
+    return torch.mean(euclidian_dists_squared)
 
 def rotation_loss(R, R_):
 

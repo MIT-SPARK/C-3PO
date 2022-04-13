@@ -410,55 +410,116 @@ def get_degenerate_angles(): #+/- 10 degrees, -1 means all angles
         np.save(val_split_new_filename, np.array(val_wo_degeneracy_array))
         np.save(test_split_new_filename, np.array(test_wo_degeneracy_array))
 
+def do_data_augmentation(pcd_filepath, filename, percentage_points_to_remove, num_augmentations= 9):
+    print(pcd_filepath)
+    pcd = o3d.io.read_point_cloud(pcd_filepath + '/' + filename)
+    #o3d.visualization.draw_geometries([pcd])
+    pcd = np.array(pcd.points)
+
+    for aug_idx in range(num_augmentations):
+        num_pts_to_remove = int(percentage_points_to_remove * pcd.shape[0])
+        new_points = pcd.copy()
+        for i in range(num_pts_to_remove):
+            rand_idx_to_remove = np.random.randint(new_points.shape[0])
+            new_points = np.delete(new_points, rand_idx_to_remove, 0)
+        print("FINISHED REMOVING PERCENTAGE OF POINTS")
+        if new_points.shape[0] < 500:
+            print("less than 500 points in this point cloud, not removing any more")
+            new_points = pcd.copy()
+        random_noise = np.random.normal(0, .001, new_points.shape)
+        new_points = new_points + random_noise
+        output_pcd = o3d.geometry.PointCloud()
+        output_pcd.points = o3d.utility.Vector3dVector(new_points)  # nts: .numpy() is optimized conversion to numpy array
+        #o3d.visualization.draw_geometries([output_pcd])
+        data_augmented_pcd_filepath = pcd_filepath[:-15] + 'data_augmentation/' + filename[:-4] + "_aug_" + str(aug_idx).zfill(3) + ".ply"
+        print(data_augmented_pcd_filepath)
+        if not os.path.exists(pcd_filepath[:-15] + 'data_augmentation/'):
+            os.makedirs(pcd_filepath[:-15] + 'data_augmentation/')
+        o3d.io.write_point_cloud(data_augmented_pcd_filepath, output_pcd)
+
 
 if __name__=="__main__":
-    get_degenerate_angles()
+    # get_degenerate_angles()
     target_object = "001_chips_can"#"021_bleach_cleanser" #"019_pitcher_base"#"035_power_drill"	# Full name of the target object.
     # for target_object in ["007_tuna_fish_can", "008_pudding_box", "009_gelatin_box", "010_potted_meat_can", "011_banana"]:
     # for target_object in ["024_bowl", "036_wood_block", "040_large_marker", "051_large_clamp", "052_extra_large_clamp", "061_foam_brick"]:
     # for target_object in ["004_sugar_box", "005_tomato_soup_can", "006_mustard_bottle"]:
-    # for target_object in ["021_bleach_cleanser"]: # ["021_bleach_cleanser", "052_extra_large_clamp", "006_mustard_bottle"]:
-    # for target_object in ["011_banana", \
-    #                       "019_pitcher_base", "021_bleach_cleanser", \
+    # for target_object in ["001_chips_can", "002_master_chef_can", "003_cracker_box", \
+    #                       "004_sugar_box", "005_tomato_soup_can", "006_mustard_bottle", \
+    #                       "007_tuna_fish_can", "008_pudding_box", "009_gelatin_box", "010_potted_meat_can", \
+    #                       "011_banana", "019_pitcher_base", "021_bleach_cleanser", \
     #                       "035_power_drill", "036_wood_block", "037_scissors", \
-    #                       "040_large_marker", "051_large_clamp", "061_foam_brick"]:
-    #     mesh = load_mesh(target_object, viz=True)
-    #     points = mesh.vertices
-    #     pcd = o3d.geometry.PointCloud()
-    #     pcd.points = points
-    #     picked_points_idx = pick_points(pcd)
-    #     save_kpts(picked_points_idx, points, target_object)
-    #
-    #     # ### testing transformations
-    #     # load_image_and_model2(target_object, "NP1", 30)
-    #
-    #     # ### saving ground truth transformations wrt saved point cloud frame of reference
-    #     # for viewpoint_camera in ["NP1", "NP2", "NP3", "NP4", "NP5"]:
-    #     #     for viewpoint_angle in range(358):
-    #     #         if viewpoint_angle%3 != 0:
-    #     #             continue
-    #     #         save_rgbFromObj(target_object, viewpoint_camera, viewpoint_angle)
-    #
-    #     ### making train/val/testing splits:
-    #     pcd_filepath = os.path.join(ycb_data_folder + target_object, "clouds", "largest_cluster")
-    #
-    #     saved_point_clouds = []
-    #     for filename in os.listdir(pcd_filepath):
-    #         saved_point_clouds.append(filename)
-    #     random.shuffle(saved_point_clouds)
-    #     num_test = int(.1 * len(saved_point_clouds))
-    #     num_val = num_test
-    #     num_train = len(saved_point_clouds) - num_test - num_val
-    #
-    #     train_split = saved_point_clouds[:num_train]
-    #     val_split = saved_point_clouds[num_train:num_train+num_val]
-    #     test_split = saved_point_clouds[num_train+num_val:]
-    #     #save splits in npy
-    #     split_path = os.path.join(ycb_data_folder + target_object, "clouds", "largest_cluster")
-    #     np.save(split_path + '/train_split.npy', train_split)
-    #     np.save(split_path + '/val_split.npy', val_split)
-    #     np.save(split_path + '/test_split.npy', test_split)
-    #
-    #     # ### vis and save images
-    #     # for obj in ["019_pitcher_base", "021_bleach_cleanser"]:
-    #     #     viz_and_save_depth_pc(obj, 'test')
+    #                       "051_large_clamp", "052_extra_large_clamp", "061_foam_brick"]:
+    for target_object in ["009_gelatin_box"]: #fix the primes
+
+        # mesh = load_mesh(target_object, viz=True)
+        # points = mesh.vertices
+        # pcd = o3d.geometry.PointCloud()
+        # pcd.points = points
+        # picked_points_idx = pick_points(pcd)
+        # save_kpts(picked_points_idx, points, target_object)
+
+        # ### testing transformations
+        # load_image_and_model2(target_object, "NP1", 30)
+
+        # ### saving ground truth transformations wrt saved point cloud frame of reference
+        # for viewpoint_camera in ["NP1", "NP2", "NP3", "NP4", "NP5"]:
+        #     for viewpoint_angle in range(358):
+        #         if viewpoint_angle%3 != 0:
+        #             continue
+        #         save_rgbFromObj(target_object, viewpoint_camera, viewpoint_angle)
+
+        ### making train/val/testing splits:
+        # pcd_filepath = os.path.join(ycb_data_folder + target_object, "clouds", "largest_cluster")
+
+        # saved_point_clouds = []
+        # for filename in os.listdir(pcd_filepath):
+        #     if filename in ["train_split.npy", "val_split.npy", "test_split.npy"]:
+        #         continue
+        #     saved_point_clouds.append(filename)
+        # random.shuffle(saved_point_clouds)
+        # num_test = int(.1 * len(saved_point_clouds))
+        # num_val = num_test
+        # num_train = len(saved_point_clouds) - num_test - num_val
+        #
+        # train_split = saved_point_clouds[:num_train]
+        # val_split = saved_point_clouds[num_train:num_train+num_val]
+        # test_split = saved_point_clouds[num_train+num_val:]
+        # #save splits in npy
+        # split_path = os.path.join(ycb_data_folder + target_object, "clouds", "largest_cluster")
+        # np.save(split_path + '/train_split.npy', train_split)
+        # np.save(split_path + '/val_split.npy', val_split)
+        # np.save(split_path + '/test_split.npy', test_split)
+
+        # ### vis and save images
+        # for obj in ["019_pitcher_base", "021_bleach_cleanser"]:
+        #     viz_and_save_depth_pc(obj, 'test')
+
+        ### for data augmentation
+        print("target_object", target_object)
+        pcd_filepath = os.path.join(ycb_data_folder + target_object, "clouds", "largest_cluster")
+        for filename in os.listdir(pcd_filepath):
+            do_data_augmentation(pcd_filepath, filename, percentage_points_to_remove=.1)
+
+        ### making train/val/testing splits for data augmented dataset:
+        pcd_augmented_filepath = os.path.join(ycb_data_folder + target_object, "clouds", "data_augmentation")
+        saved_point_clouds = []
+        for filename in os.listdir(pcd_augmented_filepath):
+            if filename in ["train_split.npy", "val_split.npy", "test_split.npy"]:
+                continue
+            saved_point_clouds.append(filename)
+        random.shuffle(saved_point_clouds)
+        num_test = int(.1 * len(saved_point_clouds))
+        num_val = num_test
+        num_train = len(saved_point_clouds) - num_test - num_val
+
+        train_split = saved_point_clouds[:num_train]
+        val_split = saved_point_clouds[num_train:num_train+num_val]
+        test_split = saved_point_clouds[num_train+num_val:]
+        #save splits in npy
+        split_path = os.path.join(ycb_data_folder + target_object, "clouds", "data_augmentation")
+        np.save(split_path + '/train_split.npy', train_split)
+        np.save(split_path + '/val_split.npy', val_split)
+        np.save(split_path + '/test_split.npy', test_split)
+
+

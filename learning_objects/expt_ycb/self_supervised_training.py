@@ -23,7 +23,7 @@ sys.path.append("../../")
 
 from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPointCloud2, DepthPC, CLASS_NAME, \
     FixedDepthPC, CLASS_ID
-from learning_objects.datasets.ycb import DepthYCB
+from learning_objects.datasets.ycb import DepthYCBAugment
 from learning_objects.models.certifiability import confidence, confidence_kp
 
 from learning_objects.utils.general import display_results, TrackingMeter
@@ -232,6 +232,8 @@ def train_detector(hyper_param, detector_type='point_transformer', model_id="019
     lr_sgd = hyper_param['lr_sgd']
     print("LR_SGD", lr_sgd)
     momentum_sgd = hyper_param['momentum_sgd']
+    epsilon = hyper_param['epsilon']
+    print("epsilon", epsilon)
 
     # object symmetry
     if model_id in SYMMETRIC_MODEL_IDS:
@@ -243,7 +245,7 @@ def train_detector(hyper_param, detector_type='point_transformer', model_id="019
     self_supervised_train_batch_size = hyper_param['self_supervised_train_batch_size'][model_id]
     num_of_points_to_sample = hyper_param['num_of_points_to_sample']
 
-    self_supervised_train_dataset = DepthYCB(model_id=model_id,
+    self_supervised_train_dataset = DepthYCBAugment(model_id=model_id,
                                              split='train',
                                              num_of_points=num_of_points_to_sample)
     self_supervised_train_loader = torch.utils.data.DataLoader(self_supervised_train_dataset,
@@ -252,7 +254,7 @@ def train_detector(hyper_param, detector_type='point_transformer', model_id="019
 
     # validation dataset:
     val_batch_size = hyper_param['val_batch_size'][model_id]
-    val_dataset = DepthYCB(model_id=model_id,
+    val_dataset = DepthYCBAugment(model_id=model_id,
                            split='val',
                            num_of_points=num_of_points_to_sample)
     val_loader = torch.utils.data.DataLoader(val_dataset,
@@ -353,7 +355,7 @@ def visual_test(test_loader, model, correction_flag=False, device=None, hyper_pa
         del input_point_cloud, keypoints_target, R_target, t_target, \
             predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted
 
-        if i >= 10:
+        if i >= 20:
             break
 
 
@@ -393,8 +395,9 @@ def visualize_detector(hyper_param, detector_type, model_id,
     # Evaluation
     # validation dataset:
     eval_batch_size = hyper_param['eval_batch_size'][model_id]
-    eval_dataset = DepthYCB(model_id=model_id,
+    eval_dataset = DepthYCBAugment(model_id=model_id,
                             split='test',
+                            only_load_nondegenerate_pcds= hyper_param['only_load_nondegenerate_pcds'],
                             num_of_points=hyper_param['num_of_points_to_sample'])
     eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=eval_batch_size, shuffle=False, pin_memory=True)
 
@@ -448,8 +451,9 @@ def visualize_detector(hyper_param, detector_type, model_id,
 
     # # Visual Test
     dataset_batch_size = 1
-    dataset = DepthYCB(model_id=model_id,
+    dataset = DepthYCBAugment(model_id=model_id,
                             split='test',
+                            only_load_nondegenerate_pcds= False,
                             num_of_points=hyper_param['num_of_points_to_sample'])
     loader = torch.utils.data.DataLoader(dataset, batch_size=dataset_batch_size, shuffle=False, pin_memory=True)
 
@@ -569,7 +573,7 @@ if __name__ == "__main__":
         model_ids = yaml.load(stream=stream, Loader=yaml.Loader)['model_ids']
 
     train_kp_detectors(detector_type=detector_type, model_ids=model_ids, only_models=only_models)
-    # visualize_kp_detectors(detector_type=detector_type, model_ids=model_ids, only_models=only_models, visualize=False, models_to_analyze='pre')
+    # visualize_kp_detectors(detector_type=detector_type, model_ids=model_ids, only_models=only_models, visualize=True, models_to_analyze='post')
 
 
 
