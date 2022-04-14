@@ -5,14 +5,14 @@ It uses registration during supervised training. It uses registration plus corre
 """
 
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torchvision
-import torchvision.transforms as transforms
+# import torch.nn as nn
+# import torch.nn.functional as F
+# import torchvision
+# import torchvision.transforms as transforms
 import yaml
 import argparse
 import pickle
-from pytorch3d import ops
+# from pytorch3d import ops
 
 from torch.utils.tensorboard import SummaryWriter
 from datetime import datetime
@@ -23,12 +23,12 @@ sys.path.append("../../")
 
 from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPointCloud2, DepthPC, CLASS_NAME, \
     FixedDepthPC, CLASS_ID
-from learning_objects.models.certifiability import confidence, confidence_kp
+# from learning_objects.models.certifiability import confidence, confidence_kp
 
 from learning_objects.utils.general import display_results, TrackingMeter
 
 # loss functions
-from learning_objects.expt_self_supervised_correction.loss_functions import chamfer_loss
+# from learning_objects.expt_self_supervised_correction.loss_functions import chamfer_loss
 from learning_objects.expt_self_supervised_correction.loss_functions import certify
 from learning_objects.expt_self_supervised_correction.loss_functions import self_supervised_training_loss \
     as self_supervised_loss
@@ -36,6 +36,7 @@ from learning_objects.expt_self_supervised_correction.loss_functions import self
     as validation_loss
 # evaluation metrics
 from learning_objects.expt_self_supervised_correction.evaluation_metrics import evaluation_error, add_s_error
+from learning_objects.expt_self_supervised_correction.proposed_model import ProposedRegressionModel as ProposedModel
 
 
 # Train
@@ -274,7 +275,6 @@ def train_detector(hyper_param, detector_type='pointnet', class_id="03001627",
     model_keypoints = self_supervised_train_dataset._get_model_keypoints().to(torch.float).to(device=device)
 
     # model
-    from learning_objects.expt_self_supervised_correction.proposed_model import ProposedRegressionModel as ProposedModel
     model = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,
                           keypoint_detector=detector_type, use_pretrained_regression_model=False).to(device)            #ToDo: use_pretrained_regression_model needs to be depreciated.
 

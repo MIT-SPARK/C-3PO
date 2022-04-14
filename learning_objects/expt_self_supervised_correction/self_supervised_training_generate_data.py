@@ -21,14 +21,14 @@ if __name__ == "__main__":
     # # run this to generate evaluation data
     # generate_depthpc_eval_data(model_class_ids=model_class_ids, param=param)
     #
-    # print("GENERATING DATA FOR EVALUATION")
-    #
-    # stream = open("class_model_ids.yml", "r")
-    # model_class_ids = yaml.load(stream=stream, Loader=yaml.Loader)
-    # stream = open("evaluation_datagen.yml", "r")
-    # param = yaml.load(stream=stream, Loader=yaml.Loader)
-    #
-    # # run this to generate evaluation data
-    # generate_depthpc_eval_data(model_class_ids=model_class_ids, param=param)
+    print("GENERATING DATA FOR EVALUATION")
+
+    stream = open("class_model_ids.yml", "r")
+    model_class_ids = yaml.load(stream=stream, Loader=yaml.Loader)
+    stream = open("evaluation_datagen.yml", "r")
+    param = yaml.load(stream=stream, Loader=yaml.Loader)
+
+    # run this to generate evaluation data
+    generate_depthpc_eval_data(model_class_ids=model_class_ids, param=param)
 
 

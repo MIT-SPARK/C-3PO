@@ -1119,7 +1119,8 @@ class FixedDepthPC(torch.utils.data.Dataset):
 
     def __init__(self, class_id, model_id, n=1000, radius_multiple=torch.tensor([1.2, 3.0]),
                  num_of_points_to_sample=10000, dataset_len=1, rotate_about_z=False,
-                 base_dataset_folder='../../data/learning_objects/shapenet_depthpc_eval_data/'):
+                 base_dataset_folder='../../data/learning_objects/shapenet_depthpc_eval_data/',
+                 mixed_data=False):
         super().__init__()
         """
         class_id        : str   : class id of a ShapeNetCore object
@@ -1135,7 +1136,10 @@ class FixedDepthPC(torch.utils.data.Dataset):
         self.class_id = class_id
         self.class_name = CLASS_NAME[self.class_id]
         self.model_id = model_id
-        self.dataset_folder = self.base_dataset_folder + self.class_name + '/' + self.model_id + '/'
+        if mixed_data:
+            self.dataset_folder = self.base_dataset_folder + 'mixed/'
+        else:
+            self.dataset_folder = self.base_dataset_folder + self.class_name + '/' + self.model_id + '/'
 
         self.n = n
         self.radius_multiple = radius_multiple
@@ -1203,6 +1207,107 @@ class FixedDepthPC(torch.utils.data.Dataset):
 
         return 0
 
+
+class MixedFixedDepthPC(torch.utils.data.Dataset):
+    """
+        Given class id, model id, and number of points, it generates various depth point clouds and SE3 transformations
+        of the ShapeNetCore object.
+
+        Note:
+            Unlike DepthPointCloud2(), this outputs depth point clouds of the same shape by appending with
+            zero points. It also outputs a flag to tell the user which outputs have been artificially added.
+
+            Unlike DepthPointCloud2(), this dataset can be used with a dataloader for any batch_size.
+
+        Returns
+            input_point_cloud, keypoints, rotation, translation, padding
+        """
+
+    def __init__(self, class_id, model_id, base_dataset_folder, n=1000, radius_multiple=torch.tensor([1.2, 3.0]),
+                 num_of_points_to_sample=10000, dataset_len=1, rotate_about_z=False):
+        super().__init__()
+        """
+        class_id        : str   : class id of a ShapeNetCore object
+        model_id        : str   : model id of a ShapeNetCore object 
+        n               : int   : number of points in the output point cloud
+        radius_multiple : torch.tensor of shape (2) : lower and upper limit of the distance from which depth point 
+                                                        cloud is constructed
+        num_of_points_to_sample   : int   : number of points sampled on the surface of the CAD model object
+        dataset_len     : int   : size of the dataset  
+
+        """
+        self.base_dataset_folder = base_dataset_folder
+        self.class_id = class_id
+        self.class_name = CLASS_NAME[self.class_id]
+        self.model_id = model_id
+
+        self.dataset_folder = self.base_dataset_folder + 'mixed/'
+
+        self.n = n
+        self.radius_multiple = radius_multiple
+        self.num_of_points_to_sample = 1000
+        self.len = len(os.listdir(self.dataset_folder))
+        self.rotate_about_z = rotate_about_z
+
+        self.dataset = DepthPointCloud2(class_id=self.class_id,
+                                        model_id=self.model_id,
+                                        radius_multiple=self.radius_multiple,
+                                        num_of_points=self.num_of_points_to_sample,
+                                        dataset_len=self.len,
+                                        rotate_about_z=rotate_about_z)
+
+    def __len__(self):
+
+        return self.len
+
+    def __getitem__(self, idx):
+
+        filename = self.dataset_folder + 'item_' + str(idx) + '.pkl'
+        with open(filename, 'rb') as inp:
+            data = pickle.load(inp)
+
+        return data[0].squeeze(0), data[2].squeeze(0), data[3].squeeze(0)
+
+    def _get_cad_models(self):
+        """
+        Returns two point clouds as shape models, one with the min shape and the other with the max shape.
+
+        output:
+        cad_models  : torch.tensor of shape (2, 3, self.num_of_points)
+        """
+
+        return self.dataset._get_cad_models(n=self.n)
+
+    def _get_model_keypoints(self):
+        """
+        Returns two sets of keypoints, one with the min shape and the other with the max shape.
+
+        output:
+        model_keypoints : torch.tensor of shape (2, 3, N)
+
+        where
+        N = number of keypoints
+        """
+
+        return self.dataset._get_model_keypoints()
+
+    def _get_diameter(self):
+        """
+        returns the diameter of the mid-sized object.
+
+        output  :   torch.tensor of shape (1)
+        """
+
+        return self.dataset._get_diameter()
+
+    def _visualize(self):
+        """
+        Visualizes the two CAD models and the corresponding keypoints
+
+        """
+        self.dataset._visualize()
+
+        return 0
 
 class DepthPointCloud(torch.utils.data.Dataset):
     """

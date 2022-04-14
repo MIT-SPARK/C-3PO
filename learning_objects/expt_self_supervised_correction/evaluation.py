@@ -196,12 +196,6 @@ def generate_depthpc_eval_data(model_class_ids, param):
                 pickle.dump(data, outp, pickle.HIGHEST_PROTOCOL)
 
 
-def plot_cert():
-
-    #ToDo: plot %cert during training
-
-    return None
-
 if __name__ == "__main__":
 
     print("test")
