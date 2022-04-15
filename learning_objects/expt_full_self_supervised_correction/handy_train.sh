@@ -1,34 +1,34 @@
 
 echo "BOTTLE:: POINT TRANSFORMER"
-python self_supervised_training.py "point_transformer" "bottle"
+python full_self_supervised_training.py "point_transformer" "bottle"
 
 echo "CHAIR:: POINT TRANSFORMER"
-python self_supervised_training.py "point_transformer" "chair"
+python full_self_supervised_training.py "point_transformer" "chair"
 
 echo "LAPTOP:: POINT TRANSFORMER"
-python self_supervised_training.py "point_transformer" "laptop"
+python full_self_supervised_training.py "point_transformer" "laptop"
 
 echo "SKATEBOARD:: POINT TRANSFORMER"
-python self_supervised_training.py "point_transformer" "skateboard"
+python full_self_supervised_training.py "point_transformer" "skateboard"
 
 echo "TABLE:: POINT TRANSFORMER"
-python self_supervised_training.py "point_transformer" "table"
+python full_self_supervised_training.py "point_transformer" "table"
 
 
 
 
-#echo "BOTTLE:: POINTNET"
-#python self_supervised_training.py "pointnet" "bottle"
+echo "BOTTLE:: POINTNET"
+python full_self_supervised_training.py "pointnet" "bottle"
 
-#echo "CHAIR:: POINTNET"
-#python self_supervised_training.py "pointnet" "chair"
+echo "CHAIR:: POINTNET"
+python full_self_supervised_training.py "pointnet" "chair"
 
-#echo "LAPTOP:: POINTNET"
-#python self_supervised_training.py "pointnet" "laptop"
+echo "LAPTOP:: POINTNET"
+python full_self_supervised_training.py "pointnet" "laptop"
 
-#echo "SKATEBOARD:: POINTNET"
-#python self_supervised_training.py "pointnet" "skateboard"
+echo "SKATEBOARD:: POINTNET"
+python full_self_supervised_training.py "pointnet" "skateboard"
 
-#echo "TABLE:: POINTNET"
-#python self_supervised_training.py "pointnet" "table"
+echo "TABLE:: POINTNET"
+python full_self_supervised_training.py "pointnet" "table"
 
