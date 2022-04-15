@@ -36,8 +36,9 @@ from learning_objects.expt_self_supervised_correction.loss_functions import self
     as validation_loss
 # evaluation metrics
 from learning_objects.expt_self_supervised_correction.evaluation_metrics import evaluation_error, add_s_error
+# from learning_objects.expt_self_supervised_correction.proposed_model import ProposedRegressionModel as ProposedModel
+from learning_objects.expt_self_supervised_correction.evaluation import evaluate
 from learning_objects.expt_self_supervised_correction.proposed_model import ProposedRegressionModel as ProposedModel
-
 
 # Train
 def self_supervised_train_one_epoch(training_loader, model, optimizer, correction_flag, device, hyper_param):
@@ -378,7 +379,8 @@ def visual_test(test_loader, model, hyper_param, correction_flag=False, device=N
 def visualize_detector(hyper_param, detector_type, class_id, model_id,
                        evaluate_models=True, models_to_analyze='both',
                        visualize_without_corrector=True, visualize_with_corrector=True,
-                       visualize=False, device=None):
+                       visualize=False, device=None,
+                       cross=False, cross_class_id=None, cross_model_id=None):
     """
 
     """
@@ -420,12 +422,17 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
                                 rotate_about_z=True)
     eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=eval_batch_size, shuffle=False)
 
-
     # model
     cad_models = eval_dataset._get_cad_models().to(torch.float).to(device=device)
     model_keypoints = eval_dataset._get_model_keypoints().to(torch.float).to(device=device)
 
-    from learning_objects.expt_self_supervised_correction.proposed_model import ProposedRegressionModel as ProposedModel
+    if cross:
+        eval_dataset = FixedDepthPC(class_id=cross_class_id, model_id=cross_model_id,
+                                    n=hyper_param['num_of_points_selfsupervised'],
+                                    num_of_points_to_sample=hyper_param['num_of_points_to_sample'],
+                                    dataset_len=eval_dataset_len,
+                                    rotate_about_z=True)
+        eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=eval_batch_size, shuffle=False)
 
     if pre_:
         model_before = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,
@@ -509,10 +516,6 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
     return None
 
 
-# Evaluation. Use the fact that you know rotation, translation, and shape of the generated data.
-from learning_objects.expt_self_supervised_correction.evaluation import evaluate
-
-
 ## Wrapper
 def train_kp_detectors(detector_type, model_class_ids, only_categories=None):
 
@@ -540,7 +543,10 @@ def visualize_kp_detectors(detector_type, model_class_ids, only_categories=None,
                            models_to_analyze='both',
                            visualize=True,
                            visualize_without_corrector=False,
-                           visualize_with_corrector=True):
+                           visualize_with_corrector=True,
+                           cross=False,
+                           cross_class_id=None,
+                           cross_model_id=None):
 
     if not visualize:
         visualize_with_corrector, visualize_without_corrector = False, False
@@ -572,7 +578,10 @@ def visualize_kp_detectors(detector_type, model_class_ids, only_categories=None,
                                models_to_analyze=models_to_analyze,
                                visualize_without_corrector=visualize_without_corrector,
                                visualize_with_corrector=visualize_with_corrector,
-                               visualize=visualize)
+                               visualize=visualize,
+                               cross=cross,
+                               cross_class_id=cross_class_id,
+                               cross_model_id=cross_model_id)
 
 
 
