@@ -2242,3 +2242,465 @@ Evaluating performance for certifiable objects:
 ADD-S ( 2 %):  100.0
 ADD-S AUC ( 5 %):  79.8709716796875
 GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  bottle ; Model ID: 41a2005b595ae783be1868124d5ddbcb
+Number of trainable parameters:  1616956
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 2 %):  100.0
+ADD-S AUC ( 5 %):  77.96498107910156
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  98.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 2 %):  100.0
+ADD-S AUC ( 5 %):  78.0404052734375
+GT-certifiable: 
+EVALUATING POINTNET(bottle) ON DATASET(laptop)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  bottle ; Model ID: 41a2005b595ae783be1868124d5ddbcb
+Number of trainable parameters:  1616956
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  bottle ; Model ID: 41a2005b595ae783be1868124d5ddbcb
+Number of trainable parameters:  1616956
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+EVALUATING POINTNET(bottle) ON DATASET(skateboard)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  bottle ; Model ID: 41a2005b595ae783be1868124d5ddbcb
+Number of trainable parameters:  1616956
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  bottle ; Model ID: 41a2005b595ae783be1868124d5ddbcb
+Number of trainable parameters:  1616956
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+EVALUATING POINTNET(laptop) ON DATASET(table)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  laptop ; Model ID: 519e98268bee56dddbb1de10c9529bf7
+Number of trainable parameters:  1608475
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  2.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  laptop ; Model ID: 519e98268bee56dddbb1de10c9529bf7
+Number of trainable parameters:  1608475
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  3.5518276691436768
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+EVALUATING POINTNET(laptop) ON DATASET(chair)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  laptop ; Model ID: 519e98268bee56dddbb1de10c9529bf7
+Number of trainable parameters:  1608475
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  laptop ; Model ID: 519e98268bee56dddbb1de10c9529bf7
+Number of trainable parameters:  1608475
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+EVALUATING POINTNET(laptop) ON DATASET(bottle)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  laptop ; Model ID: 519e98268bee56dddbb1de10c9529bf7
+Number of trainable parameters:  1608475
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  laptop ; Model ID: 519e98268bee56dddbb1de10c9529bf7
+Number of trainable parameters:  1608475
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+EVALUATING POINTNET(laptop) ON DATASET(laptop)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  laptop ; Model ID: 519e98268bee56dddbb1de10c9529bf7
+Number of trainable parameters:  1608475
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 2 %):  14.0
+ADD-S AUC ( 5 %):  13.19464111328125
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  6.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 2 %):  100.0
+ADD-S AUC ( 5 %):  86.70759582519531
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  laptop ; Model ID: 519e98268bee56dddbb1de10c9529bf7
+Number of trainable parameters:  1608475
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 2 %):  96.0
+ADD-S AUC ( 5 %):  74.461181640625
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  18.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 2 %):  100.0
+ADD-S AUC ( 5 %):  82.8080062866211
+GT-certifiable: 
+EVALUATING POINTNET(laptop) ON DATASET(skateboard)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  laptop ; Model ID: 519e98268bee56dddbb1de10c9529bf7
+Number of trainable parameters:  1608475
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  laptop ; Model ID: 519e98268bee56dddbb1de10c9529bf7
+Number of trainable parameters:  1608475
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  2.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+EVALUATING POINTNET(skateboard) ON DATASET(table)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  skateboard ; Model ID: 98222a1e5f59f2098745e78dbc45802e
+Number of trainable parameters:  1611559
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  skateboard ; Model ID: 98222a1e5f59f2098745e78dbc45802e
+Number of trainable parameters:  1611559
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  2.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+EVALUATING POINTNET(skateboard) ON DATASET(chair)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  skateboard ; Model ID: 98222a1e5f59f2098745e78dbc45802e
+Number of trainable parameters:  1611559
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  skateboard ; Model ID: 98222a1e5f59f2098745e78dbc45802e
+Number of trainable parameters:  1611559
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+EVALUATING POINTNET(skateboard) ON DATASET(bottle)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  skateboard ; Model ID: 98222a1e5f59f2098745e78dbc45802e
+Number of trainable parameters:  1611559
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  skateboard ; Model ID: 98222a1e5f59f2098745e78dbc45802e
+Number of trainable parameters:  1611559
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+EVALUATING POINTNET(skateboard) ON DATASET(laptop)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  skateboard ; Model ID: 98222a1e5f59f2098745e78dbc45802e
+Number of trainable parameters:  1611559
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  skateboard ; Model ID: 98222a1e5f59f2098745e78dbc45802e
+Number of trainable parameters:  1611559
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+EVALUATING POINTNET(skateboard) ON DATASET(skateboard)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  skateboard ; Model ID: 98222a1e5f59f2098745e78dbc45802e
+Number of trainable parameters:  1611559
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 2 %):  52.0
+ADD-S AUC ( 5 %):  61.05704879760742
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  48.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 2 %):  100.0
+ADD-S AUC ( 5 %):  87.95409393310547
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  skateboard ; Model ID: 98222a1e5f59f2098745e78dbc45802e
+Number of trainable parameters:  1611559
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 2 %):  98.0
+ADD-S AUC ( 5 %):  87.05293273925781
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  96.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 2 %):  100.0
+ADD-S AUC ( 5 %):  87.66529846191406
+GT-certifiable: 

@@ -5,14 +5,9 @@ It uses registration during supervised training. It uses registration plus corre
 """
 
 import torch
-# import torch.nn as nn
-# import torch.nn.functional as F
-# import torchvision
-# import torchvision.transforms as transforms
 import yaml
 import argparse
 import pickle
-# from pytorch3d import ops
 
 from torch.utils.tensorboard import SummaryWriter
 from datetime import datetime
@@ -23,20 +18,15 @@ sys.path.append("../../")
 
 from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPointCloud2, DepthPC, CLASS_NAME, \
     FixedDepthPC, CLASS_ID
-# from learning_objects.models.certifiability import confidence, confidence_kp
-
 from learning_objects.utils.general import display_results, TrackingMeter
 
 # loss functions
-# from learning_objects.expt_self_supervised_correction.loss_functions import chamfer_loss
 from learning_objects.expt_self_supervised_correction.loss_functions import certify
 from learning_objects.expt_self_supervised_correction.loss_functions import self_supervised_training_loss \
     as self_supervised_loss
 from learning_objects.expt_self_supervised_correction.loss_functions import self_supervised_validation_loss \
     as validation_loss
-# evaluation metrics
 from learning_objects.expt_self_supervised_correction.evaluation_metrics import evaluation_error, add_s_error
-# from learning_objects.expt_self_supervised_correction.proposed_model import ProposedRegressionModel as ProposedModel
 from learning_objects.expt_self_supervised_correction.evaluation import evaluate
 from learning_objects.expt_self_supervised_correction.proposed_model import ProposedRegressionModel as ProposedModel
 

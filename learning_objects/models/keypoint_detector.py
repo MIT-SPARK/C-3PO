@@ -303,7 +303,7 @@ if __name__ == "__main__":
     kp = HeatmapKeypoints(method='pointnet', N=N).to(device=device)
     # kp = HeatmapKeypoints(method='point_transformer', dim=[8, 32, 64], k=63).to(device=device)
     y = kp(pointcloud=pc)
-    print("Shape of keypoint output: ", y.shape)
+    print("Shape of keypoint output: ", y[0].shape)
     print('-' * 20)
 
 
@@ -318,7 +318,7 @@ if __name__ == "__main__":
     # kp = HeatmapKeypoints(method='pointnet', k=63).to(device=device)
     kp = HeatmapKeypoints(method='point_transformer', dim=[8, 16, 24], N=N).to(device=device)
     y = kp(pointcloud=pc)
-    print("Shape of keypoint output: ", y.shape)
+    print("Shape of keypoint output: ", y[0].shape)
     print('-' * 20)
 
 
@@ -347,7 +347,7 @@ if __name__ == "__main__":
     print("Shape of input point cloud: ", pc.shape)
     # pc = torch.rand(4, 1000, 6)
     pc = pc.to(device=device)
-    kp = RegressionKeypoints(method='point_transformer', dim=[8, 16, 24], N=N).to(device=device)
+    kp = RegressionKeypoints(method='point_transformer',  dim=[8, 16, 24], N=N).to(device=device)
     y = kp(pointcloud=pc)
     print("Shape of keypoint output: ", y.shape)
     print('-' * 20)

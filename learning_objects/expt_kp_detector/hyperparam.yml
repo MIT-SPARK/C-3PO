@@ -1,0 +1,36 @@
+
+point_transformer:
+  save_folder: './'
+
+  lr_sgd: 0.02
+  momentum_sgd: 0.95
+
+  train_dataset_len: 10000
+  train_batch_size: 50
+  num_of_points_to_sample: 1000
+
+  val_dataset_len: 1000
+  val_batch_size: 50
+
+  num_epochs: 100
+
+  eval_dataset_len: 1000
+  eval_batch_size: 50
+
+pointnet:
+  save_folder: './'
+
+  lr_sgd: 0.02
+  momentum_sgd: 0.95
+
+  train_dataset_len: 10000
+  train_batch_size: 50
+  num_of_points_to_sample: 1000
+
+  val_dataset_len: 1000
+  val_batch_size: 50
+
+  num_epochs: 100
+
+  eval_dataset_len: 1000
+  eval_batch_size: 50
