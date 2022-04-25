@@ -5,23 +5,23 @@ This code implements outlier-free point set registration as torch function
 import time
 
 import torch
-import cvxpy as cp
-import pymanopt as pym
-import torch.nn as nn
-import torch.nn.functional as F
-from cvxpylayers.torch import CvxpyLayer
+# import cvxpy as cp
+# import pymanopt as pym
+# import torch.nn as nn
+# import torch.nn.functional as F
+# from cvxpylayers.torch import CvxpyLayer
 from pytorch3d import transforms
 
-import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
-import numpy as np
+# import matplotlib.pyplot as plt
+# from matplotlib.animation import FuncAnimation
+# import numpy as np
 
-import os
+# import os
 import sys
 sys.path.append("../../")
 
-from learning_objects.utils.ddn.node import AbstractDeclarativeNode, EqConstDeclarativeNode, DeclarativeLayer, ParamDeclarativeFunction
-from learning_objects.utils.general import generate_random_keypoints
+# from learning_objects.utils.ddn.node import AbstractDeclarativeNode, EqConstDeclarativeNode, DeclarativeLayer, ParamDeclarativeFunction
+# from learning_objects.utils.general import generate_random_keypoints
 
 
 

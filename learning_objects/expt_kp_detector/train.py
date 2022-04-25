@@ -166,11 +166,8 @@ def train(train_loader, validation_loader, model, optimizer, best_model_save_fil
         # Make sure gradient tracking is on, and do a pass over the data
         model.train(True)
         print("Training: ")
-        ave_loss_self_supervised, _fra_cert = train_one_epoch(train_loader,
-                                                              model,
-                                                              optimizer,
-                                                              device=device,
-                                                              hyper_param=hyper_param)
+        ave_loss_self_supervised = train_one_epoch(train_loader, model, optimizer, device=device,
+                                                   hyper_param=hyper_param)
 
         # Validation. We don't need gradients on to do reporting.
         model.train(False)

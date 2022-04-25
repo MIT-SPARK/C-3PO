@@ -9,7 +9,7 @@ import pickle
 import yaml
 import matplotlib.pyplot as plt
 from matplotlib import colors as mcolors
-from datetime import datetime
+# from datetime import datetime
 import os
 import sys
 sys.path.append("../../")
@@ -88,6 +88,7 @@ class experiment():
         detected_keypoints  : torch.tensor of shape (B, 3, N)
         """
         device_ = self.device_
+        print("Device: ", device_)
         var = self.kp_noise_var
         type = self.kp_noise_type
         fra = self.kp_noise_fra
@@ -143,19 +144,27 @@ class experiment():
             detected_keypoints = self.keypoint_perturbation(keypoints_true)
 
             # estimate model: using the keypoint corrector
-            start = time.perf_counter()
+
+            torch.cuda.synchronize()
+            # start = time.perf_counter()
+            start = time.process_time_ns()
+
             correction = corrector.forward(detected_keypoints, input_point_cloud)
-            end = time.perf_counter()
+
+            torch.cuda.synchronize()
+            # end = time.perf_counter()
+            end = time.process_time_ns()
 
             # correction = torch.zeros_like(correction)
             R, t = point_set_registration.forward(target_points=detected_keypoints + correction)
-            model_estimate = R @ cad_models + t
-            keypoint_estimate = R @ model_keypoints + t
+            #model_estimate = R @ cad_models + t
+            #keypoint_estimate = R @ model_keypoints + t
 
             # corrector time
             time_taken += (end - start)
 
         time_taken = time_taken / (batch_size * (i + 1))
+        time_taken = time_taken / 1000      # to get time in msec
 
         return time_taken
 
@@ -216,7 +225,7 @@ def run_experiments_on(class_id, model_id):
     num_points = 500
 
     # averaging over
-    num_iterations = 2
+    num_iterations = 10
 
     # kp_noise parameters
     kp_noise_type = 'sporadic'
@@ -228,8 +237,8 @@ def run_experiments_on(class_id, model_id):
     kappa = 10.0
 
     # batch range
-    # batch_range = [5, 10]
-    batch_range = [1, 5, 10, 25, 50, 75, 100, 500]
+    # batch_range = [1, 5, 10]
+    batch_range = [1, 5, 10, 25, 50, 75, 100, 150, 200]
     # batch_range = [1, 5, 10, 100, 500]
 
     print("-" * 40)
@@ -261,16 +270,16 @@ def analyze_results(class_id, model_id):
     # print(data['time_algo_scipy'])
     # print(parameters['batch_range'])
     batch_range = np.asarray(parameters['batch_range'][0:-1])
-    time_algo_torch = np.asarray(data['time_algo_torch'][0:-1])
-    time_algo_scipy = np.asarray(data['time_algo_scipy'][0:-1])
+    time_algo_torch = np.asarray(data['time_algo_torch'][0:-1]) / 1000000
+    time_algo_scipy = np.asarray(data['time_algo_scipy'][0:-1]) / 1000000
 
     fig = plt.figure()
     plt.plot(batch_range, time_algo_torch, 'o--',
              label='batch gradient descent', color='orangered')
     plt.plot(batch_range, time_algo_scipy, 'o--',
              label='non batch: trust region', color='grey')
-    plt.xlabel("Number of batches")
-    plt.ylabel("Compute time per batch (sec)")
+    plt.xlabel("Batch size")
+    plt.ylabel("Compute time per input (sec)")
     plt.legend(loc='upper left')
     plt.xlim([batch_range[0], batch_range[-1]])
     # plt.show()
@@ -279,11 +288,9 @@ def analyze_results(class_id, model_id):
     plt.close(fig)
 
 
-
-
 if __name__ == "__main__":
 
-    class_name = 'airplane'
+    class_name = 'chair'
 
     stream = open("class_model_ids.yml", "r")
     model_class_ids = yaml.load(stream=stream, Loader=yaml.Loader)
@@ -291,6 +298,6 @@ if __name__ == "__main__":
     class_id = CLASS_ID[class_name]
     model_id = model_class_ids[class_name]
 
-    # run_experiments_on(class_id, model_id)
+    run_experiments_on(class_id, model_id)
     analyze_results(class_id, model_id)
 

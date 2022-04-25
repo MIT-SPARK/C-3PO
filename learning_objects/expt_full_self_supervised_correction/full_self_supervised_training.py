@@ -46,6 +46,7 @@ def self_supervised_train_one_epoch(training_loader, model, optimizer, correctio
 
     for i, data in enumerate(training_loader):
         # Every data instance is an input + label pair
+        print("i :", i)
         # print("Running batch ", i+1, "/", len(training_loader))
         input_point_cloud, _, _ = data
         input_point_cloud = input_point_cloud.to(device)
@@ -524,7 +525,7 @@ def train_kp_detectors(detector_type, model_class_ids, only_categories=None):
             class_id = CLASS_ID[key]
             model_id = str(value)
 
-            hyper_param_file = "full_self_supervised_training.yml"
+            hyper_param_file = "./full_self_supervised_training.yml"
             stream = open(hyper_param_file, "r")
             hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
             hyper_param = hyper_param[detector_type]
@@ -554,7 +555,7 @@ def visualize_kp_detectors(detector_type, model_class_ids, only_categories=None,
             model_id = str(value)
             class_name = CLASS_NAME[class_id]
 
-            hyper_param_file = "full_self_supervised_training.yml"
+            hyper_param_file = "./full_self_supervised_training.yml"
             stream = open(hyper_param_file, "r")
             hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
             hyper_param = hyper_param[detector_type]
