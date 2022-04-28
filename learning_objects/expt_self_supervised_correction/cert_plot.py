@@ -102,7 +102,7 @@ def plot_cert_at_train(model_class_ids, only_categories):
                 fig = plt.figure()
                 iter_range = torch.arange(len_max)
                 plt.plot(iter_range, plot_dict["pointnet"], '-', label=key + ': pointnet', color='grey')
-                plt.plot(iter_range, plot_dict["point_transformer"], '-', label=key + ': PT', color='orangered')
+                plt.plot(iter_range, plot_dict["point_transformer"], '-', label=key + ': point transformer', color='orangered')
                 plt.xlabel('Number of SGD iterations')
                 plt.ylabel('Percent certifiable')
                 if only_one:
@@ -114,7 +114,7 @@ def plot_cert_at_train(model_class_ids, only_categories):
                 # fig = plt.figure()
                 # iter_range = torch.arange(len_max)
                 plt.plot(iter_range, plot_dict["pointnet"], '--', label=key + ': pointnet', color='grey')
-                plt.plot(iter_range, plot_dict["point_transformer"], '--', label=key + ': PT', color='orangered')
+                plt.plot(iter_range, plot_dict["point_transformer"], '--', label=key + ': point transformer', color='orangered')
                 # plt.xlabel('number of SGD iterations')
                 # plt.ylabel('% certifiable')
                 plt.legend(loc="lower right")

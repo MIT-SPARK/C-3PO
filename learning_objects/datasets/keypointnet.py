@@ -1224,7 +1224,7 @@ class MixedFixedDepthPC(torch.utils.data.Dataset):
         """
 
     def __init__(self, class_id, model_id, base_dataset_folder, n=1000, radius_multiple=torch.tensor([1.2, 3.0]),
-                 num_of_points_to_sample=10000, dataset_len=1, rotate_about_z=False):
+                 num_of_points_to_sample=10000, dataset_len=1, rotate_about_z=False, mixed_data=True):
         super().__init__()
         """
         class_id        : str   : class id of a ShapeNetCore object
@@ -1241,7 +1241,10 @@ class MixedFixedDepthPC(torch.utils.data.Dataset):
         self.class_name = CLASS_NAME[self.class_id]
         self.model_id = model_id
 
-        self.dataset_folder = self.base_dataset_folder + 'mixed/'
+        if mixed_data:
+            self.dataset_folder = self.base_dataset_folder + 'mixed/'
+        else:
+            self.dataset_folder = self.base_dataset_folder + self.class_name + '/' + self.model_id + '/'
 
         self.n = n
         self.radius_multiple = radius_multiple

@@ -11,6 +11,7 @@ point_transformer:
   save_folder: './'
   dataset_folder: '../../data/learning_objects/shapenet_depthpc_train_data/'
   val_dataset_folder: '../../data/learning_objects/shapenet_depthpc_val_data/'
+  eval_dataset_folder: '../../data/learning_objects/shapenet_depthpc_eval_data/'
 
   lr_sgd: 0.02
   momentum_sgd: 0.9
@@ -55,6 +56,7 @@ pointnet:
   save_folder: './'
   dataset_folder: '../../data/learning_objects/shapenet_depthpc_train_data/'
   val_dataset_folder: '../../data/learning_objects/shapenet_depthpc_val_data/'
+  eval_dataset_folder: '../../data/learning_objects/shapenet_depthpc_eval_data/'
 
   lr_sgd: 0.02
   momentum_sgd: 0.9

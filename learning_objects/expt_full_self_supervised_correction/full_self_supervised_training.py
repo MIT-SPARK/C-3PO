@@ -376,6 +376,7 @@ def visual_test(test_loader, model, hyper_param, correction_flag=False, device=N
 
 
 def visualize_detector(hyper_param, detector_type, class_id, model_id,
+                       dataset_class_id, dataset_model_id,
                        evaluate_models=True, models_to_analyze='both',
                        visualize_without_corrector=True, visualize_with_corrector=True,
                        visualize=False, device=None):
@@ -418,17 +419,25 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
     #                                  num_of_points_to_sample=hyper_param['num_of_points_to_sample'],
     #                                  dataset_len=eval_dataset_len,
     #                                  rotate_about_z=True)
-    eval_dataset = MixedFixedDepthPC(class_id=class_id,
-                                     model_id=model_id,
+    eval_dataset = MixedFixedDepthPC(class_id=dataset_class_id,
+                                     model_id=dataset_model_id,
                                      n=hyper_param['num_of_points_selfsupervised'],
                                      num_of_points_to_sample=hyper_param['num_of_points_to_sample'],
-                                     base_dataset_folder=hyper_param['val_dataset_folder'])
+                                     base_dataset_folder=hyper_param['eval_dataset_folder'],
+                                     mixed_data=False)
     eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=eval_batch_size, shuffle=True)
 
 
     # model
-    cad_models = eval_dataset._get_cad_models().to(torch.float).to(device=device)
-    model_keypoints = eval_dataset._get_model_keypoints().to(torch.float).to(device=device)
+    temp_dataset = MixedFixedDepthPC(class_id=class_id,
+                                     model_id=model_id,
+                                     n=hyper_param['num_of_points_selfsupervised'],
+                                     num_of_points_to_sample=hyper_param['num_of_points_to_sample'],
+                                     base_dataset_folder=hyper_param['eval_dataset_folder'],
+                                     mixed_data=False)
+    cad_models = temp_dataset._get_cad_models().to(torch.float).to(device=device)
+    model_keypoints = temp_dataset._get_model_keypoints().to(torch.float).to(device=device)
+    del temp_dataset
 
     if pre_:
         model_before = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,
@@ -539,7 +548,7 @@ def train_kp_detectors(detector_type, model_class_ids, only_categories=None):
                            hyper_param=hyper_param)
 
 
-def visualize_kp_detectors(detector_type, model_class_ids, only_categories=None,
+def visualize_kp_detectors(detector_type, model_class_ids, dataset_name, only_categories=None,
                            evaluate_models=True,
                            models_to_analyze='both',
                            visualize=True,
@@ -548,6 +557,11 @@ def visualize_kp_detectors(detector_type, model_class_ids, only_categories=None,
 
     if not visualize:
         visualize_with_corrector, visualize_without_corrector = False, False
+
+    dataset_class_id = CLASS_ID[dataset_name]
+    dataset_model_id = model_class_ids[dataset_name]
+    # print("dataset_class_id: ", dataset_class_id)
+    # print("dataset_model_id: ", dataset_model_id)
 
     for key, value in model_class_ids.items():
         if key in only_categories:
@@ -568,9 +582,13 @@ def visualize_kp_detectors(detector_type, model_class_ids, only_categories=None,
 
             print(">>"*40)
             print("Analyzing Trained Model for Object: ", key, "; Model ID:", str(model_id))
+            print("On dataset of: ", dataset_name)
+            # print("class id: ", class_id)
             visualize_detector(detector_type=detector_type,
                                class_id=class_id,
                                model_id=model_id,
+                               dataset_class_id=dataset_class_id,
+                               dataset_model_id=dataset_model_id,
                                hyper_param=hyper_param,
                                evaluate_models=evaluate_models,
                                models_to_analyze=models_to_analyze,

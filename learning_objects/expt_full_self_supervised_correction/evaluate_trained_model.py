@@ -13,8 +13,8 @@ from learning_objects.expt_full_self_supervised_correction.full_self_supervised_
 if __name__ == "__main__":
     """
     usage: 
-    >> python evaluate_trained_model.py "point_transformer" "chair" "pre"
-    >> python evaluate_trained_model.py "pointnet" "chair" "post"
+    >> python evaluate_trained_model.py "point_transformer" "chair" "pre" "table"
+    >> python evaluate_trained_model.py "pointnet" "chair" "post" "chair"
 
     """
 
@@ -22,12 +22,15 @@ if __name__ == "__main__":
     parser.add_argument("detector_type", help="specify the detector type.", type=str)
     parser.add_argument("class_name", help="specify the ShapeNet class name.", type=str)
     parser.add_argument("models_to_analyze", help="pre/post, for pre-trained or post-training models.", type=str)
+    parser.add_argument("dataset_name", help="specify the ShapeNet class name, on whom the model will be tested",
+                        type=str)
 
     args = parser.parse_args()
 
     detector_type = args.detector_type
     class_name = args.class_name
     models_to_analyze = args.models_to_analyze
+    dataset_name = args.dataset_name
     # print("KP detector type: ", args.detector_type)
     # print("CAD Model class: ", args.class_name)
     only_categories = [class_name]
@@ -38,6 +41,7 @@ if __name__ == "__main__":
     visualize_kp_detectors(detector_type=detector_type,
                            model_class_ids=model_class_ids,
                            only_categories=only_categories,
+                           dataset_name=dataset_name,
                            visualize=False, evaluate_models=True,
                            models_to_analyze=models_to_analyze)
 
