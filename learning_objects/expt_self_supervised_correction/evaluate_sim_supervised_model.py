@@ -230,7 +230,8 @@ def visualize_kp_detectors(detector_type, model_class_ids, only_categories=None,
             hyper_param['epsilon'] = hyper_param['epsilon'][key]
 
             if class_name == 'bottle':
-                hyper_param["is_symmetric"] = True
+                # hyper_param["is_symmetric"] = True
+                hyper_param["is_symmetric"] = False     #Removing the difference between symmetric and asymmetric case
             else:
                 hyper_param["is_symmetric"] = False
 
