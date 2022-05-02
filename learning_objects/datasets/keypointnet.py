@@ -159,11 +159,13 @@ def visualize_model(class_id, model_id):
 
     return mesh, pcd, keypoints_xyz, keypoint_markers
 
-def temp_expt_1_viz(cad_models, model_keypoints, gt_keypoints=None):
+def temp_expt_1_viz(cad_models, model_keypoints, gt_keypoints=None, colors = None):
     batch_size = model_keypoints.shape[0]
-
+    if gt_keypoints is None:
+        gt_keypoints = model_keypoints
     print("model_keypoints.shape", model_keypoints.shape)
     print("gt_keypoints.shape", gt_keypoints.shape)
+    print("cad_models.shape", cad_models.shape)
 
 
     for b in range(batch_size):
@@ -172,7 +174,10 @@ def temp_expt_1_viz(cad_models, model_keypoints, gt_keypoints=None):
         gt_keypoints = gt_keypoints[b, ...].cpu()
 
         point_cloud = pos_tensor_to_o3d(pos=point_cloud)
-        point_cloud = point_cloud.paint_uniform_color([0.0, 0.0, 1])
+        if colors is not None:
+            point_cloud.colors = colors
+        else:
+            point_cloud = point_cloud.paint_uniform_color([1.0, 1.0, 1])
         point_cloud.estimate_normals()
         keypoints = keypoints.transpose(0, 1).numpy()
         gt_keypoints = gt_keypoints.transpose(0, 1).numpy()
@@ -184,19 +189,18 @@ def temp_expt_1_viz(cad_models, model_keypoints, gt_keypoints=None):
         min_bound = point_cloud.get_min_bound()
         d = max(np.linalg.norm(max_bound - min_bound, ord=2), d)
 
-        keypoint_radius = 0.01 * d
+        keypoint_radius = 0.03 * d
 
         keypoint_markers = []
         for xyz in keypoints:
             new_mesh = o3d.geometry.TriangleMesh.create_sphere(radius=keypoint_radius)
             new_mesh.translate(xyz)
-            new_mesh.paint_uniform_color([0.8, 0.0, 0.0])
+            new_mesh.paint_uniform_color([0, 0.8, 0.0])
             keypoint_markers.append(new_mesh)
-
         for xyz in gt_keypoints:
             new_mesh = o3d.geometry.TriangleMesh.create_sphere(radius=keypoint_radius)
             new_mesh.translate(xyz)
-            new_mesh.paint_uniform_color([0, 0.8, 0.0])
+            new_mesh.paint_uniform_color([0.8, 0, 0.0])
             keypoint_markers.append(new_mesh)
 
         o3d.visualization.draw_geometries(keypoint_markers + [point_cloud])
@@ -204,6 +208,7 @@ def temp_expt_1_viz(cad_models, model_keypoints, gt_keypoints=None):
         return keypoint_markers
 
     return 0
+
 
 def visualize_torch_model_n_keypoints(cad_models, model_keypoints):
     """

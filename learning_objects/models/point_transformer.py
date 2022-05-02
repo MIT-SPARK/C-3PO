@@ -323,7 +323,9 @@ class TransitionDown(nn.Module):
         features = index_points(mlp_x, neighbors)  # features: (B, M, k, out_channels)
 
         # 3: Local Max Pooling
-        y = torch.max(features, dim=2)[0]  # y: (B, M, out_channels)
+        # y_max = torch.max(features, dim=2)[0]  # y: (B, M, out_channels)
+        # 3a: Local Mean Pooling
+        y = torch.mean(features, dim=2)  # y: (B, M, out_channels)
 
         return y, p_out
 
@@ -463,6 +465,7 @@ class PointTransformerSegment(nn.Module):
 
 class PointTransformerCls(nn.Module):
     def __init__(self, output_dim=20, channels=[16, 32, 64, 128, 256, 512], k=16, sampling_ratio=0.25):
+
         super().__init__()
 
         channels.append(output_dim)

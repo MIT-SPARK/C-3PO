@@ -148,13 +148,15 @@ class experiment():
             torch.cuda.synchronize()
             # start = time.perf_counter()
             start = time.process_time_ns()
+            #start = time.time_ns()
 
             correction = corrector.forward(detected_keypoints, input_point_cloud)
 
             torch.cuda.synchronize()
             # end = time.perf_counter()
             end = time.process_time_ns()
-
+            
+            #end = time.time_ns()
             # correction = torch.zeros_like(correction)
             R, t = point_set_registration.forward(target_points=detected_keypoints + correction)
             #model_estimate = R @ cad_models + t

@@ -395,7 +395,7 @@ def display_results(input_point_cloud, detected_keypoints, target_point_cloud, t
     for xyz in detected_keypoints:
         kpt_mesh = o3d.geometry.TriangleMesh.create_sphere(radius=.01)
         kpt_mesh.translate(xyz)
-        kpt_mesh.paint_uniform_color([0.8, 0.0, 0.0])
+        kpt_mesh.paint_uniform_color([0, 0.8, 0.0])
         keypoint_markers.append(kpt_mesh)
     detected_keypoints = keypoint_markers
     target_point_cloud = pos_tensor_to_o3d(target_point_cloud)
@@ -405,14 +405,17 @@ def display_results(input_point_cloud, detected_keypoints, target_point_cloud, t
     # target_keypoints.paint_uniform_color([0.0, 0.8, 0.0])
 
     target_keypoints = target_keypoints.numpy().transpose()
+    # color_order = [[0,0,0],[0,0,0],[0,0,0],[0,0,0], [1,0,0],[1,0,.25],[1,.5,0],[1,1,0],[0,1,0],[0, .5, .5], [0,0,1],[.25,0,.75], \
+    #                [0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]
     keypoint_markers = []
-    for xyz in target_keypoints:
+    for xyz_idx in range(len(target_keypoints)):
         kpt_mesh = o3d.geometry.TriangleMesh.create_sphere(radius=.01)
-        kpt_mesh.translate(xyz)
+        kpt_mesh.translate(target_keypoints[xyz_idx])
         if target_keypoints_flag == 0:
             kpt_mesh.paint_uniform_color([0.8, 0.0, 0.0])
         else:
-            kpt_mesh.paint_uniform_color([0, 0.8, 0.0])
+            kpt_mesh.paint_uniform_color([0.8, 0, 0.0])
+            # kpt_mesh.paint_uniform_color(color_order[xyz_idx])
         keypoint_markers.append(kpt_mesh)
     target_keypoints = keypoint_markers
 

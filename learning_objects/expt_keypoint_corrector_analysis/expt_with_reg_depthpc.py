@@ -12,7 +12,7 @@ import os
 import sys
 sys.path.append("../../")
 
-from learning_objects.datasets.keypointnet import SE3PointCloud, visualize_torch_model_n_keypoints, DepthPointCloud2, DepthPC
+from learning_objects.datasets.keypointnet import SE3PointCloud, visualize_torch_model_n_keypoints, DepthPointCloud2, DepthPC, temp_expt_1_viz
 from learning_objects.datasets.keypointnet import PCD_FOLDER_NAME as KEYPOINTNET_PCD_FOLDER_NAME, \
     CLASS_NAME as KEYPOINTNET_ID2NAME, \
     CLASS_ID as KEYPOINTNET_NAME2ID
@@ -239,7 +239,8 @@ class experiment():
             detected_keypoints = keypoint_perturbation(keypoints_true=keypoints_true, type=self.kp_noise_type,
                                                        fra=self.kp_noise_fra, var=kp_noise_var*self.diameter)
             if visualization:
-                visualize_torch_model_n_keypoints(cad_models=input_point_cloud, model_keypoints=detected_keypoints)
+                temp_expt_1_viz(cad_models=input_point_cloud, model_keypoints=detected_keypoints, gt_keypoints = keypoints_true)
+                # visualize_torch_model_n_keypoints(cad_models=input_point_cloud, model_keypoints=detected_keypoints)
 
             # estimate model: using point set registration on perturbed keypoints
             R_naive, t_naive = self.point_set_registration.forward(target_points=detected_keypoints)
@@ -535,16 +536,20 @@ def run_full_experiment(kp_noise_fra=0.8, do_certification=False):
 
 
 if __name__ == "__main__":
-    run_full_experiment()
+    # run_full_experiment()
 
     # # model parameters
-    # class_id = "03001627"  # chair
-    # model_id = "1e3fba4500d20bb49b9f2eb77f5e247e"  # a particular chair model
+    class_id = "03001627"  # chair
+    model_id = "1cc6f2ed3d684fa245f213b8994b4a04"  # a particular chair model
+
+    # # # model parameters
+    # class_id = "02876657"
+    # model_id = "41a2005b595ae783be1868124d5ddbcb" # a particular bottle model
     #
     # run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='sporadic', kp_noise_fra=0.2)
     # run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='sporadic', kp_noise_fra=0.8)
     #
-    # run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='uniform')
+    run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='uniform', kp_noise_fra=0.8, only_visualize=True)
 
     # run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='sporadic', kp_noise_fra=0.2,
     #                    only_visualize=True)

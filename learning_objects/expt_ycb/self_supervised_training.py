@@ -12,6 +12,7 @@ import torchvision.transforms as transforms
 import yaml
 import argparse
 import pickle
+import numpy as np
 from pytorch3d import ops
 
 from torch.utils.tensorboard import SummaryWriter
@@ -22,8 +23,8 @@ import sys
 sys.path.append("../../")
 
 from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPointCloud2, DepthPC, CLASS_NAME, \
-    FixedDepthPC, CLASS_ID
-from learning_objects.datasets.ycb import DepthYCBAugment
+    FixedDepthPC, CLASS_ID, temp_expt_1_viz
+from learning_objects.datasets.ycb import DepthYCB, DepthYCBAugment, viz_rgb_pcd
 from learning_objects.models.certifiability import confidence, confidence_kp
 
 from learning_objects.utils.general import display_results, TrackingMeter
@@ -38,8 +39,8 @@ from learning_objects.expt_self_supervised_correction.loss_functions import self
 # evaluation metrics
 from learning_objects.expt_self_supervised_correction.evaluation_metrics import evaluation_error, add_s_error
 
-SYMMETRIC_MODEL_IDS = ["001_chips_can", "002_master_chef_can", "004_sugar_box", \
-                       "005_tomato_soup_can", "006_mustard_bottle", "007_tuna_fish_can", "008_pudding_box" \
+SYMMETRIC_MODEL_IDS = ["001_chips_can", "002_master_chef_can", "003_cracker_box", "004_sugar_box", \
+                        "005_tomato_soup_can", "006_mustard_bottle", "007_tuna_fish_can", "008_pudding_box" \
                        "009_gelatin_box", "010_potted_meat_can", "036_wood_block", "040_large_marker", \
                        "051_large_clamp", "052_extra_large_clamp", "061_foam_brick"]
 
@@ -221,7 +222,7 @@ def train_detector(hyper_param, detector_type='point_transformer', model_id="019
     if not os.path.exists(best_model_save_location):
         os.makedirs(best_model_save_location)
 
-    sim_trained_model_file = best_model_save_location + '_best_supervised_kp_' + detector_type + '.pth'
+    sim_trained_model_file = best_model_save_location + '_best_supervised_kp_' + detector_type + '_data_augment.pth'
     best_model_save_file = best_model_save_location + '_best_self_supervised_kp_' + detector_type + '.pth'
     train_loss_save_file = best_model_save_location + '_sstrain_loss_' + detector_type + '.pkl'
     val_loss_save_file = best_model_save_location + '_ssval_loss_' + detector_type + '.pkl'
@@ -236,10 +237,7 @@ def train_detector(hyper_param, detector_type='point_transformer', model_id="019
     print("epsilon", epsilon)
 
     # object symmetry
-    if model_id in SYMMETRIC_MODEL_IDS:
-        hyper_param["is_symmetric"] = True
-    else:
-        hyper_param["is_symmetric"] = False
+    hyper_param["is_symmetric"] = False
 
     # real dataset:
     self_supervised_train_batch_size = hyper_param['self_supervised_train_batch_size'][model_id]
@@ -254,7 +252,7 @@ def train_detector(hyper_param, detector_type='point_transformer', model_id="019
 
     # validation dataset:
     val_batch_size = hyper_param['val_batch_size'][model_id]
-    val_dataset = DepthYCBAugment(model_id=model_id,
+    val_dataset = DepthYCB(model_id=model_id,
                            split='val',
                            num_of_points=num_of_points_to_sample)
     val_loader = torch.utils.data.DataLoader(val_dataset,
@@ -308,13 +306,14 @@ def train_detector(hyper_param, detector_type='point_transformer', model_id="019
 
 
 # Visualize
-def visual_test(test_loader, model, correction_flag=False, device=None, hyper_param=None):
+def visual_test(test_loader, model, correction_flag=True, device=None, hyper_param=None):
 
     if device == None:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         # torch.cuda.empty_cache()
 
     for i, vdata in enumerate(test_loader):
+
         input_point_cloud, keypoints_target, R_target, t_target = vdata
         input_point_cloud = input_point_cloud.to(device)
         keypoints_target = keypoints_target.to(device)
@@ -346,10 +345,23 @@ def visual_test(test_loader, model, correction_flag=False, device=None, hyper_pa
         pc_p = predicted_point_cloud.clone().detach().to('cpu')
         kp = keypoints_target.clone().detach().to('cpu')
         kp_p = predicted_keypoints.clone().detach().to('cpu')
-        # display_results(input_point_cloud=pc_p, detected_keypoints=kp_p, target_point_cloud=pc,
-        #                 target_keypoints=kp)
+        # # display_results(input_point_cloud=pc_p, detected_keypoints=kp_p, target_point_cloud=pc,
+        # #                 target_keypoints=kp)
         display_results(input_point_cloud=pc, detected_keypoints=kp_p, target_point_cloud=pc,
                         target_keypoints=kp)
+        #if i == 10:
+        #    # pcd_rgb = viz_rgb_pcd("002_master_chef_can", "NP2", "NP5", "207")
+        #    pcd_rgb = viz_rgb_pcd("052_extra_large_clamp", "NP1", "NP5", "201")
+
+        #    # if i == 1:
+        #    # pcd_rgb = viz_rgb_pcd("037_scissors", "NP3", "NP5", "183")
+
+        #    # pcd_rgb = viz_rgb_pcd("011_banana", "NP2", "NP5", "174")
+
+        #    pcd_torch = torch.from_numpy(np.asarray(pcd_rgb.points)).transpose(0, 1)  # (3, m)
+        #    pcd_torch = pcd_torch.to(torch.float).unsqueeze(0)
+
+        #    temp_expt_1_viz(pcd_torch, model_keypoints=kp_p, gt_keypoints=kp, colors=pcd_rgb.colors)
 
         del pc, pc_p, kp, kp_p
         del input_point_cloud, keypoints_target, R_target, t_target, \
@@ -391,14 +403,15 @@ def visualize_detector(hyper_param, detector_type, model_id,
     best_model_save_location = save_folder + '/' + model_id + '/'
     best_pre_model_save_file = best_model_save_location + '_best_supervised_kp_' + detector_type + '.pth'
     best_post_model_save_file = best_model_save_location + '_best_self_supervised_kp_' + detector_type + '.pth'
-
+    print("best_post_model_save_file", best_post_model_save_file)
     # Evaluation
     # validation dataset:
-    eval_batch_size = hyper_param['eval_batch_size'][model_id]
-    eval_dataset = DepthYCBAugment(model_id=model_id,
+    eval_dataset = DepthYCB(model_id=model_id,
                             split='test',
                             only_load_nondegenerate_pcds= hyper_param['only_load_nondegenerate_pcds'],
                             num_of_points=hyper_param['num_of_points_to_sample'])
+    eval_batch_size = len(eval_dataset) if hyper_param['only_load_nondegenerate_pcds'] else hyper_param['eval_batch_size'][model_id]
+
     eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=eval_batch_size, shuffle=False, pin_memory=True)
 
 
@@ -440,7 +453,7 @@ def visualize_detector(hyper_param, detector_type, model_id,
             print(">>"*40)
             print("PRE-TRAINED MODEL:")
             print(">>" * 40)
-            evaluate(eval_loader=eval_loader, model=model_before, hyper_param=hyper_param, certification=True,
+            evaluate(eval_loader=eval_loader, model=model_before, correction_flag=True, hyper_param=hyper_param, certification=True,
                      device=device, normalize_adds=False)
         if post_:
             print(">>" * 40)
@@ -451,9 +464,9 @@ def visualize_detector(hyper_param, detector_type, model_id,
 
     # # Visual Test
     dataset_batch_size = 1
-    dataset = DepthYCBAugment(model_id=model_id,
+    dataset = DepthYCB(model_id=model_id,
                             split='test',
-                            only_load_nondegenerate_pcds= False,
+                            only_load_nondegenerate_pcds= hyper_param['only_load_nondegenerate_pcds'],
                             num_of_points=hyper_param['num_of_points_to_sample'])
     loader = torch.utils.data.DataLoader(dataset, batch_size=dataset_batch_size, shuffle=False, pin_memory=True)
 
@@ -528,10 +541,7 @@ def visualize_kp_detectors(detector_type, model_ids, only_models=None,
             hyper_param = hyper_param[detector_type]
             hyper_param['epsilon'] = hyper_param['epsilon'][model_id]
 
-            if model_id in SYMMETRIC_MODEL_IDS:
-                hyper_param["is_symmetric"] = True
-            else:
-                hyper_param["is_symmetric"] = False
+            hyper_param["is_symmetric"] = False
 
             print(">>" * 40)
             print("Analyzing Trained Model for Object: ", model_id)
@@ -574,6 +584,9 @@ if __name__ == "__main__":
 
     train_kp_detectors(detector_type=detector_type, model_ids=model_ids, only_models=only_models)
     # visualize_kp_detectors(detector_type=detector_type, model_ids=model_ids, only_models=only_models, visualize=True, models_to_analyze='post')
+    # visualize_kp_detectors(detector_type=detector_type, model_ids=model_ids, only_models=only_models, visualize=True, visualize_without_corrector=True, models_to_analyze='pre')
+
+    #visualize_kp_detectors(detector_type=detector_type, model_ids=model_ids, only_models=only_models, visualize=True, models_to_analyze='pre')
 
 
 

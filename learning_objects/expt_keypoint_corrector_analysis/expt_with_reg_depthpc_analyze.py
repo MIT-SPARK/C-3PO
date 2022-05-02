@@ -158,18 +158,24 @@ def certification(data, epsilon, delta, num_iterations=100, full_batch=False, sy
     return certi_naive, certi_corrector
 
 if __name__ == '__main__':
+    use_adds_metric = True
+    is_object_symmetric = True
+    # file_names = ["./expt_with_reg_depthpc/02958343/ad45b2d40c7801ef2074a73831d8a3a2/20220218_021749_experiment.pickle"]
+    # file_names = ["./expt_with_reg_depthpc/03467517/5df08ba7af60e7bfe72db292d4e13056/20220218_041231_experiment.pickle"]
     file_names = ["./expt_with_reg_depthpc/02876657/41a2005b595ae783be1868124d5ddbcb_wchamfer/20220227_170722_experiment.pickle"]
+    # file_names = ["./expt_with_reg_depthpc/03001627/1cc6f2ed3d684fa245f213b8994b4a04/20220218_032039_experiment.pickle"]
 
     for name in file_names:
 
         fp = open(name, 'rb')
         parameters, data = pickle.load(fp)
         fp.close()
-        #todo: move down
-        for noise_idx in range(len(data['chamfer_pose_naive_to_gt_pose_list'])):
-            data['chamfer_pose_naive_to_gt_pose_list'][noise_idx] = np.asarray(data['chamfer_pose_naive_to_gt_pose_list'][noise_idx][0].squeeze().to('cpu'))
-            data['chamfer_pose_corrected_to_gt_pose_list'][noise_idx] = np.asarray(data['chamfer_pose_corrected_to_gt_pose_list'][noise_idx][0].squeeze().to('cpu'))
-        print(torch.Tensor(np.array(data['chamfer_pose_naive_to_gt_pose_list'])))
+
+        if use_adds_metric:
+            for noise_idx in range(len(data['chamfer_pose_naive_to_gt_pose_list'])):
+                data['chamfer_pose_naive_to_gt_pose_list'][noise_idx] = np.asarray(data['chamfer_pose_naive_to_gt_pose_list'][noise_idx][0].squeeze().to('cpu'))
+                data['chamfer_pose_corrected_to_gt_pose_list'][noise_idx] = np.asarray(data['chamfer_pose_corrected_to_gt_pose_list'][noise_idx][0].squeeze().to('cpu'))
+            print(torch.Tensor(np.array(data['chamfer_pose_naive_to_gt_pose_list'])))
 
         print("-" * 80)
 
@@ -180,7 +186,7 @@ if __name__ == '__main__':
         # certi_naive = data['certi_naive'].to('cpu')
         # certi_corrector = data['certi_corrector'].to('cpu')
         # CALCULATE DYNAMICALLY
-        certi_naive, certi_corrector = certification(data, epsilon=.99, delta=.7, full_batch=True, symmetry=True)
+        certi_naive, certi_corrector = certification(data, epsilon=.99, delta=.7, full_batch=True, symmetry=is_object_symmetric)
         certi_naive = certi_naive.to('cpu')
         certi_corrector = certi_corrector.to('cpu')
 
@@ -189,10 +195,9 @@ if __name__ == '__main__':
         sqdist_kp_naiveest = data['sqdist_kp_naiveest']
         sqdist_kp_correctorest = data['sqdist_kp_correctorest']
 
-        chamfer_pose_naive_to_gt_pose_list = torch.from_numpy(np.asarray(data['chamfer_pose_naive_to_gt_pose_list']))
-        chamfer_pose_corrected_to_gt_pose_list = torch.from_numpy(np.asarray(data['chamfer_pose_corrected_to_gt_pose_list']))
-        # print(chamfer_pose_naive_to_gt_pose_list.shape)
-        # print(chamfer_pose_corrected_to_gt_pose_list.shape)
+        if use_adds_metric:
+            chamfer_pose_naive_to_gt_pose_list = torch.from_numpy(np.asarray(data['chamfer_pose_naive_to_gt_pose_list']))
+            chamfer_pose_corrected_to_gt_pose_list = torch.from_numpy(np.asarray(data['chamfer_pose_corrected_to_gt_pose_list']))
 
 
         kp_noise_var_range = parameters['kp_noise_var_range'].to('cpu')
@@ -217,10 +222,11 @@ if __name__ == '__main__':
         plt.show()
         plt.close(fig)
 
-        chamfer_metric_naive_var, chamfer_metric_naive_mean = varul_mean(chamfer_pose_naive_to_gt_pose_list)
-        chamfer_metric_corrected_var, chamfer_metric_corrected_mean = varul_mean(chamfer_pose_corrected_to_gt_pose_list)
-        chamfer_metric_naive_certi_var, chamfer_metric_naive_certi_mean = masked_varul_mean(chamfer_pose_naive_to_gt_pose_list, mask=certi_naive)
-        chamfer_metric_corrected_certi_var, chamfer_metric_corrected_certi_mean = masked_varul_mean(chamfer_pose_corrected_to_gt_pose_list, mask=certi_corrector)
+        if use_adds_metric:
+            chamfer_metric_naive_var, chamfer_metric_naive_mean = varul_mean(chamfer_pose_naive_to_gt_pose_list)
+            chamfer_metric_corrected_var, chamfer_metric_corrected_mean = varul_mean(chamfer_pose_corrected_to_gt_pose_list)
+            chamfer_metric_naive_certi_var, chamfer_metric_naive_certi_mean = masked_varul_mean(chamfer_pose_naive_to_gt_pose_list, mask=certi_naive)
+            chamfer_metric_corrected_certi_var, chamfer_metric_corrected_certi_mean = masked_varul_mean(chamfer_pose_corrected_to_gt_pose_list, mask=certi_corrector)
 
         Rerr_naive_var, Rerr_naive_mean = varul_mean(Rerr_naive)
         Rerr_corrector_var, Rerr_corrector_mean = varul_mean(Rerr_corrector)
@@ -249,64 +255,75 @@ if __name__ == '__main__':
         fraction_not_certified_corrector_var = torch.sqrt(fraction_not_certified_corrector_var).T
         fraction_not_certified_naive_var = torch.sqrt(fraction_not_certified_naive_var).T
 
-        chamfer_metric_naive_var = torch.sqrt(chamfer_metric_naive_var).T
-        chamfer_metric_corrected_var = torch.sqrt(chamfer_metric_corrected_var).T
-        chamfer_metric_naive_certi_var = torch.sqrt(chamfer_metric_naive_certi_var).T
-        chamfer_metric_corrected_certi_var = torch.sqrt(chamfer_metric_corrected_certi_var).T
+        if use_adds_metric:
+            chamfer_metric_naive_var = torch.sqrt(chamfer_metric_naive_var).T
+            chamfer_metric_corrected_var = torch.sqrt(chamfer_metric_corrected_var).T
+            chamfer_metric_naive_certi_var = torch.sqrt(chamfer_metric_naive_certi_var).T
+            chamfer_metric_corrected_certi_var = torch.sqrt(chamfer_metric_corrected_certi_var).T
 
         # plotting chamfer metric
-        fig = plt.figure()
-        # plt.errorbar(x=kp_noise_var_range, y=chamfer_metric_naive_mean, yerr=chamfer_metric_naive_var, fmt='-x', color='black',
-        #              ecolor='gray', elinewidth=1, capsize=3, label='naive')
-        # plt.errorbar(x=kp_noise_var_range, y=chamfer_metric_naive_certi_mean, yerr=chamfer_metric_naive_certi_var, fmt='--o', color='grey',
-        #              ecolor='lightgray', elinewidth=3, capsize=0, label='naive + certification')
-        # plt.errorbar(x=kp_noise_var_range, y=chamfer_metric_corrected_mean, yerr=chamfer_metric_corrected_var, fmt='-x', color='red',
-        #              ecolor='salmon', elinewidth=1, capsize=3, label='corrector')
-        # plt.errorbar(x=kp_noise_var_range, y=chamfer_metric_corrected_certi_mean, yerr=chamfer_metric_corrected_certi_var, fmt='--o',
-        #              color='orangered',
-        #              ecolor='salmon', elinewidth=3, capsize=0, label='corrector + certification')
-        # new colors
-        plt.errorbar(x=kp_noise_var_range, y=chamfer_metric_naive_mean, yerr=chamfer_metric_naive_var,
-                     fmt='-', color='red', ecolor='red', elinewidth=1, capsize=3, label='naive')
-        plt.errorbar(x=kp_noise_var_range, y=chamfer_metric_naive_certi_mean, yerr=chamfer_metric_naive_certi_var,
-                     fmt='--o', color='red', ecolor=(1.0,0,0,0.3), elinewidth=3, capsize=3, label='naive + certification')
-        plt.errorbar(x=kp_noise_var_range, y=chamfer_metric_corrected_mean, yerr=chamfer_metric_corrected_var,
-                     fmt='-', color='green', ecolor='green', elinewidth=1, capsize=3, label='corrector')
-        plt.errorbar(x=kp_noise_var_range, y=chamfer_metric_corrected_certi_mean, yerr=chamfer_metric_corrected_certi_var,
-                     fmt='--o', color='green', ecolor=(0,.5,0,0.3), elinewidth=3, capsize=3, label='corrector + certification')
-        plt.legend(loc='upper left')
-        if kp_noise_type=='sporadic':
-            title = 'CAD model: ' + cad_model_name + ', Noise: ' + kp_noise_type + f' with fra={kp_noise_fra:.2f}'
-            plt.title(title)
-        elif kp_noise_type=='uniform':
-            title = 'CAD model: ' + cad_model_name + ', Noise: ' + kp_noise_type
-            plt.title(title)
-        plt.xlabel('noise variance parameter $\sigma$')
-        plt.ylabel('ADD-S (% diameter)')
-        plt.show()
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        rand_string = generate_filename()
-        filename = name[:-7] + '_chamfer_metric_plot_' + timestamp + '_' + rand_string + '.jpg'
-        fig.savefig(filename)
-        plt.close(fig)
+        if use_adds_metric:
+            fig = plt.figure()
+            plt.errorbar(x=kp_noise_var_range, y=chamfer_metric_naive_mean, yerr=chamfer_metric_naive_var,
+                         fmt='-x', color='black', ecolor='gray', elinewidth=1, capsize=3, label='naive')
+            plt.errorbar(x=kp_noise_var_range, y=chamfer_metric_naive_certi_mean, yerr=chamfer_metric_naive_certi_var,
+                         fmt='--o', color='grey', ecolor='lightgray', elinewidth=3, capsize=0, label='naive + certification')
+            plt.errorbar(x=kp_noise_var_range, y=chamfer_metric_corrected_mean, yerr=chamfer_metric_corrected_var, fmt='-x', color='red',
+                         ecolor='salmon', elinewidth=1, capsize=3, label='corrector')
+            plt.errorbar(x=kp_noise_var_range, y=chamfer_metric_corrected_certi_mean, yerr=chamfer_metric_corrected_certi_var, fmt='--o',
+                         color='orangered', ecolor='salmon', elinewidth=3, capsize=0, label='corrector + certification')
+            # new colors
+            # plt.errorbar(x=kp_noise_var_range, y=chamfer_metric_naive_mean, yerr=chamfer_metric_naive_var,
+            #              fmt='-', color='red', ecolor='red', elinewidth=1, capsize=3, label='naive')
+            # plt.errorbar(x=kp_noise_var_range, y=chamfer_metric_naive_certi_mean, yerr=chamfer_metric_naive_certi_var,
+            #              fmt='--o', color='red', ecolor=(1.0,0,0,0.3), elinewidth=3, capsize=3, label='naive + certification')
+            # plt.errorbar(x=kp_noise_var_range, y=chamfer_metric_corrected_mean, yerr=chamfer_metric_corrected_var,
+            #              fmt='-', color='green', ecolor='green', elinewidth=1, capsize=3, label='corrector')
+            # plt.errorbar(x=kp_noise_var_range, y=chamfer_metric_corrected_certi_mean, yerr=chamfer_metric_corrected_certi_var,
+            #              fmt='--o', color='green', ecolor=(0,.5,0,0.3), elinewidth=3, capsize=3, label='corrector + certification')
+            plt.legend(loc='upper left')
+            # if kp_noise_type=='sporadic':
+            #     title = 'CAD model: ' + cad_model_name + ', Noise: ' + kp_noise_type + f' with fra={kp_noise_fra:.2f}'
+            #     plt.title(title)
+            # elif kp_noise_type=='uniform':
+            #     title = 'CAD model: ' + cad_model_name + ', Noise: ' + kp_noise_type
+            #     plt.title(title)
+            plt.xlabel('Noise variance parameter $\sigma$')
+            plt.ylabel('Normalized ADD-S')
+            plt.show()
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            rand_string = generate_filename()
+            filename = name[:-7] + '_chamfer_metric_plot_' + timestamp + '_' + rand_string + '.jpg'
+            fig.savefig(filename)
+            plt.close(fig)
 
 
 
         # plotting rotation errors
         fig = plt.figure()
-        plt.errorbar(x=kp_noise_var_range, y=Rerr_naive_mean, yerr=Rerr_naive_var, fmt='-', color='red', ecolor='red', elinewidth=1, capsize=3, label='naive')
-        plt.errorbar(x=kp_noise_var_range, y=Rerr_naive_certi_mean, yerr=Rerr_naive_certi_var, fmt='--o', color='red', ecolor=(1.0,0,0,0.3), elinewidth=3, capsize=3, label='naive + certification')
-        plt.errorbar(x=kp_noise_var_range, y=Rerr_corrector_mean, yerr=Rerr_corrector_var, fmt='-', color='green', ecolor='green', elinewidth=1, capsize=3, label='corrector')
-        plt.errorbar(x=kp_noise_var_range, y=Rerr_corrector_certi_mean, yerr=Rerr_corrector_certi_var, fmt='--o', color='green', ecolor=(0,.5,0,0.3), elinewidth=3, capsize=3, label='corrector + certification')
+        plt.errorbar(x=kp_noise_var_range, y=Rerr_naive_mean, yerr=Rerr_naive_var, fmt='-x', color='black', ecolor='gray',
+                     elinewidth=1, capsize=3, label='naive')
+        plt.errorbar(x=kp_noise_var_range, y=Rerr_naive_certi_mean, yerr=Rerr_naive_certi_var, fmt='--o', color='grey',
+                     ecolor='lightgray', elinewidth=3, capsize=0, label='naive + certification')
+        plt.errorbar(x=kp_noise_var_range, y=Rerr_corrector_mean, yerr=Rerr_corrector_var, fmt='-x', color='red',
+                     ecolor='salmon', elinewidth=1, capsize=3, label='corrector')
+        plt.errorbar(x=kp_noise_var_range, y=Rerr_corrector_certi_mean, yerr=Rerr_corrector_certi_var, fmt='--o',
+                     color='orangered', ecolor='salmon', elinewidth=3, capsize=0, label='corrector + certification')
+
+        # new colors
+        # plt.errorbar(x=kp_noise_var_range, y=Rerr_naive_mean, yerr=Rerr_naive_var, fmt='-', color='red', ecolor='red', elinewidth=1, capsize=3, label='naive')
+        # plt.errorbar(x=kp_noise_var_range, y=Rerr_naive_certi_mean, yerr=Rerr_naive_certi_var, fmt='--o', color='red', ecolor=(1.0,0,0,0.3), elinewidth=3, capsize=3, label='naive + certification')
+        # plt.errorbar(x=kp_noise_var_range, y=Rerr_corrector_mean, yerr=Rerr_corrector_var, fmt='-', color='green', ecolor='green', elinewidth=1, capsize=3, label='corrector')
+        # plt.errorbar(x=kp_noise_var_range, y=Rerr_corrector_certi_mean, yerr=Rerr_corrector_certi_var, fmt='--o', color='green', ecolor=(0,.5,0,0.3), elinewidth=3, capsize=3, label='corrector + certification')
         plt.legend(loc='upper left')
-        if kp_noise_type=='sporadic':
-            title = 'CAD model: ' + cad_model_name + ', Noise: ' + kp_noise_type + f' with fra={kp_noise_fra:.2f}'
-            plt.title(title)
-        elif kp_noise_type=='uniform':
-            title = 'CAD model: ' + cad_model_name + ', Noise: ' + kp_noise_type
-            plt.title(title)
-        plt.xlabel('noise variance parameter $\sigma$')
-        plt.ylabel('rotation error')
+        # if kp_noise_type=='sporadic':
+        #     title = 'CAD model: ' + cad_model_name + ', Noise: ' + kp_noise_type + f' with fra={kp_noise_fra:.2f}'
+        #     plt.title(title)
+        # elif kp_noise_type=='uniform':
+        #     title = 'CAD model: ' + cad_model_name + ', Noise: ' + kp_noise_type
+        #     plt.title(title)
+        plt.xlabel('Noise variance parameter $\sigma$')
+        plt.ylabel('Rotation error')
         plt.show()
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         rand_string = generate_filename()
@@ -321,19 +338,29 @@ if __name__ == '__main__':
 
         # Plotting translation errors
         fig = plt.figure()
-        plt.errorbar(x=kp_noise_var_range, y=terr_naive_mean, yerr=terr_naive_var, fmt='-', color='red', ecolor='red', elinewidth=1, capsize=3, label='naive')
-        plt.errorbar(x=kp_noise_var_range, y=terr_naive_certi_mean, yerr=terr_naive_certi_var, fmt='--o', color='red', ecolor=(1.0,0,0,0.3), elinewidth=3, capsize=3, label='naive + certification')
-        plt.errorbar(x=kp_noise_var_range, y=terr_corrector_mean, yerr=terr_corrector_var, fmt='-', color='green', ecolor='green', elinewidth=1, capsize=3, label='corrector')
-        plt.errorbar(x=kp_noise_var_range, y=terr_corrector_certi_mean, yerr=terr_corrector_certi_var, fmt='--o', color='green', ecolor=(0,.5,0,0.3), elinewidth=3, capsize=3, label='corrector + certification')
+        plt.errorbar(x=kp_noise_var_range, y=terr_naive_mean, yerr=terr_naive_var, fmt='-x', color='black', ecolor='gray',
+                     elinewidth=1, capsize=3, label='naive')
+        plt.errorbar(x=kp_noise_var_range, y=terr_naive_certi_mean, yerr=terr_naive_certi_var, fmt='--o', color='grey',
+                     ecolor='lightgray', elinewidth=3, capsize=0, label='naive + certification')
+        plt.errorbar(x=kp_noise_var_range, y=terr_corrector_mean, yerr=terr_corrector_var, fmt='-x', color='red',
+                     ecolor='salmon', elinewidth=1, capsize=3, label='corrector')
+        plt.errorbar(x=kp_noise_var_range, y=terr_corrector_certi_mean, yerr=terr_corrector_certi_var, fmt='--o',
+                     color='salmon', ecolor='orangered', elinewidth=3, capsize=0, label='corrector + certification')
+
+        #new colors
+        # plt.errorbar(x=kp_noise_var_range, y=terr_naive_mean, yerr=terr_naive_var, fmt='-', color='red', ecolor='red', elinewidth=1, capsize=3, label='naive')
+        # plt.errorbar(x=kp_noise_var_range, y=terr_naive_certi_mean, yerr=terr_naive_certi_var, fmt='--o', color='red', ecolor=(1.0,0,0,0.3), elinewidth=3, capsize=3, label='naive + certification')
+        # plt.errorbar(x=kp_noise_var_range, y=terr_corrector_mean, yerr=terr_corrector_var, fmt='-', color='green', ecolor='green', elinewidth=1, capsize=3, label='corrector')
+        # plt.errorbar(x=kp_noise_var_range, y=terr_corrector_certi_mean, yerr=terr_corrector_certi_var, fmt='--o', color='green', ecolor=(0,.5,0,0.3), elinewidth=3, capsize=3, label='corrector + certification')
         plt.legend(loc='upper left')
-        if kp_noise_type == 'sporadic':
-            title = 'CAD model: ' + cad_model_name + ', Noise: ' + kp_noise_type + f' with fra={kp_noise_fra:.2f}'
-            plt.title(title)
-        elif kp_noise_type == 'uniform':
-            title = 'CAD model: ' + cad_model_name + ', Noise: ' + kp_noise_type
-            plt.title(title)
-        plt.xlabel('noise variance parameter $\sigma$')
-        plt.ylabel('translation error')
+        # if kp_noise_type == 'sporadic':
+        #     title = 'CAD model: ' + cad_model_name + ', Noise: ' + kp_noise_type + f' with fra={kp_noise_fra:.2f}'
+        #     plt.title(title)
+        # elif kp_noise_type == 'uniform':
+        #     title = 'CAD model: ' + cad_model_name + ', Noise: ' + kp_noise_type
+        #     plt.title(title)
+        plt.xlabel('Noise variance parameter $\sigma$')
+        plt.ylabel('Translation error')
         plt.show()
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         rand_string = generate_filename()
@@ -345,24 +372,24 @@ if __name__ == '__main__':
         # Plotting fraction not certified
         fig = plt.figure()
         plt.bar(x=kp_noise_var_range-0.01, width=0.02, height=fraction_not_certified_naive_mean,
-                color='red', align='center', label='naive')
+                color='grey', align='center', label='naive')
         # plt.errorbar(x=kp_noise_var_range-0.01, y=fraction_not_certified_naive_mean,
         #              yerr=fraction_not_certified_naive_var,
         #              fmt='o', color='black', ecolor='darkgray', elinewidth=1, capsize=3)
         plt.bar(x=kp_noise_var_range+0.01, width=0.02, height=fraction_not_certified_corrector_mean,
-                color='green', align='center', label='corrector')
+                color='salmon', align='center', label='corrector')
         # plt.errorbar(x=kp_noise_var_range+0.01, y=fraction_not_certified_corrector_mean,
         #              yerr=fraction_not_certified_corrector_var,
         #              fmt='o', color='red', ecolor='orangered', elinewidth=1, capsize=3)
         plt.legend(loc='upper left')
-        plt.xlabel('noise variance parameter $\sigma$')
-        plt.ylabel('fraction not ($\epsilon$, $\delta$)-certifiable')
-        if kp_noise_type == 'sporadic':
-            title = 'CAD model: ' + cad_model_name + ', Noise: ' + kp_noise_type + f' with fra={kp_noise_fra:.2f}'
-            plt.title(title)
-        elif kp_noise_type == 'uniform':
-            title = 'CAD model: ' + cad_model_name + ', Noise: ' + kp_noise_type
-            plt.title(title)
+        plt.xlabel('Noise variance parameter $\sigma$')
+        plt.ylabel('Fraction not certifiable')
+        # if kp_noise_type == 'sporadic':
+        #     title = 'CAD model: ' + cad_model_name + ', Noise: ' + kp_noise_type + f' with fra={kp_noise_fra:.2f}'
+        #     plt.title(title)
+        # elif kp_noise_type == 'uniform':
+        #     title = 'CAD model: ' + cad_model_name + ', Noise: ' + kp_noise_type
+        #     plt.title(title)
         plt.show()
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         rand_string = generate_filename()
