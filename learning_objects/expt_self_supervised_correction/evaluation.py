@@ -146,7 +146,7 @@ def evaluate(eval_loader, model, hyper_param, certification=True, device=None, c
         # print("t error: ", ave_t_err.item())
         print("ADD-S (", int(hyper_param["adds_threshold"]*100), "%): ", ave_adds_err.item())
         print("ADD-S AUC (", int(hyper_param["adds_auc_threshold"]*100), "%): ", ave_auc.item())
-        print("GT-certifiable: ")
+        # print("GT-certifiable: ")
 
         print("Evaluating certification: ")
         print("epsilon parameter: ", hyper_param['epsilon'])
@@ -158,7 +158,7 @@ def evaluate(eval_loader, model, hyper_param, certification=True, device=None, c
         # print("t error: ", ave_t_err_cert.item())
         print("ADD-S (", int(hyper_param["adds_threshold"]*100), "%): ", ave_adds_err_cert.item())
         print("ADD-S AUC (", int(hyper_param["adds_auc_threshold"]*100), "%): ", ave_auc_cert.item())
-        print("GT-certifiable: ")
+        # print("GT-certifiable: ")
 
     return None
 
