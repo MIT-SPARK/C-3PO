@@ -37,7 +37,11 @@ from learning_objects.expt_self_supervised_correction.loss_functions import self
 from learning_objects.expt_self_supervised_correction.loss_functions import self_supervised_validation_loss \
     as validation_loss
 # evaluation metrics
-from learning_objects.expt_self_supervised_correction.evaluation_metrics import evaluation_error, add_s_error
+from learning_objects.expt_self_supervised_correction.evaluation_metrics import evaluation_error, add_s_error, \
+    is_pcd_nondegenerate
+
+from learning_objects.datasets.ycb import MODEL_TO_KPT_GROUPS as MODEL_TO_KPT_GROUPS_YCB
+
 
 SYMMETRIC_MODEL_IDS = ["001_chips_can", "002_master_chef_can", "003_cracker_box", "004_sugar_box", \
                         "005_tomato_soup_can", "006_mustard_bottle", "007_tuna_fish_can", "008_pudding_box" \
@@ -223,11 +227,12 @@ def train_detector(hyper_param, detector_type='point_transformer', model_id="019
         os.makedirs(best_model_save_location)
 
     sim_trained_model_file = best_model_save_location + '_best_supervised_kp_' + detector_type + '_data_augment.pth'
-    best_model_save_file = best_model_save_location + '_best_self_supervised_kp_' + detector_type + '.pth'
+    best_model_save_file = best_model_save_location + '_best_self_supervised_kp_' + detector_type + 'data_augment.pth'
     train_loss_save_file = best_model_save_location + '_sstrain_loss_' + detector_type + '.pkl'
     val_loss_save_file = best_model_save_location + '_ssval_loss_' + detector_type + '.pkl'
     cert_save_file = best_model_save_location + '_certi_all_batches_' + detector_type + '.pkl'
     last_epoch_model_dict_file = best_model_save_location + '_last_epoch_self_supervised_kp_' + detector_type + '.pth'
+    hyperparam_file = best_model_save_location + '_self_supervised_kp_' + detector_type + '_hyperparams.pth'
 
     # optimization parameters
     lr_sgd = hyper_param['lr_sgd']
@@ -235,6 +240,7 @@ def train_detector(hyper_param, detector_type='point_transformer', model_id="019
     momentum_sgd = hyper_param['momentum_sgd']
     epsilon = hyper_param['epsilon']
     print("epsilon", epsilon)
+
 
     # object symmetry
     hyper_param["is_symmetric"] = False
@@ -302,11 +308,14 @@ def train_detector(hyper_param, detector_type='point_transformer', model_id="019
     with open(cert_save_file, 'wb') as outp:
         pickle.dump(fra_cert_, outp, pickle.HIGHEST_PROTOCOL)
 
+    with open(hyperparam_file, 'wb') as outp:
+        pickle.dump(hyper_param, outp, pickle.HIGHEST_PROTOCOL)
+
     return None
 
 
 # Visualize
-def visual_test(test_loader, model, correction_flag=True, device=None, hyper_param=None):
+def visual_test(test_loader, model, correction_flag=True, device=None, hyper_param=None, degeneracy_eval=False):
 
     if device == None:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -340,6 +349,10 @@ def visual_test(test_loader, model, correction_flag=True, device=None, hyper_par
         adds_err_ = add_s_error(predicted_point_cloud, ground_truth_point_cloud,
                                 threshold=hyper_param["adds_threshold"])
         print("ADD-S Score", adds_err_)
+        if degeneracy_eval:
+            nondeg_indicator = is_pcd_nondegenerate(model.model_id, input_point_cloud, predicted_model_keypoints,
+                                                    MODEL_TO_KPT_GROUPS_YCB)
+            print("Is Non-Degenerate", nondeg_indicator)
 
         pc = input_point_cloud.clone().detach().to('cpu')
         pc_p = predicted_point_cloud.clone().detach().to('cpu')
@@ -347,7 +360,9 @@ def visual_test(test_loader, model, correction_flag=True, device=None, hyper_par
         kp_p = predicted_keypoints.clone().detach().to('cpu')
         # # display_results(input_point_cloud=pc_p, detected_keypoints=kp_p, target_point_cloud=pc,
         # #                 target_keypoints=kp)
-        display_results(input_point_cloud=pc, detected_keypoints=kp_p, target_point_cloud=pc,
+        # display_results(input_point_cloud=pc, detected_keypoints=kp_p, target_point_cloud=pc_p,
+        #                 target_keypoints=kp)
+        display_results(input_point_cloud=pc, detected_keypoints=kp_p, target_point_cloud=None,
                         target_keypoints=kp)
         #if i == 10:
         #    # pcd_rgb = viz_rgb_pcd("002_master_chef_can", "NP2", "NP5", "207")
@@ -374,7 +389,7 @@ def visual_test(test_loader, model, correction_flag=True, device=None, hyper_par
 def visualize_detector(hyper_param, detector_type, model_id,
                        evaluate_models=True, models_to_analyze='both',
                        visualize_without_corrector=True, visualize_with_corrector=True,
-                       visualize_before=True, visualize_after=True, device=None):
+                       visualize_before=True, visualize_after=True, device=None, degeneracy_eval=False):
     """
 
     """
@@ -401,7 +416,7 @@ def visualize_detector(hyper_param, detector_type, model_id,
 
     save_folder = hyper_param['save_folder']
     best_model_save_location = save_folder + '/' + model_id + '/'
-    best_pre_model_save_file = best_model_save_location + '_best_supervised_kp_' + detector_type + '.pth'
+    best_pre_model_save_file = best_model_save_location + '_best_supervised_kp_' + detector_type + '_data_augment.pth'
     best_post_model_save_file = best_model_save_location + '_best_self_supervised_kp_' + detector_type + '.pth'
     print("best_post_model_save_file", best_post_model_save_file)
     # Evaluation
@@ -454,13 +469,13 @@ def visualize_detector(hyper_param, detector_type, model_id,
             print("PRE-TRAINED MODEL:")
             print(">>" * 40)
             evaluate(eval_loader=eval_loader, model=model_before, correction_flag=True, hyper_param=hyper_param, certification=True,
-                     device=device, normalize_adds=False)
+                     device=device, normalize_adds=False, degeneracy=degeneracy_eval)
         if post_:
             print(">>" * 40)
             print("(SELF-SUPERVISED) TRAINED MODEL:")
             print(">>" * 40)
             evaluate(eval_loader=eval_loader, model=model_after, hyper_param=hyper_param, certification=True,
-                     device=device, normalize_adds=False)
+                     device=device, normalize_adds=False, degeneracy=degeneracy_eval)
 
     # # Visual Test
     dataset_batch_size = 1
@@ -476,10 +491,10 @@ def visualize_detector(hyper_param, detector_type, model_id,
         print(">>" * 40)
         if visualize_without_corrector:
             print("Without corrector")
-            visual_test(test_loader=loader, model=model_before, correction_flag=False, hyper_param=hyper_param)
+            visual_test(test_loader=loader, model=model_before, correction_flag=False, hyper_param=hyper_param, degeneracy_eval=degeneracy_eval)
         if visualize_with_corrector:
             print("With corrector")
-            visual_test(test_loader=loader, model=model_before, correction_flag=True, hyper_param=hyper_param)
+            visual_test(test_loader=loader, model=model_before, correction_flag=True, hyper_param=hyper_param, degeneracy_eval=degeneracy_eval)
 
     if visualize_after and post_:
         print(">>" * 40)
@@ -487,10 +502,10 @@ def visualize_detector(hyper_param, detector_type, model_id,
         print(">>" * 40)
         if visualize_without_corrector:
             print("Without corrector")
-            visual_test(test_loader=loader, model=model_after, correction_flag=False, hyper_param=hyper_param)
+            visual_test(test_loader=loader, model=model_after, correction_flag=False, hyper_param=hyper_param, degeneracy_eval=degeneracy_eval)
         if visualize_with_corrector:
             print("With corrector")
-            visual_test(test_loader=loader, model=model_after, correction_flag=True, hyper_param=hyper_param)
+            visual_test(test_loader=loader, model=model_after, correction_flag=True, hyper_param=hyper_param, degeneracy_eval=degeneracy_eval)
 
     if pre_:
         del model_before, state_dict_pre
@@ -528,7 +543,8 @@ def visualize_kp_detectors(detector_type, model_ids, only_models=None,
                            visualize_without_corrector=False,
                            visualize_with_corrector=True,
                            visualize_before=True,
-                           visualize_after=True):
+                           visualize_after=True,
+                           degeneracy_eval=False):
 
     if not visualize:
         visualize_with_corrector, visualize_without_corrector, visualize_before, visualize_after \
@@ -553,7 +569,8 @@ def visualize_kp_detectors(detector_type, model_ids, only_models=None,
                                visualize_without_corrector=visualize_without_corrector,
                                visualize_with_corrector=visualize_with_corrector,
                                visualize_before=visualize_before,
-                               visualize_after=visualize_after)
+                               visualize_after=visualize_after,
+                               degeneracy_eval=degeneracy_eval)
 
 
 
@@ -583,7 +600,7 @@ if __name__ == "__main__":
         model_ids = yaml.load(stream=stream, Loader=yaml.Loader)['model_ids']
 
     train_kp_detectors(detector_type=detector_type, model_ids=model_ids, only_models=only_models)
-    # visualize_kp_detectors(detector_type=detector_type, model_ids=model_ids, only_models=only_models, visualize=True, models_to_analyze='post')
+    # visualize_kp_detectors(detector_type=detector_type, model_ids=model_ids, only_models=only_models, visualize=False, models_to_analyze='post', degeneracy_eval=False)
     # visualize_kp_detectors(detector_type=detector_type, model_ids=model_ids, only_models=only_models, visualize=True, visualize_without_corrector=True, models_to_analyze='pre')
 
     #visualize_kp_detectors(detector_type=detector_type, model_ids=model_ids, only_models=only_models, visualize=True, models_to_analyze='pre')

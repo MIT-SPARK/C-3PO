@@ -67,6 +67,11 @@ class ScaleAxis(Enum):
     Y = 1
     Z = 2
 
+MODEL_TO_KPT_GROUPS = {
+    "mug": [set([9])],
+    "cap": [set([1])]
+    }
+
 def display_two_pcs(pc1, pc2):
     """
     pc1 : torch.tensor of shape (3, n)

@@ -11,11 +11,15 @@ sys.path.append("../..")
 from learning_objects.datasets.keypointnet import CLASS_NAME, CLASS_ID, DepthPC
 
 from learning_objects.expt_self_supervised_correction.loss_functions import certify
-from learning_objects.expt_self_supervised_correction.evaluation_metrics import evaluation_error, add_s_error
+from learning_objects.expt_self_supervised_correction.evaluation_metrics import evaluation_error, add_s_error, is_pcd_nondegenerate
 from learning_objects.expt_self_supervised_correction.loss_functions import chamfer_loss
 
+from learning_objects.datasets.ycb import MODEL_TO_KPT_GROUPS as MODEL_TO_KPT_GROUPS_YCB
+from learning_objects.datasets.keypointnet import MODEL_TO_KPT_GROUPS as MODEL_TO_KPT_GROUPS_SHAPENET
 
-def evaluate(eval_loader, model, hyper_param, certification=True, device=None, correction_flag=True, normalize_adds=False):
+
+
+def evaluate(eval_loader, model, hyper_param, certification=True, degeneracy=False, device=None, correction_flag=True, normalize_adds=False):
 
     model.eval()
 
@@ -30,6 +34,9 @@ def evaluate(eval_loader, model, hyper_param, certification=True, device=None, c
         # t_err = 0.0
         adds_err = 0.0
         auc = 0.0
+        # we don't care about degeneracy for noncertifiable cases
+        adds_err_nondeg = 0.0
+        auc_nondeg = 0.0
 
         # pc_err_cert = 0.0
         # kp_err_cert = 0.0
@@ -38,8 +45,17 @@ def evaluate(eval_loader, model, hyper_param, certification=True, device=None, c
         adds_err_cert = 0.0
         auc_cert = 0.0
 
+        adds_err_cert_nondeg = 0.0
+        auc_cert_nondeg = 0.0
+
+        adds_err_cert_deg = 0.0
+        auc_cert_deg = 0.0
+
+
         num_cert = 0.0
-        # num_batches = len(eval_loader)
+        num_nondeg = 0
+        num_cert_nondeg = 0
+        num_cert_deg = 0
 
         if normalize_adds:
             print("normalizing adds thresholds")
@@ -70,6 +86,16 @@ def evaluate(eval_loader, model, hyper_param, certification=True, device=None, c
                                 epsilon=hyper_param['epsilon'],
                                 is_symmetric=hyper_param['is_symmetric'])
 
+            if degeneracy:
+                # if ycb
+                nondeg = is_pcd_nondegenerate(model.model_id, input_point_cloud, predicted_keypoints, MODEL_TO_KPT_GROUPS_YCB)
+                # print("-------------------------------------")
+                # print("nondeg bool mask:", nondeg)
+                # print("-------------------------------------")
+                # if shapenet
+                # nondeg = is_pcd_nondegenerate(model.class_name, input_point_cloud, predicted_model_keypoints, MODEL_TO_KPT_GROUPS_SHAPENET)
+                deg = nondeg < 1
+
             # fraction certifiable
             # error of all objects
             # error of certified objects
@@ -86,6 +112,14 @@ def evaluate(eval_loader, model, hyper_param, certification=True, device=None, c
             _, auc_ = add_s_error(predicted_point_cloud, ground_truth_point_cloud,
                                   threshold=hyper_param["adds_auc_threshold"])
 
+            if degeneracy:
+                adds_err_nondeg_, _ = add_s_error(predicted_point_cloud, ground_truth_point_cloud,
+                                           threshold=hyper_param["adds_threshold"], degeneracy_i = nondeg)
+                _, auc_nondeg_ = add_s_error(predicted_point_cloud, ground_truth_point_cloud,
+                                      threshold=hyper_param["adds_auc_threshold"], degeneracy_i = nondeg)
+
+
+
             # gt_cert_all = certify(input_point_cloud=ground_truth_point_cloud,
             #                       predicted_point_cloud=predicted_point_cloud,
             #                       corrected_keypoints=predicted_keypoints,
@@ -101,6 +135,10 @@ def evaluate(eval_loader, model, hyper_param, certification=True, device=None, c
             # t_err += t_err_.sum()
             adds_err += adds_err_.sum()
             auc += auc_
+            if degeneracy:
+                num_nondeg += nondeg.sum()
+                adds_err_nondeg += (adds_err_nondeg_).sum()
+                auc_nondeg += (auc_nondeg_).sum()
 
             if certification:
                 # fraction certifiable
@@ -113,9 +151,26 @@ def evaluate(eval_loader, model, hyper_param, certification=True, device=None, c
                 # t_err_cert += (t_err_ * certi).sum()
                 adds_err_cert += (adds_err_ * certi).sum()
 
+
+
                 _, auc_cert_ = add_s_error(predicted_point_cloud, ground_truth_point_cloud,
                                           threshold=hyper_param['adds_auc_threshold'], certi=certi)
                 auc_cert += auc_cert_
+
+                if degeneracy:
+                    _, auc_cert_nondeg_ = add_s_error(predicted_point_cloud, ground_truth_point_cloud,
+                                           threshold=hyper_param['adds_auc_threshold'], certi=certi, degeneracy_i = nondeg)
+
+                    _, auc_cert_deg_ = add_s_error(predicted_point_cloud, ground_truth_point_cloud,
+                                           threshold=hyper_param['adds_auc_threshold'], certi=certi, degeneracy_i = nondeg, degenerate=True)
+
+                    adds_err_cert_nondeg += (adds_err_.squeeze() * nondeg.squeeze() * certi.squeeze()).sum()
+                    adds_err_cert_deg += (adds_err_.squeeze() * deg.squeeze() * certi.squeeze()).sum()
+                    auc_cert_nondeg += (auc_cert_nondeg_).sum()
+                    auc_cert_deg += auc_cert_deg_.sum()
+                    num_cert_nondeg += (certi.squeeze() * nondeg).sum()
+                    num_cert_deg += (certi.squeeze() * deg).sum()
+
 
             del input_point_cloud, keypoints_target, R_target, t_target, \
                 predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted
@@ -128,6 +183,10 @@ def evaluate(eval_loader, model, hyper_param, certification=True, device=None, c
         ave_adds_err = 100 * adds_err / ((i + 1) * batch_size)
         ave_auc = 100 * auc / (i + 1)
 
+        if degeneracy:
+            ave_adds_err_nondeg = 100 * adds_err_nondeg / num_nondeg
+            ave_auc_nondeg = 100 * auc_nondeg / (i + 1)
+
         if certification:
             # ave_pc_err_cert = pc_err_cert / num_cert
             # ave_kp_err_cert = kp_err_cert / num_cert
@@ -136,7 +195,20 @@ def evaluate(eval_loader, model, hyper_param, certification=True, device=None, c
             ave_adds_err_cert = 100 * adds_err_cert / num_cert
             ave_auc_cert = 100 * auc_cert / (i + 1)
 
+            if degeneracy:
+                ave_adds_err_cert_nondeg = 100 * adds_err_cert_nondeg / (num_cert_nondeg)
+                ave_adds_err_cert_deg = 100 * adds_err_cert_deg / (num_cert_deg)
+                ave_auc_cert_nondeg = 100 * auc_cert_nondeg / (i + 1)
+                ave_auc_cert_deg = 100 * auc_cert_deg / (i + 1)
+                fra_cert_nondeg = 100 * num_cert_nondeg / ((i + 1)*batch_size)
+                fra_cert_deg = 100 * num_cert_deg / ((i + 1)*batch_size)
+
             fra_cert = 100 * num_cert / ((i + 1)*batch_size)
+
+        if degeneracy:
+            fra_nondeg = 100 * num_nondeg / ((i + 1)*batch_size)
+            fra_nondeg = 100 * num_nondeg / ((i + 1)*batch_size)
+
 
         print(">>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>")
         print("Evaluating performance across all objects:")
@@ -146,8 +218,16 @@ def evaluate(eval_loader, model, hyper_param, certification=True, device=None, c
         # print("t error: ", ave_t_err.item())
         print("ADD-S (", int(hyper_param["adds_threshold"]*100), "%): ", ave_adds_err.item())
         print("ADD-S AUC (", int(hyper_param["adds_auc_threshold"]*100), "%): ", ave_auc.item())
-        print("GT-certifiable: ")
 
+
+        if degeneracy:
+            print("Evaluating performance across all nondegenerate objects: ")
+            print("% nondegenerate: ", fra_nondeg.item())
+            print("ADD-S (", int(hyper_param["adds_threshold"]*100), "%): ", ave_adds_err_nondeg.item())
+            print("ADD-S AUC (", int(hyper_param["adds_auc_threshold"]*100), "%): ", ave_auc_nondeg.item())
+
+
+        print("GT-certifiable: ")
         print("Evaluating certification: ")
         print("epsilon parameter: ", hyper_param['epsilon'])
         print("% certifiable: ", fra_cert.item())
@@ -158,6 +238,15 @@ def evaluate(eval_loader, model, hyper_param, certification=True, device=None, c
         # print("t error: ", ave_t_err_cert.item())
         print("ADD-S (", int(hyper_param["adds_threshold"]*100), "%): ", ave_adds_err_cert.item())
         print("ADD-S AUC (", int(hyper_param["adds_auc_threshold"]*100), "%): ", ave_auc_cert.item())
+        if degeneracy:
+            print("% nondegenerate & certifiable: ", fra_cert_nondeg.item())
+            print("ADD-S (", int(hyper_param["adds_threshold"]*100), "%): ", ave_adds_err_cert_nondeg.item())
+            print("ADD-S AUC (", int(hyper_param["adds_auc_threshold"] * 100), "%): ", ave_auc_cert_nondeg.item())
+            print("% degenerate & certifiable: ", fra_cert_deg.item())
+            print("ADD-S (", int(hyper_param["adds_threshold"] * 100), "%): ", ave_adds_err_cert_deg.item())
+            print("ADD-S AUC (", int(hyper_param["adds_auc_threshold"] * 100), "%): ", ave_auc_cert_deg.item())
+
+
         print("GT-certifiable: ")
 
     return None

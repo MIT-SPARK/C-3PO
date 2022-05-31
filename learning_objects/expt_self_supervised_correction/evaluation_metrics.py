@@ -2,7 +2,29 @@
 import torch
 import sys
 from pytorch3d import ops
+from learning_objects.datasets.ycb import MODEL_TO_KPT_GROUPS
 sys.path.append('../..')
+
+
+def is_close(keypoints, pcd, threshold=0.015):
+    pcd = pcd.unsqueeze(0)
+    keypoints = keypoints.unsqueeze(0)
+    # temp_expt_1_viz(pcd, keypoints)
+    closest_dist, _, _ = ops.knn_points(torch.transpose(keypoints, -1, -2), torch.transpose(pcd, -1, -2), K=1,
+                                        return_sorted=False)
+    if torch.max(torch.sqrt(closest_dist)) < threshold:
+        return True
+    return False
+
+def is_pcd_nondegenerate(model_id, input_point_clouds, predicted_model_keypoints, model_to_kpt_groups):
+    nondeg_indicator = torch.zeros(predicted_model_keypoints.shape[0]).to(input_point_clouds.device)
+    for batch_idx in range(predicted_model_keypoints.shape[0]):
+        predicted_kpts = predicted_model_keypoints[batch_idx]
+        for group in model_to_kpt_groups[model_id]:
+            kpt_group = predicted_kpts[:,list(group)]
+            if is_close(kpt_group, input_point_clouds[batch_idx]):
+                nondeg_indicator[batch_idx] = 1
+    return nondeg_indicator.to(torch.bool)
 
 
 def chamfer_dist(pc, pc_, pc_padding=None, max_loss=False):
@@ -176,7 +198,7 @@ def VOCap(rec, threshold):
     return ap
 
 
-def add_s_error(predicted_point_cloud, ground_truth_point_cloud, threshold, certi=None):
+def add_s_error(predicted_point_cloud, ground_truth_point_cloud, threshold, certi=None, degeneracy_i=None, degenerate=False):
     """
     predicted_point_cloud       : torch.tensor of shape (B, 3, m)
     ground_truth_point_cloud    : torch.tensor of shape (B, 3, m)
@@ -187,11 +209,21 @@ def add_s_error(predicted_point_cloud, ground_truth_point_cloud, threshold, cert
 
     # compute the chamfer distance between the two
     d = chamfer_dist(predicted_point_cloud, ground_truth_point_cloud, max_loss=False)
+    if degeneracy_i is not None:
+        if not degenerate:
+            degeneracy_i = degeneracy_i > 0
+        else:
+            degeneracy_i = degeneracy_i < 1
 
-    if certi==None:
+    if certi is None:
+        if degeneracy_i is not None:
+            d = d[degeneracy_i]
         auc = VOCap(d.squeeze(-1), threshold=threshold)
     else:
-        d = d[certi]
+        if degeneracy_i is not None:
+            d = d[degeneracy_i.squeeze()*certi.squeeze()]
+        else:
+            d = d[certi]
         auc = VOCap(d.squeeze(-1), threshold=threshold)
 
     return d <= threshold, auc
