@@ -227,7 +227,6 @@ def evaluate(eval_loader, model, hyper_param, certification=True, degeneracy=Fal
             print("ADD-S AUC (", int(hyper_param["adds_auc_threshold"]*100), "%): ", ave_auc_nondeg.item())
 
 
-        print("GT-certifiable: ")
         print("Evaluating certification: ")
         print("epsilon parameter: ", hyper_param['epsilon'])
         print("% certifiable: ", fra_cert.item())
@@ -245,9 +244,6 @@ def evaluate(eval_loader, model, hyper_param, certification=True, degeneracy=Fal
             print("% degenerate & certifiable: ", fra_cert_deg.item())
             print("ADD-S (", int(hyper_param["adds_threshold"] * 100), "%): ", ave_adds_err_cert_deg.item())
             print("ADD-S AUC (", int(hyper_param["adds_auc_threshold"] * 100), "%): ", ave_auc_cert_deg.item())
-
-
-        print("GT-certifiable: ")
 
     return None
 
