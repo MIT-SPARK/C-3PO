@@ -1,4 +1,4 @@
-FILE_NAME="./eval/model_eval_v2.txt"
+FILE_NAME="./eval/model_eval_v3.txt"
 
 now=$(date +'%c')
 echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" >> $FILE_NAME
