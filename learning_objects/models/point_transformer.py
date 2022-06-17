@@ -270,7 +270,7 @@ class PointTransformerBlock(nn.Module):
 
 
 class TransitionDown(nn.Module):
-    def __init__(self, in_channels, out_channels, k, sampling_ratio, fast=True):
+    def __init__(self, in_channels, out_channels, k, sampling_ratio, fast=True, local_max_pooling=True):
         super().__init__()
 
         self.in_channels = in_channels
@@ -278,6 +278,7 @@ class TransitionDown(nn.Module):
         self.k = k
         self.sampling_ratio = sampling_ratio
         self.fast = fast
+        self.local_max_pooling = local_max_pooling
         self.mlp = nn.Sequential(
             nn.Conv1d(self.in_channels, self.out_channels, kernel_size=1, bias=False),
             nn.BatchNorm1d(self.out_channels),
@@ -322,10 +323,13 @@ class TransitionDown(nn.Module):
         # 2-2: Extract features based on neighbors
         features = index_points(mlp_x, neighbors)  # features: (B, M, k, out_channels)
 
-        # 3: Local Max Pooling
-        # y_max = torch.max(features, dim=2)[0]  # y: (B, M, out_channels)
-        # 3a: Local Mean Pooling
-        y = torch.mean(features, dim=2)  # y: (B, M, out_channels)
+        if self.local_max_pooling:
+            # 3: Local Max Pooling
+            y = torch.max(features, dim=2)[0]  # y: (B, M, out_channels)
+        else:
+            # 3a: Local Mean Pooling
+            print("running ycb experiment")
+            y = torch.mean(features, dim=2)  # y: (B, M, out_channels)
 
         return y, p_out
 
@@ -464,12 +468,14 @@ class PointTransformerSegment(nn.Module):
 
 
 class PointTransformerCls(nn.Module):
-    def __init__(self, output_dim=20, channels=[16, 32, 64, 128, 256, 512], k=16, sampling_ratio=0.25):
+    def __init__(self, output_dim=20, channels=[16, 32, 64, 128, 256, 512], k=16, sampling_ratio=0.25, local_max_pooling=True):
 
         super().__init__()
 
         channels.append(output_dim)
         assert len(channels) > 3
+
+        self.local_max_pooling = local_max_pooling
 
         self.prev_block = nn.Sequential(
             nn.Linear(3, channels[0]),
@@ -488,6 +494,7 @@ class PointTransformerCls(nn.Module):
                     out_channels=channels[i],
                     k=k,
                     sampling_ratio=sampling_ratio,
+                    local_max_pooling=local_max_pooling
                 )
             )
             self.transformers.append(PointTransformerBlock(channels[i], k))

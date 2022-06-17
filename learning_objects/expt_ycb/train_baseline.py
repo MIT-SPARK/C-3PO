@@ -21,7 +21,7 @@ sys.path.append("../../")
 
 from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPointCloud2, DepthPC, CLASS_NAME, \
     FixedDepthPC, CLASS_ID
-from learning_objects.datasets.ycb import DepthYCBAugment
+from learning_objects.datasets.ycb import DepthYCB, DepthYCBAugment
 from learning_objects.models.certifiability import confidence, confidence_kp
 
 from learning_objects.utils.general import display_results, TrackingMeter
@@ -37,12 +37,13 @@ from learning_objects.expt_self_supervised_correction.loss_functions import self
 from learning_objects.expt_self_supervised_correction.evaluation_metrics import evaluation_error, add_s_error
 
 from learning_objects.expt_ycb.supervised_training import train_with_supervision
+from learning_objects.expt_ycb.proposed_model import ProposedRegressionModel as ProposedModel
 
-SYMMETRIC_MODEL_IDS = ["001_chips_can", "002_master_chef_can", "004_sugar_box", \
-                       "005_tomato_soup_can", "006_mustard_bottle", "007_tuna_fish_can", "008_pudding_box" \
-                       "009_gelatin_box", "010_potted_meat_can", "036_wood_block", "040_large_marker", \
-                       "051_large_clamp", "052_extra_large_clamp", "061_foam_brick"]
 
+# SYMMETRIC_MODEL_IDS = ["001_chips_can", "002_master_chef_can", "004_sugar_box", \
+#                        "005_tomato_soup_can", "006_mustard_bottle", "007_tuna_fish_can", "008_pudding_box" \
+#                        "009_gelatin_box", "010_potted_meat_can", "036_wood_block", "040_large_marker", \
+#                        "051_large_clamp", "052_extra_large_clamp", "061_foam_brick"]
 # Train
 def train_detector(hyper_param, detector_type='point_transformer', model_id="019_pitcher_base"):
     """
@@ -65,7 +66,7 @@ def train_detector(hyper_param, detector_type='point_transformer', model_id="019
     if not os.path.exists(best_model_save_location):
         os.makedirs(best_model_save_location)
 
-    sim_trained_model_file = best_model_save_location + '_best_supervised_kp_' + detector_type + '.pth'
+    sim_trained_model_file = best_model_save_location + '_best_supervised_kp_' + detector_type + '_data_augment.pth'
     best_model_save_file = best_model_save_location + '_best_baseline_regression_model_' + detector_type + '.pth'
     train_loss_save_file = best_model_save_location + '_baseline_train_loss_' + detector_type + '.pkl'
     val_loss_save_file = best_model_save_location + '_baseline_val_loss_' + detector_type + '.pkl'
@@ -76,10 +77,7 @@ def train_detector(hyper_param, detector_type='point_transformer', model_id="019
     momentum_sgd = hyper_param['baseline_momentum_sgd']
 
     # object symmetry
-    if model_id in SYMMETRIC_MODEL_IDS:
-        hyper_param["is_symmetric"] = True
-    else:
-        hyper_param["is_symmetric"] = False
+    hyper_param["is_symmetric"] = False
 
     # real dataset:
     train_batch_size = hyper_param['self_supervised_train_batch_size'][model_id]
@@ -95,7 +93,7 @@ def train_detector(hyper_param, detector_type='point_transformer', model_id="019
 
     # validation dataset:
     val_batch_size = hyper_param['val_batch_size'][model_id]
-    val_dataset = DepthYCBAugment(model_id=model_id,
+    val_dataset = DepthYCB(model_id=model_id,
                            split='val',
                            num_of_points=num_of_points_to_sample)
     val_loader = torch.utils.data.DataLoader(val_dataset,
@@ -107,9 +105,8 @@ def train_detector(hyper_param, detector_type='point_transformer', model_id="019
     model_keypoints = train_dataset._get_model_keypoints().to(torch.float).to(device=device)
 
     # model
-    from learning_objects.expt_ycb.proposed_model import ProposedRegressionModel as ProposedModel
     model = ProposedModel(model_id=model_id, model_keypoints=model_keypoints, cad_models=cad_models,
-                          keypoint_detector=detector_type).to(device)
+                          keypoint_detector=detector_type, local_max_pooling=False).to(device)
 
     if not os.path.isfile(sim_trained_model_file):
         print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")
@@ -231,11 +228,11 @@ def visualize_detector(hyper_param, detector_type, model_id,
 
     # Evaluation
     # validation dataset:
-    eval_batch_size = hyper_param['eval_batch_size'][model_id]
-    eval_dataset = DepthYCBAugment(model_id=model_id,
+    eval_dataset = DepthYCB(model_id=model_id,
                             split='test',
-                            only_load_nondegenerate_pcds= False,
+                            only_load_nondegenerate_pcds= hyper_param['only_load_nondegenerate_pcds'],
                             num_of_points=hyper_param['num_of_points_to_sample'])
+    eval_batch_size = len(eval_dataset) if hyper_param['only_load_nondegenerate_pcds'] else hyper_param['eval_batch_size'][model_id]
     eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=eval_batch_size, shuffle=False)
 
 
@@ -243,10 +240,8 @@ def visualize_detector(hyper_param, detector_type, model_id,
     cad_models = eval_dataset._get_cad_models().to(torch.float).to(device=device)
     model_keypoints = eval_dataset._get_model_keypoints().to(torch.float).to(device=device)
 
-    from learning_objects.expt_ycb.proposed_model import ProposedRegressionModel as ProposedModel
-
     model = ProposedModel(model_id=model_id, model_keypoints=model_keypoints, cad_models=cad_models,
-                                     keypoint_detector=detector_type).to(device)
+                                     keypoint_detector=detector_type, local_max_pooling=False).to(device)
 
     if not os.path.isfile(best_model_save_file):
         print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")
@@ -269,7 +264,7 @@ def visualize_detector(hyper_param, detector_type, model_id,
     # # Visual Test
     if visualize_before:
         dataset_batch_size = 1
-        dataset = DepthYCBAugment(model_id=model_id,
+        dataset = DepthYCB(model_id=model_id,
                             split='test',
                             only_load_nondegenerate_pcds= False,
                             num_of_points=hyper_param['num_of_points_to_sample'])
@@ -331,10 +326,7 @@ def visualize_kp_detectors(detector_type, model_ids, only_models=None,
             hyper_param = hyper_param[detector_type]
             hyper_param['epsilon'] = hyper_param['epsilon'][model_id]
 
-            if model_id in SYMMETRIC_MODEL_IDS:
-                hyper_param["is_symmetric"] = True
-            else:
-                hyper_param["is_symmetric"] = False
+            hyper_param["is_symmetric"] = False
 
             print(">>"*40)
             print("Analyzing Baseline for Object: ", model_id)
@@ -370,12 +362,12 @@ if __name__ == "__main__":
     model_id = args.model_id
     only_models = [model_id]
 
-    stream = open("class_model_ids.yml", "r")
+    stream = open("model_ids.yml", "r")
     model_ids = yaml.load(stream=stream, Loader=yaml.Loader)['model_ids']
 
     train_kp_detectors(detector_type=detector_type, model_ids=model_ids, only_models=only_models)
     # visualize_kp_detectors(detector_type=detector_type, model_ids=model_ids, \
-    #                       visualize_without_corrector=True, only_models=only_models, visualize=False)
+    #                       visualize_without_corrector=True, only_models=only_models, visualize=True)
 
 
 

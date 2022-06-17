@@ -13,6 +13,7 @@ import time
 import trimesh
 from tqdm import tqdm
 from scipy.spatial import ConvexHull
+import scipy.io
 import pickle as pkl
 import open3d as o3d
 import random
@@ -47,14 +48,24 @@ from depth_to_pcl_processing import depth_img_to_pcl, save_pcl, img_to_pcl
 import learning_objects.utils.general as gu
 from learning_objects.datasets.ycb import DepthYCB
 
-ycb_data_folder = "../../third_party/ycb-tools/models/ycb/"  # Folder that contains the ycb data.
+# ycb_data_folder = "../../third_party/ycb-tools/models/ycb/"  # Folder that contains the ycb data.
+ycb_data_folder = "../../../../../../../media/lisa/Figgy/datasets_rajat/ycb/models/ycb/"
+ycb_video_data_folder = "../../../../../../../media/lisa/Figgy/detectron2_datasets/YCB_Video_Dataset/"
 
+YCB_VIDEO_ID_TO_MODEL = ["002_master_chef_can", "003_cracker_box", \
+                          "004_sugar_box", "005_tomato_soup_can", \
+                          "006_mustard_bottle", "007_tuna_fish_can", \
+                          "008_pudding_box", "009_gelatin_box", \
+                          "010_potted_meat_can", "011_banana", \
+                          "019_pitcher_base","021_bleach_cleanser", \
+                          "024_bowl", "025_mug", \
+                          "035_power_drill", "036_wood_block", "037_scissors",\
+                          "040_large_marker","051_large_clamp", \
+                          "052_extra_large_clamp","061_foam_brick"]
 
-def load_mesh(target_object, viz=True, calculate_data=False):
-    # mesh_filename = os.path.join(ycb_data_folder + target_object, "google_16k", "nontextured.ply")
-    mesh_filename = os.path.join(ycb_data_folder + target_object, "poisson", "nontextured.ply")
-    #pitcher google_16k is fine, drill is not
-
+def load_mesh(target_object, viz=True, calculate_data=False, data_folder = ycb_data_folder, mesh_filename = "poisson/nontextured.ply"):
+    # mesh_filename = os.path.join(ycb_data_folder + target_object, "google_16k", "nontextured.ply") #pitcher google_16k is fine, drill is not
+    mesh_filename = os.path.join(data_folder + target_object, mesh_filename)
 
     mesh = o3d.io.read_triangle_mesh(mesh_filename)
     mesh.compute_vertex_normals()
@@ -230,6 +241,50 @@ def get_largest_cluster(pcd, viz=False, eps=0.5):
         o3d.visualization.draw_geometries([primary_cluster_pcd])
     return primary_cluster_pcd
 
+def load_image_and_model_ycb_video(scene, frame):
+    data_folder = os.path.join(ycb_video_data_folder, "data", str(scene).zfill(4))
+
+    basename = "{0}-".format(frame)
+    rgbFilename = os.path.join(data_folder, basename + "color.png")
+    if not os.path.isfile(rgbFilename):
+        print(
+            "The rgbd data is not available for the target object \"%s\". Please download the data first." % target_object)
+        exit(1)
+    rgbK = np.array([[1066.778, 0, 312.9869], [0, 1067.487, 241.3109], [0, 0, 1]])
+
+    # we need to transform the mesh to world coordinates wrt the rgb camera
+    metadataFilename = os.path.join(data_folder, basename + "meta.mat")
+    metadata = scipy.io.loadmat(metadataFilename)
+    for obj in range(len(metadata['cls_indexes'])):
+        model_id = metadata['cls_indexes'][obj][0] -1
+        objFromCam = metadata['poses'][:, :, obj]
+        print("model_id", model_id)
+        target_object = YCB_VIDEO_ID_TO_MODEL[model_id]
+        mesh = load_mesh(target_object, viz=True, data_folder=ycb_video_data_folder + "/models/",
+                         mesh_filename="textured.obj")
+
+        points = mesh.vertices  # these are mesh model points (we assume 0,0,0 is at the center bottom)?
+        points_array = np.asarray(points)
+
+        #mesh points in the rgb coordinates are H_world_to_camera @ points_in_world
+        objFromCam = np.vstack((objFromCam, np.zeros((objFromCam.shape[1]))))
+        objFromCam[3,3] = 1
+        print(objFromCam.shape)
+
+        camera_from_obj = objFromCam #np.linalg.inv(objFromCam) gt poses are defined other way around
+        rmat_cam_from_obj = camera_from_obj[:3,:3]
+
+        rvect_cam_from_obj, _ = cv2.Rodrigues(rmat_cam_from_obj)
+        tvect_cam_from_obj = camera_from_obj[:3,3]
+
+        points_homo = np.hstack((points_array, np.ones((points_array.shape[0], 1))))
+        print("points_homo.shape", points_homo.shape)
+        image_pts = rgbK @ camera_from_obj[:3, :] @ points_homo.T  # transform the world points to camera coordinates
+        image_pts /= image_pts[-1, :]
+        print("image_pts.shape", image_pts.shape)
+        plot_pts_on_image(image_pts, rgbFilename)
+
+
 def load_image_and_model2(target_object, viewpoint_camera, viewpoint_angle):
     basename = "{0}_{1}".format(viewpoint_camera, viewpoint_angle)
     rgbFilename = os.path.join(ycb_data_folder + target_object, basename + ".jpg")
@@ -359,11 +414,12 @@ def get_degenerate_angles(): #+/- 10 degrees, -1 means all angles
         for degenerate_angle in obj_to_degenerate_cam_angles[target_object][ref_idx]:
             if degenerate_angle == -1:
                 return True
+            assert ref_idx !=  4
             if degenerate_angle - 10 < ref_angle and degenerate_angle + 10 > ref_angle:
                 return True
         return False
     obj_to_degenerate_cam_angles = {"003_cracker_box": [[0, 96, 186, 270, 357],[],[],[],[-1]],
-     "004_sugar_box": [[3,93,183, 273, 357],[],[],[],[-1]],
+     "004_sugar_box": [[3,93,183, 273, 357],[],[],[],[-1]]
      "008_pudding_box": [[0,177,267,357],[],[],[219,348],[-1]],
      "009_gelatin_box": [[6,186,357], [], [], [], [-1]],
      "036_wood_block": [[6,99,189,279], [], [], [], [-1]],
@@ -405,7 +461,6 @@ def get_degenerate_angles(): #+/- 10 degrees, -1 means all angles
         print("number of pcls in new train_wo_degeneracy_array", len(train_wo_degeneracy_array))
         print("number of pcls in new val_wo_degeneracy_array", len(val_wo_degeneracy_array))
         print("number of pcls in new test_wo_degeneracy_array", len(test_wo_degeneracy_array))
-
         np.save(train_split_new_filename, np.array(train_wo_degeneracy_array))
         np.save(val_split_new_filename, np.array(val_wo_degeneracy_array))
         np.save(test_split_new_filename, np.array(test_wo_degeneracy_array))
@@ -440,7 +495,7 @@ def do_data_augmentation(pcd_filepath, filename, percentage_points_to_remove, nu
 
 if __name__=="__main__":
     # get_degenerate_angles()
-    target_object = "001_chips_can"#"021_bleach_cleanser" #"019_pitcher_base"#"035_power_drill"	# Full name of the target object.
+    # target_object = "001_chips_can"#"021_bleach_cleanser" #"019_pitcher_base"#"035_power_drill"	# Full name of the target object.
     # for target_object in ["007_tuna_fish_can", "008_pudding_box", "009_gelatin_box", "010_potted_meat_can", "011_banana"]:
     # for target_object in ["024_bowl", "036_wood_block", "040_large_marker", "051_large_clamp", "052_extra_large_clamp", "061_foam_brick"]:
     # for target_object in ["004_sugar_box", "005_tomato_soup_can", "006_mustard_bottle"]:
@@ -450,7 +505,7 @@ if __name__=="__main__":
     #                       "011_banana", "019_pitcher_base", "021_bleach_cleanser", \
     #                       "035_power_drill", "036_wood_block", "037_scissors", \
     #                       "051_large_clamp", "052_extra_large_clamp", "061_foam_brick"]:
-    for target_object in ["009_gelatin_box"]: #fix the primes
+    # for target_object in ["021_bleach_cleanser"]: #fix the primes
 
         # mesh = load_mesh(target_object, viz=True)
         # points = mesh.vertices
@@ -471,7 +526,7 @@ if __name__=="__main__":
 
         ### making train/val/testing splits:
         # pcd_filepath = os.path.join(ycb_data_folder + target_object, "clouds", "largest_cluster")
-
+        #
         # saved_point_clouds = []
         # for filename in os.listdir(pcd_filepath):
         #     if filename in ["train_split.npy", "val_split.npy", "test_split.npy"]:
@@ -495,31 +550,56 @@ if __name__=="__main__":
         # for obj in ["019_pitcher_base", "021_bleach_cleanser"]:
         #     viz_and_save_depth_pc(obj, 'test')
 
-        ### for data augmentation
-        print("target_object", target_object)
-        pcd_filepath = os.path.join(ycb_data_folder + target_object, "clouds", "largest_cluster")
-        for filename in os.listdir(pcd_filepath):
-            do_data_augmentation(pcd_filepath, filename, percentage_points_to_remove=.1)
+        # ### for data augmentation
+        # print("target_object", target_object)
+        # pcd_filepath = os.path.join(ycb_data_folder + target_object, "clouds", "largest_cluster")
+        # for filename in os.listdir(pcd_filepath):
+        #     do_data_augmentation(pcd_filepath, filename, percentage_points_to_remove=.1)
+        #
+        # ### making train/val/testing splits for data augmented dataset:
+        # pcd_augmented_filepath = os.path.join(ycb_data_folder + target_object, "clouds", "data_augmentation")
+        # saved_point_clouds = []
+        # for filename in os.listdir(pcd_augmented_filepath):
+        #     if filename in ["train_split.npy", "val_split.npy", "test_split.npy"]:
+        #         continue
+        #     saved_point_clouds.append(filename)
+        # random.shuffle(saved_point_clouds)
+        # num_test = int(.1 * len(saved_point_clouds))
+        # num_val = num_test
+        # num_train = len(saved_point_clouds) - num_test - num_val
+        #
+        # train_split = saved_point_clouds[:num_train]
+        # val_split = saved_point_clouds[num_train:num_train+num_val]
+        # test_split = saved_point_clouds[num_train+num_val:]
+        # #save splits in npy
+        # split_path = os.path.join(ycb_data_folder + target_object, "clouds", "data_augmentation")
+        # np.save(split_path + '/train_split.npy', train_split)
+        # np.save(split_path + '/val_split.npy', val_split)
+        # np.save(split_path + '/test_split.npy', test_split)
+    mixed_dataset_filepath = os.path.join(ycb_data_folder + "/mixed/")
+    saved_training_point_clouds = []
+    saved_validation_point_clouds = []
 
-        ### making train/val/testing splits for data augmented dataset:
-        pcd_augmented_filepath = os.path.join(ycb_data_folder + target_object, "clouds", "data_augmentation")
-        saved_point_clouds = []
-        for filename in os.listdir(pcd_augmented_filepath):
-            if filename in ["train_split.npy", "val_split.npy", "test_split.npy"]:
-                continue
-            saved_point_clouds.append(filename)
-        random.shuffle(saved_point_clouds)
-        num_test = int(.1 * len(saved_point_clouds))
-        num_val = num_test
-        num_train = len(saved_point_clouds) - num_test - num_val
+    for target_object in ["002_master_chef_can", "006_mustard_bottle", "037_scissors", "052_extra_large_clamp", "011_banana"]:
+        # ### making train/val/testing splits for MIXED data augmented dataset:
+        pcd_augmented_filepath = os.path.join(ycb_data_folder + target_object, "clouds", "data_augmentation/")
 
-        train_split = saved_point_clouds[:num_train]
-        val_split = saved_point_clouds[num_train:num_train+num_val]
-        test_split = saved_point_clouds[num_train+num_val:]
-        #save splits in npy
-        split_path = os.path.join(ycb_data_folder + target_object, "clouds", "data_augmentation")
-        np.save(split_path + '/train_split.npy', train_split)
-        np.save(split_path + '/val_split.npy', val_split)
-        np.save(split_path + '/test_split.npy', test_split)
+        train_split_filenames = np.load(pcd_augmented_filepath + 'train_split.npy')
+        train_random_subset = np.random.choice(train_split_filenames, size=1000, replace=False)
+        for filename in train_random_subset:
+            saved_training_point_clouds.append(os.path.join(target_object, filename))
+        val_split_filenames = np.load(pcd_augmented_filepath + 'val_split.npy')
+        val_random_subset = np.random.choice(train_split_filenames, size=50, replace=False)
+        for filename in val_random_subset:
+            saved_validation_point_clouds.append(os.path.join(target_object, filename))
 
+    # at this point, 1000 of each model from it's training/val split will be in saved_point_cloud
+    print("number of point clouds in saved_training_point_clouds", len(saved_training_point_clouds))
+    print(saved_training_point_clouds[0])
+    print("number of point clouds in saved_val_point_clouds", len(saved_validation_point_clouds))
+    print(saved_validation_point_clouds[0])
+
+    split_path = os.path.join(mixed_dataset_filepath)
+    np.save(split_path + '/train_split.npy', saved_training_point_clouds)
+    np.save(split_path + '/val_split.npy', saved_validation_point_clouds)
 

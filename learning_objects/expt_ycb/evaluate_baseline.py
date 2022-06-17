@@ -38,11 +38,11 @@ from learning_objects.expt_self_supervised_correction.evaluation_metrics import 
 
 from learning_objects.expt_ycb.supervised_training import train_with_supervision
 
-SYMMETRIC_MODEL_IDS = ["001_chips_can", "002_master_chef_can", "004_sugar_box", \
-                       "005_tomato_soup_can", "006_mustard_bottle", "007_tuna_fish_can", "008_pudding_box" \
-                       "009_gelatin_box", "010_potted_meat_can", "036_wood_block", "040_large_marker", \
-                       "051_large_clamp", "052_extra_large_clamp", "061_foam_brick"]
-
+#SYMMETRIC_MODEL_IDS = ["001_chips_can", "002_master_chef_can", "004_sugar_box", \
+#                       "005_tomato_soup_can", "006_mustard_bottle", "007_tuna_fish_can", "008_pudding_box" \
+#                       "009_gelatin_box", "010_potted_meat_can", "036_wood_block", "040_large_marker", \
+#                       "051_large_clamp", "052_extra_large_clamp", "061_foam_brick"]
+#
 # Train
 def train_detector(hyper_param, detector_type='point_transformer', model_id="019_pitcher_base"):
     """
@@ -76,10 +76,7 @@ def train_detector(hyper_param, detector_type='point_transformer', model_id="019
     momentum_sgd = hyper_param['baseline_momentum_sgd']
 
     # object symmetry
-    if model_id in SYMMETRIC_MODEL_IDS:
-        hyper_param["is_symmetric"] = True
-    else:
-        hyper_param["is_symmetric"] = False
+    hyper_param["is_symmetric"] = False
 
     # real dataset:
     train_batch_size = hyper_param['self_supervised_train_batch_size'][model_id]
@@ -234,8 +231,10 @@ def visualize_detector(hyper_param, detector_type, model_id,
     eval_batch_size = hyper_param['eval_batch_size'][model_id]
     eval_dataset = DepthYCB(model_id=model_id,
                             split='test',
-                            only_load_nondegenerate_pcds= False,
+                            only_load_nondegenerate_pcds= hyper_param['only_load_nondegenerate_pcds'],
                             num_of_points=hyper_param['num_of_points_to_sample'])
+    eval_batch_size = len(eval_dataset) if hyper_param['only_load_nondegenerate_pcds'] else hyper_param['eval_batch_size'][model_id]
+
     eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=eval_batch_size, shuffle=False)
 
 
@@ -271,7 +270,7 @@ def visualize_detector(hyper_param, detector_type, model_id,
         dataset_batch_size = 1
         dataset = DepthYCB(model_id=model_id,
                             split='test',
-                            only_load_nondegenerate_pcds= False,
+                            only_load_nondegenerate_pcds= hyper_param['only_load_nondegenerate_pcds'],
                             num_of_points=hyper_param['num_of_points_to_sample'])
         loader = torch.utils.data.DataLoader(dataset, batch_size=dataset_batch_size, shuffle=False)
         print(">>" * 40)
@@ -331,10 +330,7 @@ def visualize_kp_detectors(detector_type, model_ids, only_models=None,
             hyper_param = hyper_param[detector_type]
             hyper_param['epsilon'] = hyper_param['epsilon'][model_id]
 
-            if model_id in SYMMETRIC_MODEL_IDS:
-                hyper_param["is_symmetric"] = True
-            else:
-                hyper_param["is_symmetric"] = False
+            hyper_param["is_symmetric"] = False
 
             print(">>"*40)
             print("Analyzing Baseline for Object: ", model_id)
@@ -370,7 +366,7 @@ if __name__ == "__main__":
     model_id = args.model_id
     only_models = [model_id]
 
-    stream = open("class_model_ids.yml", "r")
+    stream = open("model_ids.yml", "r")
     model_ids = yaml.load(stream=stream, Loader=yaml.Loader)['model_ids']
 
     # train_kp_detectors(detector_type=detector_type, model_ids=model_ids, only_models=only_models)

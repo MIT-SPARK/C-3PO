@@ -9,7 +9,6 @@ sys.path.append('../..')
 def is_close(keypoints, pcd, threshold=0.015):
     pcd = pcd.unsqueeze(0)
     keypoints = keypoints.unsqueeze(0)
-    # temp_expt_1_viz(pcd, keypoints)
     closest_dist, _, _ = ops.knn_points(torch.transpose(keypoints, -1, -2), torch.transpose(pcd, -1, -2), K=1,
                                         return_sorted=False)
     if torch.max(torch.sqrt(closest_dist)) < threshold:

@@ -19,7 +19,6 @@ sys.path.append("../../")
 
 from learning_objects.models.modelgen import ModelFromShape
 from learning_objects.utils.general import pos_tensor_to_o3d
-from learning_objects.datasets.keypointnet import temp_expt_1_viz
 import learning_objects.utils.general as gu
 
 MODEL_TO_KPT_GROUPS = {
@@ -483,7 +482,6 @@ class DepthYCB(torch.utils.data.Dataset):
     def is_close(self, keypoints, pcd, threshold=0.015):
         pcd = pcd.unsqueeze(0)
         keypoints = keypoints.unsqueeze(0)
-        # temp_expt_1_viz(pcd, keypoints)
         closest_dist, _, _ = ops.knn_points(torch.transpose(keypoints, -1, -2), torch.transpose(pcd, -1, -2), K=1,
                                           return_sorted=False)
         if torch.max(torch.sqrt(closest_dist)) < threshold:

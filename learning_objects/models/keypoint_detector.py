@@ -143,7 +143,7 @@ class RegressionKeypoints(nn.Module):
     The output keypoints may not be a subset of the input point cloud.
     This method uses point cloud classification architecture.
     """
-    def __init__(self, N=20, method='point_transformer'):
+    def __init__(self, N=20, method='point_transformer', local_max_pooling=True):
         super().__init__()
         """
         Inputs: 
@@ -153,9 +153,10 @@ class RegressionKeypoints(nn.Module):
         """
         self.N = N
         self.method = method
+        self.local_max_pooling = local_max_pooling
 
         if self.method == 'point_transformer':
-            self.keypoint = PointTransformerCls(output_dim=3*self.N)
+            self.keypoint = PointTransformerCls(output_dim=3*self.N, local_max_pooling=self.local_max_pooling)
         elif self.method == 'pointnet':
             self.keypoint = PointNetCls(k=3*self.N)
         else:

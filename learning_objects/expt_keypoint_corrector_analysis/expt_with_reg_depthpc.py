@@ -12,7 +12,7 @@ import os
 import sys
 sys.path.append("../../")
 
-from learning_objects.datasets.keypointnet import SE3PointCloud, visualize_torch_model_n_keypoints, DepthPointCloud2, DepthPC, temp_expt_1_viz
+from learning_objects.datasets.keypointnet import SE3PointCloud, visualize_torch_model_n_keypoints, DepthPointCloud2, DepthPC
 from learning_objects.datasets.keypointnet import PCD_FOLDER_NAME as KEYPOINTNET_PCD_FOLDER_NAME, \
     CLASS_NAME as KEYPOINTNET_ID2NAME, \
     CLASS_ID as KEYPOINTNET_NAME2ID
@@ -22,7 +22,7 @@ from learning_objects.models.point_set_registration import PointSetRegistration 
 from learning_objects.models.certifiability import certifiability
 
 from learning_objects.utils.ddn.node import ParamDeclarativeFunction
-from learning_objects.utils.general import display_two_pcs
+from learning_objects.utils.general import display_two_pcs, temp_expt_1_viz
 
 from learning_objects.expt_keypoint_corrector_analysis.evaluation_metrics import chamfer_metric
 
@@ -487,7 +487,7 @@ def run_experiments_on(class_id, model_id, kp_noise_type, kp_noise_fra=0.2, only
         fp.close()
 
 
-def choose_random_models(num_models=10, pcd_path = KEYPOINTNET_PCD_FOLDER_NAME):
+def choose_models(num_models=10, pcd_path = KEYPOINTNET_PCD_FOLDER_NAME, use_random=False):
     """
     For each class_id in pcd_path, choose num_models models randomly from each class.
     :param num_models: the number of models to sample from each class_id category
@@ -495,19 +495,12 @@ def choose_random_models(num_models=10, pcd_path = KEYPOINTNET_PCD_FOLDER_NAME):
     """
     class_id_to_model_id_samples = {}
     folder_contents = os.listdir(pcd_path)
-    # ###
-    # # hardcoded:
-    # return {'03001627': ['1cc6f2ed3d684fa245f213b8994b4a04'],
-    #         '02818832': ['7c8eb4ab1f2c8bfa2fb46fb8b9b1ac9f']
-    #         }
-    # ###
-    for class_id in folder_contents:
-        return {'02876657': ['41a2005b595ae783be1868124d5ddbcb']} #bottle
-        # hardcoded:
+    # hardcoded:
+    if not use_random:
         return {'02691156': ['3db61220251b3c9de719b5362fe06bbb'],
                 '02808440': ['90b6e958b359c1592ad490d4d7fae486'],
                 '02818832': ['7c8eb4ab1f2c8bfa2fb46fb8b9b1ac9f'],
-                '02876657': ['41a2005b595ae783be1868124d5ddbcb'], #bottle
+                '02876657': ['41a2005b595ae783be1868124d5ddbcb'],  # bottle
                 '02954340': ['3dec0d851cba045fbf444790f25ea3db'],
                 '02958343': ['ad45b2d40c7801ef2074a73831d8a3a2'],
                 '03001627': ['1cc6f2ed3d684fa245f213b8994b4a04'],
@@ -521,6 +514,7 @@ def choose_random_models(num_models=10, pcd_path = KEYPOINTNET_PCD_FOLDER_NAME):
                 '04379243': ['3f5daa8fe93b68fa87e2d08958d6900c'],
                 '04530566': ['5c54100c798dd681bfeb646a8eadb57']
                 }
+    for class_id in folder_contents:
         models = os.listdir(pcd_path + str(class_id) + '/')
         #choose random num_models from models without replacement
         model_id_samples = random.sample(models, num_models)
@@ -529,18 +523,18 @@ def choose_random_models(num_models=10, pcd_path = KEYPOINTNET_PCD_FOLDER_NAME):
     return class_id_to_model_id_samples
 
 def run_full_experiment(kp_noise_fra=0.8, do_certification=False):
-    class_id_to_model_id_samples = choose_random_models(num_models=1)
+    class_id_to_model_id_samples = choose_models(num_models=1, use_random=False)
     for class_id, model_id_samples in class_id_to_model_id_samples.items():
         for model_id in model_id_samples:
             run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='sporadic', kp_noise_fra=kp_noise_fra, do_certification=do_certification)
 
 
 if __name__ == "__main__":
-    # run_full_experiment()
+    run_full_experiment()
 
     # # model parameters
-    class_id = "03001627"  # chair
-    model_id = "1cc6f2ed3d684fa245f213b8994b4a04"  # a particular chair model
+    # class_id = "03001627"  # chair
+    # model_id = "1cc6f2ed3d684fa245f213b8994b4a04"  # a particular chair model
 
     # # # model parameters
     # class_id = "02876657"
@@ -549,18 +543,10 @@ if __name__ == "__main__":
     # run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='sporadic', kp_noise_fra=0.2)
     # run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='sporadic', kp_noise_fra=0.8)
     #
-    run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='uniform', kp_noise_fra=0.8, only_visualize=True)
+    # run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='uniform', kp_noise_fra=0.8, only_visualize=True)
 
     # run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='sporadic', kp_noise_fra=0.2,
     #                    only_visualize=True)
     # run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='sporadic', kp_noise_fra=0.8,
     #                    only_visualize=True)
     # run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='uniform')
-
-    # model parameters
-    # class_id = "04379243"
-    # model_id = "1c814f977bcda5b79a87002a4eeaf610"
-    # run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='sporadic', kp_noise_fra=0.2,
-    #                    only_visualize=True)
-    # run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='sporadic', kp_noise_fra=0.8,
-    #                    only_visualize=True)

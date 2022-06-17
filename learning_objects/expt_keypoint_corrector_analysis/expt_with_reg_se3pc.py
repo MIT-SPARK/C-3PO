@@ -7,6 +7,7 @@ from datetime import datetime
 import pickle
 import csv
 import random
+import open3d as o3d
 
 import os
 import sys
@@ -20,7 +21,8 @@ from learning_objects.models.keypoint_corrector import kp_corrector_reg
 from learning_objects.models.point_set_registration import point_set_registration, PointSetRegistration
 from learning_objects.models.certifiability import certifiability
 
-from learning_objects.utils.general import display_two_pcs
+from learning_objects.utils.general import display_two_pcs, pos_tensor_to_o3d, update_pos_tensor_to_o3d, \
+    update_pos_tensor_to_keypoint_markers
 
 from learning_objects.utils.ddn.node import ParamDeclarativeFunction
 
@@ -126,8 +128,13 @@ class experiment():
     def __init__(self, class_id, model_id, num_points, num_iterations, kp_noise_var_range,
                  kp_noise_type='sporadic', kp_noise_fra=0.2,
                  certify=certifiability(epsilon=0.8, delta=0.5, radius=0.3),
-                 theta=50.0, kappa=10.0, device='cpu'):
+                 theta=50.0, kappa=10.0, device='cpu', animation=True):
         super().__init__()
+
+        if animation:
+            o3d.utility.set_verbosity_level(o3d.utility.VerbosityLevel.Debug)
+            self.vis = o3d.visualization.Visualizer()
+            self.vis.create_window()
 
         # model parameters
         self.class_id = class_id
@@ -169,9 +176,13 @@ class experiment():
         # defining the point set registration
         self.point_set_registration = PointSetRegistration(source_points=self.model_keypoints)
         # defining the keypoint corrector
-        corrector_node = kp_corrector_reg(cad_models=self.cad_models, model_keypoints=self.model_keypoints,
-                                           theta=self.theta, kappa=self.kappa)
-        self.corrector = ParamDeclarativeFunction(problem=corrector_node)
+        if not animation:
+            self.corrector_node = kp_corrector_reg(cad_models=self.cad_models, model_keypoints=self.model_keypoints,
+                                               theta=self.theta, kappa=self.kappa)
+        else:
+            self.corrector_node = kp_corrector_reg(cad_models=self.cad_models, model_keypoints=self.model_keypoints,
+                                              theta=self.theta, kappa=self.kappa, animation_update=True, vis=self.vis)
+        self.corrector = ParamDeclarativeFunction(problem=self.corrector_node)
 
         # setting up experiment parameters and data for saving
         self.data = dict()
@@ -189,8 +200,39 @@ class experiment():
         self.parameters['kappa'] = self.kappa
         self.parameters['name'] = self.name
 
+    def init_animation_elements(self, vis, input_point_cloud, detected_keypoints, target_keypoints):
+        input_point_cloud_viz = input_point_cloud[0, ...].to('cpu')
+        input_point_cloud_viz = pos_tensor_to_o3d(input_point_cloud_viz)
+        input_point_cloud_viz.paint_uniform_color([0.7, 0.7, 0.7])
 
-    def _single_loop(self, kp_noise_var, visualization=False):
+        detected_keypoints_viz = detected_keypoints[0, ...].to('cpu')
+        detected_keypoints_viz = detected_keypoints_viz.numpy().transpose()
+        keypoint_markers = []
+        for xyz in detected_keypoints_viz:
+            detected_kpt_mesh = o3d.geometry.TriangleMesh.create_sphere(radius=.02)
+            detected_kpt_mesh.translate(xyz)
+            detected_kpt_mesh.paint_uniform_color([0, 0, 0.8])
+            keypoint_markers.append(detected_kpt_mesh)
+            vis.add_geometry(detected_kpt_mesh)
+        detected_keypoints_viz = keypoint_markers
+
+        corrected_keypoints_viz = (target_keypoints)[0, ...].to('cpu')
+        corrected_keypoints_viz = corrected_keypoints_viz.numpy().transpose()
+        corrected_keypoint_markers = []
+        for xyz in corrected_keypoints_viz:
+            kpt_mesh = o3d.geometry.TriangleMesh.create_sphere(radius=.02)
+            kpt_mesh.translate(xyz)
+            kpt_mesh.paint_uniform_color([0.8, 0, 0.0])
+            corrected_keypoint_markers.append(kpt_mesh)
+            vis.add_geometry(kpt_mesh)
+        corrected_keypoints_viz = corrected_keypoint_markers
+
+        vis.add_geometry(input_point_cloud_viz)
+        vis.run()
+
+        return input_point_cloud_viz, detected_keypoints_viz, corrected_keypoints_viz
+
+    def _single_loop(self, kp_noise_var, visualization=False, animation=False):
 
         # experiment data
         rotation_err_naive = torch.zeros(self.num_iterations, 1).to(device=self.device_)
@@ -229,7 +271,6 @@ class experiment():
                                                        fra=self.kp_noise_fra, var=kp_noise_var*self.diameter)
             if visualization:
                 visualize_torch_model_n_keypoints(cad_models=input_point_cloud, model_keypoints=detected_keypoints)
-
             # estimate model: using point set registration on perturbed keypoints
             R_naive, t_naive = self.point_set_registration.forward(target_points=detected_keypoints)
             model_estimate_naive = R_naive @ self.cad_models + t_naive
@@ -237,9 +278,17 @@ class experiment():
             if visualization:
                 print("Displaying input and naive model estimate: ")
                 display_two_pcs(pc1=input_point_cloud.squeeze(0), pc2=model_estimate_naive.squeeze(0))
+            if animation:
+                print("ANIMATION IS TRUE")
+                _, _, target_keypoint_markers = self.init_animation_elements(self.vis, input_point_cloud, detected_keypoints, detected_keypoints)
+                self.corrector_node.set_markers(target_keypoint_markers)
+                print("FINISHED INITIALIZING ANIMATION ELEMENTS")
 
             # estimate model: using the keypoint corrector
+            print("ABOUT TO ENTER CORRECTOR")
             correction = self.corrector.forward(detected_keypoints, input_point_cloud)
+            print("EXITED CORRECTOR")
+
             # correction = torch.zeros_like(correction)
             R, t = self.point_set_registration.forward(target_points=detected_keypoints + correction)
             model_estimate = R @ self.cad_models + t
@@ -283,6 +332,8 @@ class experiment():
             # certi_corrector[i] = certi
             certi_corrector = certi
 
+            if animation:
+                self.vis.destroy_window()
             if visualization and i >= 5:
                 break
 
@@ -411,12 +462,13 @@ def run_experiments_on(class_id, model_id, kp_noise_type, kp_noise_fra=0.2, only
     expt = experiment(class_id=class_id, model_id=model_id, num_points=num_points,
                       num_iterations=num_iterations, kp_noise_var_range=kp_noise_var_range,
                       kp_noise_type=kp_noise_type, kp_noise_fra=kp_noise_fra,
-                      certify=certify, theta=theta, kappa=kappa, device=device)
+                      certify=certify, theta=theta, kappa=kappa, device=device, animation=False)
+
 
     if only_visualize:
         while True:
             kp_noise_var = float(input('Enter noise variance parameter: '))
-            expt._single_loop(kp_noise_var=kp_noise_var, visualization=True)
+            expt._single_loop(kp_noise_var=kp_noise_var, visualization=False, animation=False)
             flag = input('Do you want to try another variance? (y/n): ')
             if flag == 'n':
                 break
@@ -487,8 +539,14 @@ if __name__ == "__main__":
     # run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='uniform')
 
     # model parameters
+    #table
     # class_id = "04379243"
     # model_id = "1c814f977bcda5b79a87002a4eeaf610"
+    # class_id = "03001627"  # chair
+    # model_id = "1e3fba4500d20bb49b9f2eb77f5e247e"  # a particular chair model
+    #skateboard
+    # class_id = '04225987'
+    # model_id = '98222a1e5f59f2098745e78dbc45802e'
     # run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='sporadic', kp_noise_fra=0.2,
     #                    only_visualize=True)
     # run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='sporadic', kp_noise_fra=0.8,

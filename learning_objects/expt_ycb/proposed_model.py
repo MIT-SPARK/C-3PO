@@ -172,7 +172,7 @@ class ProposedRegressionModel(nn.Module):
         predicted_pc, corrected_keypoints, rotation, translation    if correction_flag=True
     """
 
-    def __init__(self, model_id, model_keypoints, cad_models, keypoint_detector=None):
+    def __init__(self, model_id, model_keypoints, cad_models, keypoint_detector=None, local_max_pooling=True):
         super().__init__()
         """ 
         model_keypoints     : torch.tensor of shape (K, 3, N)
@@ -195,6 +195,8 @@ class ProposedRegressionModel(nn.Module):
         self.N = self.model_keypoints.shape[-1]  # (1, 1)
         self.K = self.model_keypoints.shape[0]  # (1, 1)
 
+        self.local_max_pooling = local_max_pooling
+
         # Keypoint Detector
         if keypoint_detector == None:
             self.keypoint_detector = RegressionKeypoints(N=self.N, method='pointnet')
@@ -203,7 +205,7 @@ class ProposedRegressionModel(nn.Module):
             self.keypoint_detector = RegressionKeypoints(N=self.N, method='pointnet')
 
         elif keypoint_detector == 'point_transformer':
-            self.keypoint_detector = RegressionKeypoints(N=self.N, method='point_transformer')
+            self.keypoint_detector = RegressionKeypoints(N=self.N, method='point_transformer', local_max_pooling=self.local_max_pooling)
 
         else:
             self.keypoint_detector = keypoint_detector(model_name=model_name, N=self.N)
@@ -212,7 +214,6 @@ class ProposedRegressionModel(nn.Module):
         self.point_set_registration = PointSetRegistration(source_points=self.model_keypoints)
 
         # Corrector
-        # self.corrector = kp_corrector_reg(cad_models=self.cad_models, model_keypoints=self.model_keypoints)
         corrector_node = kp_corrector_reg(cad_models=self.cad_models, model_keypoints=self.model_keypoints)
         self.corrector = ParamDeclarativeFunction(problem=corrector_node)
 

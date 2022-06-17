@@ -159,11 +159,27 @@ def certification(data, epsilon, delta, num_iterations=100, full_batch=False, sy
 
 if __name__ == '__main__':
     use_adds_metric = True
-    is_object_symmetric = True
+    is_object_symmetric = False
     # file_names = ["./expt_with_reg_depthpc/02958343/ad45b2d40c7801ef2074a73831d8a3a2/20220218_021749_experiment.pickle"]
     # file_names = ["./expt_with_reg_depthpc/03467517/5df08ba7af60e7bfe72db292d4e13056/20220218_041231_experiment.pickle"]
     file_names = ["./expt_with_reg_depthpc/02876657/41a2005b595ae783be1868124d5ddbcb_wchamfer/20220227_170722_experiment.pickle"]
-    # file_names = ["./expt_with_reg_depthpc/03001627/1cc6f2ed3d684fa245f213b8994b4a04/20220218_032039_experiment.pickle"]
+    # file_names = ["./expt_with_reg_depthpc/02691156/3db61220251b3c9de719b5362fe06bbb_wchamfer/20220610_185655_experiment.pickle",
+    #               "./expt_with_reg_depthpc/02808440/90b6e958b359c1592ad490d4d7fae486_wchamfer/20220610_194647_experiment.pickle",
+    #               "./expt_with_reg_depthpc/02818832/7c8eb4ab1f2c8bfa2fb46fb8b9b1ac9f_wchamfer/20220610_203643_experiment.pickle",
+    #               "./expt_with_reg_depthpc/02954340/3dec0d851cba045fbf444790f25ea3db_wchamfer/20220610_212958_experiment.pickle",
+    #               "./expt_with_reg_depthpc/02958343/ad45b2d40c7801ef2074a73831d8a3a2_wchamfer/20220610_222513_experiment.pickle",
+    #               "./expt_with_reg_depthpc/03001627/1cc6f2ed3d684fa245f213b8994b4a04_wchamfer/20220610_232015_experiment.pickle",
+    #               "./expt_with_reg_depthpc/03467517/5df08ba7af60e7bfe72db292d4e13056_wchamfer/20220611_001510_experiment.pickle",
+    #               "./expt_with_reg_depthpc/03513137/3621cf047be0d1ae52fafb0cab311e6a_wchamfer/20220611_010956_experiment.pickle",
+    #               "./expt_with_reg_depthpc/03624134/819e16fd120732f4609e2d916fa0da27_wchamfer/20220611_020429_experiment.pickle",
+    #               "./expt_with_reg_depthpc/03642806/519e98268bee56dddbb1de10c9529bf7_wchamfer/20220611_025907_experiment.pickle",
+    #               "./expt_with_reg_depthpc/03790512/481f7a57a12517e0fe1b9fad6c90c7bf_wchamfer/20220611_035351_experiment.pickle",
+    #               "./expt_with_reg_depthpc/03797390/f3a7f8198cc50c225f5e789acd4d1122_wchamfer/20220611_044817_experiment.pickle",
+    #               "./expt_with_reg_depthpc/04225987/98222a1e5f59f2098745e78dbc45802e_wchamfer/20220611_054239_experiment.pickle",
+    #               "./expt_with_reg_depthpc/04379243/3f5daa8fe93b68fa87e2d08958d6900c_wchamfer/20220611_063732_experiment.pickle",
+    #               "./expt_with_reg_depthpc/04530566/5c54100c798dd681bfeb646a8eadb57_wchamfer/20220611_073255_experiment.pickle",
+    #
+    #               ]
 
     for name in file_names:
 
@@ -175,7 +191,6 @@ if __name__ == '__main__':
             for noise_idx in range(len(data['chamfer_pose_naive_to_gt_pose_list'])):
                 data['chamfer_pose_naive_to_gt_pose_list'][noise_idx] = np.asarray(data['chamfer_pose_naive_to_gt_pose_list'][noise_idx][0].squeeze().to('cpu'))
                 data['chamfer_pose_corrected_to_gt_pose_list'][noise_idx] = np.asarray(data['chamfer_pose_corrected_to_gt_pose_list'][noise_idx][0].squeeze().to('cpu'))
-            print(torch.Tensor(np.array(data['chamfer_pose_naive_to_gt_pose_list'])))
 
         print("-" * 80)
 
@@ -186,7 +201,14 @@ if __name__ == '__main__':
         # certi_naive = data['certi_naive'].to('cpu')
         # certi_corrector = data['certi_corrector'].to('cpu')
         # CALCULATE DYNAMICALLY
-        certi_naive, certi_corrector = certification(data, epsilon=.99, delta=.7, full_batch=True, symmetry=is_object_symmetric)
+        epsilon = .99
+        delta = .7
+        fig_save_folder = '/'.join(name.split('/')[:-1] + ['eps' + str(epsilon)[2:]])
+        if not os.path.exists(fig_save_folder):
+            os.makedirs(fig_save_folder)
+        fig_save_prefix = fig_save_folder + '/' + name.split('/')[-1]
+        print(fig_save_prefix)
+        certi_naive, certi_corrector = certification(data, epsilon=epsilon, delta=delta, full_batch=True, symmetry=is_object_symmetric)
         certi_naive = certi_naive.to('cpu')
         certi_corrector = certi_corrector.to('cpu')
 
@@ -263,6 +285,7 @@ if __name__ == '__main__':
 
         # plotting chamfer metric
         if use_adds_metric:
+
             fig = plt.figure()
             plt.errorbar(x=kp_noise_var_range, y=chamfer_metric_naive_mean, yerr=chamfer_metric_naive_var,
                          fmt='-x', color='black', ecolor='gray', elinewidth=1, capsize=3, label='naive')
@@ -293,7 +316,7 @@ if __name__ == '__main__':
             plt.show()
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
             rand_string = generate_filename()
-            filename = name[:-7] + '_chamfer_metric_plot_' + timestamp + '_' + rand_string + '.jpg'
+            filename = fig_save_prefix[:-7] + '_chamfer_metric_plot_' + timestamp + '_' + rand_string + '.jpg'
             fig.savefig(filename)
             plt.close(fig)
 
@@ -327,7 +350,7 @@ if __name__ == '__main__':
         plt.show()
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         rand_string = generate_filename()
-        filename = name[:-7] + '_rotation_error_plot_' + timestamp + '_' + rand_string +'.jpg'
+        filename = fig_save_prefix[:-7] + '_rotation_error_plot_' + timestamp + '_' + rand_string +'.jpg'
         fig.savefig(filename)
         plt.close(fig)
 
@@ -364,7 +387,7 @@ if __name__ == '__main__':
         plt.show()
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         rand_string = generate_filename()
-        filename = name[:-7] + '_translation_error_plot_' + timestamp + '_' + rand_string + '.jpg'
+        filename = fig_save_prefix[:-7] + '_translation_error_plot_' + timestamp + '_' + rand_string + '.jpg'
         fig.savefig(filename)
         plt.close(fig)
 
@@ -393,7 +416,7 @@ if __name__ == '__main__':
         plt.show()
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         rand_string = generate_filename()
-        filename = name[:-7] + '_fraction_not_certifiable_plot_' + timestamp + '_' + rand_string + '.jpg'
+        filename = fig_save_prefix[:-7] + '_fraction_not_certifiable_plot_' + timestamp + '_' + rand_string + '.jpg'
         fig.savefig(filename)
         plt.close(fig)
 

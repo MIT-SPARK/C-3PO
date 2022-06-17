@@ -206,7 +206,7 @@ def train_detector(hyper_param, detector_type='pointnet', model_id="019_pitcher_
 
     # model
     model = ProposedModel(model_id=model_id, model_keypoints=model_keypoints, cad_models=cad_models,
-                          keypoint_detector=detector_type).to(device)
+                          keypoint_detector=detector_type, local_max_pooling=False).to(device)
 
     num_parameters = sum(param.numel() for param in model.parameters() if param.requires_grad)
     print("Number of trainable parameters: ", num_parameters)
@@ -301,10 +301,8 @@ def visualize_detector(hyper_param,
 
 
     # model
-    from learning_objects.expt_ycb.proposed_model import ProposedRegressionModel as ProposedModel
-
     model = ProposedModel(model_id=model_id, model_keypoints=model_keypoints, cad_models=cad_models,
-                          keypoint_detector=detector_type).to(device)
+                          keypoint_detector=detector_type, local_max_pooling=False).to(device)
 
     if not os.path.isfile(best_model_save_file):
         print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")

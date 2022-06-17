@@ -350,13 +350,13 @@ def visual_test(test_loader, model, hyper_param, correction_flag=False, device=N
         kp = keypoints_target.clone().detach().to('cpu')
         kp_p = predicted_keypoints.clone().detach().to('cpu')
         print("DISPLAY: INPUT PC")
-        display_results(input_point_cloud=pc, detected_keypoints=kp, target_point_cloud=pc,
-                        target_keypoints=None)
+        display_results(input_point_cloud=pc, detected_keypoints=None, target_point_cloud=None,
+                        target_keypoints=kp)
         print("DISPLAY: INPUT AND PREDICTED PC")
         display_results(input_point_cloud=pc, detected_keypoints=kp_p, target_point_cloud=pc_p,
                         target_keypoints=kp)
         print("DISPLAY: TRUE AND PREDICTED PC")
-        display_results(input_point_cloud=pc_p, detected_keypoints=kp_p, target_point_cloud=pc_t,
+        display_results(input_point_cloud=pc_t, detected_keypoints=kp_p, target_point_cloud=pc_p,
                         target_keypoints=kp)
 
         del pc, pc_p, kp, kp_p, pc_t

@@ -23,7 +23,7 @@ from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPointCloud
 
 from learning_objects.utils.general import pos_tensor_to_o3d, display_two_pcs
 from learning_objects.utils.general import chamfer_distance, chamfer_half_distance, rotation_error, \
-    translation_error, shape_error
+    translation_error, shape_error, update_pos_tensor_to_keypoint_markers
 
 # from learning_objects.models.pace_ddn import PACEbp
 # from learning_objects.models.pace_altern_ddn import PACEbp
@@ -169,7 +169,7 @@ def keypoint_perturbation(keypoints_true, var=0.8, type='uniform', fra=0.2):
 
 
 class kp_corrector_reg():
-    def __init__(self, cad_models, model_keypoints, theta=50.0, kappa=10.0, algo='torch'):
+    def __init__(self, cad_models, model_keypoints, theta=50.0, kappa=10.0, algo='torch', animation_update=False, vis=None):
         super().__init__()
         """
         cad_models      : torch.tensor of shape (1, 3, m)
@@ -182,8 +182,15 @@ class kp_corrector_reg():
         self.kappa = kappa
         self.algo = algo
         self.device_ = model_keypoints.device
+        self.animation_update = animation_update
+        self.vis = vis
+
+        self.markers = None
 
         self.point_set_registration_fn = PointSetRegistration(source_points=self.model_keypoints)
+
+    def set_markers(self, markers):
+        self.markers = markers
 
     def objective(self, detected_keypoints, input_point_cloud, correction):
         """
@@ -249,7 +256,6 @@ class kp_corrector_reg():
             correction = self.solve_algo2(detected_keypoints, input_point_cloud)
         else:
             raise NotImplementedError
-
         return correction, None
 
     def solve_algo1(self, detected_keypoints, input_point_cloud, lr=0.1, num_steps=20):
@@ -350,6 +356,9 @@ class kp_corrector_reg():
         while iter < max_iterations:
 
             iter += 1
+            if self.vis is not None and self.animation_update and self.markers is not None:
+                self.markers = update_pos_tensor_to_keypoint_markers(self.vis, detected_keypoints + correction, self.markers)
+                print("ATTEMPTED TO UPDATE VIS")
             obj = obj_
 
             dfdcorrection = _get_objective_jacobian(f, correction)
@@ -491,6 +500,7 @@ class kp_corrector_pace():
         return correction, None
 
     def solve_algo2(self, detected_keypoints, input_point_cloud, lr=0.1, max_iterations=1000, tol=1e-12):
+
         """
         inputs:
         detected_keypoints  : torch.tensor of shape (B, 3, N)

@@ -244,8 +244,14 @@ def evaluate(eval_loader, model, hyper_param, certification=True, degeneracy=Fal
             print("% degenerate & certifiable: ", fra_cert_deg.item())
             print("ADD-S (", int(hyper_param["adds_threshold"] * 100), "%): ", ave_adds_err_cert_deg.item())
             print("ADD-S AUC (", int(hyper_param["adds_auc_threshold"] * 100), "%): ", ave_auc_cert_deg.item())
+    del model
+    if degeneracy:
+        return [ave_adds_err.item(), ave_auc.item(), ave_adds_err_nondeg.item(), ave_auc_nondeg.item(), \
+               fra_cert.item(), ave_adds_err_cert.item(), ave_auc_cert.item(), ave_adds_err_cert_nondeg.item(), \
+               ave_auc_cert_nondeg.item(), ave_adds_err_cert_deg.item(), ave_auc_cert_deg.item(), fra_cert_nondeg.item(), \
+                fra_cert_deg.item()]
 
-    return None
+    return [ave_adds_err.item(), ave_auc.item(), fra_cert.item(), ave_adds_err_cert.item(), ave_auc_cert.item()]
 
 
 def generate_depthpc_eval_data(model_class_ids, param):

@@ -9,7 +9,6 @@ import csv
 import random
 import string
 import numpy as np
-# import open3d as o3d
 # import open3d.visualization.rendering as rendering
 # import matplotlib.pyplot as plt
 
@@ -18,10 +17,12 @@ import torch
 # import torch.nn as nn
 import torch.nn.functional as F
 import open3d as o3d
+import open3d.visualization.gui as gui
+import open3d.visualization.rendering as rendering
 from pytorch3d import ops
 from pytorch3d import transforms
 # from torch_geometric.data import Data
-from time import time
+import time
 
 
 
@@ -38,9 +39,8 @@ def display_two_pcs(pc1, pc2):
     pc1 : torch.tensor of shape (3, n)
     pc2 : torch.tensor of shape (3, m)
     """
-    pc1 = pc1.detach().to('cpu')
-    pc2 = pc2.detach().to('cpu')
-
+    pc1 = pc1.detach()[0, ...].to('cpu')
+    pc2 = pc2.detach()[0, ...].to('cpu')
     object1 = pos_tensor_to_o3d(pos=pc1)
     object2 = pos_tensor_to_o3d(pos=pc2)
 
@@ -340,7 +340,6 @@ def tensor_to_o3d(normals, pos):
 
     return object
 
-
 def pos_tensor_to_o3d(pos, estimate_normals=True):
     """
     inputs:
@@ -358,8 +357,27 @@ def pos_tensor_to_o3d(pos, estimate_normals=True):
 
     return object
 
+def update_pos_tensor_to_o3d(pos, o3d_pcd):
+    pos_o3d = o3d.utility.Vector3dVector(pos.transpose(0, 1).to('cpu').numpy())
+    o3d_pcd.points = pos_o3d
+    return object
 
-def display_results(input_point_cloud, detected_keypoints, target_point_cloud, target_keypoints=None):
+def update_pos_tensor_to_keypoint_markers(vis, keypoints, keypoint_markers):
+
+    keypoints = keypoints[0, ...].to('cpu')
+    keypoints = keypoints.numpy().transpose()
+
+    for i in range(len(keypoint_markers)):
+        keypoint_markers[i].translate(keypoints[i], relative=False)
+        vis.update_geometry(keypoint_markers[i])
+        vis.poll_events()
+        vis.update_renderer()
+    print("FINISHED UPDATING KEYPOINT MARKERS IN CORRECTOR")
+    return keypoint_markers
+
+
+
+def display_results(input_point_cloud, detected_keypoints, target_point_cloud, target_keypoints=None, render_text=False):
     """
     inputs:
     input_point_cloud   :   torch.tensor of shape (B, 3, m)
@@ -373,57 +391,158 @@ def display_results(input_point_cloud, detected_keypoints, target_point_cloud, t
     m = number of points in the input point cloud
     n = number of points in the target point cloud
     """
-    target_keypoints_flag = 1
-    if target_keypoints==None:
-        target_keypoints = detected_keypoints
-        target_keypoints_flag = 0
 
-    # displaying only the first item in the batch
-    input_point_cloud = input_point_cloud[0, ...].to('cpu')
-    detected_keypoints = detected_keypoints[0, ...].to('cpu')
-    target_point_cloud = target_point_cloud[0, ...].to('cpu')
-    target_keypoints = target_keypoints[0, ...].to('cpu')
+    if render_text:
+        gui.Application.instance.initialize()
+        window = gui.Application.instance.create_window("Mesh-Viewer", 1024, 750)
+        scene = gui.SceneWidget()
+        scene.scene = rendering.Open3DScene(window.renderer)
+        window.add_child(scene)
+        # displaying only the first item in the batch
+    if input_point_cloud is not None:
+        input_point_cloud = input_point_cloud[0, ...].to('cpu')
+    if detected_keypoints is not None:
+        detected_keypoints = detected_keypoints[0, ...].to('cpu')
+    if target_point_cloud is not None:
+        target_point_cloud = target_point_cloud[0, ...].to('cpu')
 
-    input_point_cloud = pos_tensor_to_o3d(input_point_cloud)
-    input_point_cloud.paint_uniform_color([0.7, 0.7, 0.7])
+    if detected_keypoints is not None:
+        detected_keypoints = detected_keypoints.numpy().transpose()
+        keypoint_markers = []
+        for xyz in detected_keypoints:
+            kpt_mesh = o3d.geometry.TriangleMesh.create_sphere(radius=.01)
+            kpt_mesh.translate(xyz)
+            kpt_mesh.paint_uniform_color([0, 0.8, 0.0])
+            keypoint_markers.append(kpt_mesh)
+        detected_keypoints = keypoint_markers
 
-    # detected_keypoints = pos_tensor_to_o3d(detected_keypoints)
-    # detected_keypoints.paint_uniform_color([0.8, 0.0, 0.0])
+    if target_keypoints is not None:
+        target_keypoints = target_keypoints[0, ...].to('cpu')
+        target_keypoints = target_keypoints.numpy().transpose()
+        keypoint_markers = []
+        for xyz_idx in range(len(target_keypoints)):
+            kpt_mesh = o3d.geometry.TriangleMesh.create_sphere(radius=.01)
+            kpt_mesh.translate(target_keypoints[xyz_idx])
+            kpt_mesh.paint_uniform_color([1, 0.0, 0.0])
+            xyz_label = target_keypoints[xyz_idx] + np.array([0.0,0.0,0.0])
+            if render_text:
+                scene_label = scene.add_3d_label(xyz_label, str(xyz_idx))
+                # scene_label.scale = 2.0
+            keypoint_markers.append(kpt_mesh)
+        target_keypoints = keypoint_markers
 
-    detected_keypoints = detected_keypoints.numpy().transpose()
-    keypoint_markers = []
-    for xyz in detected_keypoints:
-        kpt_mesh = o3d.geometry.TriangleMesh.create_sphere(radius=.01)
-        kpt_mesh.translate(xyz)
-        kpt_mesh.paint_uniform_color([0, 0.8, 0.0])
-        keypoint_markers.append(kpt_mesh)
-    detected_keypoints = keypoint_markers
-    target_point_cloud = pos_tensor_to_o3d(target_point_cloud)
-    target_point_cloud.paint_uniform_color([0.0, 0.0, 0.7])
+    if target_point_cloud is not None:
+        target_point_cloud = pos_tensor_to_o3d(target_point_cloud)
+        target_point_cloud.paint_uniform_color([0.0, 0.0, 0.7])
 
-    # target_keypoints = pos_tensor_to_o3d(target_keypoints)
-    # target_keypoints.paint_uniform_color([0.0, 0.8, 0.0])
+    if input_point_cloud is not None:
+        input_point_cloud = pos_tensor_to_o3d(input_point_cloud)
+        input_point_cloud.paint_uniform_color([0.7, 0.7, 0.7])
+    elements_to_viz = []
+    if target_point_cloud is not None:
+        elements_to_viz = elements_to_viz + [target_point_cloud]
+        if render_text:
+            bounds = target_point_cloud.get_axis_aligned_bounding_box()
+            scene.setup_camera(60, bounds, bounds.get_center())
 
-    target_keypoints = target_keypoints.numpy().transpose()
-    # color_order = [[0,0,0],[0,0,0],[0,0,0],[0,0,0], [1,0,0],[1,0,.25],[1,.5,0],[1,1,0],[0,1,0],[0, .5, .5], [0,0,1],[.25,0,.75], \
-    #                [0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]
-    keypoint_markers = []
-    for xyz_idx in range(len(target_keypoints)):
-        kpt_mesh = o3d.geometry.TriangleMesh.create_sphere(radius=.01)
-        kpt_mesh.translate(target_keypoints[xyz_idx])
-        if target_keypoints_flag == 0:
-            kpt_mesh.paint_uniform_color([0.8, 0.0, 0.0])
-        else:
-            kpt_mesh.paint_uniform_color([0.8, 0, 0.0])
-            # kpt_mesh.paint_uniform_color(color_order[xyz_idx])
-        keypoint_markers.append(kpt_mesh)
-    target_keypoints = keypoint_markers
+    if input_point_cloud is not None:
+        elements_to_viz = elements_to_viz + [input_point_cloud]
+    if detected_keypoints is not None:
+        elements_to_viz = elements_to_viz + detected_keypoints
+    if target_keypoints is not None:
+        elements_to_viz = elements_to_viz + target_keypoints
 
-    o3d.visualization.draw_geometries([input_point_cloud] + [target_point_cloud] + detected_keypoints + target_keypoints)
-
-    # o3d.visualization.draw_geometries([input_point_cloud, detected_keypoints, target_keypoints, target_point_cloud])
+    if render_text:
+        for idx, element_to_viz in enumerate(elements_to_viz):
+            scene.scene.add_geometry(str(idx), element_to_viz, rendering.MaterialRecord())
+        gui.Application.instance.run()  # Run until user closes window
+    else:
+        # draw_geometries_with_rotation(elements_to_viz)
+        o3d.visualization.draw_geometries(elements_to_viz)
 
     return None
+
+def temp_expt_1_viz(cad_models, model_keypoints, gt_keypoints=None, colors = None):
+    batch_size = model_keypoints.shape[0]
+    if gt_keypoints is None:
+        gt_keypoints = model_keypoints
+    print("model_keypoints.shape", model_keypoints.shape)
+    print("gt_keypoints.shape", gt_keypoints.shape)
+    print("cad_models.shape", cad_models.shape)
+
+
+    for b in range(batch_size):
+        point_cloud = cad_models[b, ...]
+        keypoints = model_keypoints[b, ...].cpu()
+        gt_keypoints = gt_keypoints[b, ...].cpu()
+
+        point_cloud = pos_tensor_to_o3d(pos=point_cloud)
+        if colors is not None:
+            point_cloud.colors = colors
+        else:
+            point_cloud = point_cloud.paint_uniform_color([1.0, 1.0, 1])
+        point_cloud.estimate_normals()
+        keypoints = keypoints.transpose(0, 1).numpy()
+        gt_keypoints = gt_keypoints.transpose(0, 1).numpy()
+
+        # visualize_model_n_keypoints([point_cloud], keypoints_xyz=keypoints)
+
+        d = 0
+        max_bound = point_cloud.get_max_bound()
+        min_bound = point_cloud.get_min_bound()
+        d = max(np.linalg.norm(max_bound - min_bound, ord=2), d)
+
+        keypoint_radius = 0.01 * d
+
+        keypoint_markers = []
+        for xyz in keypoints:
+            new_mesh = o3d.geometry.TriangleMesh.create_sphere(radius=keypoint_radius)
+            new_mesh.translate(xyz)
+            new_mesh.paint_uniform_color([0, 0.8, 0.0])
+            keypoint_markers.append(new_mesh)
+        for xyz in gt_keypoints:
+            new_mesh = o3d.geometry.TriangleMesh.create_sphere(radius=keypoint_radius)
+            new_mesh.translate(xyz)
+            new_mesh.paint_uniform_color([0.8, 0, 0.0])
+            keypoint_markers.append(new_mesh)
+
+        custom_draw_geometry_with_key_callback(keypoint_markers + [point_cloud])
+        # o3d.visualization.draw_geometries(keypoint_markers + [point_cloud])
+
+        return keypoint_markers
+
+    return 0
+
+def draw_geometries_with_rotation(elements, toggle=True):
+
+    def rotate_view(vis, toggle=toggle):
+        ctr = vis.get_view_control()
+        if toggle:
+            ctr.rotate(.05, 0)
+        else:
+            ctr.rotate(-.05, 0)
+        return False
+
+    o3d.visualization.draw_geometries_with_animation_callback(elements, rotate_view)
+
+
+def custom_draw_geometry_with_key_callback(elements):
+    def rotate_view_cw(vis):
+        ctr = vis.get_view_control()
+        ctr.rotate(5, 0)
+        return False
+
+    def rotate_view_ccw(vis):
+        ctr = vis.get_view_control()
+        ctr.rotate(-5, 0)
+        return False
+
+
+    key_to_callback = {}
+    key_to_callback[ord("A")] = rotate_view_cw
+    key_to_callback[ord("D")] = rotate_view_ccw
+
+    o3d.visualization.draw_geometries_with_key_callbacks(elements, key_to_callback)
 
 
 def generate_filename(chars=string.ascii_uppercase + string.digits, N=10):
