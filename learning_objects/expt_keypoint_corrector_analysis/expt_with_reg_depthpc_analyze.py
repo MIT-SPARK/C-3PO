@@ -110,7 +110,7 @@ def varul_mean(data):
 
 
 
-def certification(data, epsilon, delta, num_iterations=100, full_batch=False, symmetry=False):
+def certification(data, epsilon, delta, num_iterations=100, full_batch=False):
     device_ = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     certify=certifiability(epsilon=epsilon, delta=delta, radius=0.3)
     ###
@@ -142,9 +142,9 @@ def certification(data, epsilon, delta, num_iterations=100, full_batch=False, sy
             sqdist_kp_corrector = sqdist_kp_correctorest[kp_noise_var_i][batch_i]
             pc_padding = pc_padding_masks[kp_noise_var_i][batch_i]
             certi_naive_batch, _ = certify.forward_with_distances(
-                sqdist_input_naive[0], sqdist_input_naive[1], sqdist_input_naive[2], sqdist_kp_naive, pc_padding, symmetry=symmetry)
+                sqdist_input_naive[0], sqdist_input_naive[1], sqdist_input_naive[2], sqdist_kp_naive, pc_padding)
             certi_corrector_batch, _ = certify.forward_with_distances(
-                sqdist_input_corrector[0], sqdist_input_corrector[1], sqdist_input_naive[2], sqdist_kp_corrector, pc_padding, symmetry=symmetry)
+                sqdist_input_corrector[0], sqdist_input_corrector[1], sqdist_input_naive[2], sqdist_kp_corrector, pc_padding)
             if full_batch: #full batch
                 c_naive = certi_naive_batch
                 c_corrector = certi_corrector_batch
@@ -159,7 +159,6 @@ def certification(data, epsilon, delta, num_iterations=100, full_batch=False, sy
 
 if __name__ == '__main__':
     use_adds_metric = True
-    is_object_symmetric = False
     # file_names = ["./expt_with_reg_depthpc/02958343/ad45b2d40c7801ef2074a73831d8a3a2/20220218_021749_experiment.pickle"]
     # file_names = ["./expt_with_reg_depthpc/03467517/5df08ba7af60e7bfe72db292d4e13056/20220218_041231_experiment.pickle"]
     file_names = ["./expt_with_reg_depthpc/02876657/41a2005b595ae783be1868124d5ddbcb_wchamfer/20220227_170722_experiment.pickle"]
@@ -208,7 +207,7 @@ if __name__ == '__main__':
             os.makedirs(fig_save_folder)
         fig_save_prefix = fig_save_folder + '/' + name.split('/')[-1]
         print(fig_save_prefix)
-        certi_naive, certi_corrector = certification(data, epsilon=epsilon, delta=delta, full_batch=True, symmetry=is_object_symmetric)
+        certi_naive, certi_corrector = certification(data, epsilon=epsilon, delta=delta, full_batch=True)
         certi_naive = certi_naive.to('cpu')
         certi_corrector = certi_corrector.to('cpu')
 

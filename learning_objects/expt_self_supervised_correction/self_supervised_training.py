@@ -53,8 +53,7 @@ def self_supervised_train_one_epoch(training_loader, model, optimizer, device, h
                         predicted_point_cloud=predicted_point_cloud,
                         corrected_keypoints=corrected_keypoints,
                         predicted_model_keypoints=predicted_model_keypoints,
-                        epsilon=hyper_param['epsilon'],
-                        is_symmetric=hyper_param["is_symmetric"])
+                        epsilon=hyper_param['epsilon'])
         certi = certi.squeeze(-1)  # (B,)
 
         # Compute the loss and its gradients
@@ -105,7 +104,7 @@ def validate(validation_loader, model, device, hyper_param):
                             predicted_point_cloud=predicted_point_cloud,
                             corrected_keypoints=corrected_keypoints,
                             predicted_model_keypoints=predicted_model_keypoints,
-                            epsilon=hyper_param['epsilon'], is_symmetric=hyper_param["is_symmetric"])
+                            epsilon=hyper_param['epsilon'])
 
             vloss = validation_loss(input_point_cloud,
                                     predicted_point_cloud,
@@ -217,13 +216,6 @@ def train_detector(hyper_param, detector_type='pointnet', class_id="03001627",
     lr_sgd = hyper_param['lr_sgd']
     momentum_sgd = hyper_param['momentum_sgd']
 
-    # object symmetry
-    if class_name == "bottle":
-        # hyper_param["is_symmetric"] = True
-        hyper_param["is_symmetric"] = False     #Removing the difference between symmetric and asymmetric case
-    else:
-        hyper_param["is_symmetric"] = False
-
     # real dataset:
     self_supervised_train_dataset_len = hyper_param['self_supervised_train_dataset_len']
     self_supervised_train_batch_size = hyper_param['self_supervised_train_batch_size']
@@ -329,7 +321,7 @@ def visual_test(test_loader, model, hyper_param, device=None):
                         predicted_point_cloud=predicted_point_cloud,
                         corrected_keypoints=predicted_keypoints,
                         predicted_model_keypoints=predicted_model_keypoints,
-                        epsilon=hyper_param['epsilon'], is_symmetric=hyper_param["is_symmetric"])
+                        epsilon=hyper_param['epsilon'])
 
         print("Certifiable: ", certi)
 
@@ -540,11 +532,6 @@ def visualize_kp_detectors(detector_type, model_class_ids, only_categories=None,
             hyper_param = hyper_param[detector_type]
             hyper_param['epsilon'] = hyper_param['epsilon'][key]
 
-            if class_name == 'bottle':
-                # hyper_param["is_symmetric"] = True
-                hyper_param["is_symmetric"] = False     #Removing the difference between symmetric and asymmetric case
-            else:
-                hyper_param["is_symmetric"] = False
 
             print(">>"*40)
             print("Analyzing Trained Model for Object: ", key, "; Model ID:", str(model_id))

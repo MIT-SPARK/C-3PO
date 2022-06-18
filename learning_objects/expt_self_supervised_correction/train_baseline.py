@@ -71,12 +71,6 @@ def train_detector(hyper_param, detector_type='pointnet', class_id="03001627",
     lr_sgd = hyper_param['baseline_lr_sgd']
     momentum_sgd = hyper_param['baseline_momentum_sgd']
 
-    # object symmetry
-    if class_name == "bottle":
-        hyper_param["is_symmetric"] = True
-    else:
-        hyper_param["is_symmetric"] = False
-
     # real dataset:
     train_dataset_len = hyper_param['self_supervised_train_dataset_len']
     train_batch_size = hyper_param['self_supervised_train_batch_size']
@@ -312,11 +306,6 @@ def visualize_kp_detectors(detector_type, model_class_ids, only_categories=None,
             hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
             hyper_param = hyper_param[detector_type]
             hyper_param['epsilon'] = hyper_param['epsilon'][key]
-
-            if class_name == 'bottle':
-                hyper_param["is_symmetric"] = True
-            else:
-                hyper_param["is_symmetric"] = False
 
             print(">>"*40)
             print("Analyzing Baseline for Object: ", key, "; Model ID:", str(model_id))

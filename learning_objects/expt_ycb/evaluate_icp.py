@@ -15,11 +15,6 @@ from learning_objects.expt_self_supervised_correction.baseline_model import RANS
 from learning_objects.utils.general import display_two_pcs, pos_tensor_to_o3d
 from learning_objects.expt_ycb.proposed_model import ProposedRegressionModel as ProposedModel
 
-# SYMMETRIC_MODEL_IDS = ["001_chips_can", "002_master_chef_can", "004_sugar_box", \
-#                        "005_tomato_soup_can", "006_mustard_bottle", "007_tuna_fish_can", "008_pudding_box" \
-#                        "009_gelatin_box", "010_potted_meat_can", "036_wood_block", "040_large_marker", \
-#                        "051_large_clamp", "052_extra_large_clamp", "061_foam_brick"]
-
 def eval_icp(model_id, detector_type, hyper_param, global_registration='ransac',
              use_corrector=False, certification=True, visualize=False):
 
@@ -119,8 +114,7 @@ def eval_icp(model_id, detector_type, hyper_param, global_registration='ransac',
                                 predicted_point_cloud=predicted_point_cloud,
                                 corrected_keypoints=keypoints_target,
                                 predicted_model_keypoints=keypoints_target,
-                                epsilon=hyper_param['epsilon'],
-                                is_symmetric=hyper_param['is_symmetric'])
+                                epsilon=hyper_param['epsilon'])
 
             pc_err_, kp_err_, R_err_, t_err_ = \
                 evaluation_error(input=(input_point_cloud, keypoints_target, R_target, t_target),
@@ -215,8 +209,6 @@ def evaluate_icp(model_ids, only_models, detector_type, global_registration='ran
             hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
             hyper_param = hyper_param[detector_type]   # we only use the evaluation dataset parameters, which are the same
             hyper_param['epsilon'] = hyper_param['epsilon'][model_id]
-
-            hyper_param["is_symmetric"] = False
 
             print(">>"*40)
             print("Analyzing Baseline for Object: ", str(model_id))

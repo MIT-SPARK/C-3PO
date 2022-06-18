@@ -122,8 +122,7 @@ def eval_icp(class_id, model_id, detector_type, hyper_param, global_registration
                                 predicted_point_cloud=predicted_point_cloud,
                                 corrected_keypoints=keypoints_target,
                                 predicted_model_keypoints=keypoints_target,
-                                epsilon=hyper_param['epsilon'],
-                                is_symmetric=hyper_param['is_symmetric'])
+                                epsilon=hyper_param['epsilon'])
 
             pc_err_, kp_err_, R_err_, t_err_ = \
                 evaluation_error(input=(input_point_cloud, keypoints_target, R_target, t_target),
@@ -223,12 +222,6 @@ def evaluate_icp(model_class_ids, only_categories, detector_type, global_registr
             hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
             hyper_param = hyper_param[detector_type]   # we only use the evaluation dataset parameters, which are the same
             hyper_param['epsilon'] = hyper_param['epsilon'][key]
-
-            if class_name == 'bottle':
-                # hyper_param["is_symmetric"] = True
-                hyper_param["is_symmetric"] = False     #Removing the difference between symmetric and asymmetric case
-            else:
-                hyper_param["is_symmetric"] = False
 
             print(">>"*40)
             print("Analyzing Baseline for Object: ", key, "; Model ID:", str(model_id))

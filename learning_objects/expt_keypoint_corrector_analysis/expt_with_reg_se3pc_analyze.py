@@ -106,7 +106,7 @@ def varul_mean(data):
 
     return var, mean.squeeze(-1)
 
-def certification(data, epsilon, delta, num_iterations=100, full_batch=False, symmetry=False):
+def certification(data, epsilon, delta, num_iterations=100, full_batch=False):
     device_ = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     certify=certifiability(epsilon=epsilon, delta=delta, radius=0.3)
     ###
@@ -138,9 +138,9 @@ def certification(data, epsilon, delta, num_iterations=100, full_batch=False, sy
             sqdist_kp_corrector = sqdist_kp_correctorest[kp_noise_var_i][batch_i]
             pc_padding = pc_padding_masks[kp_noise_var_i][batch_i]
             certi_naive_batch, _ = certify.forward_with_distances(
-                sqdist_input_naive[0], sqdist_input_naive[1], None, sqdist_kp_naive, pc_padding, symmetry=symmetry)
+                sqdist_input_naive[0], sqdist_input_naive[1], None, sqdist_kp_naive, pc_padding)
             certi_corrector_batch, _ = certify.forward_with_distances(
-                sqdist_input_corrector[0], sqdist_input_corrector[1], None, sqdist_kp_corrector, pc_padding, symmetry=symmetry)
+                sqdist_input_corrector[0], sqdist_input_corrector[1], None, sqdist_kp_corrector, pc_padding)
             if full_batch: #full batch
                 c_naive = certi_naive_batch
                 c_corrector = certi_corrector_batch

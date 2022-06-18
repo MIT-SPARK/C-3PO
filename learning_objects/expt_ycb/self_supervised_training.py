@@ -36,21 +36,12 @@ from learning_objects.expt_self_supervised_correction.evaluation_metrics import 
     is_pcd_nondegenerate
 from learning_objects.expt_self_supervised_correction.evaluation import evaluate
 
-
-
-SYMMETRIC_MODEL_IDS = ["001_chips_can", "002_master_chef_can", "003_cracker_box", "004_sugar_box", \
-                        "005_tomato_soup_can", "006_mustard_bottle", "007_tuna_fish_can", "008_pudding_box" \
-                       "009_gelatin_box", "010_potted_meat_can", "036_wood_block", "040_large_marker", \
-                       "051_large_clamp", "052_extra_large_clamp", "061_foam_brick"]
-
-# Train
 def self_supervised_train_one_epoch(training_loader, model, optimizer, device, hyper_param):
     running_loss = 0.
     fra_certi_track = []
 
     for i, data in enumerate(training_loader):
         # Every data instance is an input + label pair
-        # print("Running batch ", i+1, "/", len(training_loader))
         input_point_cloud, _, _, _ = data
         input_point_cloud = input_point_cloud.to(device)
 
@@ -66,8 +57,7 @@ def self_supervised_train_one_epoch(training_loader, model, optimizer, device, h
                         predicted_point_cloud=predicted_point_cloud,
                         corrected_keypoints=corrected_keypoints,
                         predicted_model_keypoints=predicted_model_keypoints,
-                        epsilon=hyper_param['epsilon'],
-                        is_symmetric=hyper_param["is_symmetric"])
+                        epsilon=hyper_param['epsilon'])
         certi = certi.squeeze(-1)  # (B,)
 
         # Compute the loss and its gradients
@@ -89,14 +79,12 @@ def self_supervised_train_one_epoch(training_loader, model, optimizer, device, h
         fra_certi_track.append(fra_cert)
 
         del input_point_cloud, predicted_point_cloud, correction
-        # torch.cuda.empty_cache()
 
     ave_tloss = running_loss / (i + 1)
 
     return ave_tloss, fra_certi_track
 
 
-# Val
 def validate(validation_loader, model, device, hyper_param):
 
     with torch.no_grad():
@@ -120,7 +108,7 @@ def validate(validation_loader, model, device, hyper_param):
                             predicted_point_cloud=predicted_point_cloud,
                             corrected_keypoints=corrected_keypoints,
                             predicted_model_keypoints=predicted_model_keypoints,
-                            epsilon=hyper_param['epsilon'], is_symmetric=hyper_param["is_symmetric"])
+                            epsilon=hyper_param['epsilon'])
 
             vloss = validation_loss(input_point_cloud,
                                     predicted_point_cloud,
@@ -131,7 +119,6 @@ def validate(validation_loader, model, device, hyper_param):
             del input_point_cloud, keypoints_target, R_target, t_target, \
                 predicted_point_cloud, corrected_keypoints, R_predicted, t_predicted, certi
 
-            # torch.cuda.empty_cache()
         avg_vloss = running_vloss / (i + 1)
 
     return avg_vloss
@@ -212,7 +199,6 @@ def train_detector(hyper_param, detector_type='point_transformer', model_id="019
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print('device is ', device)
     print('-' * 20)
-    # torch.cuda.empty_cache()
 
     # ycb
     save_folder = hyper_param['save_folder']
@@ -234,10 +220,6 @@ def train_detector(hyper_param, detector_type='point_transformer', model_id="019
     momentum_sgd = hyper_param['momentum_sgd']
     epsilon = hyper_param['epsilon']
     print("epsilon", epsilon)
-
-
-    # object symmetry
-    hyper_param["is_symmetric"] = False
 
     # real dataset:
     self_supervised_train_batch_size = hyper_param['self_supervised_train_batch_size'][model_id]
@@ -331,7 +313,7 @@ def visual_test(test_loader, model, device=None, hyper_param=None, degeneracy_ev
                         predicted_point_cloud=predicted_point_cloud,
                         corrected_keypoints=predicted_keypoints,
                         predicted_model_keypoints=predicted_model_keypoints,
-                        epsilon=hyper_param['epsilon'], is_symmetric=hyper_param['is_symmetric'])
+                        epsilon=hyper_param['epsilon'])
 
         print("Certifiable: ", certi)
 
@@ -403,7 +385,6 @@ def evaluate_model(detector_type, model_id,
     hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
     hyper_param = hyper_param[detector_type]
     hyper_param['epsilon'] = hyper_param['epsilon'][model_id]
-    hyper_param["is_symmetric"] = False
     print(">>" * 40)
     print("Analyzing Trained Model for Object: " + str(model_id))
 

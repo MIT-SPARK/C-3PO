@@ -153,7 +153,7 @@ def supervised_validation_loss(input, output):
 
 # self-supervised training and validation losses
 def certify(input_point_cloud, predicted_point_cloud, corrected_keypoints,
-            predicted_model_keypoints, epsilon=0.99, is_symmetric=False):
+            predicted_model_keypoints, epsilon=0.99):
     """
     inputs:
     input_point_cloud           : torch.tensor of shape (B, 3, m)
@@ -169,10 +169,7 @@ def certify(input_point_cloud, predicted_point_cloud, corrected_keypoints,
     confidence_ = confidence(input_point_cloud, predicted_point_cloud)
     confidence_kp_ = confidence_kp(corrected_keypoints, predicted_model_keypoints)
 
-    if is_symmetric:
-        out = (confidence_ >= epsilon)
-    else:
-        out = (confidence_ >= epsilon) & (confidence_kp_ >= epsilon)
+    out = (confidence_ >= epsilon) & (confidence_kp_ >= epsilon)
 
     return out
 

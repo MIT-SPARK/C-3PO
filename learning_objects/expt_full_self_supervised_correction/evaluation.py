@@ -70,8 +70,7 @@ def evaluate(eval_loader, model, hyper_param, certification=True, device=None, n
                                 predicted_point_cloud=predicted_point_cloud,
                                 corrected_keypoints=predicted_keypoints,
                                 predicted_model_keypoints=predicted_model_keypoints,
-                                epsilon=hyper_param['epsilon'],
-                                is_symmetric=hyper_param['is_symmetric'])
+                                epsilon=hyper_param['epsilon'])
 
             # fraction certifiable
             # error of all objects
@@ -93,8 +92,7 @@ def evaluate(eval_loader, model, hyper_param, certification=True, device=None, n
             #                       predicted_point_cloud=predicted_point_cloud,
             #                       corrected_keypoints=predicted_keypoints,
             #                       predicted_model_keypoints=predicted_model_keypoints,
-            #                       epsilon=hyper_param['epsilon'],
-            #                       is_symmetric=hyper_param['is_symmetric'])
+            #                       epsilon=hyper_param['epsilon'])
 
 
             # error for all objects

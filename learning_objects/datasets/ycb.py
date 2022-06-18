@@ -39,6 +39,12 @@ MODEL_TO_KPT_GROUPS = {
     "061_foam_brick": [set([0,2,3,5]), set([1,2,3,4]), set([0,1,3,7]), set([0,1,2,6]), \
                         set([4,5,6,2]), set([4,5,7,3]), set([4,6,7,1]), set([5,6,7,0])]
     }
+
+SYMMETRIC_MODEL_IDS = ["001_chips_can", "002_master_chef_can", "003_cracker_box", "004_sugar_box", \
+                       "005_tomato_soup_can", "006_mustard_bottle", "007_tuna_fish_can", "008_pudding_box" \
+                       "009_gelatin_box", "010_potted_meat_can", "036_wood_block", "040_large_marker", \
+                       "051_large_clamp", "052_extra_large_clamp", "061_foam_brick"]
+
 def viz_rgb_pcd(target_object, viewpoint_camera, referenceCamera, viewpoint_angle, viz=False):
     pcd = o3d.io.read_point_cloud(DATASET_PATH + target_object + \
                                   "/clouds/rgb/pc_" + viewpoint_camera + "_" \

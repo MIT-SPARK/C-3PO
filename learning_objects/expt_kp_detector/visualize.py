@@ -35,7 +35,7 @@ def visual_test(test_loader, model, hyper_param, correction_flag=False, device=N
                         predicted_point_cloud=predicted_point_cloud,
                         corrected_keypoints=predicted_keypoints,
                         predicted_model_keypoints=predicted_model_keypoints,
-                        epsilon=hyper_param['epsilon'], is_symmetric=hyper_param["is_symmetric"])
+                        epsilon=hyper_param['epsilon'])
 
         print("Certifiable: ", certi)
 
@@ -237,11 +237,6 @@ def visualize_kp_detectors(detector_type, model_class_ids, only_categories=None,
             hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
             hyper_param = hyper_param[detector_type]
             hyper_param['epsilon'] = hyper_param['epsilon'][key]
-
-            if class_name == 'bottle':
-                hyper_param["is_symmetric"] = True
-            else:
-                hyper_param["is_symmetric"] = False
 
             print(">>"*40)
             print("Analyzing Trained Model for Object: ", key, "; Model ID:", str(model_id))

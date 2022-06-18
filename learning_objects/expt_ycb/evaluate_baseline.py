@@ -39,11 +39,6 @@ from learning_objects.expt_ycb.supervised_training import train_with_supervision
 from learning_objects.expt_ycb.proposed_model import ProposedRegressionModel as ProposedModel
 
 
-#SYMMETRIC_MODEL_IDS = ["001_chips_can", "002_master_chef_can", "004_sugar_box", \
-#                       "005_tomato_soup_can", "006_mustard_bottle", "007_tuna_fish_can", "008_pudding_box" \
-#                       "009_gelatin_box", "010_potted_meat_can", "036_wood_block", "040_large_marker", \
-#                       "051_large_clamp", "052_extra_large_clamp", "061_foam_brick"]
-#
 # Train
 def train_detector(hyper_param, detector_type='point_transformer', model_id="019_pitcher_base", use_corrector=False):
     """
@@ -75,9 +70,6 @@ def train_detector(hyper_param, detector_type='point_transformer', model_id="019
     # optimization parameters
     lr_sgd = hyper_param['baseline_lr_sgd']
     momentum_sgd = hyper_param['baseline_momentum_sgd']
-
-    # object symmetry
-    hyper_param["is_symmetric"] = False
 
     # real dataset:
     train_batch_size = hyper_param['self_supervised_train_batch_size'][model_id]
@@ -164,7 +156,7 @@ def visual_test(test_loader, model, device=None, hyper_param=None):
                         predicted_point_cloud=predicted_point_cloud,
                         corrected_keypoints=predicted_keypoints,
                         predicted_model_keypoints=predicted_model_keypoints,
-                        epsilon=hyper_param['epsilon'], is_symmetric=hyper_param['is_symmetric'])
+                        epsilon=hyper_param['epsilon'])
 
         print("Certifiable: ", certi)
 
@@ -317,8 +309,6 @@ def visualize_kp_detectors(detector_type, model_ids, only_models=None,
             hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
             hyper_param = hyper_param[detector_type]
             hyper_param['epsilon'] = hyper_param['epsilon'][model_id]
-
-            hyper_param["is_symmetric"] = False
 
             print(">>"*40)
             print("Analyzing Baseline for Object: ", model_id)

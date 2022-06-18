@@ -144,7 +144,7 @@ class certifiability():
 
         return (confidence_ >= self.epsilon) & (confidence_kp_ >= self.epsilon) & (completeness_ >= self.delta), completeness_
 
-    def forward_with_distances(self, sq_dist_XZ, sq_dist_ZX, nn_idxs_ZX, sq_kp_dist, zero_mask = None, max_loss=True, symmetry=False):
+    def forward_with_distances(self, sq_dist_XZ, sq_dist_ZX, nn_idxs_ZX, sq_kp_dist, zero_mask = None, max_loss=True):
         """
         NOTE: on filters out points at 0,0 if nn_idxx_ZX is not none
         inputs:
@@ -199,9 +199,7 @@ class certifiability():
 
         #confidence_kp_
         confidence_kp_ = torch.exp(-sq_kp_dist.max(dim=1)[0].unsqueeze(-1))
-        if symmetry:
-            return (confidence_ >= self.epsilon) & (
-                    completeness_ >= self.delta), completeness_
+
         return (confidence_ >= self.epsilon) & (confidence_kp_ >= self.epsilon) & (
                     completeness_ >= self.delta), completeness_
 
