@@ -4,43 +4,38 @@ It uses registration during supervised training. It uses registration plus corre
 
 """
 
+import argparse
+import numpy as np
+import os
+import pickle
+import sys
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision
 import torchvision.transforms as transforms
 import yaml
-import argparse
-import pickle
-import numpy as np
-from pytorch3d import ops
-
-from torch.utils.tensorboard import SummaryWriter
 from datetime import datetime
+from pytorch3d import ops
+from torch.utils.tensorboard import SummaryWriter
 
-import os
-import sys
 sys.path.append("../../")
 
-from learning_objects.datasets.ycb import DepthYCB, DepthYCBAugment, viz_rgb_pcd
+# model and datasets
+from learning_objects.expt_ycb.proposed_model import ProposedRegressionModel as ProposedModel
+from learning_objects.datasets.ycb import DepthYCB, DepthYCBAugment, viz_rgb_pcd, MODEL_TO_KPT_GROUPS as MODEL_TO_KPT_GROUPS_YCB
 from learning_objects.models.certifiability import confidence, confidence_kp
 
 from learning_objects.utils.general import display_results, TrackingMeter, temp_expt_1_viz
 
 # loss functions
-# from learning_objects.expt_self_supervised_correction.loss_functions import chamfer_loss
-from learning_objects.expt_self_supervised_correction.loss_functions import certify
 from learning_objects.expt_self_supervised_correction.loss_functions import self_supervised_training_loss \
-    as self_supervised_loss
-from learning_objects.expt_self_supervised_correction.loss_functions import self_supervised_validation_loss \
-    as validation_loss
+    as self_supervised_loss, self_supervised_validation_loss as validation_loss, certify
 # evaluation metrics
 from learning_objects.expt_self_supervised_correction.evaluation_metrics import evaluation_error, add_s_error, \
     is_pcd_nondegenerate
+from learning_objects.expt_self_supervised_correction.evaluation import evaluate
 
-from learning_objects.expt_ycb.proposed_model import ProposedRegressionModel as ProposedModel
-
-from learning_objects.datasets.ycb import MODEL_TO_KPT_GROUPS as MODEL_TO_KPT_GROUPS_YCB
 
 
 SYMMETRIC_MODEL_IDS = ["001_chips_can", "002_master_chef_can", "003_cracker_box", "004_sugar_box", \
@@ -49,7 +44,7 @@ SYMMETRIC_MODEL_IDS = ["001_chips_can", "002_master_chef_can", "003_cracker_box"
                        "051_large_clamp", "052_extra_large_clamp", "061_foam_brick"]
 
 # Train
-def self_supervised_train_one_epoch(training_loader, model, optimizer, correction_flag, device, hyper_param):
+def self_supervised_train_one_epoch(training_loader, model, optimizer, device, hyper_param):
     running_loss = 0.
     fra_certi_track = []
 
@@ -64,7 +59,7 @@ def self_supervised_train_one_epoch(training_loader, model, optimizer, correctio
 
         # Make predictions for this batch
         predicted_point_cloud, corrected_keypoints, _, _, correction, predicted_model_keypoints = \
-            model(input_point_cloud, correction_flag=correction_flag, need_predicted_keypoints=True)
+            model(input_point_cloud, need_predicted_keypoints=True)
 
         # Certification
         certi = certify(input_point_cloud=input_point_cloud,
@@ -102,7 +97,7 @@ def self_supervised_train_one_epoch(training_loader, model, optimizer, correctio
 
 
 # Val
-def validate(validation_loader, model, correction_flag, device, hyper_param):
+def validate(validation_loader, model, device, hyper_param):
 
     with torch.no_grad():
 
@@ -116,8 +111,9 @@ def validate(validation_loader, model, correction_flag, device, hyper_param):
             t_target = t_target.to(device)
 
             # Make predictions for this batch
-            predicted_point_cloud, corrected_keypoints, R_predicted, t_predicted, correction, predicted_model_keypoints = model(input_point_cloud,
-                                                                                            correction_flag=correction_flag, need_predicted_keypoints=True)
+            predicted_point_cloud, corrected_keypoints, \
+            R_predicted, t_predicted, correction, \
+            predicted_model_keypoints = model(input_point_cloud, need_predicted_keypoints=True)
 
             # certification
             certi = certify(input_point_cloud=input_point_cloud,
@@ -142,7 +138,7 @@ def validate(validation_loader, model, correction_flag, device, hyper_param):
 
 
 # Train + Val Loop
-def train_without_supervision(self_supervised_train_loader, validation_loader, model, optimizer, correction_flag,
+def train_without_supervision(self_supervised_train_loader, validation_loader, model, optimizer,
                               best_model_save_file, device, hyper_param, train_loss_save_file,
                               val_loss_save_file, cert_save_file, last_epoch_model_dict_file):
 
@@ -163,15 +159,13 @@ def train_without_supervision(self_supervised_train_loader, validation_loader, m
         ave_loss_self_supervised, _fra_cert = self_supervised_train_one_epoch(self_supervised_train_loader,
                                                                    model,
                                                                    optimizer,
-                                                                   correction_flag=correction_flag,
                                                                    device=device,
                                                                    hyper_param=hyper_param)
 
         # Validation. We don't need gradients on to do reporting.
         model.train(False)
         print("Validation on real data: ")
-        avg_vloss = validate(validation_loader, model, correction_flag=correction_flag,
-                             device=device, hyper_param=hyper_param)
+        avg_vloss = validate(validation_loader, model, device=device, hyper_param=hyper_param)
 
         print('LOSS self-supervised train {}, valid (%cert) {}'.format(ave_loss_self_supervised, -avg_vloss))
         train_loss.add_item(ave_loss_self_supervised)
@@ -207,7 +201,7 @@ def train_without_supervision(self_supervised_train_loader, validation_loader, m
 
 
 # Train
-def train_detector(hyper_param, detector_type='point_transformer', model_id="019_pitcher_base"):
+def train_detector(hyper_param, detector_type='point_transformer', model_id="019_pitcher_base", use_corrector=True):
     """
 
     """
@@ -271,7 +265,7 @@ def train_detector(hyper_param, detector_type='point_transformer', model_id="019
 
     # model
     model = ProposedModel(model_id=model_id, model_keypoints=model_keypoints, cad_models=cad_models,
-                          keypoint_detector=detector_type, local_max_pooling=False).to(device)
+                          keypoint_detector=detector_type, local_max_pooling=False, correction_flag=use_corrector).to(device)
 
     if not os.path.isfile(sim_trained_model_file):
         print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")
@@ -289,7 +283,6 @@ def train_detector(hyper_param, detector_type='point_transformer', model_id="019
                                                                 validation_loader=val_loader,
                                                                 model=model,
                                                                 optimizer=optimizer,
-                                                                correction_flag=True,
                                                                 best_model_save_file=best_model_save_file,
                                                                 device=device,
                                                                 hyper_param=hyper_param,
@@ -314,7 +307,7 @@ def train_detector(hyper_param, detector_type='point_transformer', model_id="019
 
 
 # Visualize
-def visual_test(test_loader, model, correction_flag=True, device=None, hyper_param=None, degeneracy_eval=False):
+def visual_test(test_loader, model, device=None, hyper_param=None, degeneracy_eval=False):
 
     if device == None:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -331,7 +324,7 @@ def visual_test(test_loader, model, correction_flag=True, device=None, hyper_par
         # Make predictions for this batch
         model.eval()
         predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted, _, predicted_model_keypoints \
-            = model(input_point_cloud, correction_flag=correction_flag, need_predicted_keypoints=True)
+            = model(input_point_cloud, need_predicted_keypoints=True)
 
         # certification
         certi = certify(input_point_cloud=input_point_cloud,
@@ -360,9 +353,6 @@ def visual_test(test_loader, model, correction_flag=True, device=None, hyper_par
 
         display_results(input_point_cloud=pc, detected_keypoints=kp_p, target_point_cloud=None,
                         target_keypoints=kp)
-        # for keypoint generation
-        # display_results(input_point_cloud=None, detected_keypoints=None, target_point_cloud=ground_truth_point_cloud,
-        #                 target_keypoints=kp, render_text=True)
         # if i == 7:
         #    display_results(input_point_cloud=None, detected_keypoints=kp_p, target_point_cloud=pc_p,
         #                 target_keypoints=kp)
@@ -381,137 +371,6 @@ def visual_test(test_loader, model, correction_flag=True, device=None, hyper_par
 
         if i >= 20:
             break
-
-
-def evaluate_detector(hyper_param, detector_type, model_id,
-                       evaluate_models=True, visualize=True,
-                       use_corrector=True,
-                       evaluate_pretrained=False,
-                       evaluate_trained=True, device=None, degeneracy_eval=False, average_metrics=False):
-    """
-
-    """
-
-    # print('-' * 20)
-    if device==None:
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-    save_folder = hyper_param['save_folder']
-    best_model_save_location = save_folder + '/' + model_id + '/'
-    best_pre_model_save_file = best_model_save_location + '_best_supervised_kp_' + detector_type + '_data_augment.pth'
-    best_post_model_save_file = best_model_save_location + '_best_self_supervised_kp_' + detector_type + 'data_augment.pth'
-    print("best_post_model_save_file", best_post_model_save_file)
-    hyper_param_file = best_model_save_location + '_self_supervised_kp_point_transformer_hyperparams.pth'
-    metrics_file = best_model_save_location + "_averaged_eval_metrics_with_degeneracy.pkl"
-
-    #todo: if exists
-    with open(hyper_param_file, "rb") as f:
-        hyper_param = pickle.load(f)
-    print(hyper_param['epsilon'])
-
-    if average_metrics:
-        if os.path.exists(metrics_file):
-            with open(metrics_file, "rb") as f:
-                averaged_metrics = pickle.load(f)
-        else:
-            averaged_metrics = [0] * 6 if not degeneracy_eval else [0] * 14
-        print("LOADING AVERAGE OF " + str(averaged_metrics[-1]) + " RUNS!")
-        print(averaged_metrics)
-        averaged_metrics = np.array(averaged_metrics)
-
-    # Evaluation
-    # validation dataset:
-    eval_dataset = DepthYCB(model_id=model_id,
-                            split='test',
-                            only_load_nondegenerate_pcds= hyper_param['only_load_nondegenerate_pcds'],
-                            num_of_points=hyper_param['num_of_points_to_sample'])
-    eval_batch_size = len(eval_dataset) if hyper_param['only_load_nondegenerate_pcds'] else hyper_param['eval_batch_size'][model_id]
-
-    eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=eval_batch_size, shuffle=False, pin_memory=True)
-
-
-    # model
-    cad_models = eval_dataset._get_cad_models().to(torch.float).to(device=device)
-    model_keypoints = eval_dataset._get_model_keypoints().to(torch.float).to(device=device)
-
-
-    if evaluate_pretrained:
-        model = ProposedModel(model_id=model_id, model_keypoints=model_keypoints, cad_models=cad_models,
-                                     keypoint_detector=detector_type, local_max_pooling=False).to(device)
-
-        if not os.path.isfile(best_pre_model_save_file):
-            print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")
-
-        state_dict_pre = torch.load(best_pre_model_save_file)
-        model.load_state_dict(state_dict_pre)
-
-        num_parameters = sum(param.numel() for param in model.parameters() if param.requires_grad)
-        print("Number of trainable parameters: ", num_parameters)
-
-    elif evaluate_trained:
-        model = ProposedModel(model_id=model_id, model_keypoints=model_keypoints, cad_models=cad_models,
-                                    keypoint_detector=detector_type, local_max_pooling=False).to(device)
-
-        if not os.path.isfile(best_post_model_save_file):
-            print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")
-
-        state_dict_post = torch.load(best_post_model_save_file, map_location=lambda storage, loc: storage)
-        model.load_state_dict(state_dict_post)
-
-        num_parameters = sum(param.numel() for param in model.parameters() if param.requires_grad)
-        print("Number of trainable parameters: ", num_parameters)
-
-    # Evaluation:
-    if evaluate_models:
-        print(">>"*40)
-        log_info = "PRE-TRAINED MODEL:" if evaluate_pretrained else "(SELF-SUPERVISED) TRAINED MODEL:"
-        print(log_info)
-        print(">>" * 40)
-        eval_metrics = evaluate(eval_loader=eval_loader, model=model, correction_flag=use_corrector, hyper_param=hyper_param, certification=True,
-                 device=device, normalize_adds=False, degeneracy=degeneracy_eval)
-
-    # # Visual Test
-    dataset_batch_size = 1
-    dataset = DepthYCB(model_id=model_id,
-                            split='test',
-                            only_load_nondegenerate_pcds= hyper_param['only_load_nondegenerate_pcds'],
-                            num_of_points=hyper_param['num_of_points_to_sample'])
-    loader = torch.utils.data.DataLoader(dataset, batch_size=dataset_batch_size, shuffle=False, pin_memory=True)
-
-    if visualize:
-        print(">>" * 40)
-        log_info = "VISUALIZING PRE-TRAINED MODEL:" if evaluate_pretrained else "VISUALIZING (SELF-SUPERVISED) TRAINED MODEL:"
-        print(log_info)
-        print(">>" * 40)
-        if not use_corrector:
-            print("Without corrector")
-            visual_test(test_loader=loader, model=model, correction_flag=False, hyper_param=hyper_param, degeneracy_eval=degeneracy_eval)
-        else:
-            print("With corrector")
-            visual_test(test_loader=loader, model=model, correction_flag=True, hyper_param=hyper_param, degeneracy_eval=degeneracy_eval)
-
-    if evaluate_pretrained:
-        del state_dict_pre
-    else:
-        del state_dict_post
-    del model
-    if average_metrics and evaluate_models:
-        eval_metrics = eval_metrics + [1]
-        averaged_metrics = averaged_metrics + np.array(eval_metrics)
-        for elt_idx in range(len(averaged_metrics)):
-            if np.isnan(averaged_metrics[elt_idx]):
-                averaged_metrics[elt_idx] = 0
-        print("NEW AVERAGED METRICS: ", averaged_metrics)
-        with open(metrics_file, 'wb+') as f:
-            pickle.dump(averaged_metrics, f)
-    elif evaluate_models:
-        return eval_metrics
-    else:
-        return None
-
-
-# Evaluation. Use the fact that you know rotation, translation, and shape of the generated data.
-from learning_objects.expt_self_supervised_correction.evaluation import evaluate
 
 
 ## Wrapper
@@ -536,7 +395,7 @@ def evaluate_model(detector_type, model_id,
                    evaluate_pretrained=False,
                    evaluate_trained=True,
                    degeneracy_eval=False,
-                   num_of_runs=10):
+                   average_metrics=False):
 
 
     hyper_param_file = "self_supervised_training.yml"
@@ -544,20 +403,110 @@ def evaluate_model(detector_type, model_id,
     hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
     hyper_param = hyper_param[detector_type]
     hyper_param['epsilon'] = hyper_param['epsilon'][model_id]
-
     hyper_param["is_symmetric"] = False
-    # for run in range(num_of_runs):
     print(">>" * 40)
-    print("Analyzing Trained Model for Object: " + str(model_id) + " averaged over " + str(num_of_runs) + " runs.")
-    eval_metrics = evaluate_detector(detector_type=detector_type,
-                       model_id=model_id,
-                       hyper_param=hyper_param,
-                       evaluate_models=evaluate_models,
-                       visualize=visualize,
-                       use_corrector=use_corrector,
-                       evaluate_pretrained=evaluate_pretrained,
-                       evaluate_trained=evaluate_trained,
-                       degeneracy_eval=degeneracy_eval)
+    print("Analyzing Trained Model for Object: " + str(model_id))
+
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    save_folder = hyper_param['save_folder']
+    best_model_save_location = save_folder + '/' + model_id + '/'
+    best_pre_model_save_file = best_model_save_location + '_best_supervised_kp_' + detector_type + '_data_augment.pth'
+    best_post_model_save_file = best_model_save_location + '_best_self_supervised_kp_' + detector_type + 'data_augment.pth'
+    hyper_param_file = best_model_save_location + '_self_supervised_kp_point_transformer_hyperparams.pth'
+    if os.path.exists(hyper_param_file):
+        with open(hyper_param_file, "rb") as f:
+            hyper_param = pickle.load(f)
+
+    metrics_file_base = best_model_save_location + "_averaged_eval_metrics"
+    if evaluate_pretrained:
+        metrics_file_base = metrics_file_base + "_sim_trained"
+    if degeneracy_eval:
+        metrics_file_base = metrics_file_base + "_with_degeneracy"
+    if not use_corrector:
+        metrics_file_base = metrics_file_base + "_no_corrector"
+    metrics_file = metrics_file_base + ".pkl"
+
+    if average_metrics:
+        if os.path.exists(metrics_file):
+            with open(metrics_file, "rb") as f:
+                averaged_metrics = pickle.load(f)
+        else:
+            averaged_metrics = [0] * 6 if not degeneracy_eval else [0] * 14
+        print("LOADING AVERAGE OF " + str(averaged_metrics[-1]) + " RUNS!")
+        print(averaged_metrics)
+        averaged_metrics = np.array(averaged_metrics)
+
+    # Evaluation
+    # test dataset:
+    eval_dataset = DepthYCB(model_id=model_id,
+                            split='test',
+                            only_load_nondegenerate_pcds= hyper_param['only_load_nondegenerate_pcds'],
+                            num_of_points=hyper_param['num_of_points_to_sample'])
+    eval_batch_size = len(eval_dataset) if hyper_param['only_load_nondegenerate_pcds'] else hyper_param['eval_batch_size'][model_id]
+
+    eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=eval_batch_size, shuffle=False, pin_memory=True)
+
+
+    # model
+    cad_models = eval_dataset._get_cad_models().to(torch.float).to(device=device)
+    model_keypoints = eval_dataset._get_model_keypoints().to(torch.float).to(device=device)
+
+    model = ProposedModel(model_id=model_id, model_keypoints=model_keypoints, cad_models=cad_models,
+                          keypoint_detector=detector_type, local_max_pooling=False, correction_flag=use_corrector).to(device)
+
+    if evaluate_pretrained:
+        if not os.path.isfile(best_pre_model_save_file):
+            print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")
+        state_dict = torch.load(best_pre_model_save_file)
+    elif evaluate_trained:
+        if not os.path.isfile(best_post_model_save_file):
+            print("ERROR: CAN'T LOAD TRAINED REGRESSION MODEL, PATH DOESN'T EXIST")
+        state_dict = torch.load(best_post_model_save_file, map_location=lambda storage, loc: storage)
+
+    model.load_state_dict(state_dict)
+    num_parameters = sum(param.numel() for param in model.parameters() if param.requires_grad)
+    print("Number of trainable parameters: ", num_parameters)
+
+    # Evaluation:
+    if evaluate_models:
+        print(">>"*40)
+        log_info = "PRE-TRAINED MODEL:" if evaluate_pretrained else "(SELF-SUPERVISED) TRAINED MODEL:"
+        print(log_info)
+        print(">>" * 40)
+        eval_metrics = evaluate(eval_loader=eval_loader, model=model, hyper_param=hyper_param, certification=True,
+                 device=device, normalize_adds=False, degeneracy=degeneracy_eval)
+
+    # # Visual Test
+    dataset_batch_size = 1
+    dataset = DepthYCB(model_id=model_id,
+                            split='test',
+                            only_load_nondegenerate_pcds= hyper_param['only_load_nondegenerate_pcds'],
+                            num_of_points=hyper_param['num_of_points_to_sample'])
+    loader = torch.utils.data.DataLoader(dataset, batch_size=dataset_batch_size, shuffle=False, pin_memory=True)
+
+    if visualize:
+        print(">>" * 40)
+        log_info = "VISUALIZING PRE-TRAINED MODEL:" if evaluate_pretrained else "VISUALIZING (SELF-SUPERVISED) TRAINED MODEL:"
+        print(log_info)
+        print(">>" * 40)
+        visual_test(test_loader=loader, model=model, hyper_param=hyper_param,
+                    degeneracy_eval=degeneracy_eval)
+
+    del state_dict, model
+    if average_metrics and evaluate_models:
+        eval_metrics = eval_metrics + [1]
+        averaged_metrics = averaged_metrics + np.array(eval_metrics)
+        for elt_idx in range(len(averaged_metrics)):
+            if np.isnan(averaged_metrics[elt_idx]):
+                averaged_metrics[elt_idx] = 0
+        print("NEW AVERAGED METRICS: ", averaged_metrics)
+        with open(metrics_file, 'wb+') as f:
+            pickle.dump(averaged_metrics, f)
+    elif evaluate_models:
+        return eval_metrics
+    else:
+        return None
 
 
 if __name__ == "__main__":
@@ -579,7 +528,6 @@ if __name__ == "__main__":
     print("CAD Model class: ", args.model_id)
     detector_type = args.detector_type
     model_id = args.model_id
-    # this isn't useful when using point transformer because we can't load multiple ProposedModels with point transformer in a row
     # keeping for code monkey param happiness
     with open("model_ids.yml", 'r') as stream:
         model_ids = yaml.load(stream=stream, Loader=yaml.Loader)['model_ids']
@@ -587,9 +535,9 @@ if __name__ == "__main__":
             raise Exception('Invalid model_id')
 
     #train_kp_detectors(detector_type=detector_type, model_id=model_id)
-    evaluate_model(detector_type=detector_type, model_id=model_id, evaluate_models=True, visualize=False, use_corrector=True, evaluate_pretrained=False, evaluate_trained=True, degeneracy_eval=False)
-    #evaluate_model(detector_type=detector_type, model_id=model_id, evaluate_models=True, visualize=False, use_corrector=False, evaluate_pretrained=True, evaluate_trained=False, degeneracy_eval=False)
-    # turn off averaging metrics and viz 061! and 036!
+    evaluate_model(detector_type=detector_type, model_id=model_id, evaluate_models=True,
+                   visualize=False, use_corrector=True, evaluate_pretrained=False,
+                   evaluate_trained=True, degeneracy_eval=False, average_metrics=False)
 
 
 

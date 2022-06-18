@@ -40,7 +40,6 @@ if __name__ == "__main__":
                            model_class_ids=model_class_ids,
                            only_categories=only_categories,
                            visualize=True, evaluate_models=True,
-                           visualize_without_corrector=True,
-                           visualize_with_corrector=False,
+                           use_corrector=False,
                            visualize_before=True,
                            visualize_after=False)

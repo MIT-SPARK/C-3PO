@@ -58,7 +58,8 @@ def eval_icp(model_id, detector_type, hyper_param, global_registration='ransac',
                           model_keypoints=model_keypoints,
                           cad_models=cad_models,
                           keypoint_detector=detector_type,
-                          local_max_pooling=False).to(device=device)
+                          local_max_pooling=False,
+                          correction_flag=use_corrector).to(device=device)
 
     if not os.path.isfile(best_pre_model_save_file):
         print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")
@@ -97,10 +98,8 @@ def eval_icp(model_id, detector_type, hyper_param, global_registration='ransac',
             t_target = t_target.to(device)
             batch_size = input_point_cloud.shape[0]
 
-            print("here")
             _, detected_keypoints, R0, t0, _ \
-                = model(input_point_cloud, correction_flag=use_corrector, need_predicted_keypoints=False)
-            print("here")
+                = model(input_point_cloud, need_predicted_keypoints=False)
 
             if global_registration == 'ransac' or global_registration == 'teaser':
                 predicted_point_cloud, R_predicted, t_predicted = icp.forward(input_point_cloud, detected_keypoints)

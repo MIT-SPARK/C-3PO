@@ -51,7 +51,7 @@ if __name__ == "__main__":
     visualize_kp_detectors(detector_type=detector_type,
                            model_class_ids=model_class_ids,
                            only_categories=only_categories,
-                           visualize=False, evaluate_models=True,
+                           visualize=False, use_corrector=True, evaluate_models=True,
                            models_to_analyze=models_to_analyze,
                            cross=True,
                            cross_model_id=cross_model_id,

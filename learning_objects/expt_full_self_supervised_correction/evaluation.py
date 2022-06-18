@@ -15,7 +15,7 @@ from learning_objects.expt_self_supervised_correction.evaluation_metrics import 
 # from learning_objects.expt_self_supervised_correction.loss_functions import chamfer_loss
 
 
-def evaluate(eval_loader, model, hyper_param, certification=True, device=None, correction_flag=True, normalize_adds=False):
+def evaluate(eval_loader, model, hyper_param, certification=True, device=None, normalize_adds=False):
 
     model.eval()
 
@@ -63,7 +63,7 @@ def evaluate(eval_loader, model, hyper_param, certification=True, device=None, c
 
             # Make predictions for this batch
             predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted, correction, predicted_model_keypoints\
-                = model(input_point_cloud, correction_flag=correction_flag, need_predicted_keypoints=True)
+                = model(input_point_cloud, need_predicted_keypoints=True)
 
             if certification:
                 certi = certify(input_point_cloud=input_point_cloud,

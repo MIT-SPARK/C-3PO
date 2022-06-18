@@ -36,11 +36,11 @@ from learning_objects.expt_self_supervised_correction.loss_functions import self
 from learning_objects.expt_self_supervised_correction.evaluation_metrics import evaluation_error
 
 from learning_objects.expt_self_supervised_correction.supervised_training import train_with_supervision
+from learning_objects.expt_self_supervised_correction.proposed_model import ProposedRegressionModel as ProposedModel
 
 
-# Train
 def train_detector(hyper_param, detector_type='pointnet', class_id="03001627",
-                   model_id="1e3fba4500d20bb49b9f2eb77f5e247e"):
+                   model_id="1e3fba4500d20bb49b9f2eb77f5e247e", use_corrector=False):
     """
 
     """
@@ -66,7 +66,6 @@ def train_detector(hyper_param, detector_type='pointnet', class_id="03001627",
     best_model_save_file = best_model_save_location + '_best_baseline_regression_model_' + detector_type + '.pth'
     train_loss_save_file = best_model_save_location + '_baseline_train_loss_' + detector_type + '.pkl'
     val_loss_save_file = best_model_save_location + '_baseline_val_loss_' + detector_type + '.pkl'
-    # cert_save_file = best_model_save_location + '_certi_all_batches_' + regression_model + '.pkl'
 
     # optimization parameters
     lr_sgd = hyper_param['baseline_lr_sgd']
@@ -112,9 +111,8 @@ def train_detector(hyper_param, detector_type='pointnet', class_id="03001627",
     model_keypoints = train_dataset._get_model_keypoints().to(torch.float).to(device=device)
 
     # model
-    from learning_objects.expt_self_supervised_correction.proposed_model import ProposedRegressionModel as ProposedModel
     model = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,
-                          keypoint_detector=detector_type, use_pretrained_regression_model=False).to(device)            #ToDo: use_pretrained_regression_model needs to be depreciated.
+                          keypoint_detector=detector_type, correction_flag=use_corrector).to(device)
 
     if not os.path.isfile(sim_trained_model_file):
         print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")
@@ -132,7 +130,6 @@ def train_detector(hyper_param, detector_type='pointnet', class_id="03001627",
                                                   validation_loader=val_loader,
                                                   model=model,
                                                   optimizer=optimizer,
-                                                  correction_flag=False,
                                                   best_model_save_file=best_model_save_file,
                                                   device=device,
                                                   hyper_param=hyper_param)
@@ -143,15 +140,11 @@ def train_detector(hyper_param, detector_type='pointnet', class_id="03001627",
     with open(val_loss_save_file, 'wb') as outp:
         pickle.dump(val_loss, outp, pickle.HIGHEST_PROTOCOL)
 
-    # with open(cert_save_file, 'wb') as outp:
-    #     pickle.dump(fra_cert_, outp, pickle.HIGHEST_PROTOCOL)
-
     return None
 
 
 # Visualize
-#ToDo: Did not change.
-def visual_test(test_loader, model, correction_flag=False, device=None):
+def visual_test(test_loader, model, device=None):
 
     if device == None:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -167,7 +160,7 @@ def visual_test(test_loader, model, correction_flag=False, device=None):
         # Make predictions for this batch
         model.eval()
         predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted, _, predicted_model_keypoints \
-            = model(input_point_cloud, correction_flag=correction_flag, need_predicted_keypoints=True)
+            = model(input_point_cloud, need_predicted_keypoints=True)
 
         # certification
         certi = certify(input_point_cloud=input_point_cloud,
@@ -195,8 +188,7 @@ def visual_test(test_loader, model, correction_flag=False, device=None):
 
 
 def visualize_detector(hyper_param, detector_type, class_id, model_id,
-                       evaluate_models=True,
-                       visualize_without_corrector=True, visualize_with_corrector=True,
+                       evaluate_models=True, use_corrector=False,
                        visualize_before=True, visualize_after=True, device=None):
     """
 
@@ -205,20 +197,6 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
     # print('-' * 20)
     if device==None:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    # print('device is ', device)
-    # print('-' * 20)
-    # torch.cuda.empty_cache()
-    # if models_to_analyze=='both':
-    #     pre_ = True
-    #     post_ = True
-    # elif models_to_analyze == 'pre':
-    #     pre_ = True
-    #     post_ = False
-    # elif models_to_analyze == 'post':
-    #     pre_ = False
-    #     post_ = True
-    # else:
-    #     return NotImplementedError
 
     class_name = CLASS_NAME[class_id]
     save_folder = hyper_param['save_folder']
@@ -243,10 +221,8 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
     cad_models = eval_dataset._get_cad_models().to(torch.float).to(device=device)
     model_keypoints = eval_dataset._get_model_keypoints().to(torch.float).to(device=device)
 
-    from learning_objects.expt_self_supervised_correction.proposed_model import ProposedRegressionModel as ProposedModel
-
     model = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,
-                                     keypoint_detector=detector_type, use_pretrained_regression_model=False).to(device)
+                                     keypoint_detector=detector_type, correction_flag=use_corrector).to(device)
 
     if not os.path.isfile(best_model_save_file):
         print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")
@@ -264,7 +240,7 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
         print("PRE-TRAINED MODEL:")
         print(">>" * 40)
         evaluate(eval_loader=eval_loader, model=model, hyper_param=hyper_param, certification=True,
-                     device=device, correction_flag=False)
+                     device=device)
 
     # # Visual Test
     if visualize_before:
@@ -280,12 +256,7 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
         print(">>" * 40)
         print("VISUALIZING PRE-TRAINED MODEL:")
         print(">>" * 40)
-        if visualize_without_corrector:
-            print("Without corrector")
-            visual_test(test_loader=loader, model=model, correction_flag=False)
-        if visualize_with_corrector:
-            print("With corrector")
-            visual_test(test_loader=loader, model=model, correction_flag=True)
+        visual_test(test_loader=loader, model=model)
 
     del model, state_dict
 
@@ -297,7 +268,7 @@ from learning_objects.expt_self_supervised_correction.evaluation import evaluate
 
 
 ## Wrapper
-def train_kp_detectors(detector_type, model_class_ids, only_categories=None):
+def train_kp_detectors(detector_type, model_class_ids, only_categories=None, use_corrector=False):
 
     for key, value in model_class_ids.items():
         if key in only_categories:
@@ -315,20 +286,20 @@ def train_kp_detectors(detector_type, model_class_ids, only_categories=None):
             train_detector(detector_type=detector_type,
                            class_id=class_id,
                            model_id=model_id,
-                           hyper_param=hyper_param)
+                           hyper_param=hyper_param,
+                           use_corrector=use_corrector)
 
 
 def visualize_kp_detectors(detector_type, model_class_ids, only_categories=None,
                            evaluate_models=True,
                            visualize=True,
-                           visualize_without_corrector=False,
-                           visualize_with_corrector=True,
+                           use_corrector=False,
                            visualize_before=True,
                            visualize_after=True):
 
     if not visualize:
-        visualize_with_corrector, visualize_without_corrector, visualize_before, visualize_after \
-            = False, False, False, False
+        visualize_before, visualize_after \
+            = False, False
 
     for key, value in model_class_ids.items():
         if key in only_categories:
@@ -354,8 +325,7 @@ def visualize_kp_detectors(detector_type, model_class_ids, only_categories=None,
                                model_id=model_id,
                                hyper_param=hyper_param,
                                evaluate_models=evaluate_models,
-                               visualize_without_corrector=visualize_without_corrector,
-                               visualize_with_corrector=visualize_with_corrector,
+                               use_corrector=use_corrector,
                                visualize_before=visualize_before,
                                visualize_after=visualize_after)
 
@@ -385,7 +355,8 @@ if __name__ == "__main__":
     stream = open("class_model_ids.yml", "r")
     model_class_ids = yaml.load(stream=stream, Loader=yaml.Loader)
 
-    train_kp_detectors(detector_type=detector_type, model_class_ids=model_class_ids, only_categories=only_categories)
+    train_kp_detectors(detector_type=detector_type, model_class_ids=model_class_ids, only_categories=only_categories,
+                       use_corrector=False)
 
 
 

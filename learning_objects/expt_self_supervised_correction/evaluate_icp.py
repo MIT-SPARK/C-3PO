@@ -60,7 +60,7 @@ def eval_icp(class_id, model_id, detector_type, hyper_param, global_registration
                           model_keypoints=model_keypoints,
                           cad_models=cad_models,
                           keypoint_detector=detector_type,
-                          use_pretrained_regression_model=False).to(device=device)
+                          correction_flag=use_corrector).to(device=device)
 
     if not os.path.isfile(best_pre_model_save_file):
         print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")
@@ -101,7 +101,7 @@ def eval_icp(class_id, model_id, detector_type, hyper_param, global_registration
 
             print("here")
             _, detected_keypoints, R0, t0, _ \
-                = model(input_point_cloud, correction_flag=use_corrector, need_predicted_keypoints=False)
+                = model(input_point_cloud, need_predicted_keypoints=False)
             print("here")
 
             if global_registration == 'ransac' or global_registration == 'teaser':

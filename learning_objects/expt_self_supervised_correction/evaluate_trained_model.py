@@ -41,7 +41,8 @@ if __name__ == "__main__":
                            model_class_ids=model_class_ids,
                            only_categories=only_categories,
                            visualize=False, evaluate_models=True,
-                           models_to_analyze=models_to_analyze)
+                           models_to_analyze=models_to_analyze,
+                           use_corrector=True)
 
     ############# OLD
 

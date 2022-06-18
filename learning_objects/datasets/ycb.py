@@ -402,30 +402,18 @@ class DepthYCB(torch.utils.data.Dataset):
         self.num_of_points = num_of_points
 
         self.pcd_data_root = os.path.join(DATASET_PATH + model_id, "clouds/largest_cluster/")
-        # uncomment for manually filtered dataset of degenerate/nondegenerate point clouds
-        # if only_load_nondegenerate_pcds and os.path.exists(self.pcd_data_root + split + '_split_wo_degeneracy.npy'):
-        #     print("ONLY LOADING NONDEGENERATE VIEWPOINTS")
-        #     self.split_filenames = np.load(self.pcd_data_root + split + '_split_wo_degeneracy.npy')
-        # else:
-        #     self.split_filenames = np.load(self.pcd_data_root + split + '_split.npy')
         self.split_filenames = np.load(self.pcd_data_root + split + '_split.npy')
         self.len = self.split_filenames.shape[0]
 
         # get model
         self.model_mesh, _, self.keypoints_xyz = get_model_and_keypoints(model_id)
-        # #center the cad model WE DON'T DO THIS FOR REAL DEPTH DATA BECAUSE WE DON'T HAVE
-        # TRANSFORMATIONS TO A CENTERED VERSION OF THE PCL
-        # center = self.model_mesh.get_center()
-        # self.model_mesh.translate(-center)
-        #
-        # self.keypoints_xyz = self.keypoints_xyz - center
         self.keypoints_xyz = torch.from_numpy(self.keypoints_xyz).transpose(0, 1).unsqueeze(0).to(torch.float)
 
         # size of the model
         self.diameter = np.linalg.norm(np.asarray(self.model_mesh.get_max_bound()) - np.asarray(self.model_mesh.get_min_bound()))
 
         if only_load_nondegenerate_pcds:
-            print("ONLY LOADING NONDEGENERATE VIEWPOINTS")
+            print("ONLY LOADING NONDEGENERATE VIEWPOINTS USING KEYPOINT GROUPS")
             self.filter_degenerate(MODEL_TO_KPT_GROUPS)
 
         print("dataset len", self.len)

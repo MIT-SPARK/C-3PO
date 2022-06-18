@@ -129,7 +129,7 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
 
     if pre_:
         model_before = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,
-                                     keypoint_detector=detector_type, use_pretrained_regression_model=False).to(device)
+                                     keypoint_detector=detector_type).to(device)
 
         if not os.path.isfile(best_pre_model_save_file):
             print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")
@@ -142,7 +142,7 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
 
     if post_:
         model_after = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,
-                                    keypoint_detector=detector_type, use_pretrained_regression_model=False).to(device)
+                                    keypoint_detector=detector_type).to(device)
 
         if not os.path.isfile(best_post_model_save_file):
             print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")

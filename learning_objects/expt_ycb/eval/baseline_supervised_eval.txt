@@ -1,0 +1,8327 @@
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Thu Apr 21 19:42:20 EDT 2022
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+POINT_TRANSFORMER
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  003_cracker_box
+ONLY LOADING NONDEGENERATE VIEWPOINTS
+dataset len 29
+Number of trainable parameters:  897700
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+pc_NP1_NP5_132_masked.ply
+pc_NP2_NP5_63_masked.ply
+pc_NP1_NP5_330_masked.ply
+pc_NP2_NP5_336_masked.ply
+pc_NP2_NP5_120_masked.ply
+pc_NP2_NP5_216_masked.ply
+pc_NP2_NP5_132_masked.ply
+pc_NP3_NP5_18_masked.ply
+pc_NP2_NP5_282_masked.ply
+pc_NP3_NP5_27_masked.ply
+pc_NP1_NP5_75_masked.ply
+pc_NP2_NP5_153_masked.ply
+pc_NP3_NP5_333_masked.ply
+pc_NP2_NP5_105_masked.ply
+pc_NP3_NP5_198_masked.ply
+pc_NP3_NP5_153_masked.ply
+pc_NP2_NP5_207_masked.ply
+pc_NP3_NP5_177_masked.ply
+pc_NP1_NP5_42_masked.ply
+pc_NP2_NP5_300_masked.ply
+pc_NP3_NP5_24_masked.ply
+pc_NP1_NP5_63_masked.ply
+pc_NP1_NP5_36_masked.ply
+pc_NP2_NP5_27_masked.ply
+pc_NP3_NP5_261_masked.ply
+pc_NP3_NP5_267_masked.ply
+pc_NP2_NP5_249_masked.ply
+pc_NP1_NP5_45_masked.ply
+pc_NP1_NP5_312_masked.ply
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  96.55172729492188
+ADD-S AUC ( 5 %):  88.67799377441406
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.9998
+% certifiable:  6.896551609039307
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  100.0
+ADD-S AUC ( 5 %):  96.63690948486328
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  004_sugar_box
+ONLY LOADING NONDEGENERATE VIEWPOINTS
+dataset len 28
+Number of trainable parameters:  897700
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+pc_NP3_NP5_30_masked.ply
+pc_NP2_NP5_339_masked.ply
+pc_NP2_NP5_195_masked.ply
+pc_NP2_NP5_267_masked.ply
+pc_NP2_NP5_51_masked.ply
+pc_NP1_NP5_303_masked.ply
+pc_NP1_NP5_297_masked.ply
+pc_NP3_NP5_312_masked.ply
+pc_NP2_NP5_231_masked.ply
+pc_NP2_NP5_213_masked.ply
+pc_NP2_NP5_3_masked.ply
+pc_NP2_NP5_36_masked.ply
+pc_NP2_NP5_354_masked.ply
+pc_NP3_NP5_159_masked.ply
+pc_NP3_NP5_144_masked.ply
+pc_NP1_NP5_336_masked.ply
+pc_NP2_NP5_288_masked.ply
+pc_NP3_NP5_153_masked.ply
+pc_NP3_NP5_150_masked.ply
+pc_NP3_NP5_42_masked.ply
+pc_NP1_NP5_321_masked.ply
+pc_NP3_NP5_36_masked.ply
+pc_NP2_NP5_69_masked.ply
+pc_NP3_NP5_111_masked.ply
+pc_NP1_NP5_27_masked.ply
+pc_NP3_NP5_117_masked.ply
+pc_NP2_NP5_246_masked.ply
+pc_NP1_NP5_57_masked.ply
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  42.85714340209961
+ADD-S AUC ( 5 %):  80.14185333251953
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.9999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  008_pudding_box
+ONLY LOADING NONDEGENERATE VIEWPOINTS
+dataset len 37
+Number of trainable parameters:  891544
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+pc_NP2_NP5_219_masked.ply
+pc_NP3_NP5_312_masked.ply
+pc_NP2_NP5_273_masked.ply
+pc_NP1_NP5_54_masked.ply
+pc_NP1_NP5_303_masked.ply
+pc_NP2_NP5_90_masked.ply
+pc_NP3_NP5_195_masked.ply
+pc_NP3_NP5_261_masked.ply
+pc_NP3_NP5_192_masked.ply
+pc_NP5_NP5_252_masked.ply
+pc_NP3_NP5_114_masked.ply
+pc_NP2_NP5_147_masked.ply
+pc_NP3_NP5_348_masked.ply
+pc_NP3_NP5_228_masked.ply
+pc_NP1_NP5_204_masked.ply
+pc_NP2_NP5_171_masked.ply
+pc_NP2_NP5_6_masked.ply
+pc_NP3_NP5_327_masked.ply
+pc_NP1_NP5_57_masked.ply
+pc_NP1_NP5_297_masked.ply
+pc_NP3_NP5_282_masked.ply
+pc_NP2_NP5_114_masked.ply
+pc_NP2_NP5_213_masked.ply
+pc_NP5_NP5_108_masked.ply
+pc_NP2_NP5_207_masked.ply
+pc_NP3_NP5_207_masked.ply
+pc_NP1_NP5_126_masked.ply
+pc_NP2_NP5_222_masked.ply
+pc_NP3_NP5_105_masked.ply
+pc_NP2_NP5_138_masked.ply
+pc_NP3_NP5_150_masked.ply
+pc_NP3_NP5_3_masked.ply
+pc_NP1_NP5_300_masked.ply
+pc_NP2_NP5_96_masked.ply
+pc_NP2_NP5_192_masked.ply
+pc_NP2_NP5_333_masked.ply
+pc_NP3_NP5_0_masked.ply
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  89.18919372558594
+ADD-S AUC ( 5 %):  90.35882568359375
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99995
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  009_gelatin_box
+ONLY LOADING NONDEGENERATE VIEWPOINTS
+dataset len 32
+Number of trainable parameters:  891544
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+pc_NP1_NP5_231_masked.ply
+pc_NP3_NP5_279_masked.ply
+pc_NP5_NP5_345_masked.ply
+pc_NP2_NP5_306_masked.ply
+pc_NP1_NP5_45_masked.ply
+pc_NP2_NP5_168_masked.ply
+pc_NP1_NP5_336_masked.ply
+pc_NP1_NP5_297_masked.ply
+pc_NP1_NP5_237_masked.ply
+pc_NP2_NP5_231_masked.ply
+pc_NP5_NP5_78_masked.ply
+pc_NP1_NP5_210_masked.ply
+pc_NP2_NP5_24_masked.ply
+pc_NP1_NP5_144_masked.ply
+pc_NP5_NP5_168_masked.ply
+pc_NP2_NP5_51_masked.ply
+pc_NP3_NP5_300_masked.ply
+pc_NP3_NP5_243_masked.ply
+pc_NP3_NP5_324_masked.ply
+pc_NP2_NP5_252_masked.ply
+pc_NP4_NP5_189_masked.ply
+pc_NP2_NP5_27_masked.ply
+pc_NP3_NP5_150_masked.ply
+pc_NP3_NP5_234_masked.ply
+pc_NP2_NP5_291_masked.ply
+pc_NP4_NP5_207_masked.ply
+pc_NP1_NP5_312_masked.ply
+pc_NP1_NP5_69_masked.ply
+pc_NP2_NP5_243_masked.ply
+pc_NP1_NP5_309_masked.ply
+pc_NP1_NP5_129_masked.ply
+pc_NP5_NP5_33_masked.ply
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  87.5
+ADD-S AUC ( 5 %):  90.14447784423828
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99995
+% certifiable:  3.125
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  100.0
+ADD-S AUC ( 5 %):  100.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  010_potted_meat_can
+ONLY LOADING NONDEGENERATE VIEWPOINTS
+dataset len 29
+Number of trainable parameters:  891544
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+pc_NP3_NP5_96_masked.ply
+pc_NP2_NP5_294_masked.ply
+pc_NP3_NP5_51_masked.ply
+pc_NP3_NP5_267_masked.ply
+pc_NP3_NP5_183_masked.ply
+pc_NP3_NP5_30_masked.ply
+pc_NP3_NP5_102_masked.ply
+pc_NP3_NP5_63_masked.ply
+pc_NP3_NP5_0_masked.ply
+pc_NP2_NP5_9_masked.ply
+pc_NP3_NP5_333_masked.ply
+pc_NP2_NP5_144_masked.ply
+pc_NP2_NP5_30_masked.ply
+pc_NP2_NP5_156_masked.ply
+pc_NP2_NP5_333_masked.ply
+pc_NP2_NP5_66_masked.ply
+pc_NP2_NP5_96_masked.ply
+pc_NP2_NP5_138_masked.ply
+pc_NP2_NP5_180_masked.ply
+pc_NP3_NP5_309_masked.ply
+pc_NP3_NP5_324_masked.ply
+pc_NP2_NP5_243_masked.ply
+pc_NP2_NP5_252_masked.ply
+pc_NP3_NP5_111_masked.ply
+pc_NP1_NP5_348_masked.ply
+pc_NP3_NP5_6_masked.ply
+pc_NP2_NP5_354_masked.ply
+pc_NP3_NP5_255_masked.ply
+pc_NP2_NP5_114_masked.ply
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  86.20689392089844
+ADD-S AUC ( 5 %):  88.34811401367188
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.9999
+% certifiable:  20.689655303955078
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  100.0
+ADD-S AUC ( 5 %):  94.14778137207031
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  019_pitcher_base
+ONLY LOADING NONDEGENERATE VIEWPOINTS
+dataset len 25
+Number of trainable parameters:  896161
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+pc_NP2_NP5_132_masked.ply
+pc_NP3_NP5_189_masked.ply
+pc_NP1_NP5_69_masked.ply
+pc_NP3_NP5_18_masked.ply
+pc_NP3_NP5_336_masked.ply
+pc_NP3_NP5_138_masked.ply
+pc_NP2_NP5_114_masked.ply
+pc_NP3_NP5_21_masked.ply
+pc_NP3_NP5_105_masked.ply
+pc_NP2_NP5_129_masked.ply
+pc_NP2_NP5_342_masked.ply
+pc_NP2_NP5_33_masked.ply
+pc_NP2_NP5_66_masked.ply
+pc_NP2_NP5_198_masked.ply
+pc_NP1_NP5_216_masked.ply
+pc_NP2_NP5_351_masked.ply
+pc_NP1_NP5_357_masked.ply
+pc_NP2_NP5_84_masked.ply
+pc_NP1_NP5_132_masked.ply
+pc_NP1_NP5_81_masked.ply
+pc_NP4_NP5_21_masked.ply
+pc_NP3_NP5_57_masked.ply
+pc_NP3_NP5_174_masked.ply
+pc_NP1_NP5_0_masked.ply
+pc_NP2_NP5_336_masked.ply
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  100.0
+ADD-S AUC ( 5 %):  91.1199951171875
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99975
+% certifiable:  12.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  100.0
+ADD-S AUC ( 5 %):  95.1517105102539
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  035_power_drill
+ONLY LOADING NONDEGENERATE VIEWPOINTS
+dataset len 41
+Number of trainable parameters:  899239
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+pc_NP3_NP5_276_masked.ply
+pc_NP3_NP5_195_masked.ply
+pc_NP2_NP5_0_masked.ply
+pc_NP2_NP5_327_masked.ply
+pc_NP3_NP5_147_masked.ply
+pc_NP1_NP5_72_masked.ply
+pc_NP2_NP5_42_masked.ply
+pc_NP2_NP5_270_masked.ply
+pc_NP4_NP5_33_masked.ply
+pc_NP2_NP5_303_masked.ply
+pc_NP1_NP5_87_masked.ply
+pc_NP3_NP5_129_masked.ply
+pc_NP2_NP5_189_masked.ply
+pc_NP3_NP5_165_masked.ply
+pc_NP4_NP5_21_masked.ply
+pc_NP4_NP5_186_masked.ply
+pc_NP3_NP5_216_masked.ply
+pc_NP2_NP5_183_masked.ply
+pc_NP3_NP5_66_masked.ply
+pc_NP1_NP5_3_masked.ply
+pc_NP2_NP5_288_masked.ply
+pc_NP3_NP5_207_masked.ply
+pc_NP3_NP5_84_masked.ply
+pc_NP4_NP5_6_masked.ply
+pc_NP2_NP5_234_masked.ply
+pc_NP4_NP5_300_masked.ply
+pc_NP2_NP5_114_masked.ply
+pc_NP4_NP5_231_masked.ply
+pc_NP2_NP5_258_masked.ply
+pc_NP4_NP5_240_masked.ply
+pc_NP3_NP5_288_masked.ply
+pc_NP3_NP5_285_masked.ply
+pc_NP4_NP5_117_masked.ply
+pc_NP3_NP5_213_masked.ply
+pc_NP1_NP5_288_masked.ply
+pc_NP1_NP5_93_masked.ply
+pc_NP3_NP5_123_masked.ply
+pc_NP2_NP5_231_masked.ply
+pc_NP4_NP5_354_masked.ply
+pc_NP1_NP5_6_masked.ply
+pc_NP3_NP5_225_masked.ply
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  100.0
+ADD-S AUC ( 5 %):  92.64596557617188
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99992
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  036_wood_block
+ONLY LOADING NONDEGENERATE VIEWPOINTS
+dataset len 31
+Number of trainable parameters:  891544
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+pc_NP3_NP5_357_masked.ply
+pc_NP2_NP5_342_masked.ply
+pc_NP3_NP5_48_masked.ply
+pc_NP2_NP5_138_masked.ply
+pc_NP2_NP5_354_masked.ply
+pc_NP3_NP5_45_masked.ply
+pc_NP1_NP5_300_masked.ply
+pc_NP3_NP5_156_masked.ply
+pc_NP3_NP5_297_masked.ply
+pc_NP3_NP5_66_masked.ply
+pc_NP3_NP5_129_masked.ply
+pc_NP2_NP5_150_masked.ply
+pc_NP2_NP5_141_masked.ply
+pc_NP2_NP5_51_masked.ply
+pc_NP2_NP5_300_masked.ply
+pc_NP1_NP5_252_masked.ply
+pc_NP3_NP5_27_masked.ply
+pc_NP3_NP5_273_masked.ply
+pc_NP1_NP5_306_masked.ply
+pc_NP1_NP5_312_masked.ply
+pc_NP3_NP5_240_masked.ply
+pc_NP1_NP5_48_masked.ply
+pc_NP3_NP5_183_masked.ply
+pc_NP3_NP5_243_masked.ply
+pc_NP2_NP5_294_masked.ply
+pc_NP2_NP5_315_masked.ply
+pc_NP2_NP5_297_masked.ply
+pc_NP3_NP5_309_masked.ply
+pc_NP2_NP5_48_masked.ply
+pc_NP3_NP5_315_masked.ply
+pc_NP2_NP5_93_masked.ply
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  100.0
+ADD-S AUC ( 5 %):  89.57650756835938
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.9999
+% certifiable:  12.90322494506836
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  100.0
+ADD-S AUC ( 5 %):  95.28824615478516
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  061_foam_brick
+ONLY LOADING NONDEGENERATE VIEWPOINTS
+dataset len 40
+Number of trainable parameters:  896161
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+pc_NP3_NP5_288_masked.ply
+pc_NP1_NP5_309_masked.ply
+pc_NP2_NP5_246_masked.ply
+pc_NP5_NP5_156_masked.ply
+pc_NP3_NP5_354_masked.ply
+pc_NP5_NP5_81_masked.ply
+pc_NP1_NP5_252_masked.ply
+pc_NP2_NP5_318_masked.ply
+pc_NP1_NP5_315_masked.ply
+pc_NP2_NP5_48_masked.ply
+pc_NP2_NP5_180_masked.ply
+pc_NP5_NP5_351_masked.ply
+pc_NP5_NP5_114_masked.ply
+pc_NP1_NP5_327_masked.ply
+pc_NP5_NP5_267_masked.ply
+pc_NP2_NP5_144_masked.ply
+pc_NP3_NP5_255_masked.ply
+pc_NP2_NP5_75_masked.ply
+pc_NP5_NP5_291_masked.ply
+pc_NP1_NP5_243_masked.ply
+pc_NP2_NP5_21_masked.ply
+pc_NP1_NP5_147_masked.ply
+pc_NP3_NP5_333_masked.ply
+pc_NP1_NP5_321_masked.ply
+pc_NP3_NP5_45_masked.ply
+pc_NP2_NP5_87_masked.ply
+pc_NP1_NP5_237_masked.ply
+pc_NP1_NP5_123_masked.ply
+pc_NP5_NP5_201_masked.ply
+pc_NP5_NP5_189_masked.ply
+pc_NP3_NP5_186_masked.ply
+pc_NP2_NP5_117_masked.ply
+pc_NP3_NP5_156_masked.ply
+pc_NP3_NP5_33_masked.ply
+pc_NP2_NP5_183_masked.ply
+pc_NP1_NP5_36_masked.ply
+pc_NP3_NP5_321_masked.ply
+pc_NP2_NP5_126_masked.ply
+pc_NP1_NP5_144_masked.ply
+pc_NP3_NP5_48_masked.ply
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  100.0
+ADD-S AUC ( 5 %):  90.83160400390625
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99995
+% certifiable:  2.5
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  100.0
+ADD-S AUC ( 5 %):  100.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Fri Apr 22 12:20:16 EDT 2022
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+POINT_TRANSFORMER
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  004_sugar_box
+dataset len 60
+Number of trainable parameters:  897700
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+pc_NP3_NP5_30_masked.ply
+pc_NP1_NP5_213_masked.ply
+pc_NP2_NP5_339_masked.ply
+pc_NP5_NP5_48_masked.ply
+pc_NP4_NP5_78_masked.ply
+pc_NP4_NP5_45_masked.ply
+pc_NP2_NP5_195_masked.ply
+pc_NP5_NP5_237_masked.ply
+pc_NP2_NP5_267_masked.ply
+pc_NP2_NP5_51_masked.ply
+pc_NP4_NP5_87_masked.ply
+pc_NP5_NP5_180_masked.ply
+pc_NP1_NP5_303_masked.ply
+pc_NP1_NP5_297_masked.ply
+pc_NP5_NP5_24_masked.ply
+pc_NP1_NP5_201_masked.ply
+pc_NP3_NP5_312_masked.ply
+pc_NP2_NP5_231_masked.ply
+pc_NP2_NP5_213_masked.ply
+pc_NP4_NP5_354_masked.ply
+pc_NP1_NP5_114_masked.ply
+pc_NP2_NP5_3_masked.ply
+pc_NP4_NP5_306_masked.ply
+pc_NP2_NP5_36_masked.ply
+pc_NP4_NP5_183_masked.ply
+pc_NP4_NP5_90_masked.ply
+pc_NP2_NP5_354_masked.ply
+pc_NP4_NP5_243_masked.ply
+pc_NP4_NP5_99_masked.ply
+pc_NP3_NP5_159_masked.ply
+pc_NP5_NP5_51_masked.ply
+pc_NP5_NP5_126_masked.ply
+pc_NP4_NP5_261_masked.ply
+pc_NP4_NP5_192_masked.ply
+pc_NP4_NP5_195_masked.ply
+pc_NP3_NP5_144_masked.ply
+pc_NP4_NP5_327_masked.ply
+pc_NP1_NP5_336_masked.ply
+pc_NP1_NP5_108_masked.ply
+pc_NP2_NP5_288_masked.ply
+pc_NP3_NP5_153_masked.ply
+pc_NP3_NP5_150_masked.ply
+pc_NP3_NP5_42_masked.ply
+pc_NP1_NP5_321_masked.ply
+pc_NP5_NP5_0_masked.ply
+pc_NP3_NP5_36_masked.ply
+pc_NP2_NP5_69_masked.ply
+pc_NP1_NP5_189_masked.ply
+pc_NP1_NP5_18_masked.ply
+pc_NP3_NP5_111_masked.ply
+pc_NP1_NP5_27_masked.ply
+pc_NP4_NP5_288_masked.ply
+pc_NP1_NP5_9_masked.ply
+pc_NP4_NP5_270_masked.ply
+pc_NP3_NP5_117_masked.ply
+pc_NP2_NP5_246_masked.ply
+pc_NP4_NP5_3_masked.ply
+pc_NP1_NP5_195_masked.ply
+pc_NP5_NP5_288_masked.ply
+pc_NP1_NP5_57_masked.ply
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  51.66666793823242
+ADD-S AUC ( 5 %):  81.1863784790039
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.9999
+% certifiable:  8.333333969116211
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  100.0
+ADD-S AUC ( 5 %):  63.629268646240234
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Wed May 11 23:54:59 EDT 2022
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+POINT_TRANSFORMER
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  001_chips_can
+dataset len 60
+Number of trainable parameters:  897700
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+____
+pc_NP5_NP5_312_masked.ply
+0
+____
+pc_NP3_NP5_300_masked.ply
+1
+____
+pc_NP3_NP5_231_masked.ply
+2
+____
+pc_NP3_NP5_264_masked.ply
+3
+____
+pc_NP2_NP5_3_masked.ply
+4
+____
+pc_NP1_NP5_159_masked.ply
+5
+____
+pc_NP5_NP5_222_masked.ply
+6
+____
+pc_NP1_NP5_87_masked.ply
+7
+____
+pc_NP3_NP5_36_masked.ply
+8
+____
+pc_NP4_NP5_129_masked.ply
+9
+____
+pc_NP2_NP5_84_masked.ply
+10
+____
+pc_NP4_NP5_156_masked.ply
+11
+____
+pc_NP5_NP5_279_masked.ply
+12
+____
+pc_NP1_NP5_273_masked.ply
+13
+____
+pc_NP4_NP5_333_masked.ply
+14
+____
+pc_NP3_NP5_282_masked.ply
+15
+____
+pc_NP1_NP5_354_masked.ply
+16
+____
+pc_NP3_NP5_156_masked.ply
+17
+____
+pc_NP5_NP5_231_masked.ply
+18
+____
+pc_NP2_NP5_312_masked.ply
+19
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  002_master_chef_can
+dataset len 60
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Wed May 11 23:55:22 EDT 2022
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+POINT_TRANSFORMER
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  001_chips_can
+dataset len 60
+Number of trainable parameters:  897700
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+____
+pc_NP5_NP5_312_masked.ply
+0
+____
+pc_NP3_NP5_300_masked.ply
+1
+____
+pc_NP3_NP5_231_masked.ply
+2
+____
+pc_NP3_NP5_264_masked.ply
+3
+____
+pc_NP2_NP5_3_masked.ply
+4
+____
+pc_NP1_NP5_159_masked.ply
+5
+____
+pc_NP5_NP5_222_masked.ply
+6
+____
+pc_NP1_NP5_87_masked.ply
+7
+____
+pc_NP3_NP5_36_masked.ply
+8
+____
+pc_NP4_NP5_129_masked.ply
+9
+____
+pc_NP2_NP5_84_masked.ply
+10
+____
+pc_NP4_NP5_156_masked.ply
+11
+____
+pc_NP5_NP5_279_masked.ply
+12
+____
+pc_NP1_NP5_273_masked.ply
+13
+____
+pc_NP4_NP5_333_masked.ply
+14
+____
+pc_NP3_NP5_282_masked.ply
+15
+____
+pc_NP1_NP5_354_masked.ply
+16
+____
+pc_NP3_NP5_156_masked.ply
+17
+____
+pc_NP5_NP5_231_masked.ply
+18
+____
+pc_NP2_NP5_312_masked.ply
+19
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True], device='cuda:0')
+____
+pc_NP2_NP5_231_masked.ply
+20
+____
+pc_NP4_NP5_93_masked.ply
+21
+____
+pc_NP2_NP5_219_masked.ply
+22
+____
+pc_NP2_NP5_69_masked.ply
+23
+____
+pc_NP2_NP5_33_masked.ply
+24
+____
+pc_NP2_NP5_60_masked.ply
+25
+____
+pc_NP3_NP5_333_masked.ply
+26
+____
+pc_NP3_NP5_57_masked.ply
+27
+____
+pc_NP1_NP5_318_masked.ply
+28
+____
+pc_NP2_NP5_288_masked.ply
+29
+____
+pc_NP3_NP5_294_masked.ply
+30
+____
+pc_NP5_NP5_342_masked.ply
+31
+____
+pc_NP3_NP5_237_masked.ply
+32
+____
+pc_NP5_NP5_285_masked.ply
+33
+____
+pc_NP5_NP5_261_masked.ply
+34
+____
+pc_NP4_NP5_69_masked.ply
+35
+____
+pc_NP2_NP5_132_masked.ply
+36
+____
+pc_NP2_NP5_51_masked.ply
+37
+____
+pc_NP1_NP5_315_masked.ply
+38
+____
+pc_NP4_NP5_87_masked.ply
+39
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True], device='cuda:0')
+____
+pc_NP3_NP5_12_masked.ply
+40
+____
+pc_NP1_NP5_267_masked.ply
+41
+____
+pc_NP3_NP5_126_masked.ply
+42
+____
+pc_NP5_NP5_354_masked.ply
+43
+____
+pc_NP2_NP5_273_masked.ply
+44
+____
+pc_NP2_NP5_105_masked.ply
+45
+____
+pc_NP2_NP5_321_masked.ply
+46
+____
+pc_NP3_NP5_96_masked.ply
+47
+____
+pc_NP3_NP5_159_masked.ply
+48
+____
+pc_NP4_NP5_330_masked.ply
+49
+____
+pc_NP5_NP5_153_masked.ply
+50
+____
+pc_NP4_NP5_84_masked.ply
+51
+____
+pc_NP2_NP5_210_masked.ply
+52
+____
+pc_NP5_NP5_348_masked.ply
+53
+____
+pc_NP2_NP5_81_masked.ply
+54
+____
+pc_NP2_NP5_357_masked.ply
+55
+____
+pc_NP2_NP5_252_masked.ply
+56
+____
+pc_NP4_NP5_351_masked.ply
+57
+____
+pc_NP1_NP5_168_masked.ply
+58
+____
+pc_NP5_NP5_273_masked.ply
+59
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True],
+       device='cuda:0')
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  100.00000762939453
+ADD-S AUC ( 5 %):  92.01107788085938
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.9999
+% certifiable:  70.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  100.0
+ADD-S AUC ( 5 %):  92.26094818115234
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  002_master_chef_can
+dataset len 60
+Number of trainable parameters:  891544
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+____
+pc_NP2_NP5_306_masked.ply
+0
+____
+pc_NP4_NP5_336_masked.ply
+1
+____
+pc_NP2_NP5_348_masked.ply
+2
+____
+pc_NP4_NP5_108_masked.ply
+3
+____
+pc_NP4_NP5_234_masked.ply
+4
+____
+pc_NP5_NP5_273_masked.ply
+5
+____
+pc_NP4_NP5_15_masked.ply
+6
+____
+pc_NP1_NP5_234_masked.ply
+7
+____
+pc_NP2_NP5_261_masked.ply
+8
+____
+pc_NP3_NP5_81_masked.ply
+9
+____
+pc_NP2_NP5_207_masked.ply
+10
+____
+pc_NP2_NP5_183_masked.ply
+11
+____
+pc_NP1_NP5_3_masked.ply
+12
+____
+pc_NP2_NP5_15_masked.ply
+13
+____
+pc_NP5_NP5_282_masked.ply
+14
+____
+pc_NP2_NP5_102_masked.ply
+15
+____
+pc_NP4_NP5_195_masked.ply
+16
+____
+pc_NP5_NP5_354_masked.ply
+17
+____
+pc_NP3_NP5_24_masked.ply
+18
+____
+pc_NP1_NP5_309_masked.ply
+19
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True, False, False, False, False, False, False, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP1_NP5_357_masked.ply
+20
+____
+pc_NP4_NP5_150_masked.ply
+21
+____
+pc_NP1_NP5_63_masked.ply
+22
+____
+pc_NP1_NP5_99_masked.ply
+23
+____
+pc_NP4_NP5_87_masked.ply
+24
+____
+pc_NP3_NP5_327_masked.ply
+25
+____
+pc_NP3_NP5_18_masked.ply
+26
+____
+pc_NP1_NP5_78_masked.ply
+27
+____
+pc_NP3_NP5_267_masked.ply
+28
+____
+pc_NP3_NP5_15_masked.ply
+29
+____
+pc_NP3_NP5_321_masked.ply
+30
+____
+pc_NP1_NP5_144_masked.ply
+31
+____
+pc_NP1_NP5_33_masked.ply
+32
+____
+pc_NP3_NP5_27_masked.ply
+33
+____
+pc_NP1_NP5_219_masked.ply
+34
+____
+pc_NP5_NP5_9_masked.ply
+35
+____
+pc_NP4_NP5_3_masked.ply
+36
+____
+pc_NP1_NP5_135_masked.ply
+37
+____
+pc_NP2_NP5_351_masked.ply
+38
+____
+pc_NP1_NP5_351_masked.ply
+39
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True,  True, False, False, False, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True], device='cuda:0')
+____
+pc_NP2_NP5_309_masked.ply
+40
+____
+pc_NP3_NP5_174_masked.ply
+41
+____
+pc_NP1_NP5_45_masked.ply
+42
+____
+pc_NP4_NP5_165_masked.ply
+43
+____
+pc_NP3_NP5_279_masked.ply
+44
+____
+pc_NP4_NP5_30_masked.ply
+45
+____
+pc_NP1_NP5_36_masked.ply
+46
+____
+pc_NP2_NP5_330_masked.ply
+47
+____
+pc_NP2_NP5_114_masked.ply
+48
+____
+pc_NP5_NP5_63_masked.ply
+49
+____
+pc_NP4_NP5_288_masked.ply
+50
+____
+pc_NP2_NP5_57_masked.ply
+51
+____
+pc_NP5_NP5_291_masked.ply
+52
+____
+pc_NP5_NP5_345_masked.ply
+53
+____
+pc_NP1_NP5_252_masked.ply
+54
+____
+pc_NP4_NP5_78_masked.ply
+55
+____
+pc_NP1_NP5_210_masked.ply
+56
+____
+pc_NP5_NP5_126_masked.ply
+57
+____
+pc_NP1_NP5_69_masked.ply
+58
+____
+pc_NP3_NP5_114_masked.ply
+59
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True, False, False, False, False, False, False, False, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True], device='cuda:0')
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  68.33333587646484
+ADD-S AUC ( 5 %):  84.3947982788086
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.9999
+% certifiable:  3.3333334922790527
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  100.0
+ADD-S AUC ( 5 %):  66.66666412353516
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  003_cracker_box
+dataset len 60
+Number of trainable parameters:  897700
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+____
+pc_NP1_NP5_132_masked.ply
+0
+____
+pc_NP2_NP5_183_masked.ply
+1
+____
+pc_NP1_NP5_195_masked.ply
+2
+____
+pc_NP5_NP5_6_masked.ply
+3
+____
+pc_NP4_NP5_300_masked.ply
+4
+____
+pc_NP2_NP5_6_masked.ply
+5
+____
+pc_NP4_NP5_108_masked.ply
+6
+____
+pc_NP2_NP5_63_masked.ply
+7
+____
+pc_NP1_NP5_330_masked.ply
+8
+____
+pc_NP2_NP5_336_masked.ply
+9
+____
+pc_NP5_NP5_198_masked.ply
+10
+____
+pc_NP5_NP5_144_masked.ply
+11
+____
+pc_NP2_NP5_120_masked.ply
+12
+____
+pc_NP2_NP5_216_masked.ply
+13
+____
+pc_NP2_NP5_132_masked.ply
+14
+____
+pc_NP5_NP5_312_masked.ply
+15
+____
+pc_NP5_NP5_351_masked.ply
+16
+____
+pc_NP3_NP5_18_masked.ply
+17
+____
+pc_NP4_NP5_138_masked.ply
+18
+____
+pc_NP1_NP5_21_masked.ply
+19
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP2_NP5_282_masked.ply
+20
+____
+pc_NP3_NP5_27_masked.ply
+21
+____
+pc_NP1_NP5_75_masked.ply
+22
+____
+pc_NP1_NP5_342_masked.ply
+23
+____
+pc_NP5_NP5_315_masked.ply
+24
+____
+pc_NP2_NP5_153_masked.ply
+25
+____
+pc_NP3_NP5_333_masked.ply
+26
+____
+pc_NP4_NP5_171_masked.ply
+27
+____
+pc_NP2_NP5_342_masked.ply
+28
+____
+pc_NP2_NP5_105_masked.ply
+29
+____
+pc_NP3_NP5_198_masked.ply
+30
+____
+pc_NP4_NP5_66_masked.ply
+31
+____
+pc_NP3_NP5_153_masked.ply
+32
+____
+pc_NP2_NP5_207_masked.ply
+33
+____
+pc_NP3_NP5_177_masked.ply
+34
+____
+pc_NP4_NP5_270_masked.ply
+35
+____
+pc_NP5_NP5_48_masked.ply
+36
+____
+pc_NP5_NP5_273_masked.ply
+37
+____
+pc_NP4_NP5_261_masked.ply
+38
+____
+pc_NP4_NP5_297_masked.ply
+39
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True,  True,  True, False, False, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP4_NP5_99_masked.ply
+40
+____
+pc_NP1_NP5_42_masked.ply
+41
+____
+pc_NP1_NP5_99_masked.ply
+42
+____
+pc_NP2_NP5_300_masked.ply
+43
+____
+pc_NP1_NP5_261_masked.ply
+44
+____
+pc_NP3_NP5_24_masked.ply
+45
+____
+pc_NP1_NP5_63_masked.ply
+46
+____
+pc_NP1_NP5_36_masked.ply
+47
+____
+pc_NP5_NP5_159_masked.ply
+48
+____
+pc_NP5_NP5_294_masked.ply
+49
+____
+pc_NP2_NP5_27_masked.ply
+50
+____
+pc_NP3_NP5_261_masked.ply
+51
+____
+pc_NP3_NP5_267_masked.ply
+52
+____
+pc_NP1_NP5_96_masked.ply
+53
+____
+pc_NP5_NP5_153_masked.ply
+54
+____
+pc_NP5_NP5_42_masked.ply
+55
+____
+pc_NP2_NP5_249_masked.ply
+56
+____
+pc_NP1_NP5_45_masked.ply
+57
+____
+pc_NP1_NP5_312_masked.ply
+58
+____
+pc_NP1_NP5_201_masked.ply
+59
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True,  True,  True,  True, False, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True], device='cuda:0')
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  91.66667175292969
+ADD-S AUC ( 5 %):  89.33673095703125
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.9998
+% certifiable:  1.6666667461395264
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  100.0
+ADD-S AUC ( 5 %):  33.33333969116211
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  004_sugar_box
+dataset len 60
+Number of trainable parameters:  897700
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+____
+pc_NP3_NP5_30_masked.ply
+0
+____
+pc_NP1_NP5_213_masked.ply
+1
+____
+pc_NP2_NP5_339_masked.ply
+2
+____
+pc_NP5_NP5_48_masked.ply
+3
+____
+pc_NP4_NP5_78_masked.ply
+4
+____
+pc_NP4_NP5_45_masked.ply
+5
+____
+pc_NP2_NP5_195_masked.ply
+6
+____
+pc_NP5_NP5_237_masked.ply
+7
+____
+pc_NP2_NP5_267_masked.ply
+8
+____
+pc_NP2_NP5_51_masked.ply
+9
+____
+pc_NP4_NP5_87_masked.ply
+10
+____
+pc_NP5_NP5_180_masked.ply
+11
+____
+pc_NP1_NP5_303_masked.ply
+12
+____
+pc_NP1_NP5_297_masked.ply
+13
+____
+pc_NP5_NP5_24_masked.ply
+14
+____
+pc_NP1_NP5_201_masked.ply
+15
+____
+pc_NP3_NP5_312_masked.ply
+16
+____
+pc_NP2_NP5_231_masked.ply
+17
+____
+pc_NP2_NP5_213_masked.ply
+18
+____
+pc_NP4_NP5_354_masked.ply
+19
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True, False, False, False, False, False, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP1_NP5_114_masked.ply
+20
+____
+pc_NP2_NP5_3_masked.ply
+21
+____
+pc_NP4_NP5_306_masked.ply
+22
+____
+pc_NP2_NP5_36_masked.ply
+23
+____
+pc_NP4_NP5_183_masked.ply
+24
+____
+pc_NP4_NP5_90_masked.ply
+25
+____
+pc_NP2_NP5_354_masked.ply
+26
+____
+pc_NP4_NP5_243_masked.ply
+27
+____
+pc_NP4_NP5_99_masked.ply
+28
+____
+pc_NP3_NP5_159_masked.ply
+29
+____
+pc_NP5_NP5_51_masked.ply
+30
+____
+pc_NP5_NP5_126_masked.ply
+31
+____
+pc_NP4_NP5_261_masked.ply
+32
+____
+pc_NP4_NP5_192_masked.ply
+33
+____
+pc_NP4_NP5_195_masked.ply
+34
+____
+pc_NP3_NP5_144_masked.ply
+35
+____
+pc_NP4_NP5_327_masked.ply
+36
+____
+pc_NP1_NP5_336_masked.ply
+37
+____
+pc_NP1_NP5_108_masked.ply
+38
+____
+pc_NP2_NP5_288_masked.ply
+39
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True, False, False, False, False, False, False, False, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True], device='cuda:0')
+____
+pc_NP3_NP5_153_masked.ply
+40
+____
+pc_NP3_NP5_150_masked.ply
+41
+____
+pc_NP3_NP5_42_masked.ply
+42
+____
+pc_NP1_NP5_321_masked.ply
+43
+____
+pc_NP5_NP5_0_masked.ply
+44
+____
+pc_NP3_NP5_36_masked.ply
+45
+____
+pc_NP2_NP5_69_masked.ply
+46
+____
+pc_NP1_NP5_189_masked.ply
+47
+____
+pc_NP1_NP5_18_masked.ply
+48
+____
+pc_NP3_NP5_111_masked.ply
+49
+____
+pc_NP1_NP5_27_masked.ply
+50
+____
+pc_NP4_NP5_288_masked.ply
+51
+____
+pc_NP1_NP5_9_masked.ply
+52
+____
+pc_NP4_NP5_270_masked.ply
+53
+____
+pc_NP3_NP5_117_masked.ply
+54
+____
+pc_NP2_NP5_246_masked.ply
+55
+____
+pc_NP4_NP5_3_masked.ply
+56
+____
+pc_NP1_NP5_195_masked.ply
+57
+____
+pc_NP5_NP5_288_masked.ply
+58
+____
+pc_NP1_NP5_57_masked.ply
+59
+index in VOCap tensor([ True,  True,  True,  True,  True,  True, False, False, False, False,
+        False, False, False, False, False, False, False, False, False, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True], device='cuda:0')
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  53.333335876464844
+ADD-S AUC ( 5 %):  81.6969223022461
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.9999
+% certifiable:  3.3333334922790527
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  100.0
+ADD-S AUC ( 5 %):  66.66666412353516
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  005_tomato_soup_can
+dataset len 60
+Number of trainable parameters:  891544
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+____
+pc_NP5_NP5_96_masked.ply
+0
+____
+pc_NP1_NP5_195_masked.ply
+1
+____
+pc_NP1_NP5_108_masked.ply
+2
+____
+pc_NP5_NP5_261_masked.ply
+3
+____
+pc_NP3_NP5_180_masked.ply
+4
+____
+pc_NP4_NP5_183_masked.ply
+5
+____
+pc_NP3_NP5_171_masked.ply
+6
+____
+pc_NP5_NP5_9_masked.ply
+7
+____
+pc_NP1_NP5_288_masked.ply
+8
+____
+pc_NP3_NP5_84_masked.ply
+9
+____
+pc_NP4_NP5_246_masked.ply
+10
+____
+pc_NP4_NP5_267_masked.ply
+11
+____
+pc_NP2_NP5_291_masked.ply
+12
+____
+pc_NP5_NP5_180_masked.ply
+13
+____
+pc_NP2_NP5_273_masked.ply
+14
+____
+pc_NP4_NP5_312_masked.ply
+15
+____
+pc_NP3_NP5_306_masked.ply
+16
+____
+pc_NP3_NP5_291_masked.ply
+17
+____
+pc_NP5_NP5_228_masked.ply
+18
+____
+pc_NP4_NP5_195_masked.ply
+19
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True], device='cuda:0')
+____
+pc_NP5_NP5_291_masked.ply
+20
+____
+pc_NP1_NP5_204_masked.ply
+21
+____
+pc_NP5_NP5_252_masked.ply
+22
+____
+pc_NP1_NP5_354_masked.ply
+23
+____
+pc_NP2_NP5_321_masked.ply
+24
+____
+pc_NP3_NP5_237_masked.ply
+25
+____
+pc_NP2_NP5_72_masked.ply
+26
+____
+pc_NP5_NP5_30_masked.ply
+27
+____
+pc_NP2_NP5_138_masked.ply
+28
+____
+pc_NP3_NP5_51_masked.ply
+29
+____
+pc_NP2_NP5_351_masked.ply
+30
+____
+pc_NP4_NP5_219_masked.ply
+31
+____
+pc_NP4_NP5_105_masked.ply
+32
+____
+pc_NP2_NP5_39_masked.ply
+33
+____
+pc_NP1_NP5_324_masked.ply
+34
+____
+pc_NP3_NP5_141_masked.ply
+35
+____
+pc_NP3_NP5_156_masked.ply
+36
+____
+pc_NP4_NP5_345_masked.ply
+37
+____
+pc_NP1_NP5_270_masked.ply
+38
+____
+pc_NP2_NP5_150_masked.ply
+39
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True], device='cuda:0')
+____
+pc_NP1_NP5_147_masked.ply
+40
+____
+pc_NP4_NP5_222_masked.ply
+41
+____
+pc_NP5_NP5_132_masked.ply
+42
+____
+pc_NP2_NP5_354_masked.ply
+43
+____
+pc_NP1_NP5_342_masked.ply
+44
+____
+pc_NP1_NP5_24_masked.ply
+45
+____
+pc_NP1_NP5_231_masked.ply
+46
+____
+pc_NP4_NP5_165_masked.ply
+47
+____
+pc_NP4_NP5_60_masked.ply
+48
+____
+pc_NP3_NP5_282_masked.ply
+49
+____
+pc_NP5_NP5_135_masked.ply
+50
+____
+pc_NP1_NP5_174_masked.ply
+51
+____
+pc_NP3_NP5_354_masked.ply
+52
+____
+pc_NP1_NP5_90_masked.ply
+53
+____
+pc_NP2_NP5_231_masked.ply
+54
+____
+pc_NP2_NP5_237_masked.ply
+55
+____
+pc_NP5_NP5_204_masked.ply
+56
+____
+pc_NP5_NP5_69_masked.ply
+57
+____
+pc_NP3_NP5_309_masked.ply
+58
+____
+pc_NP2_NP5_204_masked.ply
+59
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  100.00000762939453
+ADD-S AUC ( 5 %):  92.90831756591797
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99995
+% certifiable:  3.3333334922790527
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  100.0
+ADD-S AUC ( 5 %):  66.66666412353516
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  006_mustard_bottle
+dataset len 60
+Number of trainable parameters:  896161
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+____
+pc_NP2_NP5_240_masked.ply
+0
+____
+pc_NP3_NP5_306_masked.ply
+1
+____
+pc_NP3_NP5_69_masked.ply
+2
+____
+pc_NP5_NP5_141_masked.ply
+3
+____
+pc_NP5_NP5_342_masked.ply
+4
+____
+pc_NP5_NP5_285_masked.ply
+5
+____
+pc_NP3_NP5_87_masked.ply
+6
+____
+pc_NP5_NP5_357_masked.ply
+7
+____
+pc_NP2_NP5_330_masked.ply
+8
+____
+pc_NP1_NP5_126_masked.ply
+9
+____
+pc_NP2_NP5_120_masked.ply
+10
+____
+pc_NP3_NP5_270_masked.ply
+11
+____
+pc_NP3_NP5_72_masked.ply
+12
+____
+pc_NP5_NP5_288_masked.ply
+13
+____
+pc_NP4_NP5_126_masked.ply
+14
+____
+pc_NP4_NP5_177_masked.ply
+15
+____
+pc_NP2_NP5_153_masked.ply
+16
+____
+pc_NP5_NP5_114_masked.ply
+17
+____
+pc_NP1_NP5_138_masked.ply
+18
+____
+pc_NP3_NP5_210_masked.ply
+19
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True,  True,  True,  True,  True, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True], device='cuda:0')
+____
+pc_NP1_NP5_336_masked.ply
+20
+____
+pc_NP4_NP5_87_masked.ply
+21
+____
+pc_NP3_NP5_195_masked.ply
+22
+____
+pc_NP1_NP5_354_masked.ply
+23
+____
+pc_NP1_NP5_171_masked.ply
+24
+____
+pc_NP2_NP5_87_masked.ply
+25
+____
+pc_NP3_NP5_300_masked.ply
+26
+____
+pc_NP1_NP5_54_masked.ply
+27
+____
+pc_NP1_NP5_303_masked.ply
+28
+____
+pc_NP2_NP5_105_masked.ply
+29
+____
+pc_NP4_NP5_189_masked.ply
+30
+____
+pc_NP2_NP5_81_masked.ply
+31
+____
+pc_NP5_NP5_333_masked.ply
+32
+____
+pc_NP2_NP5_228_masked.ply
+33
+____
+pc_NP5_NP5_162_masked.ply
+34
+____
+pc_NP2_NP5_99_masked.ply
+35
+____
+pc_NP4_NP5_198_masked.ply
+36
+____
+pc_NP5_NP5_255_masked.ply
+37
+____
+pc_NP5_NP5_174_masked.ply
+38
+____
+pc_NP3_NP5_186_masked.ply
+39
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True,  True,  True,  True, False, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True], device='cuda:0')
+____
+pc_NP3_NP5_342_masked.ply
+40
+____
+pc_NP5_NP5_336_masked.ply
+41
+____
+pc_NP2_NP5_279_masked.ply
+42
+____
+pc_NP3_NP5_135_masked.ply
+43
+____
+pc_NP5_NP5_231_masked.ply
+44
+____
+pc_NP4_NP5_129_masked.ply
+45
+____
+pc_NP3_NP5_141_masked.ply
+46
+____
+pc_NP2_NP5_63_masked.ply
+47
+____
+pc_NP1_NP5_81_masked.ply
+48
+____
+pc_NP2_NP5_318_masked.ply
+49
+____
+pc_NP4_NP5_159_masked.ply
+50
+____
+pc_NP5_NP5_198_masked.ply
+51
+____
+pc_NP1_NP5_150_masked.ply
+52
+____
+pc_NP5_NP5_219_masked.ply
+53
+____
+pc_NP1_NP5_207_masked.ply
+54
+____
+pc_NP2_NP5_336_masked.ply
+55
+____
+pc_NP4_NP5_84_masked.ply
+56
+____
+pc_NP3_NP5_315_masked.ply
+57
+____
+pc_NP3_NP5_162_masked.ply
+58
+____
+pc_NP2_NP5_72_masked.ply
+59
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True,  True,  True,  True,  True, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  93.33333587646484
+ADD-S AUC ( 5 %):  87.87972259521484
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.9999
+% certifiable:  5.000000476837158
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  100.0
+ADD-S AUC ( 5 %):  65.09689331054688
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  007_tuna_fish_can
+dataset len 60
+Number of trainable parameters:  891544
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+____
+pc_NP1_NP5_198_masked.ply
+0
+____
+pc_NP5_NP5_309_masked.ply
+1
+____
+pc_NP3_NP5_234_masked.ply
+2
+____
+pc_NP4_NP5_270_masked.ply
+3
+____
+pc_NP1_NP5_141_masked.ply
+4
+____
+pc_NP1_NP5_0_masked.ply
+5
+____
+pc_NP1_NP5_312_masked.ply
+6
+____
+pc_NP2_NP5_207_masked.ply
+7
+____
+pc_NP4_NP5_81_masked.ply
+8
+____
+pc_NP5_NP5_132_masked.ply
+9
+____
+pc_NP2_NP5_315_masked.ply
+10
+____
+pc_NP5_NP5_111_masked.ply
+11
+____
+pc_NP3_NP5_351_masked.ply
+12
+____
+pc_NP2_NP5_339_masked.ply
+13
+____
+pc_NP3_NP5_171_masked.ply
+14
+____
+pc_NP4_NP5_354_masked.ply
+15
+____
+pc_NP5_NP5_321_masked.ply
+16
+____
+pc_NP4_NP5_225_masked.ply
+17
+____
+pc_NP4_NP5_3_masked.ply
+18
+____
+pc_NP1_NP5_111_masked.ply
+19
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP4_NP5_108_masked.ply
+20
+____
+pc_NP4_NP5_231_masked.ply
+21
+____
+pc_NP5_NP5_120_masked.ply
+22
+____
+pc_NP1_NP5_147_masked.ply
+23
+____
+pc_NP3_NP5_144_masked.ply
+24
+____
+pc_NP1_NP5_9_masked.ply
+25
+____
+pc_NP5_NP5_198_masked.ply
+26
+____
+pc_NP5_NP5_219_masked.ply
+27
+____
+pc_NP3_NP5_153_masked.ply
+28
+____
+pc_NP1_NP5_144_masked.ply
+29
+____
+pc_NP5_NP5_69_masked.ply
+30
+____
+pc_NP3_NP5_42_masked.ply
+31
+____
+pc_NP1_NP5_72_masked.ply
+32
+____
+pc_NP3_NP5_336_masked.ply
+33
+____
+pc_NP3_NP5_81_masked.ply
+34
+____
+pc_NP2_NP5_51_masked.ply
+35
+____
+pc_NP3_NP5_69_masked.ply
+36
+____
+pc_NP5_NP5_243_masked.ply
+37
+____
+pc_NP5_NP5_108_masked.ply
+38
+____
+pc_NP3_NP5_315_masked.ply
+39
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP2_NP5_303_masked.ply
+40
+____
+pc_NP1_NP5_183_masked.ply
+41
+____
+pc_NP4_NP5_330_masked.ply
+42
+____
+pc_NP5_NP5_273_masked.ply
+43
+____
+pc_NP1_NP5_282_masked.ply
+44
+____
+pc_NP5_NP5_171_masked.ply
+45
+____
+pc_NP5_NP5_12_masked.ply
+46
+____
+pc_NP4_NP5_39_masked.ply
+47
+____
+pc_NP2_NP5_357_masked.ply
+48
+____
+pc_NP3_NP5_273_masked.ply
+49
+____
+pc_NP2_NP5_336_masked.ply
+50
+____
+pc_NP2_NP5_219_masked.ply
+51
+____
+pc_NP5_NP5_342_masked.ply
+52
+____
+pc_NP2_NP5_348_masked.ply
+53
+____
+pc_NP1_NP5_165_masked.ply
+54
+____
+pc_NP2_NP5_42_masked.ply
+55
+____
+pc_NP5_NP5_216_masked.ply
+56
+____
+pc_NP5_NP5_129_masked.ply
+57
+____
+pc_NP3_NP5_105_masked.ply
+58
+____
+pc_NP1_NP5_345_masked.ply
+59
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True,  True,  True,  True,  True, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  98.33333587646484
+ADD-S AUC ( 5 %):  89.71085357666016
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99995
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  008_pudding_box
+dataset len 60
+Number of trainable parameters:  891544
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+____
+pc_NP2_NP5_219_masked.ply
+0
+____
+pc_NP3_NP5_312_masked.ply
+1
+____
+pc_NP1_NP5_168_masked.ply
+2
+____
+pc_NP1_NP5_75_masked.ply
+3
+____
+pc_NP2_NP5_273_masked.ply
+4
+____
+pc_NP1_NP5_54_masked.ply
+5
+____
+pc_NP4_NP5_0_masked.ply
+6
+____
+pc_NP1_NP5_303_masked.ply
+7
+____
+pc_NP4_NP5_282_masked.ply
+8
+____
+pc_NP2_NP5_90_masked.ply
+9
+____
+pc_NP1_NP5_279_masked.ply
+10
+____
+pc_NP3_NP5_195_masked.ply
+11
+____
+pc_NP3_NP5_261_masked.ply
+12
+____
+pc_NP3_NP5_192_masked.ply
+13
+____
+pc_NP5_NP5_252_masked.ply
+14
+____
+pc_NP3_NP5_114_masked.ply
+15
+____
+pc_NP3_NP5_267_masked.ply
+16
+____
+pc_NP2_NP5_147_masked.ply
+17
+____
+pc_NP3_NP5_348_masked.ply
+18
+____
+pc_NP3_NP5_228_masked.ply
+19
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True,  True,  True, False, False, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP1_NP5_204_masked.ply
+20
+____
+pc_NP1_NP5_354_masked.ply
+21
+____
+pc_NP2_NP5_171_masked.ply
+22
+____
+pc_NP2_NP5_6_masked.ply
+23
+____
+pc_NP3_NP5_327_masked.ply
+24
+____
+pc_NP1_NP5_57_masked.ply
+25
+____
+pc_NP1_NP5_297_masked.ply
+26
+____
+pc_NP1_NP5_174_masked.ply
+27
+____
+pc_NP5_NP5_18_masked.ply
+28
+____
+pc_NP3_NP5_282_masked.ply
+29
+____
+pc_NP3_NP5_90_masked.ply
+30
+____
+pc_NP4_NP5_27_masked.ply
+31
+____
+pc_NP2_NP5_114_masked.ply
+32
+____
+pc_NP5_NP5_81_masked.ply
+33
+____
+pc_NP5_NP5_204_masked.ply
+34
+____
+pc_NP1_NP5_192_masked.ply
+35
+____
+pc_NP1_NP5_255_masked.ply
+36
+____
+pc_NP4_NP5_225_masked.ply
+37
+____
+pc_NP5_NP5_357_masked.ply
+38
+____
+pc_NP4_NP5_297_masked.ply
+39
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True,  True,  True, False, False, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP2_NP5_213_masked.ply
+40
+____
+pc_NP5_NP5_108_masked.ply
+41
+____
+pc_NP2_NP5_207_masked.ply
+42
+____
+pc_NP3_NP5_207_masked.ply
+43
+____
+pc_NP1_NP5_126_masked.ply
+44
+____
+pc_NP2_NP5_222_masked.ply
+45
+____
+pc_NP3_NP5_105_masked.ply
+46
+____
+pc_NP5_NP5_12_masked.ply
+47
+____
+pc_NP2_NP5_138_masked.ply
+48
+____
+pc_NP3_NP5_150_masked.ply
+49
+____
+pc_NP3_NP5_3_masked.ply
+50
+____
+pc_NP1_NP5_300_masked.ply
+51
+____
+pc_NP2_NP5_96_masked.ply
+52
+____
+pc_NP4_NP5_201_masked.ply
+53
+____
+pc_NP2_NP5_192_masked.ply
+54
+____
+pc_NP2_NP5_333_masked.ply
+55
+____
+pc_NP4_NP5_261_masked.ply
+56
+____
+pc_NP3_NP5_0_masked.ply
+57
+____
+pc_NP4_NP5_213_masked.ply
+58
+____
+pc_NP5_NP5_225_masked.ply
+59
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True,  True,  True, False, False, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  85.00000762939453
+ADD-S AUC ( 5 %):  88.4582748413086
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99995
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  009_gelatin_box
+dataset len 56
+Number of trainable parameters:  891544
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+____
+pc_NP1_NP5_231_masked.ply
+0
+____
+pc_NP3_NP5_279_masked.ply
+1
+____
+pc_NP4_NP5_21_masked.ply
+2
+____
+pc_NP5_NP5_345_masked.ply
+3
+____
+pc_NP2_NP5_306_masked.ply
+4
+____
+pc_NP1_NP5_78_masked.ply
+5
+____
+pc_NP1_NP5_45_masked.ply
+6
+____
+pc_NP2_NP5_168_masked.ply
+7
+____
+pc_NP1_NP5_336_masked.ply
+8
+____
+pc_NP4_NP5_96_masked.ply
+9
+____
+pc_NP1_NP5_297_masked.ply
+10
+____
+pc_NP5_NP5_132_masked.ply
+11
+____
+pc_NP1_NP5_237_masked.ply
+12
+____
+pc_NP2_NP5_231_masked.ply
+13
+____
+pc_NP1_NP5_294_masked.ply
+14
+____
+pc_NP1_NP5_114_masked.ply
+15
+____
+pc_NP5_NP5_78_masked.ply
+16
+____
+pc_NP5_NP5_348_masked.ply
+17
+____
+pc_NP4_NP5_342_masked.ply
+18
+____
+pc_NP1_NP5_210_masked.ply
+19
+____
+pc_NP2_NP5_24_masked.ply
+20
+____
+pc_NP1_NP5_144_masked.ply
+21
+____
+pc_NP5_NP5_210_masked.ply
+22
+____
+pc_NP5_NP5_168_masked.ply
+23
+____
+pc_NP4_NP5_252_masked.ply
+24
+____
+pc_NP5_NP5_81_masked.ply
+25
+____
+pc_NP1_NP5_282_masked.ply
+26
+____
+pc_NP5_NP5_21_masked.ply
+27
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True, False, False, False, False, False, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP4_NP5_228_masked.ply
+28
+____
+pc_NP4_NP5_141_masked.ply
+29
+____
+pc_NP2_NP5_51_masked.ply
+30
+____
+pc_NP3_NP5_300_masked.ply
+31
+____
+pc_NP4_NP5_3_masked.ply
+32
+____
+pc_NP3_NP5_243_masked.ply
+33
+____
+pc_NP1_NP5_207_masked.ply
+34
+____
+pc_NP3_NP5_324_masked.ply
+35
+____
+pc_NP1_NP5_291_masked.ply
+36
+____
+pc_NP2_NP5_252_masked.ply
+37
+____
+pc_NP4_NP5_189_masked.ply
+38
+____
+pc_NP4_NP5_156_masked.ply
+39
+____
+pc_NP2_NP5_27_masked.ply
+40
+____
+pc_NP5_NP5_18_masked.ply
+41
+____
+pc_NP3_NP5_150_masked.ply
+42
+____
+pc_NP4_NP5_24_masked.ply
+43
+____
+pc_NP3_NP5_234_masked.ply
+44
+____
+pc_NP2_NP5_291_masked.ply
+45
+____
+pc_NP1_NP5_342_masked.ply
+46
+____
+pc_NP4_NP5_207_masked.ply
+47
+____
+pc_NP5_NP5_0_masked.ply
+48
+____
+pc_NP1_NP5_312_masked.ply
+49
+____
+pc_NP1_NP5_69_masked.ply
+50
+____
+pc_NP1_NP5_339_masked.ply
+51
+____
+pc_NP2_NP5_243_masked.ply
+52
+____
+pc_NP1_NP5_309_masked.ply
+53
+____
+pc_NP1_NP5_129_masked.ply
+54
+____
+pc_NP5_NP5_33_masked.ply
+55
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True, False, False, False, False, False, False, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  76.78572082519531
+ADD-S AUC ( 5 %):  86.27281951904297
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99995
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  010_potted_meat_can
+dataset len 60
+Number of trainable parameters:  891544
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+____
+pc_NP3_NP5_96_masked.ply
+0
+____
+pc_NP2_NP5_294_masked.ply
+1
+____
+pc_NP4_NP5_198_masked.ply
+2
+____
+pc_NP3_NP5_51_masked.ply
+3
+____
+pc_NP3_NP5_267_masked.ply
+4
+____
+pc_NP3_NP5_183_masked.ply
+5
+____
+pc_NP3_NP5_30_masked.ply
+6
+____
+pc_NP3_NP5_102_masked.ply
+7
+____
+pc_NP4_NP5_309_masked.ply
+8
+____
+pc_NP4_NP5_297_masked.ply
+9
+____
+pc_NP1_NP5_351_masked.ply
+10
+____
+pc_NP1_NP5_45_masked.ply
+11
+____
+pc_NP3_NP5_63_masked.ply
+12
+____
+pc_NP4_NP5_120_masked.ply
+13
+____
+pc_NP5_NP5_72_masked.ply
+14
+____
+pc_NP3_NP5_0_masked.ply
+15
+____
+pc_NP4_NP5_150_masked.ply
+16
+____
+pc_NP2_NP5_9_masked.ply
+17
+____
+pc_NP3_NP5_333_masked.ply
+18
+____
+pc_NP2_NP5_144_masked.ply
+19
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True, False, False, False, False, False, False, False, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True], device='cuda:0')
+____
+pc_NP2_NP5_30_masked.ply
+20
+____
+pc_NP5_NP5_240_masked.ply
+21
+____
+pc_NP2_NP5_156_masked.ply
+22
+____
+pc_NP1_NP5_294_masked.ply
+23
+____
+pc_NP2_NP5_333_masked.ply
+24
+____
+pc_NP1_NP5_30_masked.ply
+25
+____
+pc_NP5_NP5_342_masked.ply
+26
+____
+pc_NP4_NP5_177_masked.ply
+27
+____
+pc_NP5_NP5_147_masked.ply
+28
+____
+pc_NP4_NP5_153_masked.ply
+29
+____
+pc_NP2_NP5_66_masked.ply
+30
+____
+pc_NP5_NP5_126_masked.ply
+31
+____
+pc_NP2_NP5_96_masked.ply
+32
+____
+pc_NP2_NP5_138_masked.ply
+33
+____
+pc_NP2_NP5_180_masked.ply
+34
+____
+pc_NP5_NP5_93_masked.ply
+35
+____
+pc_NP3_NP5_309_masked.ply
+36
+____
+pc_NP3_NP5_324_masked.ply
+37
+____
+pc_NP2_NP5_243_masked.ply
+38
+____
+pc_NP5_NP5_186_masked.ply
+39
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True, False,
+        False, False, False, False, False, False, False, False, False, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP5_NP5_246_masked.ply
+40
+____
+pc_NP4_NP5_114_masked.ply
+41
+____
+pc_NP5_NP5_345_masked.ply
+42
+____
+pc_NP1_NP5_195_masked.ply
+43
+____
+pc_NP2_NP5_252_masked.ply
+44
+____
+pc_NP3_NP5_111_masked.ply
+45
+____
+pc_NP4_NP5_255_masked.ply
+46
+____
+pc_NP1_NP5_348_masked.ply
+47
+____
+pc_NP3_NP5_6_masked.ply
+48
+____
+pc_NP1_NP5_60_masked.ply
+49
+____
+pc_NP2_NP5_354_masked.ply
+50
+____
+pc_NP1_NP5_159_masked.ply
+51
+____
+pc_NP3_NP5_255_masked.ply
+52
+____
+pc_NP1_NP5_321_masked.ply
+53
+____
+pc_NP5_NP5_312_masked.ply
+54
+____
+pc_NP1_NP5_126_masked.ply
+55
+____
+pc_NP1_NP5_327_masked.ply
+56
+____
+pc_NP2_NP5_114_masked.ply
+57
+____
+pc_NP5_NP5_315_masked.ply
+58
+____
+pc_NP4_NP5_282_masked.ply
+59
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+        False, False, False, False, False, False, False, False, False, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  51.66666793823242
+ADD-S AUC ( 5 %):  81.70557403564453
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.9999
+% certifiable:  1.6666667461395264
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  100.0
+ADD-S AUC ( 5 %):  33.33333206176758
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  011_banana
+dataset len 60
+Number of trainable parameters:  888466
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+____
+pc_NP4_NP5_126_masked.ply
+0
+____
+pc_NP2_NP5_174_masked.ply
+1
+____
+pc_NP3_NP5_102_masked.ply
+2
+____
+pc_NP1_NP5_117_masked.ply
+3
+____
+pc_NP2_NP5_90_masked.ply
+4
+____
+pc_NP3_NP5_285_masked.ply
+5
+____
+pc_NP4_NP5_195_masked.ply
+6
+____
+pc_NP2_NP5_84_masked.ply
+7
+____
+pc_NP1_NP5_222_masked.ply
+8
+____
+pc_NP2_NP5_135_masked.ply
+9
+____
+pc_NP2_NP5_186_masked.ply
+10
+____
+pc_NP3_NP5_15_masked.ply
+11
+____
+pc_NP1_NP5_309_masked.ply
+12
+____
+pc_NP3_NP5_261_masked.ply
+13
+____
+pc_NP1_NP5_327_masked.ply
+14
+____
+pc_NP2_NP5_276_masked.ply
+15
+____
+pc_NP5_NP5_192_masked.ply
+16
+____
+pc_NP5_NP5_90_masked.ply
+17
+____
+pc_NP5_NP5_39_masked.ply
+18
+____
+pc_NP3_NP5_267_masked.ply
+19
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True], device='cuda:0')
+____
+pc_NP1_NP5_18_masked.ply
+20
+____
+pc_NP3_NP5_270_masked.ply
+21
+____
+pc_NP5_NP5_276_masked.ply
+22
+____
+pc_NP5_NP5_165_masked.ply
+23
+____
+pc_NP5_NP5_270_masked.ply
+24
+____
+pc_NP3_NP5_216_masked.ply
+25
+____
+pc_NP1_NP5_27_masked.ply
+26
+____
+pc_NP1_NP5_345_masked.ply
+27
+____
+pc_NP3_NP5_123_masked.ply
+28
+____
+pc_NP3_NP5_42_masked.ply
+29
+____
+pc_NP5_NP5_87_masked.ply
+30
+____
+pc_NP4_NP5_6_masked.ply
+31
+____
+pc_NP2_NP5_306_masked.ply
+32
+____
+pc_NP5_NP5_312_masked.ply
+33
+____
+pc_NP3_NP5_174_masked.ply
+34
+____
+pc_NP5_NP5_93_masked.ply
+35
+____
+pc_NP1_NP5_204_masked.ply
+36
+____
+pc_NP1_NP5_357_masked.ply
+37
+____
+pc_NP3_NP5_12_masked.ply
+38
+____
+pc_NP4_NP5_183_masked.ply
+39
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True], device='cuda:0')
+____
+pc_NP5_NP5_228_masked.ply
+40
+____
+pc_NP5_NP5_114_masked.ply
+41
+____
+pc_NP3_NP5_291_masked.ply
+42
+____
+pc_NP1_NP5_42_masked.ply
+43
+____
+pc_NP4_NP5_306_masked.ply
+44
+____
+pc_NP3_NP5_111_masked.ply
+45
+____
+pc_NP2_NP5_18_masked.ply
+46
+____
+pc_NP4_NP5_309_masked.ply
+47
+____
+pc_NP1_NP5_3_masked.ply
+48
+____
+pc_NP5_NP5_216_masked.ply
+49
+____
+pc_NP4_NP5_141_masked.ply
+50
+____
+pc_NP2_NP5_3_masked.ply
+51
+____
+pc_NP5_NP5_222_masked.ply
+52
+____
+pc_NP5_NP5_147_masked.ply
+53
+____
+pc_NP5_NP5_315_masked.ply
+54
+____
+pc_NP1_NP5_351_masked.ply
+55
+____
+pc_NP2_NP5_114_masked.ply
+56
+____
+pc_NP4_NP5_105_masked.ply
+57
+____
+pc_NP4_NP5_207_masked.ply
+58
+____
+pc_NP4_NP5_297_masked.ply
+59
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True], device='cuda:0')
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  100.00000762939453
+ADD-S AUC ( 5 %):  95.15596771240234
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99992
+% certifiable:  11.666666984558105
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  100.0
+ADD-S AUC ( 5 %):  98.16616821289062
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  019_pitcher_base
+dataset len 60
+Number of trainable parameters:  896161
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+____
+pc_NP2_NP5_231_masked.ply
+0
+____
+pc_NP5_NP5_318_masked.ply
+1
+____
+pc_NP4_NP5_333_masked.ply
+2
+____
+pc_NP4_NP5_117_masked.ply
+3
+____
+pc_NP2_NP5_132_masked.ply
+4
+____
+pc_NP5_NP5_330_masked.ply
+5
+____
+pc_NP3_NP5_189_masked.ply
+6
+____
+pc_NP4_NP5_303_masked.ply
+7
+____
+pc_NP1_NP5_69_masked.ply
+8
+____
+pc_NP3_NP5_18_masked.ply
+9
+____
+pc_NP3_NP5_336_masked.ply
+10
+____
+pc_NP5_NP5_348_masked.ply
+11
+____
+pc_NP3_NP5_87_masked.ply
+12
+____
+pc_NP2_NP5_228_masked.ply
+13
+____
+pc_NP5_NP5_249_masked.ply
+14
+____
+pc_NP3_NP5_138_masked.ply
+15
+____
+pc_NP2_NP5_114_masked.ply
+16
+____
+pc_NP3_NP5_222_masked.ply
+17
+____
+pc_NP2_NP5_282_masked.ply
+18
+____
+pc_NP3_NP5_21_masked.ply
+19
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP3_NP5_105_masked.ply
+20
+____
+pc_NP2_NP5_129_masked.ply
+21
+____
+pc_NP5_NP5_219_masked.ply
+22
+____
+pc_NP2_NP5_342_masked.ply
+23
+____
+pc_NP1_NP5_243_masked.ply
+24
+____
+pc_NP2_NP5_243_masked.ply
+25
+____
+pc_NP2_NP5_33_masked.ply
+26
+____
+pc_NP5_NP5_237_masked.ply
+27
+____
+pc_NP3_NP5_273_masked.ply
+28
+____
+pc_NP2_NP5_66_masked.ply
+29
+____
+pc_NP2_NP5_198_masked.ply
+30
+____
+pc_NP4_NP5_126_masked.ply
+31
+____
+pc_NP1_NP5_216_masked.ply
+32
+____
+pc_NP2_NP5_351_masked.ply
+33
+____
+pc_NP1_NP5_357_masked.ply
+34
+____
+pc_NP5_NP5_105_masked.ply
+35
+____
+pc_NP2_NP5_84_masked.ply
+36
+____
+pc_NP1_NP5_132_masked.ply
+37
+____
+pc_NP1_NP5_81_masked.ply
+38
+____
+pc_NP5_NP5_102_masked.ply
+39
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True], device='cuda:0')
+____
+pc_NP5_NP5_174_masked.ply
+40
+____
+pc_NP4_NP5_330_masked.ply
+41
+____
+pc_NP1_NP5_300_masked.ply
+42
+____
+pc_NP5_NP5_225_masked.ply
+43
+____
+pc_NP5_NP5_21_masked.ply
+44
+____
+pc_NP5_NP5_342_masked.ply
+45
+____
+pc_NP4_NP5_21_masked.ply
+46
+____
+pc_NP5_NP5_291_masked.ply
+47
+____
+pc_NP4_NP5_237_masked.ply
+48
+____
+pc_NP5_NP5_33_masked.ply
+49
+____
+pc_NP3_NP5_57_masked.ply
+50
+____
+pc_NP5_NP5_78_masked.ply
+51
+____
+pc_NP3_NP5_174_masked.ply
+52
+____
+pc_NP3_NP5_267_masked.ply
+53
+____
+pc_NP1_NP5_0_masked.ply
+54
+____
+pc_NP5_NP5_108_masked.ply
+55
+____
+pc_NP2_NP5_297_masked.ply
+56
+____
+pc_NP2_NP5_336_masked.ply
+57
+____
+pc_NP1_NP5_255_masked.ply
+58
+____
+pc_NP5_NP5_90_masked.ply
+59
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  100.00000762939453
+ADD-S AUC ( 5 %):  89.65709686279297
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99975
+% certifiable:  3.3333334922790527
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  100.0
+ADD-S AUC ( 5 %):  32.482566833496094
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  021_bleach_cleanser
+dataset len 60
+Number of trainable parameters:  897700
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+____
+pc_NP2_NP5_318_masked.ply
+0
+____
+pc_NP2_NP5_270_masked.ply
+1
+____
+pc_NP2_NP5_351_masked.ply
+2
+____
+pc_NP1_NP5_312_masked.ply
+3
+____
+pc_NP1_NP5_189_masked.ply
+4
+____
+pc_NP4_NP5_300_masked.ply
+5
+____
+pc_NP3_NP5_36_masked.ply
+6
+____
+pc_NP2_NP5_234_masked.ply
+7
+____
+pc_NP2_NP5_132_masked.ply
+8
+____
+pc_NP4_NP5_147_masked.ply
+9
+____
+pc_NP4_NP5_264_masked.ply
+10
+____
+pc_NP2_NP5_99_masked.ply
+11
+____
+pc_NP2_NP5_237_masked.ply
+12
+____
+pc_NP3_NP5_159_masked.ply
+13
+____
+pc_NP4_NP5_39_masked.ply
+14
+____
+pc_NP1_NP5_183_masked.ply
+15
+____
+pc_NP4_NP5_108_masked.ply
+16
+____
+pc_NP3_NP5_294_masked.ply
+17
+____
+pc_NP4_NP5_24_masked.ply
+18
+____
+pc_NP4_NP5_330_masked.ply
+19
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP2_NP5_165_masked.ply
+20
+____
+pc_NP1_NP5_303_masked.ply
+21
+____
+pc_NP5_NP5_105_masked.ply
+22
+____
+pc_NP2_NP5_3_masked.ply
+23
+____
+pc_NP1_NP5_234_masked.ply
+24
+____
+pc_NP3_NP5_273_masked.ply
+25
+____
+pc_NP5_NP5_351_masked.ply
+26
+____
+pc_NP4_NP5_132_masked.ply
+27
+____
+pc_NP4_NP5_273_masked.ply
+28
+____
+pc_NP4_NP5_174_masked.ply
+29
+____
+pc_NP5_NP5_48_masked.ply
+30
+____
+pc_NP4_NP5_348_masked.ply
+31
+____
+pc_NP3_NP5_66_masked.ply
+32
+____
+pc_NP3_NP5_57_masked.ply
+33
+____
+pc_NP5_NP5_72_masked.ply
+34
+____
+pc_NP2_NP5_279_masked.ply
+35
+____
+pc_NP1_NP5_12_masked.ply
+36
+____
+pc_NP1_NP5_63_masked.ply
+37
+____
+pc_NP1_NP5_300_masked.ply
+38
+____
+pc_NP1_NP5_27_masked.ply
+39
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP5_NP5_258_masked.ply
+40
+____
+pc_NP3_NP5_177_masked.ply
+41
+____
+pc_NP4_NP5_165_masked.ply
+42
+____
+pc_NP3_NP5_63_masked.ply
+43
+____
+pc_NP1_NP5_285_masked.ply
+44
+____
+pc_NP3_NP5_54_masked.ply
+45
+____
+pc_NP2_NP5_354_masked.ply
+46
+____
+pc_NP2_NP5_288_masked.ply
+47
+____
+pc_NP3_NP5_18_masked.ply
+48
+____
+pc_NP5_NP5_261_masked.ply
+49
+____
+pc_NP1_NP5_48_masked.ply
+50
+____
+pc_NP4_NP5_12_masked.ply
+51
+____
+pc_NP1_NP5_153_masked.ply
+52
+____
+pc_NP3_NP5_318_masked.ply
+53
+____
+pc_NP1_NP5_264_masked.ply
+54
+____
+pc_NP3_NP5_282_masked.ply
+55
+____
+pc_NP5_NP5_306_masked.ply
+56
+____
+pc_NP4_NP5_270_masked.ply
+57
+____
+pc_NP2_NP5_45_masked.ply
+58
+____
+pc_NP4_NP5_240_masked.ply
+59
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  100.00000762939453
+ADD-S AUC ( 5 %):  92.61067962646484
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99987
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  035_power_drill
+dataset len 60
+Number of trainable parameters:  899239
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+____
+pc_NP5_NP5_132_masked.ply
+0
+____
+pc_NP3_NP5_276_masked.ply
+1
+____
+pc_NP3_NP5_195_masked.ply
+2
+____
+pc_NP5_NP5_222_masked.ply
+3
+____
+pc_NP5_NP5_321_masked.ply
+4
+____
+pc_NP2_NP5_0_masked.ply
+5
+____
+pc_NP2_NP5_327_masked.ply
+6
+____
+pc_NP3_NP5_147_masked.ply
+7
+____
+pc_NP1_NP5_72_masked.ply
+8
+____
+pc_NP2_NP5_42_masked.ply
+9
+____
+pc_NP5_NP5_99_masked.ply
+10
+____
+pc_NP2_NP5_270_masked.ply
+11
+____
+pc_NP5_NP5_300_masked.ply
+12
+____
+pc_NP4_NP5_33_masked.ply
+13
+____
+pc_NP2_NP5_303_masked.ply
+14
+____
+pc_NP5_NP5_315_masked.ply
+15
+____
+pc_NP1_NP5_87_masked.ply
+16
+____
+pc_NP3_NP5_129_masked.ply
+17
+____
+pc_NP5_NP5_267_masked.ply
+18
+____
+pc_NP2_NP5_189_masked.ply
+19
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP3_NP5_165_masked.ply
+20
+____
+pc_NP4_NP5_21_masked.ply
+21
+____
+pc_NP5_NP5_42_masked.ply
+22
+____
+pc_NP4_NP5_186_masked.ply
+23
+____
+pc_NP3_NP5_216_masked.ply
+24
+____
+pc_NP2_NP5_183_masked.ply
+25
+____
+pc_NP5_NP5_261_masked.ply
+26
+____
+pc_NP3_NP5_66_masked.ply
+27
+____
+pc_NP1_NP5_3_masked.ply
+28
+____
+pc_NP2_NP5_288_masked.ply
+29
+____
+pc_NP3_NP5_207_masked.ply
+30
+____
+pc_NP3_NP5_84_masked.ply
+31
+____
+pc_NP4_NP5_6_masked.ply
+32
+____
+pc_NP4_NP5_306_masked.ply
+33
+____
+pc_NP2_NP5_234_masked.ply
+34
+____
+pc_NP4_NP5_300_masked.ply
+35
+____
+pc_NP2_NP5_114_masked.ply
+36
+____
+pc_NP5_NP5_12_masked.ply
+37
+____
+pc_NP4_NP5_231_masked.ply
+38
+____
+pc_NP2_NP5_258_masked.ply
+39
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP5_NP5_243_masked.ply
+40
+____
+pc_NP4_NP5_240_masked.ply
+41
+____
+pc_NP3_NP5_288_masked.ply
+42
+____
+pc_NP5_NP5_213_masked.ply
+43
+____
+pc_NP4_NP5_279_masked.ply
+44
+____
+pc_NP5_NP5_327_masked.ply
+45
+____
+pc_NP5_NP5_309_masked.ply
+46
+____
+pc_NP3_NP5_285_masked.ply
+47
+____
+pc_NP4_NP5_117_masked.ply
+48
+____
+pc_NP3_NP5_213_masked.ply
+49
+____
+pc_NP1_NP5_288_masked.ply
+50
+____
+pc_NP1_NP5_93_masked.ply
+51
+____
+pc_NP3_NP5_123_masked.ply
+52
+____
+pc_NP5_NP5_165_masked.ply
+53
+____
+pc_NP5_NP5_27_masked.ply
+54
+____
+pc_NP2_NP5_231_masked.ply
+55
+____
+pc_NP4_NP5_354_masked.ply
+56
+____
+pc_NP1_NP5_6_masked.ply
+57
+____
+pc_NP5_NP5_210_masked.ply
+58
+____
+pc_NP3_NP5_225_masked.ply
+59
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  100.00000762939453
+ADD-S AUC ( 5 %):  93.50662231445312
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99992
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  036_wood_block
+dataset len 60
+Number of trainable parameters:  891544
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+____
+pc_NP4_NP5_348_masked.ply
+0
+____
+pc_NP4_NP5_9_masked.ply
+1
+____
+pc_NP5_NP5_63_masked.ply
+2
+____
+pc_NP4_NP5_51_masked.ply
+3
+____
+pc_NP3_NP5_357_masked.ply
+4
+____
+pc_NP5_NP5_177_masked.ply
+5
+____
+pc_NP5_NP5_18_masked.ply
+6
+____
+pc_NP5_NP5_354_masked.ply
+7
+____
+pc_NP4_NP5_96_masked.ply
+8
+____
+pc_NP2_NP5_342_masked.ply
+9
+____
+pc_NP5_NP5_234_masked.ply
+10
+____
+pc_NP5_NP5_171_masked.ply
+11
+____
+pc_NP4_NP5_123_masked.ply
+12
+____
+pc_NP4_NP5_87_masked.ply
+13
+____
+pc_NP3_NP5_48_masked.ply
+14
+____
+pc_NP2_NP5_138_masked.ply
+15
+____
+pc_NP2_NP5_354_masked.ply
+16
+____
+pc_NP4_NP5_177_masked.ply
+17
+____
+pc_NP3_NP5_45_masked.ply
+18
+____
+pc_NP1_NP5_300_masked.ply
+19
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True], device='cuda:0')
+____
+pc_NP1_NP5_270_masked.ply
+20
+____
+pc_NP3_NP5_156_masked.ply
+21
+____
+pc_NP3_NP5_297_masked.ply
+22
+____
+pc_NP3_NP5_66_masked.ply
+23
+____
+pc_NP3_NP5_129_masked.ply
+24
+____
+pc_NP2_NP5_150_masked.ply
+25
+____
+pc_NP4_NP5_162_masked.ply
+26
+____
+pc_NP2_NP5_141_masked.ply
+27
+____
+pc_NP2_NP5_51_masked.ply
+28
+____
+pc_NP5_NP5_147_masked.ply
+29
+____
+pc_NP1_NP5_81_masked.ply
+30
+____
+pc_NP2_NP5_300_masked.ply
+31
+____
+pc_NP1_NP5_252_masked.ply
+32
+____
+pc_NP3_NP5_27_masked.ply
+33
+____
+pc_NP3_NP5_273_masked.ply
+34
+____
+pc_NP1_NP5_306_masked.ply
+35
+____
+pc_NP4_NP5_111_masked.ply
+36
+____
+pc_NP5_NP5_321_masked.ply
+37
+____
+pc_NP5_NP5_48_masked.ply
+38
+____
+pc_NP1_NP5_312_masked.ply
+39
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True], device='cuda:0')
+____
+pc_NP3_NP5_240_masked.ply
+40
+____
+pc_NP1_NP5_189_masked.ply
+41
+____
+pc_NP1_NP5_174_masked.ply
+42
+____
+pc_NP4_NP5_303_masked.ply
+43
+____
+pc_NP1_NP5_48_masked.ply
+44
+____
+pc_NP1_NP5_285_masked.ply
+45
+____
+pc_NP3_NP5_183_masked.ply
+46
+____
+pc_NP3_NP5_243_masked.ply
+47
+____
+pc_NP1_NP5_18_masked.ply
+48
+____
+pc_NP5_NP5_327_masked.ply
+49
+____
+pc_NP2_NP5_294_masked.ply
+50
+____
+pc_NP1_NP5_0_masked.ply
+51
+____
+pc_NP2_NP5_315_masked.ply
+52
+____
+pc_NP2_NP5_297_masked.ply
+53
+____
+pc_NP3_NP5_309_masked.ply
+54
+____
+pc_NP2_NP5_48_masked.ply
+55
+____
+pc_NP3_NP5_315_masked.ply
+56
+____
+pc_NP2_NP5_93_masked.ply
+57
+____
+pc_NP5_NP5_126_masked.ply
+58
+____
+pc_NP4_NP5_24_masked.ply
+59
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True], device='cuda:0')
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  100.00000762939453
+ADD-S AUC ( 5 %):  88.0123519897461
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.9999
+% certifiable:  5.000000476837158
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  100.0
+ADD-S AUC ( 5 %):  100.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  037_scissors
+dataset len 29
+Number of trainable parameters:  893083
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+____
+pc_NP3_NP5_57_masked.ply
+0
+____
+pc_NP3_NP5_183_masked.ply
+1
+____
+pc_NP2_NP5_114_masked.ply
+2
+____
+pc_NP3_NP5_60_masked.ply
+3
+____
+pc_NP3_NP5_66_masked.ply
+4
+____
+pc_NP1_NP5_39_masked.ply
+5
+____
+pc_NP3_NP5_321_masked.ply
+6
+____
+pc_NP1_NP5_66_masked.ply
+7
+____
+pc_NP1_NP5_51_masked.ply
+8
+____
+pc_NP4_NP5_189_masked.ply
+9
+____
+pc_NP2_NP5_156_masked.ply
+10
+____
+pc_NP3_NP5_18_masked.ply
+11
+____
+pc_NP1_NP5_129_masked.ply
+12
+____
+pc_NP2_NP5_45_masked.ply
+13
+____
+pc_NP2_NP5_330_masked.ply
+14
+____
+pc_NP2_NP5_183_masked.ply
+15
+____
+pc_NP1_NP5_285_masked.ply
+16
+____
+pc_NP2_NP5_129_masked.ply
+17
+____
+pc_NP2_NP5_216_masked.ply
+18
+____
+pc_NP3_NP5_225_masked.ply
+19
+____
+pc_NP3_NP5_171_masked.ply
+20
+____
+pc_NP1_NP5_156_masked.ply
+21
+____
+pc_NP1_NP5_333_masked.ply
+22
+____
+pc_NP2_NP5_288_masked.ply
+23
+____
+pc_NP1_NP5_111_masked.ply
+24
+____
+pc_NP3_NP5_303_masked.ply
+25
+____
+pc_NP2_NP5_291_masked.ply
+26
+____
+pc_NP2_NP5_297_masked.ply
+27
+____
+pc_NP2_NP5_159_masked.ply
+28
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True,  True,  True, False, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  93.10344696044922
+ADD-S AUC ( 5 %):  93.36658477783203
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99991
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  051_large_clamp
+dataset len 26
+Number of trainable parameters:  894622
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+____
+pc_NP2_NP5_276_masked.ply
+0
+____
+pc_NP2_NP5_318_masked.ply
+1
+____
+pc_NP1_NP5_246_masked.ply
+2
+____
+pc_NP1_NP5_84_masked.ply
+3
+____
+pc_NP1_NP5_57_masked.ply
+4
+____
+pc_NP2_NP5_309_masked.ply
+5
+____
+pc_NP2_NP5_102_masked.ply
+6
+____
+pc_NP3_NP5_291_masked.ply
+7
+____
+pc_NP3_NP5_39_masked.ply
+8
+____
+pc_NP2_NP5_330_masked.ply
+9
+____
+pc_NP2_NP5_300_masked.ply
+10
+____
+pc_NP2_NP5_201_masked.ply
+11
+____
+pc_NP2_NP5_213_masked.ply
+12
+____
+pc_NP3_NP5_126_masked.ply
+13
+____
+pc_NP1_NP5_63_masked.ply
+14
+____
+pc_NP1_NP5_132_masked.ply
+15
+____
+pc_NP3_NP5_165_masked.ply
+16
+____
+pc_NP2_NP5_57_masked.ply
+17
+____
+pc_NP1_NP5_267_masked.ply
+18
+____
+pc_NP3_NP5_93_masked.ply
+19
+____
+pc_NP3_NP5_150_masked.ply
+20
+____
+pc_NP2_NP5_294_masked.ply
+21
+____
+pc_NP2_NP5_345_masked.ply
+22
+____
+pc_NP2_NP5_273_masked.ply
+23
+____
+pc_NP2_NP5_78_masked.ply
+24
+____
+pc_NP1_NP5_249_masked.ply
+25
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True, False], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  96.15384674072266
+ADD-S AUC ( 5 %):  89.44581604003906
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99995
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  052_extra_large_clamp
+dataset len 52
+Number of trainable parameters:  900778
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+____
+pc_NP3_NP5_252_masked.ply
+0
+____
+pc_NP1_NP5_123_masked.ply
+1
+____
+pc_NP3_NP5_147_masked.ply
+2
+____
+pc_NP1_NP5_117_masked.ply
+3
+____
+pc_NP2_NP5_261_masked.ply
+4
+____
+pc_NP3_NP5_240_masked.ply
+5
+____
+pc_NP3_NP5_0_masked.ply
+6
+____
+pc_NP5_NP5_174_masked.ply
+7
+____
+pc_NP3_NP5_213_masked.ply
+8
+____
+pc_NP4_NP5_18_masked.ply
+9
+____
+pc_NP1_NP5_201_masked.ply
+10
+____
+pc_NP3_NP5_123_masked.ply
+11
+____
+pc_NP4_NP5_129_masked.ply
+12
+____
+pc_NP4_NP5_345_masked.ply
+13
+____
+pc_NP5_NP5_306_masked.ply
+14
+____
+pc_NP4_NP5_9_masked.ply
+15
+____
+pc_NP4_NP5_102_masked.ply
+16
+____
+pc_NP4_NP5_207_masked.ply
+17
+____
+pc_NP5_NP5_177_masked.ply
+18
+____
+pc_NP3_NP5_225_masked.ply
+19
+____
+pc_NP4_NP5_39_masked.ply
+20
+____
+pc_NP3_NP5_60_masked.ply
+21
+____
+pc_NP2_NP5_6_masked.ply
+22
+____
+pc_NP3_NP5_315_masked.ply
+23
+____
+pc_NP4_NP5_153_masked.ply
+24
+____
+pc_NP4_NP5_201_masked.ply
+25
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True, False], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True], device='cuda:0')
+____
+pc_NP1_NP5_255_masked.ply
+26
+____
+pc_NP1_NP5_180_masked.ply
+27
+____
+pc_NP3_NP5_270_masked.ply
+28
+____
+pc_NP2_NP5_270_masked.ply
+29
+____
+pc_NP4_NP5_357_masked.ply
+30
+____
+pc_NP3_NP5_228_masked.ply
+31
+____
+pc_NP2_NP5_240_masked.ply
+32
+____
+pc_NP4_NP5_168_masked.ply
+33
+____
+pc_NP5_NP5_36_masked.ply
+34
+____
+pc_NP4_NP5_93_masked.ply
+35
+____
+pc_NP2_NP5_315_masked.ply
+36
+____
+pc_NP3_NP5_90_masked.ply
+37
+____
+pc_NP4_NP5_213_masked.ply
+38
+____
+pc_NP4_NP5_237_masked.ply
+39
+____
+pc_NP2_NP5_222_masked.ply
+40
+____
+pc_NP3_NP5_309_masked.ply
+41
+____
+pc_NP5_NP5_12_masked.ply
+42
+____
+pc_NP4_NP5_12_masked.ply
+43
+____
+pc_NP1_NP5_168_masked.ply
+44
+____
+pc_NP2_NP5_354_masked.ply
+45
+____
+pc_NP3_NP5_36_masked.ply
+46
+____
+pc_NP4_NP5_336_masked.ply
+47
+____
+pc_NP4_NP5_51_masked.ply
+48
+____
+pc_NP3_NP5_207_masked.ply
+49
+____
+pc_NP4_NP5_72_masked.ply
+50
+____
+pc_NP3_NP5_324_masked.ply
+51
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True, False], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  96.15384674072266
+ADD-S AUC ( 5 %):  91.38685607910156
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99992
+% certifiable:  7.692307949066162
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  100.0
+ADD-S AUC ( 5 %):  47.91486740112305
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  061_foam_brick
+dataset len 60
+Number of trainable parameters:  896161
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+____
+pc_NP1_NP5_21_masked.ply
+0
+____
+pc_NP5_NP5_15_masked.ply
+1
+____
+pc_NP3_NP5_288_masked.ply
+2
+____
+pc_NP1_NP5_309_masked.ply
+3
+____
+pc_NP2_NP5_246_masked.ply
+4
+____
+pc_NP5_NP5_156_masked.ply
+5
+____
+pc_NP5_NP5_168_masked.ply
+6
+____
+pc_NP3_NP5_354_masked.ply
+7
+____
+pc_NP5_NP5_81_masked.ply
+8
+____
+pc_NP1_NP5_252_masked.ply
+9
+____
+pc_NP4_NP5_300_masked.ply
+10
+____
+pc_NP4_NP5_69_masked.ply
+11
+____
+pc_NP2_NP5_318_masked.ply
+12
+____
+pc_NP4_NP5_306_masked.ply
+13
+____
+pc_NP1_NP5_315_masked.ply
+14
+____
+pc_NP2_NP5_48_masked.ply
+15
+____
+pc_NP2_NP5_180_masked.ply
+16
+____
+pc_NP5_NP5_351_masked.ply
+17
+____
+pc_NP5_NP5_114_masked.ply
+18
+____
+pc_NP1_NP5_327_masked.ply
+19
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True,  True,  True,  True, False, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP4_NP5_93_masked.ply
+20
+____
+pc_NP5_NP5_267_masked.ply
+21
+____
+pc_NP2_NP5_144_masked.ply
+22
+____
+pc_NP3_NP5_255_masked.ply
+23
+____
+pc_NP5_NP5_96_masked.ply
+24
+____
+pc_NP2_NP5_75_masked.ply
+25
+____
+pc_NP5_NP5_291_masked.ply
+26
+____
+pc_NP1_NP5_243_masked.ply
+27
+____
+pc_NP2_NP5_21_masked.ply
+28
+____
+pc_NP1_NP5_147_masked.ply
+29
+____
+pc_NP4_NP5_279_masked.ply
+30
+____
+pc_NP3_NP5_333_masked.ply
+31
+____
+pc_NP1_NP5_321_masked.ply
+32
+____
+pc_NP3_NP5_45_masked.ply
+33
+____
+pc_NP5_NP5_165_masked.ply
+34
+____
+pc_NP4_NP5_48_masked.ply
+35
+____
+pc_NP5_NP5_306_masked.ply
+36
+____
+pc_NP2_NP5_87_masked.ply
+37
+____
+pc_NP1_NP5_237_masked.ply
+38
+____
+pc_NP5_NP5_102_masked.ply
+39
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True,  True,  True, False, False, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP1_NP5_189_masked.ply
+40
+____
+pc_NP1_NP5_282_masked.ply
+41
+____
+pc_NP1_NP5_123_masked.ply
+42
+____
+pc_NP5_NP5_201_masked.ply
+43
+____
+pc_NP5_NP5_189_masked.ply
+44
+____
+pc_NP5_NP5_174_masked.ply
+45
+____
+pc_NP3_NP5_186_masked.ply
+46
+____
+pc_NP2_NP5_117_masked.ply
+47
+____
+pc_NP3_NP5_156_masked.ply
+48
+____
+pc_NP3_NP5_33_masked.ply
+49
+____
+pc_NP2_NP5_183_masked.ply
+50
+____
+pc_NP1_NP5_36_masked.ply
+51
+____
+pc_NP3_NP5_321_masked.ply
+52
+____
+pc_NP4_NP5_105_masked.ply
+53
+____
+pc_NP1_NP5_159_masked.ply
+54
+____
+pc_NP5_NP5_126_masked.ply
+55
+____
+pc_NP2_NP5_126_masked.ply
+56
+____
+pc_NP1_NP5_144_masked.ply
+57
+____
+pc_NP4_NP5_153_masked.ply
+58
+____
+pc_NP3_NP5_48_masked.ply
+59
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True,  True,  True,  True,  True, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  90.00000762939453
+ADD-S AUC ( 5 %):  85.04367065429688
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99995
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Thu May 12 00:05:15 EDT 2022
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+POINT_TRANSFORMER
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  001_chips_can
+dataset len 60
+Number of trainable parameters:  897700
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+____
+pc_NP5_NP5_312_masked.ply
+0
+____
+pc_NP3_NP5_300_masked.ply
+1
+____
+pc_NP3_NP5_231_masked.ply
+2
+____
+pc_NP3_NP5_264_masked.ply
+3
+____
+pc_NP2_NP5_3_masked.ply
+4
+____
+pc_NP1_NP5_159_masked.ply
+5
+____
+pc_NP5_NP5_222_masked.ply
+6
+____
+pc_NP1_NP5_87_masked.ply
+7
+____
+pc_NP3_NP5_36_masked.ply
+8
+____
+pc_NP4_NP5_129_masked.ply
+9
+____
+pc_NP2_NP5_84_masked.ply
+10
+____
+pc_NP4_NP5_156_masked.ply
+11
+____
+pc_NP5_NP5_279_masked.ply
+12
+____
+pc_NP1_NP5_273_masked.ply
+13
+____
+pc_NP4_NP5_333_masked.ply
+14
+____
+pc_NP3_NP5_282_masked.ply
+15
+____
+pc_NP1_NP5_354_masked.ply
+16
+____
+pc_NP3_NP5_156_masked.ply
+17
+____
+pc_NP5_NP5_231_masked.ply
+18
+____
+pc_NP2_NP5_312_masked.ply
+19
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP2_NP5_231_masked.ply
+20
+____
+pc_NP4_NP5_93_masked.ply
+21
+____
+pc_NP2_NP5_219_masked.ply
+22
+____
+pc_NP2_NP5_69_masked.ply
+23
+____
+pc_NP2_NP5_33_masked.ply
+24
+____
+pc_NP2_NP5_60_masked.ply
+25
+____
+pc_NP3_NP5_333_masked.ply
+26
+____
+pc_NP3_NP5_57_masked.ply
+27
+____
+pc_NP1_NP5_318_masked.ply
+28
+____
+pc_NP2_NP5_288_masked.ply
+29
+____
+pc_NP3_NP5_294_masked.ply
+30
+____
+pc_NP5_NP5_342_masked.ply
+31
+____
+pc_NP3_NP5_237_masked.ply
+32
+____
+pc_NP5_NP5_285_masked.ply
+33
+____
+pc_NP5_NP5_261_masked.ply
+34
+____
+pc_NP4_NP5_69_masked.ply
+35
+____
+pc_NP2_NP5_132_masked.ply
+36
+____
+pc_NP2_NP5_51_masked.ply
+37
+____
+pc_NP1_NP5_315_masked.ply
+38
+____
+pc_NP4_NP5_87_masked.ply
+39
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP3_NP5_12_masked.ply
+40
+____
+pc_NP1_NP5_267_masked.ply
+41
+____
+pc_NP3_NP5_126_masked.ply
+42
+____
+pc_NP5_NP5_354_masked.ply
+43
+____
+pc_NP2_NP5_273_masked.ply
+44
+____
+pc_NP2_NP5_105_masked.ply
+45
+____
+pc_NP2_NP5_321_masked.ply
+46
+____
+pc_NP3_NP5_96_masked.ply
+47
+____
+pc_NP3_NP5_159_masked.ply
+48
+____
+pc_NP4_NP5_330_masked.ply
+49
+____
+pc_NP5_NP5_153_masked.ply
+50
+____
+pc_NP4_NP5_84_masked.ply
+51
+____
+pc_NP2_NP5_210_masked.ply
+52
+____
+pc_NP5_NP5_348_masked.ply
+53
+____
+pc_NP2_NP5_81_masked.ply
+54
+____
+pc_NP2_NP5_357_masked.ply
+55
+____
+pc_NP2_NP5_252_masked.ply
+56
+____
+pc_NP4_NP5_351_masked.ply
+57
+____
+pc_NP1_NP5_168_masked.ply
+58
+____
+pc_NP5_NP5_273_masked.ply
+59
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  100.00000762939453
+ADD-S AUC ( 5 %):  92.28087615966797
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.9999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  002_master_chef_can
+dataset len 60
+Number of trainable parameters:  891544
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+____
+pc_NP2_NP5_306_masked.ply
+0
+____
+pc_NP4_NP5_336_masked.ply
+1
+____
+pc_NP2_NP5_348_masked.ply
+2
+____
+pc_NP4_NP5_108_masked.ply
+3
+____
+pc_NP4_NP5_234_masked.ply
+4
+____
+pc_NP5_NP5_273_masked.ply
+5
+____
+pc_NP4_NP5_15_masked.ply
+6
+____
+pc_NP1_NP5_234_masked.ply
+7
+____
+pc_NP2_NP5_261_masked.ply
+8
+____
+pc_NP3_NP5_81_masked.ply
+9
+____
+pc_NP2_NP5_207_masked.ply
+10
+____
+pc_NP2_NP5_183_masked.ply
+11
+____
+pc_NP1_NP5_3_masked.ply
+12
+____
+pc_NP2_NP5_15_masked.ply
+13
+____
+pc_NP5_NP5_282_masked.ply
+14
+____
+pc_NP2_NP5_102_masked.ply
+15
+____
+pc_NP4_NP5_195_masked.ply
+16
+____
+pc_NP5_NP5_354_masked.ply
+17
+____
+pc_NP3_NP5_24_masked.ply
+18
+____
+pc_NP1_NP5_309_masked.ply
+19
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True, False, False, False, False, False, False, False, False, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP1_NP5_357_masked.ply
+20
+____
+pc_NP4_NP5_150_masked.ply
+21
+____
+pc_NP1_NP5_63_masked.ply
+22
+____
+pc_NP1_NP5_99_masked.ply
+23
+____
+pc_NP4_NP5_87_masked.ply
+24
+____
+pc_NP3_NP5_327_masked.ply
+25
+____
+pc_NP3_NP5_18_masked.ply
+26
+____
+pc_NP1_NP5_78_masked.ply
+27
+____
+pc_NP3_NP5_267_masked.ply
+28
+____
+pc_NP3_NP5_15_masked.ply
+29
+____
+pc_NP3_NP5_321_masked.ply
+30
+____
+pc_NP1_NP5_144_masked.ply
+31
+____
+pc_NP1_NP5_33_masked.ply
+32
+____
+pc_NP3_NP5_27_masked.ply
+33
+____
+pc_NP1_NP5_219_masked.ply
+34
+____
+pc_NP5_NP5_9_masked.ply
+35
+____
+pc_NP4_NP5_3_masked.ply
+36
+____
+pc_NP1_NP5_135_masked.ply
+37
+____
+pc_NP2_NP5_351_masked.ply
+38
+____
+pc_NP1_NP5_351_masked.ply
+39
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True,  True, False, False, False, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP2_NP5_309_masked.ply
+40
+____
+pc_NP3_NP5_174_masked.ply
+41
+____
+pc_NP1_NP5_45_masked.ply
+42
+____
+pc_NP4_NP5_165_masked.ply
+43
+____
+pc_NP3_NP5_279_masked.ply
+44
+____
+pc_NP4_NP5_30_masked.ply
+45
+____
+pc_NP1_NP5_36_masked.ply
+46
+____
+pc_NP2_NP5_330_masked.ply
+47
+____
+pc_NP2_NP5_114_masked.ply
+48
+____
+pc_NP5_NP5_63_masked.ply
+49
+____
+pc_NP4_NP5_288_masked.ply
+50
+____
+pc_NP2_NP5_57_masked.ply
+51
+____
+pc_NP5_NP5_291_masked.ply
+52
+____
+pc_NP5_NP5_345_masked.ply
+53
+____
+pc_NP1_NP5_252_masked.ply
+54
+____
+pc_NP4_NP5_78_masked.ply
+55
+____
+pc_NP1_NP5_210_masked.ply
+56
+____
+pc_NP5_NP5_126_masked.ply
+57
+____
+pc_NP1_NP5_69_masked.ply
+58
+____
+pc_NP3_NP5_114_masked.ply
+59
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True, False, False, False, False, False, False, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  66.66667175292969
+ADD-S AUC ( 5 %):  84.29695129394531
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.9999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  003_cracker_box
+dataset len 60
+Number of trainable parameters:  897700
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+____
+pc_NP1_NP5_132_masked.ply
+0
+____
+pc_NP2_NP5_183_masked.ply
+1
+____
+pc_NP1_NP5_195_masked.ply
+2
+____
+pc_NP5_NP5_6_masked.ply
+3
+____
+pc_NP4_NP5_300_masked.ply
+4
+____
+pc_NP2_NP5_6_masked.ply
+5
+____
+pc_NP4_NP5_108_masked.ply
+6
+____
+pc_NP2_NP5_63_masked.ply
+7
+____
+pc_NP1_NP5_330_masked.ply
+8
+____
+pc_NP2_NP5_336_masked.ply
+9
+____
+pc_NP5_NP5_198_masked.ply
+10
+____
+pc_NP5_NP5_144_masked.ply
+11
+____
+pc_NP2_NP5_120_masked.ply
+12
+____
+pc_NP2_NP5_216_masked.ply
+13
+____
+pc_NP2_NP5_132_masked.ply
+14
+____
+pc_NP5_NP5_312_masked.ply
+15
+____
+pc_NP5_NP5_351_masked.ply
+16
+____
+pc_NP3_NP5_18_masked.ply
+17
+____
+pc_NP4_NP5_138_masked.ply
+18
+____
+pc_NP1_NP5_21_masked.ply
+19
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP2_NP5_282_masked.ply
+20
+____
+pc_NP3_NP5_27_masked.ply
+21
+____
+pc_NP1_NP5_75_masked.ply
+22
+____
+pc_NP1_NP5_342_masked.ply
+23
+____
+pc_NP5_NP5_315_masked.ply
+24
+____
+pc_NP2_NP5_153_masked.ply
+25
+____
+pc_NP3_NP5_333_masked.ply
+26
+____
+pc_NP4_NP5_171_masked.ply
+27
+____
+pc_NP2_NP5_342_masked.ply
+28
+____
+pc_NP2_NP5_105_masked.ply
+29
+____
+pc_NP3_NP5_198_masked.ply
+30
+____
+pc_NP4_NP5_66_masked.ply
+31
+____
+pc_NP3_NP5_153_masked.ply
+32
+____
+pc_NP2_NP5_207_masked.ply
+33
+____
+pc_NP3_NP5_177_masked.ply
+34
+____
+pc_NP4_NP5_270_masked.ply
+35
+____
+pc_NP5_NP5_48_masked.ply
+36
+____
+pc_NP5_NP5_273_masked.ply
+37
+____
+pc_NP4_NP5_261_masked.ply
+38
+____
+pc_NP4_NP5_297_masked.ply
+39
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True], device='cuda:0')
+____
+pc_NP4_NP5_99_masked.ply
+40
+____
+pc_NP1_NP5_42_masked.ply
+41
+____
+pc_NP1_NP5_99_masked.ply
+42
+____
+pc_NP2_NP5_300_masked.ply
+43
+____
+pc_NP1_NP5_261_masked.ply
+44
+____
+pc_NP3_NP5_24_masked.ply
+45
+____
+pc_NP1_NP5_63_masked.ply
+46
+____
+pc_NP1_NP5_36_masked.ply
+47
+____
+pc_NP5_NP5_159_masked.ply
+48
+____
+pc_NP5_NP5_294_masked.ply
+49
+____
+pc_NP2_NP5_27_masked.ply
+50
+____
+pc_NP3_NP5_261_masked.ply
+51
+____
+pc_NP3_NP5_267_masked.ply
+52
+____
+pc_NP1_NP5_96_masked.ply
+53
+____
+pc_NP5_NP5_153_masked.ply
+54
+____
+pc_NP5_NP5_42_masked.ply
+55
+____
+pc_NP2_NP5_249_masked.ply
+56
+____
+pc_NP1_NP5_45_masked.ply
+57
+____
+pc_NP1_NP5_312_masked.ply
+58
+____
+pc_NP1_NP5_201_masked.ply
+59
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True,  True,  True,  True,  True, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  98.33333587646484
+ADD-S AUC ( 5 %):  89.43119049072266
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.9998
+% certifiable:  1.6666667461395264
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  100.0
+ADD-S AUC ( 5 %):  33.33333206176758
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  004_sugar_box
+dataset len 60
+Number of trainable parameters:  897700
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+____
+pc_NP3_NP5_30_masked.ply
+0
+____
+pc_NP1_NP5_213_masked.ply
+1
+____
+pc_NP2_NP5_339_masked.ply
+2
+____
+pc_NP5_NP5_48_masked.ply
+3
+____
+pc_NP4_NP5_78_masked.ply
+4
+____
+pc_NP4_NP5_45_masked.ply
+5
+____
+pc_NP2_NP5_195_masked.ply
+6
+____
+pc_NP5_NP5_237_masked.ply
+7
+____
+pc_NP2_NP5_267_masked.ply
+8
+____
+pc_NP2_NP5_51_masked.ply
+9
+____
+pc_NP4_NP5_87_masked.ply
+10
+____
+pc_NP5_NP5_180_masked.ply
+11
+____
+pc_NP1_NP5_303_masked.ply
+12
+____
+pc_NP1_NP5_297_masked.ply
+13
+____
+pc_NP5_NP5_24_masked.ply
+14
+____
+pc_NP1_NP5_201_masked.ply
+15
+____
+pc_NP3_NP5_312_masked.ply
+16
+____
+pc_NP2_NP5_231_masked.ply
+17
+____
+pc_NP2_NP5_213_masked.ply
+18
+____
+pc_NP4_NP5_354_masked.ply
+19
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True, False, False, False, False, False, False, False, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP1_NP5_114_masked.ply
+20
+____
+pc_NP2_NP5_3_masked.ply
+21
+____
+pc_NP4_NP5_306_masked.ply
+22
+____
+pc_NP2_NP5_36_masked.ply
+23
+____
+pc_NP4_NP5_183_masked.ply
+24
+____
+pc_NP4_NP5_90_masked.ply
+25
+____
+pc_NP2_NP5_354_masked.ply
+26
+____
+pc_NP4_NP5_243_masked.ply
+27
+____
+pc_NP4_NP5_99_masked.ply
+28
+____
+pc_NP3_NP5_159_masked.ply
+29
+____
+pc_NP5_NP5_51_masked.ply
+30
+____
+pc_NP5_NP5_126_masked.ply
+31
+____
+pc_NP4_NP5_261_masked.ply
+32
+____
+pc_NP4_NP5_192_masked.ply
+33
+____
+pc_NP4_NP5_195_masked.ply
+34
+____
+pc_NP3_NP5_144_masked.ply
+35
+____
+pc_NP4_NP5_327_masked.ply
+36
+____
+pc_NP1_NP5_336_masked.ply
+37
+____
+pc_NP1_NP5_108_masked.ply
+38
+____
+pc_NP2_NP5_288_masked.ply
+39
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True, False, False, False, False, False, False, False, False, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP3_NP5_153_masked.ply
+40
+____
+pc_NP3_NP5_150_masked.ply
+41
+____
+pc_NP3_NP5_42_masked.ply
+42
+____
+pc_NP1_NP5_321_masked.ply
+43
+____
+pc_NP5_NP5_0_masked.ply
+44
+____
+pc_NP3_NP5_36_masked.ply
+45
+____
+pc_NP2_NP5_69_masked.ply
+46
+____
+pc_NP1_NP5_189_masked.ply
+47
+____
+pc_NP1_NP5_18_masked.ply
+48
+____
+pc_NP3_NP5_111_masked.ply
+49
+____
+pc_NP1_NP5_27_masked.ply
+50
+____
+pc_NP4_NP5_288_masked.ply
+51
+____
+pc_NP1_NP5_9_masked.ply
+52
+____
+pc_NP4_NP5_270_masked.ply
+53
+____
+pc_NP3_NP5_117_masked.ply
+54
+____
+pc_NP2_NP5_246_masked.ply
+55
+____
+pc_NP4_NP5_3_masked.ply
+56
+____
+pc_NP1_NP5_195_masked.ply
+57
+____
+pc_NP5_NP5_288_masked.ply
+58
+____
+pc_NP1_NP5_57_masked.ply
+59
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+        False, False, False, False, False, False, False, False, False, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  55.000003814697266
+ADD-S AUC ( 5 %):  82.31712341308594
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.9999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  005_tomato_soup_can
+dataset len 60
+Number of trainable parameters:  891544
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+____
+pc_NP5_NP5_96_masked.ply
+0
+____
+pc_NP1_NP5_195_masked.ply
+1
+____
+pc_NP1_NP5_108_masked.ply
+2
+____
+pc_NP5_NP5_261_masked.ply
+3
+____
+pc_NP3_NP5_180_masked.ply
+4
+____
+pc_NP4_NP5_183_masked.ply
+5
+____
+pc_NP3_NP5_171_masked.ply
+6
+____
+pc_NP5_NP5_9_masked.ply
+7
+____
+pc_NP1_NP5_288_masked.ply
+8
+____
+pc_NP3_NP5_84_masked.ply
+9
+____
+pc_NP4_NP5_246_masked.ply
+10
+____
+pc_NP4_NP5_267_masked.ply
+11
+____
+pc_NP2_NP5_291_masked.ply
+12
+____
+pc_NP5_NP5_180_masked.ply
+13
+____
+pc_NP2_NP5_273_masked.ply
+14
+____
+pc_NP4_NP5_312_masked.ply
+15
+____
+pc_NP3_NP5_306_masked.ply
+16
+____
+pc_NP3_NP5_291_masked.ply
+17
+____
+pc_NP5_NP5_228_masked.ply
+18
+____
+pc_NP4_NP5_195_masked.ply
+19
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP5_NP5_291_masked.ply
+20
+____
+pc_NP1_NP5_204_masked.ply
+21
+____
+pc_NP5_NP5_252_masked.ply
+22
+____
+pc_NP1_NP5_354_masked.ply
+23
+____
+pc_NP2_NP5_321_masked.ply
+24
+____
+pc_NP3_NP5_237_masked.ply
+25
+____
+pc_NP2_NP5_72_masked.ply
+26
+____
+pc_NP5_NP5_30_masked.ply
+27
+____
+pc_NP2_NP5_138_masked.ply
+28
+____
+pc_NP3_NP5_51_masked.ply
+29
+____
+pc_NP2_NP5_351_masked.ply
+30
+____
+pc_NP4_NP5_219_masked.ply
+31
+____
+pc_NP4_NP5_105_masked.ply
+32
+____
+pc_NP2_NP5_39_masked.ply
+33
+____
+pc_NP1_NP5_324_masked.ply
+34
+____
+pc_NP3_NP5_141_masked.ply
+35
+____
+pc_NP3_NP5_156_masked.ply
+36
+____
+pc_NP4_NP5_345_masked.ply
+37
+____
+pc_NP1_NP5_270_masked.ply
+38
+____
+pc_NP2_NP5_150_masked.ply
+39
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP1_NP5_147_masked.ply
+40
+____
+pc_NP4_NP5_222_masked.ply
+41
+____
+pc_NP5_NP5_132_masked.ply
+42
+____
+pc_NP2_NP5_354_masked.ply
+43
+____
+pc_NP1_NP5_342_masked.ply
+44
+____
+pc_NP1_NP5_24_masked.ply
+45
+____
+pc_NP1_NP5_231_masked.ply
+46
+____
+pc_NP4_NP5_165_masked.ply
+47
+____
+pc_NP4_NP5_60_masked.ply
+48
+____
+pc_NP3_NP5_282_masked.ply
+49
+____
+pc_NP5_NP5_135_masked.ply
+50
+____
+pc_NP1_NP5_174_masked.ply
+51
+____
+pc_NP3_NP5_354_masked.ply
+52
+____
+pc_NP1_NP5_90_masked.ply
+53
+____
+pc_NP2_NP5_231_masked.ply
+54
+____
+pc_NP2_NP5_237_masked.ply
+55
+____
+pc_NP5_NP5_204_masked.ply
+56
+____
+pc_NP5_NP5_69_masked.ply
+57
+____
+pc_NP3_NP5_309_masked.ply
+58
+____
+pc_NP2_NP5_204_masked.ply
+59
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  100.00000762939453
+ADD-S AUC ( 5 %):  92.9288101196289
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99995
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  006_mustard_bottle
+dataset len 60
+Number of trainable parameters:  896161
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+____
+pc_NP2_NP5_240_masked.ply
+0
+____
+pc_NP3_NP5_306_masked.ply
+1
+____
+pc_NP3_NP5_69_masked.ply
+2
+____
+pc_NP5_NP5_141_masked.ply
+3
+____
+pc_NP5_NP5_342_masked.ply
+4
+____
+pc_NP5_NP5_285_masked.ply
+5
+____
+pc_NP3_NP5_87_masked.ply
+6
+____
+pc_NP5_NP5_357_masked.ply
+7
+____
+pc_NP2_NP5_330_masked.ply
+8
+____
+pc_NP1_NP5_126_masked.ply
+9
+____
+pc_NP2_NP5_120_masked.ply
+10
+____
+pc_NP3_NP5_270_masked.ply
+11
+____
+pc_NP3_NP5_72_masked.ply
+12
+____
+pc_NP5_NP5_288_masked.ply
+13
+____
+pc_NP4_NP5_126_masked.ply
+14
+____
+pc_NP4_NP5_177_masked.ply
+15
+____
+pc_NP2_NP5_153_masked.ply
+16
+____
+pc_NP5_NP5_114_masked.ply
+17
+____
+pc_NP1_NP5_138_masked.ply
+18
+____
+pc_NP3_NP5_210_masked.ply
+19
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True,  True,  True,  True, False, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP1_NP5_336_masked.ply
+20
+____
+pc_NP4_NP5_87_masked.ply
+21
+____
+pc_NP3_NP5_195_masked.ply
+22
+____
+pc_NP1_NP5_354_masked.ply
+23
+____
+pc_NP1_NP5_171_masked.ply
+24
+____
+pc_NP2_NP5_87_masked.ply
+25
+____
+pc_NP3_NP5_300_masked.ply
+26
+____
+pc_NP1_NP5_54_masked.ply
+27
+____
+pc_NP1_NP5_303_masked.ply
+28
+____
+pc_NP2_NP5_105_masked.ply
+29
+____
+pc_NP4_NP5_189_masked.ply
+30
+____
+pc_NP2_NP5_81_masked.ply
+31
+____
+pc_NP5_NP5_333_masked.ply
+32
+____
+pc_NP2_NP5_228_masked.ply
+33
+____
+pc_NP5_NP5_162_masked.ply
+34
+____
+pc_NP2_NP5_99_masked.ply
+35
+____
+pc_NP4_NP5_198_masked.ply
+36
+____
+pc_NP5_NP5_255_masked.ply
+37
+____
+pc_NP5_NP5_174_masked.ply
+38
+____
+pc_NP3_NP5_186_masked.ply
+39
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True,  True, False, False, False, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP3_NP5_342_masked.ply
+40
+____
+pc_NP5_NP5_336_masked.ply
+41
+____
+pc_NP2_NP5_279_masked.ply
+42
+____
+pc_NP3_NP5_135_masked.ply
+43
+____
+pc_NP5_NP5_231_masked.ply
+44
+____
+pc_NP4_NP5_129_masked.ply
+45
+____
+pc_NP3_NP5_141_masked.ply
+46
+____
+pc_NP2_NP5_63_masked.ply
+47
+____
+pc_NP1_NP5_81_masked.ply
+48
+____
+pc_NP2_NP5_318_masked.ply
+49
+____
+pc_NP4_NP5_159_masked.ply
+50
+____
+pc_NP5_NP5_198_masked.ply
+51
+____
+pc_NP1_NP5_150_masked.ply
+52
+____
+pc_NP5_NP5_219_masked.ply
+53
+____
+pc_NP1_NP5_207_masked.ply
+54
+____
+pc_NP2_NP5_336_masked.ply
+55
+____
+pc_NP4_NP5_84_masked.ply
+56
+____
+pc_NP3_NP5_315_masked.ply
+57
+____
+pc_NP3_NP5_162_masked.ply
+58
+____
+pc_NP2_NP5_72_masked.ply
+59
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True,  True,  True,  True, False, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  86.66667175292969
+ADD-S AUC ( 5 %):  86.24968719482422
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.9999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  007_tuna_fish_can
+dataset len 60
+Number of trainable parameters:  891544
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+____
+pc_NP1_NP5_198_masked.ply
+0
+____
+pc_NP5_NP5_309_masked.ply
+1
+____
+pc_NP3_NP5_234_masked.ply
+2
+____
+pc_NP4_NP5_270_masked.ply
+3
+____
+pc_NP1_NP5_141_masked.ply
+4
+____
+pc_NP1_NP5_0_masked.ply
+5
+____
+pc_NP1_NP5_312_masked.ply
+6
+____
+pc_NP2_NP5_207_masked.ply
+7
+____
+pc_NP4_NP5_81_masked.ply
+8
+____
+pc_NP5_NP5_132_masked.ply
+9
+____
+pc_NP2_NP5_315_masked.ply
+10
+____
+pc_NP5_NP5_111_masked.ply
+11
+____
+pc_NP3_NP5_351_masked.ply
+12
+____
+pc_NP2_NP5_339_masked.ply
+13
+____
+pc_NP3_NP5_171_masked.ply
+14
+____
+pc_NP4_NP5_354_masked.ply
+15
+____
+pc_NP5_NP5_321_masked.ply
+16
+____
+pc_NP4_NP5_225_masked.ply
+17
+____
+pc_NP4_NP5_3_masked.ply
+18
+____
+pc_NP1_NP5_111_masked.ply
+19
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True,  True,  True,  True,  True, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP4_NP5_108_masked.ply
+20
+____
+pc_NP4_NP5_231_masked.ply
+21
+____
+pc_NP5_NP5_120_masked.ply
+22
+____
+pc_NP1_NP5_147_masked.ply
+23
+____
+pc_NP3_NP5_144_masked.ply
+24
+____
+pc_NP1_NP5_9_masked.ply
+25
+____
+pc_NP5_NP5_198_masked.ply
+26
+____
+pc_NP5_NP5_219_masked.ply
+27
+____
+pc_NP3_NP5_153_masked.ply
+28
+____
+pc_NP1_NP5_144_masked.ply
+29
+____
+pc_NP5_NP5_69_masked.ply
+30
+____
+pc_NP3_NP5_42_masked.ply
+31
+____
+pc_NP1_NP5_72_masked.ply
+32
+____
+pc_NP3_NP5_336_masked.ply
+33
+____
+pc_NP3_NP5_81_masked.ply
+34
+____
+pc_NP2_NP5_51_masked.ply
+35
+____
+pc_NP3_NP5_69_masked.ply
+36
+____
+pc_NP5_NP5_243_masked.ply
+37
+____
+pc_NP5_NP5_108_masked.ply
+38
+____
+pc_NP3_NP5_315_masked.ply
+39
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP2_NP5_303_masked.ply
+40
+____
+pc_NP1_NP5_183_masked.ply
+41
+____
+pc_NP4_NP5_330_masked.ply
+42
+____
+pc_NP5_NP5_273_masked.ply
+43
+____
+pc_NP1_NP5_282_masked.ply
+44
+____
+pc_NP5_NP5_171_masked.ply
+45
+____
+pc_NP5_NP5_12_masked.ply
+46
+____
+pc_NP4_NP5_39_masked.ply
+47
+____
+pc_NP2_NP5_357_masked.ply
+48
+____
+pc_NP3_NP5_273_masked.ply
+49
+____
+pc_NP2_NP5_336_masked.ply
+50
+____
+pc_NP2_NP5_219_masked.ply
+51
+____
+pc_NP5_NP5_342_masked.ply
+52
+____
+pc_NP2_NP5_348_masked.ply
+53
+____
+pc_NP1_NP5_165_masked.ply
+54
+____
+pc_NP2_NP5_42_masked.ply
+55
+____
+pc_NP5_NP5_216_masked.ply
+56
+____
+pc_NP5_NP5_129_masked.ply
+57
+____
+pc_NP3_NP5_105_masked.ply
+58
+____
+pc_NP1_NP5_345_masked.ply
+59
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True,  True,  True,  True,  True, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  96.66667175292969
+ADD-S AUC ( 5 %):  89.57889556884766
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99995
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  008_pudding_box
+dataset len 60
+Number of trainable parameters:  891544
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+____
+pc_NP2_NP5_219_masked.ply
+0
+____
+pc_NP3_NP5_312_masked.ply
+1
+____
+pc_NP1_NP5_168_masked.ply
+2
+____
+pc_NP1_NP5_75_masked.ply
+3
+____
+pc_NP2_NP5_273_masked.ply
+4
+____
+pc_NP1_NP5_54_masked.ply
+5
+____
+pc_NP4_NP5_0_masked.ply
+6
+____
+pc_NP1_NP5_303_masked.ply
+7
+____
+pc_NP4_NP5_282_masked.ply
+8
+____
+pc_NP2_NP5_90_masked.ply
+9
+____
+pc_NP1_NP5_279_masked.ply
+10
+____
+pc_NP3_NP5_195_masked.ply
+11
+____
+pc_NP3_NP5_261_masked.ply
+12
+____
+pc_NP3_NP5_192_masked.ply
+13
+____
+pc_NP5_NP5_252_masked.ply
+14
+____
+pc_NP3_NP5_114_masked.ply
+15
+____
+pc_NP3_NP5_267_masked.ply
+16
+____
+pc_NP2_NP5_147_masked.ply
+17
+____
+pc_NP3_NP5_348_masked.ply
+18
+____
+pc_NP3_NP5_228_masked.ply
+19
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True, False, False, False, False, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP1_NP5_204_masked.ply
+20
+____
+pc_NP1_NP5_354_masked.ply
+21
+____
+pc_NP2_NP5_171_masked.ply
+22
+____
+pc_NP2_NP5_6_masked.ply
+23
+____
+pc_NP3_NP5_327_masked.ply
+24
+____
+pc_NP1_NP5_57_masked.ply
+25
+____
+pc_NP1_NP5_297_masked.ply
+26
+____
+pc_NP1_NP5_174_masked.ply
+27
+____
+pc_NP5_NP5_18_masked.ply
+28
+____
+pc_NP3_NP5_282_masked.ply
+29
+____
+pc_NP3_NP5_90_masked.ply
+30
+____
+pc_NP4_NP5_27_masked.ply
+31
+____
+pc_NP2_NP5_114_masked.ply
+32
+____
+pc_NP5_NP5_81_masked.ply
+33
+____
+pc_NP5_NP5_204_masked.ply
+34
+____
+pc_NP1_NP5_192_masked.ply
+35
+____
+pc_NP1_NP5_255_masked.ply
+36
+____
+pc_NP4_NP5_225_masked.ply
+37
+____
+pc_NP5_NP5_357_masked.ply
+38
+____
+pc_NP4_NP5_297_masked.ply
+39
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True,  True,  True, False, False, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP2_NP5_213_masked.ply
+40
+____
+pc_NP5_NP5_108_masked.ply
+41
+____
+pc_NP2_NP5_207_masked.ply
+42
+____
+pc_NP3_NP5_207_masked.ply
+43
+____
+pc_NP1_NP5_126_masked.ply
+44
+____
+pc_NP2_NP5_222_masked.ply
+45
+____
+pc_NP3_NP5_105_masked.ply
+46
+____
+pc_NP5_NP5_12_masked.ply
+47
+____
+pc_NP2_NP5_138_masked.ply
+48
+____
+pc_NP3_NP5_150_masked.ply
+49
+____
+pc_NP3_NP5_3_masked.ply
+50
+____
+pc_NP1_NP5_300_masked.ply
+51
+____
+pc_NP2_NP5_96_masked.ply
+52
+____
+pc_NP4_NP5_201_masked.ply
+53
+____
+pc_NP2_NP5_192_masked.ply
+54
+____
+pc_NP2_NP5_333_masked.ply
+55
+____
+pc_NP4_NP5_261_masked.ply
+56
+____
+pc_NP3_NP5_0_masked.ply
+57
+____
+pc_NP4_NP5_213_masked.ply
+58
+____
+pc_NP5_NP5_225_masked.ply
+59
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True,  True,  True,  True,  True, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  85.00000762939453
+ADD-S AUC ( 5 %):  88.13904571533203
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99995
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  009_gelatin_box
+dataset len 56
+Number of trainable parameters:  891544
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+____
+pc_NP1_NP5_231_masked.ply
+0
+____
+pc_NP3_NP5_279_masked.ply
+1
+____
+pc_NP4_NP5_21_masked.ply
+2
+____
+pc_NP5_NP5_345_masked.ply
+3
+____
+pc_NP2_NP5_306_masked.ply
+4
+____
+pc_NP1_NP5_78_masked.ply
+5
+____
+pc_NP1_NP5_45_masked.ply
+6
+____
+pc_NP2_NP5_168_masked.ply
+7
+____
+pc_NP1_NP5_336_masked.ply
+8
+____
+pc_NP4_NP5_96_masked.ply
+9
+____
+pc_NP1_NP5_297_masked.ply
+10
+____
+pc_NP5_NP5_132_masked.ply
+11
+____
+pc_NP1_NP5_237_masked.ply
+12
+____
+pc_NP2_NP5_231_masked.ply
+13
+____
+pc_NP1_NP5_294_masked.ply
+14
+____
+pc_NP1_NP5_114_masked.ply
+15
+____
+pc_NP5_NP5_78_masked.ply
+16
+____
+pc_NP5_NP5_348_masked.ply
+17
+____
+pc_NP4_NP5_342_masked.ply
+18
+____
+pc_NP1_NP5_210_masked.ply
+19
+____
+pc_NP2_NP5_24_masked.ply
+20
+____
+pc_NP1_NP5_144_masked.ply
+21
+____
+pc_NP5_NP5_210_masked.ply
+22
+____
+pc_NP5_NP5_168_masked.ply
+23
+____
+pc_NP4_NP5_252_masked.ply
+24
+____
+pc_NP5_NP5_81_masked.ply
+25
+____
+pc_NP1_NP5_282_masked.ply
+26
+____
+pc_NP5_NP5_21_masked.ply
+27
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True,  True,  True,  True, False, False,
+        False, False, False, False, False, False, False, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP4_NP5_228_masked.ply
+28
+____
+pc_NP4_NP5_141_masked.ply
+29
+____
+pc_NP2_NP5_51_masked.ply
+30
+____
+pc_NP3_NP5_300_masked.ply
+31
+____
+pc_NP4_NP5_3_masked.ply
+32
+____
+pc_NP3_NP5_243_masked.ply
+33
+____
+pc_NP1_NP5_207_masked.ply
+34
+____
+pc_NP3_NP5_324_masked.ply
+35
+____
+pc_NP1_NP5_291_masked.ply
+36
+____
+pc_NP2_NP5_252_masked.ply
+37
+____
+pc_NP4_NP5_189_masked.ply
+38
+____
+pc_NP4_NP5_156_masked.ply
+39
+____
+pc_NP2_NP5_27_masked.ply
+40
+____
+pc_NP5_NP5_18_masked.ply
+41
+____
+pc_NP3_NP5_150_masked.ply
+42
+____
+pc_NP4_NP5_24_masked.ply
+43
+____
+pc_NP3_NP5_234_masked.ply
+44
+____
+pc_NP2_NP5_291_masked.ply
+45
+____
+pc_NP1_NP5_342_masked.ply
+46
+____
+pc_NP4_NP5_207_masked.ply
+47
+____
+pc_NP5_NP5_0_masked.ply
+48
+____
+pc_NP1_NP5_312_masked.ply
+49
+____
+pc_NP1_NP5_69_masked.ply
+50
+____
+pc_NP1_NP5_339_masked.ply
+51
+____
+pc_NP2_NP5_243_masked.ply
+52
+____
+pc_NP1_NP5_309_masked.ply
+53
+____
+pc_NP1_NP5_129_masked.ply
+54
+____
+pc_NP5_NP5_33_masked.ply
+55
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True, False, False, False, False, False, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  71.42857360839844
+ADD-S AUC ( 5 %):  85.71387481689453
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99995
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  010_potted_meat_can
+dataset len 60
+Number of trainable parameters:  891544
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+____
+pc_NP3_NP5_96_masked.ply
+0
+____
+pc_NP2_NP5_294_masked.ply
+1
+____
+pc_NP4_NP5_198_masked.ply
+2
+____
+pc_NP3_NP5_51_masked.ply
+3
+____
+pc_NP3_NP5_267_masked.ply
+4
+____
+pc_NP3_NP5_183_masked.ply
+5
+____
+pc_NP3_NP5_30_masked.ply
+6
+____
+pc_NP3_NP5_102_masked.ply
+7
+____
+pc_NP4_NP5_309_masked.ply
+8
+____
+pc_NP4_NP5_297_masked.ply
+9
+____
+pc_NP1_NP5_351_masked.ply
+10
+____
+pc_NP1_NP5_45_masked.ply
+11
+____
+pc_NP3_NP5_63_masked.ply
+12
+____
+pc_NP4_NP5_120_masked.ply
+13
+____
+pc_NP5_NP5_72_masked.ply
+14
+____
+pc_NP3_NP5_0_masked.ply
+15
+____
+pc_NP4_NP5_150_masked.ply
+16
+____
+pc_NP2_NP5_9_masked.ply
+17
+____
+pc_NP3_NP5_333_masked.ply
+18
+____
+pc_NP2_NP5_144_masked.ply
+19
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+        False, False, False, False, False, False, False, False, False, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP2_NP5_30_masked.ply
+20
+____
+pc_NP5_NP5_240_masked.ply
+21
+____
+pc_NP2_NP5_156_masked.ply
+22
+____
+pc_NP1_NP5_294_masked.ply
+23
+____
+pc_NP2_NP5_333_masked.ply
+24
+____
+pc_NP1_NP5_30_masked.ply
+25
+____
+pc_NP5_NP5_342_masked.ply
+26
+____
+pc_NP4_NP5_177_masked.ply
+27
+____
+pc_NP5_NP5_147_masked.ply
+28
+____
+pc_NP4_NP5_153_masked.ply
+29
+____
+pc_NP2_NP5_66_masked.ply
+30
+____
+pc_NP5_NP5_126_masked.ply
+31
+____
+pc_NP2_NP5_96_masked.ply
+32
+____
+pc_NP2_NP5_138_masked.ply
+33
+____
+pc_NP2_NP5_180_masked.ply
+34
+____
+pc_NP5_NP5_93_masked.ply
+35
+____
+pc_NP3_NP5_309_masked.ply
+36
+____
+pc_NP3_NP5_324_masked.ply
+37
+____
+pc_NP2_NP5_243_masked.ply
+38
+____
+pc_NP5_NP5_186_masked.ply
+39
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True, False, False, False, False, False, False, False, False, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP5_NP5_246_masked.ply
+40
+____
+pc_NP4_NP5_114_masked.ply
+41
+____
+pc_NP5_NP5_345_masked.ply
+42
+____
+pc_NP1_NP5_195_masked.ply
+43
+____
+pc_NP2_NP5_252_masked.ply
+44
+____
+pc_NP3_NP5_111_masked.ply
+45
+____
+pc_NP4_NP5_255_masked.ply
+46
+____
+pc_NP1_NP5_348_masked.ply
+47
+____
+pc_NP3_NP5_6_masked.ply
+48
+____
+pc_NP1_NP5_60_masked.ply
+49
+____
+pc_NP2_NP5_354_masked.ply
+50
+____
+pc_NP1_NP5_159_masked.ply
+51
+____
+pc_NP3_NP5_255_masked.ply
+52
+____
+pc_NP1_NP5_321_masked.ply
+53
+____
+pc_NP5_NP5_312_masked.ply
+54
+____
+pc_NP1_NP5_126_masked.ply
+55
+____
+pc_NP1_NP5_327_masked.ply
+56
+____
+pc_NP2_NP5_114_masked.ply
+57
+____
+pc_NP5_NP5_315_masked.ply
+58
+____
+pc_NP4_NP5_282_masked.ply
+59
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True, False,
+        False, False, False, False, False, False, False, False, False, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  50.000003814697266
+ADD-S AUC ( 5 %):  81.4361572265625
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.9999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  011_banana
+dataset len 60
+Number of trainable parameters:  888466
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+____
+pc_NP4_NP5_126_masked.ply
+0
+____
+pc_NP2_NP5_174_masked.ply
+1
+____
+pc_NP3_NP5_102_masked.ply
+2
+____
+pc_NP1_NP5_117_masked.ply
+3
+____
+pc_NP2_NP5_90_masked.ply
+4
+____
+pc_NP3_NP5_285_masked.ply
+5
+____
+pc_NP4_NP5_195_masked.ply
+6
+____
+pc_NP2_NP5_84_masked.ply
+7
+____
+pc_NP1_NP5_222_masked.ply
+8
+____
+pc_NP2_NP5_135_masked.ply
+9
+____
+pc_NP2_NP5_186_masked.ply
+10
+____
+pc_NP3_NP5_15_masked.ply
+11
+____
+pc_NP1_NP5_309_masked.ply
+12
+____
+pc_NP3_NP5_261_masked.ply
+13
+____
+pc_NP1_NP5_327_masked.ply
+14
+____
+pc_NP2_NP5_276_masked.ply
+15
+____
+pc_NP5_NP5_192_masked.ply
+16
+____
+pc_NP5_NP5_90_masked.ply
+17
+____
+pc_NP5_NP5_39_masked.ply
+18
+____
+pc_NP3_NP5_267_masked.ply
+19
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True], device='cuda:0')
+____
+pc_NP1_NP5_18_masked.ply
+20
+____
+pc_NP3_NP5_270_masked.ply
+21
+____
+pc_NP5_NP5_276_masked.ply
+22
+____
+pc_NP5_NP5_165_masked.ply
+23
+____
+pc_NP5_NP5_270_masked.ply
+24
+____
+pc_NP3_NP5_216_masked.ply
+25
+____
+pc_NP1_NP5_27_masked.ply
+26
+____
+pc_NP1_NP5_345_masked.ply
+27
+____
+pc_NP3_NP5_123_masked.ply
+28
+____
+pc_NP3_NP5_42_masked.ply
+29
+____
+pc_NP5_NP5_87_masked.ply
+30
+____
+pc_NP4_NP5_6_masked.ply
+31
+____
+pc_NP2_NP5_306_masked.ply
+32
+____
+pc_NP5_NP5_312_masked.ply
+33
+____
+pc_NP3_NP5_174_masked.ply
+34
+____
+pc_NP5_NP5_93_masked.ply
+35
+____
+pc_NP1_NP5_204_masked.ply
+36
+____
+pc_NP1_NP5_357_masked.ply
+37
+____
+pc_NP3_NP5_12_masked.ply
+38
+____
+pc_NP4_NP5_183_masked.ply
+39
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True], device='cuda:0')
+____
+pc_NP5_NP5_228_masked.ply
+40
+____
+pc_NP5_NP5_114_masked.ply
+41
+____
+pc_NP3_NP5_291_masked.ply
+42
+____
+pc_NP1_NP5_42_masked.ply
+43
+____
+pc_NP4_NP5_306_masked.ply
+44
+____
+pc_NP3_NP5_111_masked.ply
+45
+____
+pc_NP2_NP5_18_masked.ply
+46
+____
+pc_NP4_NP5_309_masked.ply
+47
+____
+pc_NP1_NP5_3_masked.ply
+48
+____
+pc_NP5_NP5_216_masked.ply
+49
+____
+pc_NP4_NP5_141_masked.ply
+50
+____
+pc_NP2_NP5_3_masked.ply
+51
+____
+pc_NP5_NP5_222_masked.ply
+52
+____
+pc_NP5_NP5_147_masked.ply
+53
+____
+pc_NP5_NP5_315_masked.ply
+54
+____
+pc_NP1_NP5_351_masked.ply
+55
+____
+pc_NP2_NP5_114_masked.ply
+56
+____
+pc_NP4_NP5_105_masked.ply
+57
+____
+pc_NP4_NP5_207_masked.ply
+58
+____
+pc_NP4_NP5_297_masked.ply
+59
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  100.00000762939453
+ADD-S AUC ( 5 %):  95.1919174194336
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99992
+% certifiable:  10.000000953674316
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  100.0
+ADD-S AUC ( 5 %):  65.41986846923828
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  019_pitcher_base
+dataset len 60
+Number of trainable parameters:  896161
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+____
+pc_NP2_NP5_231_masked.ply
+0
+____
+pc_NP5_NP5_318_masked.ply
+1
+____
+pc_NP4_NP5_333_masked.ply
+2
+____
+pc_NP4_NP5_117_masked.ply
+3
+____
+pc_NP2_NP5_132_masked.ply
+4
+____
+pc_NP5_NP5_330_masked.ply
+5
+____
+pc_NP3_NP5_189_masked.ply
+6
+____
+pc_NP4_NP5_303_masked.ply
+7
+____
+pc_NP1_NP5_69_masked.ply
+8
+____
+pc_NP3_NP5_18_masked.ply
+9
+____
+pc_NP3_NP5_336_masked.ply
+10
+____
+pc_NP5_NP5_348_masked.ply
+11
+____
+pc_NP3_NP5_87_masked.ply
+12
+____
+pc_NP2_NP5_228_masked.ply
+13
+____
+pc_NP5_NP5_249_masked.ply
+14
+____
+pc_NP3_NP5_138_masked.ply
+15
+____
+pc_NP2_NP5_114_masked.ply
+16
+____
+pc_NP3_NP5_222_masked.ply
+17
+____
+pc_NP2_NP5_282_masked.ply
+18
+____
+pc_NP3_NP5_21_masked.ply
+19
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True,  True,  True,  True,  True, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP3_NP5_105_masked.ply
+20
+____
+pc_NP2_NP5_129_masked.ply
+21
+____
+pc_NP5_NP5_219_masked.ply
+22
+____
+pc_NP2_NP5_342_masked.ply
+23
+____
+pc_NP1_NP5_243_masked.ply
+24
+____
+pc_NP2_NP5_243_masked.ply
+25
+____
+pc_NP2_NP5_33_masked.ply
+26
+____
+pc_NP5_NP5_237_masked.ply
+27
+____
+pc_NP3_NP5_273_masked.ply
+28
+____
+pc_NP2_NP5_66_masked.ply
+29
+____
+pc_NP2_NP5_198_masked.ply
+30
+____
+pc_NP4_NP5_126_masked.ply
+31
+____
+pc_NP1_NP5_216_masked.ply
+32
+____
+pc_NP2_NP5_351_masked.ply
+33
+____
+pc_NP1_NP5_357_masked.ply
+34
+____
+pc_NP5_NP5_105_masked.ply
+35
+____
+pc_NP2_NP5_84_masked.ply
+36
+____
+pc_NP1_NP5_132_masked.ply
+37
+____
+pc_NP1_NP5_81_masked.ply
+38
+____
+pc_NP5_NP5_102_masked.ply
+39
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True], device='cuda:0')
+____
+pc_NP5_NP5_174_masked.ply
+40
+____
+pc_NP4_NP5_330_masked.ply
+41
+____
+pc_NP1_NP5_300_masked.ply
+42
+____
+pc_NP5_NP5_225_masked.ply
+43
+____
+pc_NP5_NP5_21_masked.ply
+44
+____
+pc_NP5_NP5_342_masked.ply
+45
+____
+pc_NP4_NP5_21_masked.ply
+46
+____
+pc_NP5_NP5_291_masked.ply
+47
+____
+pc_NP4_NP5_237_masked.ply
+48
+____
+pc_NP5_NP5_33_masked.ply
+49
+____
+pc_NP3_NP5_57_masked.ply
+50
+____
+pc_NP5_NP5_78_masked.ply
+51
+____
+pc_NP3_NP5_174_masked.ply
+52
+____
+pc_NP3_NP5_267_masked.ply
+53
+____
+pc_NP1_NP5_0_masked.ply
+54
+____
+pc_NP5_NP5_108_masked.ply
+55
+____
+pc_NP2_NP5_297_masked.ply
+56
+____
+pc_NP2_NP5_336_masked.ply
+57
+____
+pc_NP1_NP5_255_masked.ply
+58
+____
+pc_NP5_NP5_90_masked.ply
+59
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True], device='cuda:0')
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  98.33333587646484
+ADD-S AUC ( 5 %):  89.15514373779297
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99975
+% certifiable:  3.3333334922790527
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  100.0
+ADD-S AUC ( 5 %):  66.66666412353516
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  021_bleach_cleanser
+dataset len 60
+Number of trainable parameters:  897700
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+____
+pc_NP2_NP5_318_masked.ply
+0
+____
+pc_NP2_NP5_270_masked.ply
+1
+____
+pc_NP2_NP5_351_masked.ply
+2
+____
+pc_NP1_NP5_312_masked.ply
+3
+____
+pc_NP1_NP5_189_masked.ply
+4
+____
+pc_NP4_NP5_300_masked.ply
+5
+____
+pc_NP3_NP5_36_masked.ply
+6
+____
+pc_NP2_NP5_234_masked.ply
+7
+____
+pc_NP2_NP5_132_masked.ply
+8
+____
+pc_NP4_NP5_147_masked.ply
+9
+____
+pc_NP4_NP5_264_masked.ply
+10
+____
+pc_NP2_NP5_99_masked.ply
+11
+____
+pc_NP2_NP5_237_masked.ply
+12
+____
+pc_NP3_NP5_159_masked.ply
+13
+____
+pc_NP4_NP5_39_masked.ply
+14
+____
+pc_NP1_NP5_183_masked.ply
+15
+____
+pc_NP4_NP5_108_masked.ply
+16
+____
+pc_NP3_NP5_294_masked.ply
+17
+____
+pc_NP4_NP5_24_masked.ply
+18
+____
+pc_NP4_NP5_330_masked.ply
+19
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP2_NP5_165_masked.ply
+20
+____
+pc_NP1_NP5_303_masked.ply
+21
+____
+pc_NP5_NP5_105_masked.ply
+22
+____
+pc_NP2_NP5_3_masked.ply
+23
+____
+pc_NP1_NP5_234_masked.ply
+24
+____
+pc_NP3_NP5_273_masked.ply
+25
+____
+pc_NP5_NP5_351_masked.ply
+26
+____
+pc_NP4_NP5_132_masked.ply
+27
+____
+pc_NP4_NP5_273_masked.ply
+28
+____
+pc_NP4_NP5_174_masked.ply
+29
+____
+pc_NP5_NP5_48_masked.ply
+30
+____
+pc_NP4_NP5_348_masked.ply
+31
+____
+pc_NP3_NP5_66_masked.ply
+32
+____
+pc_NP3_NP5_57_masked.ply
+33
+____
+pc_NP5_NP5_72_masked.ply
+34
+____
+pc_NP2_NP5_279_masked.ply
+35
+____
+pc_NP1_NP5_12_masked.ply
+36
+____
+pc_NP1_NP5_63_masked.ply
+37
+____
+pc_NP1_NP5_300_masked.ply
+38
+____
+pc_NP1_NP5_27_masked.ply
+39
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP5_NP5_258_masked.ply
+40
+____
+pc_NP3_NP5_177_masked.ply
+41
+____
+pc_NP4_NP5_165_masked.ply
+42
+____
+pc_NP3_NP5_63_masked.ply
+43
+____
+pc_NP1_NP5_285_masked.ply
+44
+____
+pc_NP3_NP5_54_masked.ply
+45
+____
+pc_NP2_NP5_354_masked.ply
+46
+____
+pc_NP2_NP5_288_masked.ply
+47
+____
+pc_NP3_NP5_18_masked.ply
+48
+____
+pc_NP5_NP5_261_masked.ply
+49
+____
+pc_NP1_NP5_48_masked.ply
+50
+____
+pc_NP4_NP5_12_masked.ply
+51
+____
+pc_NP1_NP5_153_masked.ply
+52
+____
+pc_NP3_NP5_318_masked.ply
+53
+____
+pc_NP1_NP5_264_masked.ply
+54
+____
+pc_NP3_NP5_282_masked.ply
+55
+____
+pc_NP5_NP5_306_masked.ply
+56
+____
+pc_NP4_NP5_270_masked.ply
+57
+____
+pc_NP2_NP5_45_masked.ply
+58
+____
+pc_NP4_NP5_240_masked.ply
+59
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  100.00000762939453
+ADD-S AUC ( 5 %):  92.7487564086914
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99987
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  035_power_drill
+dataset len 60
+Number of trainable parameters:  899239
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+____
+pc_NP5_NP5_132_masked.ply
+0
+____
+pc_NP3_NP5_276_masked.ply
+1
+____
+pc_NP3_NP5_195_masked.ply
+2
+____
+pc_NP5_NP5_222_masked.ply
+3
+____
+pc_NP5_NP5_321_masked.ply
+4
+____
+pc_NP2_NP5_0_masked.ply
+5
+____
+pc_NP2_NP5_327_masked.ply
+6
+____
+pc_NP3_NP5_147_masked.ply
+7
+____
+pc_NP1_NP5_72_masked.ply
+8
+____
+pc_NP2_NP5_42_masked.ply
+9
+____
+pc_NP5_NP5_99_masked.ply
+10
+____
+pc_NP2_NP5_270_masked.ply
+11
+____
+pc_NP5_NP5_300_masked.ply
+12
+____
+pc_NP4_NP5_33_masked.ply
+13
+____
+pc_NP2_NP5_303_masked.ply
+14
+____
+pc_NP5_NP5_315_masked.ply
+15
+____
+pc_NP1_NP5_87_masked.ply
+16
+____
+pc_NP3_NP5_129_masked.ply
+17
+____
+pc_NP5_NP5_267_masked.ply
+18
+____
+pc_NP2_NP5_189_masked.ply
+19
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP3_NP5_165_masked.ply
+20
+____
+pc_NP4_NP5_21_masked.ply
+21
+____
+pc_NP5_NP5_42_masked.ply
+22
+____
+pc_NP4_NP5_186_masked.ply
+23
+____
+pc_NP3_NP5_216_masked.ply
+24
+____
+pc_NP2_NP5_183_masked.ply
+25
+____
+pc_NP5_NP5_261_masked.ply
+26
+____
+pc_NP3_NP5_66_masked.ply
+27
+____
+pc_NP1_NP5_3_masked.ply
+28
+____
+pc_NP2_NP5_288_masked.ply
+29
+____
+pc_NP3_NP5_207_masked.ply
+30
+____
+pc_NP3_NP5_84_masked.ply
+31
+____
+pc_NP4_NP5_6_masked.ply
+32
+____
+pc_NP4_NP5_306_masked.ply
+33
+____
+pc_NP2_NP5_234_masked.ply
+34
+____
+pc_NP4_NP5_300_masked.ply
+35
+____
+pc_NP2_NP5_114_masked.ply
+36
+____
+pc_NP5_NP5_12_masked.ply
+37
+____
+pc_NP4_NP5_231_masked.ply
+38
+____
+pc_NP2_NP5_258_masked.ply
+39
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP5_NP5_243_masked.ply
+40
+____
+pc_NP4_NP5_240_masked.ply
+41
+____
+pc_NP3_NP5_288_masked.ply
+42
+____
+pc_NP5_NP5_213_masked.ply
+43
+____
+pc_NP4_NP5_279_masked.ply
+44
+____
+pc_NP5_NP5_327_masked.ply
+45
+____
+pc_NP5_NP5_309_masked.ply
+46
+____
+pc_NP3_NP5_285_masked.ply
+47
+____
+pc_NP4_NP5_117_masked.ply
+48
+____
+pc_NP3_NP5_213_masked.ply
+49
+____
+pc_NP1_NP5_288_masked.ply
+50
+____
+pc_NP1_NP5_93_masked.ply
+51
+____
+pc_NP3_NP5_123_masked.ply
+52
+____
+pc_NP5_NP5_165_masked.ply
+53
+____
+pc_NP5_NP5_27_masked.ply
+54
+____
+pc_NP2_NP5_231_masked.ply
+55
+____
+pc_NP4_NP5_354_masked.ply
+56
+____
+pc_NP1_NP5_6_masked.ply
+57
+____
+pc_NP5_NP5_210_masked.ply
+58
+____
+pc_NP3_NP5_225_masked.ply
+59
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  100.00000762939453
+ADD-S AUC ( 5 %):  93.51748657226562
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99992
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  036_wood_block
+dataset len 60
+Number of trainable parameters:  891544
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+____
+pc_NP4_NP5_348_masked.ply
+0
+____
+pc_NP4_NP5_9_masked.ply
+1
+____
+pc_NP5_NP5_63_masked.ply
+2
+____
+pc_NP4_NP5_51_masked.ply
+3
+____
+pc_NP3_NP5_357_masked.ply
+4
+____
+pc_NP5_NP5_177_masked.ply
+5
+____
+pc_NP5_NP5_18_masked.ply
+6
+____
+pc_NP5_NP5_354_masked.ply
+7
+____
+pc_NP4_NP5_96_masked.ply
+8
+____
+pc_NP2_NP5_342_masked.ply
+9
+____
+pc_NP5_NP5_234_masked.ply
+10
+____
+pc_NP5_NP5_171_masked.ply
+11
+____
+pc_NP4_NP5_123_masked.ply
+12
+____
+pc_NP4_NP5_87_masked.ply
+13
+____
+pc_NP3_NP5_48_masked.ply
+14
+____
+pc_NP2_NP5_138_masked.ply
+15
+____
+pc_NP2_NP5_354_masked.ply
+16
+____
+pc_NP4_NP5_177_masked.ply
+17
+____
+pc_NP3_NP5_45_masked.ply
+18
+____
+pc_NP1_NP5_300_masked.ply
+19
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP1_NP5_270_masked.ply
+20
+____
+pc_NP3_NP5_156_masked.ply
+21
+____
+pc_NP3_NP5_297_masked.ply
+22
+____
+pc_NP3_NP5_66_masked.ply
+23
+____
+pc_NP3_NP5_129_masked.ply
+24
+____
+pc_NP2_NP5_150_masked.ply
+25
+____
+pc_NP4_NP5_162_masked.ply
+26
+____
+pc_NP2_NP5_141_masked.ply
+27
+____
+pc_NP2_NP5_51_masked.ply
+28
+____
+pc_NP5_NP5_147_masked.ply
+29
+____
+pc_NP1_NP5_81_masked.ply
+30
+____
+pc_NP2_NP5_300_masked.ply
+31
+____
+pc_NP1_NP5_252_masked.ply
+32
+____
+pc_NP3_NP5_27_masked.ply
+33
+____
+pc_NP3_NP5_273_masked.ply
+34
+____
+pc_NP1_NP5_306_masked.ply
+35
+____
+pc_NP4_NP5_111_masked.ply
+36
+____
+pc_NP5_NP5_321_masked.ply
+37
+____
+pc_NP5_NP5_48_masked.ply
+38
+____
+pc_NP1_NP5_312_masked.ply
+39
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP3_NP5_240_masked.ply
+40
+____
+pc_NP1_NP5_189_masked.ply
+41
+____
+pc_NP1_NP5_174_masked.ply
+42
+____
+pc_NP4_NP5_303_masked.ply
+43
+____
+pc_NP1_NP5_48_masked.ply
+44
+____
+pc_NP1_NP5_285_masked.ply
+45
+____
+pc_NP3_NP5_183_masked.ply
+46
+____
+pc_NP3_NP5_243_masked.ply
+47
+____
+pc_NP1_NP5_18_masked.ply
+48
+____
+pc_NP5_NP5_327_masked.ply
+49
+____
+pc_NP2_NP5_294_masked.ply
+50
+____
+pc_NP1_NP5_0_masked.ply
+51
+____
+pc_NP2_NP5_315_masked.ply
+52
+____
+pc_NP2_NP5_297_masked.ply
+53
+____
+pc_NP3_NP5_309_masked.ply
+54
+____
+pc_NP2_NP5_48_masked.ply
+55
+____
+pc_NP3_NP5_315_masked.ply
+56
+____
+pc_NP2_NP5_93_masked.ply
+57
+____
+pc_NP5_NP5_126_masked.ply
+58
+____
+pc_NP4_NP5_24_masked.ply
+59
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  100.00000762939453
+ADD-S AUC ( 5 %):  87.4693603515625
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.9999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  037_scissors
+dataset len 29
+Number of trainable parameters:  893083
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+____
+pc_NP3_NP5_57_masked.ply
+0
+____
+pc_NP3_NP5_183_masked.ply
+1
+____
+pc_NP2_NP5_114_masked.ply
+2
+____
+pc_NP3_NP5_60_masked.ply
+3
+____
+pc_NP3_NP5_66_masked.ply
+4
+____
+pc_NP1_NP5_39_masked.ply
+5
+____
+pc_NP3_NP5_321_masked.ply
+6
+____
+pc_NP1_NP5_66_masked.ply
+7
+____
+pc_NP1_NP5_51_masked.ply
+8
+____
+pc_NP4_NP5_189_masked.ply
+9
+____
+pc_NP2_NP5_156_masked.ply
+10
+____
+pc_NP3_NP5_18_masked.ply
+11
+____
+pc_NP1_NP5_129_masked.ply
+12
+____
+pc_NP2_NP5_45_masked.ply
+13
+____
+pc_NP2_NP5_330_masked.ply
+14
+____
+pc_NP2_NP5_183_masked.ply
+15
+____
+pc_NP1_NP5_285_masked.ply
+16
+____
+pc_NP2_NP5_129_masked.ply
+17
+____
+pc_NP2_NP5_216_masked.ply
+18
+____
+pc_NP3_NP5_225_masked.ply
+19
+____
+pc_NP3_NP5_171_masked.ply
+20
+____
+pc_NP1_NP5_156_masked.ply
+21
+____
+pc_NP1_NP5_333_masked.ply
+22
+____
+pc_NP2_NP5_288_masked.ply
+23
+____
+pc_NP1_NP5_111_masked.ply
+24
+____
+pc_NP3_NP5_303_masked.ply
+25
+____
+pc_NP2_NP5_291_masked.ply
+26
+____
+pc_NP2_NP5_297_masked.ply
+27
+____
+pc_NP2_NP5_159_masked.ply
+28
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True,  True,  True, False, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  93.10344696044922
+ADD-S AUC ( 5 %):  93.03053283691406
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99991
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  051_large_clamp
+dataset len 26
+Number of trainable parameters:  894622
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+____
+pc_NP2_NP5_276_masked.ply
+0
+____
+pc_NP2_NP5_318_masked.ply
+1
+____
+pc_NP1_NP5_246_masked.ply
+2
+____
+pc_NP1_NP5_84_masked.ply
+3
+____
+pc_NP1_NP5_57_masked.ply
+4
+____
+pc_NP2_NP5_309_masked.ply
+5
+____
+pc_NP2_NP5_102_masked.ply
+6
+____
+pc_NP3_NP5_291_masked.ply
+7
+____
+pc_NP3_NP5_39_masked.ply
+8
+____
+pc_NP2_NP5_330_masked.ply
+9
+____
+pc_NP2_NP5_300_masked.ply
+10
+____
+pc_NP2_NP5_201_masked.ply
+11
+____
+pc_NP2_NP5_213_masked.ply
+12
+____
+pc_NP3_NP5_126_masked.ply
+13
+____
+pc_NP1_NP5_63_masked.ply
+14
+____
+pc_NP1_NP5_132_masked.ply
+15
+____
+pc_NP3_NP5_165_masked.ply
+16
+____
+pc_NP2_NP5_57_masked.ply
+17
+____
+pc_NP1_NP5_267_masked.ply
+18
+____
+pc_NP3_NP5_93_masked.ply
+19
+____
+pc_NP3_NP5_150_masked.ply
+20
+____
+pc_NP2_NP5_294_masked.ply
+21
+____
+pc_NP2_NP5_345_masked.ply
+22
+____
+pc_NP2_NP5_273_masked.ply
+23
+____
+pc_NP2_NP5_78_masked.ply
+24
+____
+pc_NP1_NP5_249_masked.ply
+25
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True, False], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  96.15384674072266
+ADD-S AUC ( 5 %):  90.11624145507812
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99995
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  052_extra_large_clamp
+dataset len 52
+Number of trainable parameters:  900778
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+____
+pc_NP3_NP5_252_masked.ply
+0
+____
+pc_NP1_NP5_123_masked.ply
+1
+____
+pc_NP3_NP5_147_masked.ply
+2
+____
+pc_NP1_NP5_117_masked.ply
+3
+____
+pc_NP2_NP5_261_masked.ply
+4
+____
+pc_NP3_NP5_240_masked.ply
+5
+____
+pc_NP3_NP5_0_masked.ply
+6
+____
+pc_NP5_NP5_174_masked.ply
+7
+____
+pc_NP3_NP5_213_masked.ply
+8
+____
+pc_NP4_NP5_18_masked.ply
+9
+____
+pc_NP1_NP5_201_masked.ply
+10
+____
+pc_NP3_NP5_123_masked.ply
+11
+____
+pc_NP4_NP5_129_masked.ply
+12
+____
+pc_NP4_NP5_345_masked.ply
+13
+____
+pc_NP5_NP5_306_masked.ply
+14
+____
+pc_NP4_NP5_9_masked.ply
+15
+____
+pc_NP4_NP5_102_masked.ply
+16
+____
+pc_NP4_NP5_207_masked.ply
+17
+____
+pc_NP5_NP5_177_masked.ply
+18
+____
+pc_NP3_NP5_225_masked.ply
+19
+____
+pc_NP4_NP5_39_masked.ply
+20
+____
+pc_NP3_NP5_60_masked.ply
+21
+____
+pc_NP2_NP5_6_masked.ply
+22
+____
+pc_NP3_NP5_315_masked.ply
+23
+____
+pc_NP4_NP5_153_masked.ply
+24
+____
+pc_NP4_NP5_201_masked.ply
+25
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP1_NP5_255_masked.ply
+26
+____
+pc_NP1_NP5_180_masked.ply
+27
+____
+pc_NP3_NP5_270_masked.ply
+28
+____
+pc_NP2_NP5_270_masked.ply
+29
+____
+pc_NP4_NP5_357_masked.ply
+30
+____
+pc_NP3_NP5_228_masked.ply
+31
+____
+pc_NP2_NP5_240_masked.ply
+32
+____
+pc_NP4_NP5_168_masked.ply
+33
+____
+pc_NP5_NP5_36_masked.ply
+34
+____
+pc_NP4_NP5_93_masked.ply
+35
+____
+pc_NP2_NP5_315_masked.ply
+36
+____
+pc_NP3_NP5_90_masked.ply
+37
+____
+pc_NP4_NP5_213_masked.ply
+38
+____
+pc_NP4_NP5_237_masked.ply
+39
+____
+pc_NP2_NP5_222_masked.ply
+40
+____
+pc_NP3_NP5_309_masked.ply
+41
+____
+pc_NP5_NP5_12_masked.ply
+42
+____
+pc_NP4_NP5_12_masked.ply
+43
+____
+pc_NP1_NP5_168_masked.ply
+44
+____
+pc_NP2_NP5_354_masked.ply
+45
+____
+pc_NP3_NP5_36_masked.ply
+46
+____
+pc_NP4_NP5_336_masked.ply
+47
+____
+pc_NP4_NP5_51_masked.ply
+48
+____
+pc_NP3_NP5_207_masked.ply
+49
+____
+pc_NP4_NP5_72_masked.ply
+50
+____
+pc_NP3_NP5_324_masked.ply
+51
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True, False], device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  98.0769271850586
+ADD-S AUC ( 5 %):  91.19205474853516
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99992
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Baseline for Object:  061_foam_brick
+dataset len 60
+Number of trainable parameters:  896161
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+____
+pc_NP1_NP5_21_masked.ply
+0
+____
+pc_NP5_NP5_15_masked.ply
+1
+____
+pc_NP3_NP5_288_masked.ply
+2
+____
+pc_NP1_NP5_309_masked.ply
+3
+____
+pc_NP2_NP5_246_masked.ply
+4
+____
+pc_NP5_NP5_156_masked.ply
+5
+____
+pc_NP5_NP5_168_masked.ply
+6
+____
+pc_NP3_NP5_354_masked.ply
+7
+____
+pc_NP5_NP5_81_masked.ply
+8
+____
+pc_NP1_NP5_252_masked.ply
+9
+____
+pc_NP4_NP5_300_masked.ply
+10
+____
+pc_NP4_NP5_69_masked.ply
+11
+____
+pc_NP2_NP5_318_masked.ply
+12
+____
+pc_NP4_NP5_306_masked.ply
+13
+____
+pc_NP1_NP5_315_masked.ply
+14
+____
+pc_NP2_NP5_48_masked.ply
+15
+____
+pc_NP2_NP5_180_masked.ply
+16
+____
+pc_NP5_NP5_351_masked.ply
+17
+____
+pc_NP5_NP5_114_masked.ply
+18
+____
+pc_NP1_NP5_327_masked.ply
+19
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True,  True,  True,  True,  True, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP4_NP5_93_masked.ply
+20
+____
+pc_NP5_NP5_267_masked.ply
+21
+____
+pc_NP2_NP5_144_masked.ply
+22
+____
+pc_NP3_NP5_255_masked.ply
+23
+____
+pc_NP5_NP5_96_masked.ply
+24
+____
+pc_NP2_NP5_75_masked.ply
+25
+____
+pc_NP5_NP5_291_masked.ply
+26
+____
+pc_NP1_NP5_243_masked.ply
+27
+____
+pc_NP2_NP5_21_masked.ply
+28
+____
+pc_NP1_NP5_147_masked.ply
+29
+____
+pc_NP4_NP5_279_masked.ply
+30
+____
+pc_NP3_NP5_333_masked.ply
+31
+____
+pc_NP1_NP5_321_masked.ply
+32
+____
+pc_NP3_NP5_45_masked.ply
+33
+____
+pc_NP5_NP5_165_masked.ply
+34
+____
+pc_NP4_NP5_48_masked.ply
+35
+____
+pc_NP5_NP5_306_masked.ply
+36
+____
+pc_NP2_NP5_87_masked.ply
+37
+____
+pc_NP1_NP5_237_masked.ply
+38
+____
+pc_NP5_NP5_102_masked.ply
+39
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True,  True, False, False, False, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+____
+pc_NP1_NP5_189_masked.ply
+40
+____
+pc_NP1_NP5_282_masked.ply
+41
+____
+pc_NP1_NP5_123_masked.ply
+42
+____
+pc_NP5_NP5_201_masked.ply
+43
+____
+pc_NP5_NP5_189_masked.ply
+44
+____
+pc_NP5_NP5_174_masked.ply
+45
+____
+pc_NP3_NP5_186_masked.ply
+46
+____
+pc_NP2_NP5_117_masked.ply
+47
+____
+pc_NP3_NP5_156_masked.ply
+48
+____
+pc_NP3_NP5_33_masked.ply
+49
+____
+pc_NP2_NP5_183_masked.ply
+50
+____
+pc_NP1_NP5_36_masked.ply
+51
+____
+pc_NP3_NP5_321_masked.ply
+52
+____
+pc_NP4_NP5_105_masked.ply
+53
+____
+pc_NP1_NP5_159_masked.ply
+54
+____
+pc_NP5_NP5_126_masked.ply
+55
+____
+pc_NP2_NP5_126_masked.ply
+56
+____
+pc_NP1_NP5_144_masked.ply
+57
+____
+pc_NP4_NP5_153_masked.ply
+58
+____
+pc_NP3_NP5_48_masked.ply
+59
+index in VOCap tensor([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+         True,  True,  True,  True,  True,  True,  True,  True,  True, False],
+       device='cuda:0')
+index in VOCap tensor([True, True, True, True, True, True, True, True, True, True, True, True,
+        True, True, True, True, True, True, True, True], device='cuda:0')
+index in VOCap tensor([], device='cuda:0', dtype=torch.bool)
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 1 %):  90.00000762939453
+ADD-S AUC ( 5 %):  84.8469467163086
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.99995
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 1 %):  nan
+ADD-S AUC ( 5 %):  0.0
+GT-certifiable: 

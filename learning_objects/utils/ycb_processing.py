@@ -419,7 +419,7 @@ def get_degenerate_angles(): #+/- 10 degrees, -1 means all angles
                 return True
         return False
     obj_to_degenerate_cam_angles = {"003_cracker_box": [[0, 96, 186, 270, 357],[],[],[],[-1]],
-     "004_sugar_box": [[3,93,183, 273, 357],[],[],[],[-1]]
+     "004_sugar_box": [[3,93,183, 273, 357],[],[],[],[-1]],
      "008_pudding_box": [[0,177,267,357],[],[],[219,348],[-1]],
      "009_gelatin_box": [[6,186,357], [], [], [], [-1]],
      "036_wood_block": [[6,99,189,279], [], [], [], [-1]],

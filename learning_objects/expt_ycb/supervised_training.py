@@ -34,7 +34,7 @@ from learning_objects.utils.general import TrackingMeter
 
 
 # Training code
-def supervised_train_one_epoch(training_loader, model, optimizer, correction_flag, device):
+def supervised_train_one_epoch(training_loader, model, optimizer, device):
 
     running_loss = 0.
 
@@ -50,7 +50,7 @@ def supervised_train_one_epoch(training_loader, model, optimizer, correction_fla
         optimizer.zero_grad()
         # print("Test:: pc_shape: ", pc.shape)
         # print(pc[0, ...])
-        out = model(pc, correction_flag=correction_flag)
+        out = model(pc)
         kp_pred = out[1]
 
         kp_reg = avg_kpt_distance_regularizer(kp_pred)
@@ -78,7 +78,7 @@ def supervised_train_one_epoch(training_loader, model, optimizer, correction_fla
 
 
 # Validation code
-def validate(validation_loader, model, correction_flag, device):
+def validate(validation_loader, model, device):
 
     with torch.no_grad():
 
@@ -92,8 +92,7 @@ def validate(validation_loader, model, correction_flag, device):
             t_target = t_target.to(device)
 
             # Make predictions for this batch
-            predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted, _ = model(input_point_cloud,
-                                                                                            correction_flag=correction_flag)
+            predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted, _ = model(input_point_cloud)
 
             # vloss = validation_loss(input=(input_point_cloud, keypoints_target, R_target, t_target),
             #                        output=(predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted))
@@ -109,7 +108,7 @@ def validate(validation_loader, model, correction_flag, device):
     return avg_vloss
 
 
-def train_with_supervision(supervised_training_loader, validation_loader, model, optimizer, correction_flag,
+def train_with_supervision(supervised_training_loader, validation_loader, model, optimizer,
                            best_model_save_file, device, hyper_param):
 
     num_epochs = hyper_param['num_epochs']
@@ -126,11 +125,11 @@ def train_with_supervision(supervised_training_loader, validation_loader, model,
         model.train(True)
         print("Training on simulated data with supervision:")
         avg_loss_supervised = supervised_train_one_epoch(supervised_training_loader, model,
-                                                         optimizer, correction_flag=correction_flag, device=device)
+                                                         optimizer, device=device)
         # Validation. We don't need gradients on to do reporting.
         model.train(False)
         print("Validation on real data: ")
-        avg_vloss = validate(validation_loader, model, correction_flag=correction_flag, device=device)
+        avg_vloss = validate(validation_loader, model, device=device)
 
         print('LOSS supervised-train {}, valid {}'.format(avg_loss_supervised, avg_vloss))
         train_loss.add_item(avg_loss_supervised)
@@ -148,7 +147,7 @@ def train_with_supervision(supervised_training_loader, validation_loader, model,
     return train_loss, val_loss
 
 
-def train_detector(hyper_param, detector_type='pointnet', model_id="019_pitcher_base"):
+def train_detector(hyper_param, detector_type='pointnet', model_id="019_pitcher_base", use_corrector=False):
     """
 
     """
@@ -206,7 +205,7 @@ def train_detector(hyper_param, detector_type='pointnet', model_id="019_pitcher_
 
     # model
     model = ProposedModel(model_id=model_id, model_keypoints=model_keypoints, cad_models=cad_models,
-                          keypoint_detector=detector_type, local_max_pooling=False).to(device)
+                          keypoint_detector=detector_type, local_max_pooling=False, correction_flag=use_corrector).to(device)
 
     num_parameters = sum(param.numel() for param in model.parameters() if param.requires_grad)
     print("Number of trainable parameters: ", num_parameters)
@@ -219,7 +218,6 @@ def train_detector(hyper_param, detector_type='pointnet', model_id="019_pitcher_
                                                   validation_loader=val_loader,
                                                   model=model,
                                                   optimizer=optimizer,
-                                                  correction_flag=False,
                                                   best_model_save_file=best_model_save_file,
                                                   device=device,
                                                   hyper_param=hyper_param)
@@ -236,7 +234,7 @@ def train_detector(hyper_param, detector_type='pointnet', model_id="019_pitcher_
     return None
 
 
-def visual_test(test_loader, model, correction_flag=False, device=None):
+def visual_test(test_loader, model, device=None):
 
     if device == None:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -251,8 +249,7 @@ def visual_test(test_loader, model, correction_flag=False, device=None):
 
         # Make predictions for this batch
         model.eval()
-        predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted, _ = model(input_point_cloud,
-                                                                                        correction_flag=correction_flag)
+        predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted, _ = model(input_point_cloud)
         model.train()
         pc = input_point_cloud.clone().detach().to('cpu')
         pc_p = predicted_point_cloud.clone().detach().to('cpu')
@@ -267,13 +264,14 @@ def visual_test(test_loader, model, correction_flag=False, device=None):
         del input_point_cloud, keypoints_target, R_target, t_target, \
             predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted
 
-        if i >= 20:
+        if i >= 5:
             break
 
 
 def visualize_detector(hyper_param,
                        detector_type='pointnet',
-                       model_id="019_pitcher_base"):
+                       model_id="019_pitcher_base",
+                       use_corrector=False):
     """
 
     """
@@ -302,7 +300,7 @@ def visualize_detector(hyper_param,
 
     # model
     model = ProposedModel(model_id=model_id, model_keypoints=model_keypoints, cad_models=cad_models,
-                          keypoint_detector=detector_type, local_max_pooling=False).to(device)
+                          keypoint_detector=detector_type, local_max_pooling=False, correction_flag=use_corrector).to(device)
 
     if not os.path.isfile(best_model_save_file):
         print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")
@@ -314,7 +312,7 @@ def visualize_detector(hyper_param,
 
     #
     print("Visualizing the trained model.")
-    visual_test(test_loader=loader, model=model, correction_flag=False, device=device)
+    visual_test(test_loader=loader, model=model, device=device)
 
     # # Test 2:
     # dataset = SE3PointCloud(class_id=class_id,
@@ -322,21 +320,19 @@ def visualize_detector(hyper_param,
     #                         num_of_points=200,
     #                         dataset_len=10)
     # loader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
-    # visual_test(test_loader=loader, model=model, correction_flag=False, device=device)
+    # visual_test(test_loader=loader, model=model, device=device)
     #
     # dataset = SE3PointCloud(class_id=class_id,
     #                         model_id=model_id,
     #                         num_of_points=100,
     #                         dataset_len=10)
     # loader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
-    # visual_test(test_loader=loader, model=model, correction_flag=False, device=device)
+    # visual_test(test_loader=loader, model=model, device=device)
 
     # Test 3: testing on real dataset
     real_dataset = DepthYCB(model_id=model_id, split='test', num_of_points=1000)
     real_loader = torch.utils.data.DataLoader(real_dataset, batch_size=1, shuffle=False)
-    visual_test(test_loader=real_loader, model=model, correction_flag=False, device=device)
-    # visual_test(test_loader=real_loader, model=model, correction_flag=True, device=device)
-    #
+    visual_test(test_loader=real_loader, model=model, device=device)
     del num_parameters, model.keypoint_detector, model
 
 
@@ -356,17 +352,6 @@ if __name__ == "__main__":
     stream = open("supervised_training.yml", "r")
     hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
 
-    train_detector(detector_type=detector_type, model_id=model_id, hyper_param=hyper_param)
-    # visualize_detector(detector_type=detector_type, model_id=model_id, hyper_param=hyper_param)
-
-    # #manual definition without command line
-    # for model_id in ["006_mustard_bottle"]: #, "019_pitcher_base", "052_extra_large_clamp"]: #["052_extra_large_clamp"]: #todo visualize detector for both
-    #     stream = open("supervised_training.yml", "r")
-    #     hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
-    #
-    #     # train_detector(detector_type='pointnet', model_id=model_id, hyper_param=hyper_param)
-    #     # visualize_detector(detector_type='pointnet', model_id=model_id, hyper_param=hyper_param)
-    #
-    #     train_detector(detector_type='point_transformer', model_id=model_id, hyper_param=hyper_param)
-    #     # visualize_detector(detector_type='point_transformer', model_id=model_id, hyper_param=hyper_param)
+    # train_detector(detector_type=detector_type, model_id=model_id, hyper_param=hyper_param, use_corrector=False)
+    visualize_detector(detector_type=detector_type, model_id=model_id, hyper_param=hyper_param, use_corrector=False)
 

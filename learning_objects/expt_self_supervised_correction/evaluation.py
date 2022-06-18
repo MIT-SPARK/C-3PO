@@ -19,7 +19,7 @@ from learning_objects.datasets.keypointnet import MODEL_TO_KPT_GROUPS as MODEL_T
 
 
 
-def evaluate(eval_loader, model, hyper_param, certification=True, degeneracy=False, device=None, correction_flag=True, normalize_adds=False):
+def evaluate(eval_loader, model, hyper_param, certification=True, degeneracy=False, device=None, normalize_adds=False):
 
     model.eval()
 
@@ -76,7 +76,7 @@ def evaluate(eval_loader, model, hyper_param, certification=True, degeneracy=Fal
 
             # Make predictions for this batch
             predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted, correction, predicted_model_keypoints\
-                = model(input_point_cloud, correction_flag=correction_flag, need_predicted_keypoints=True)
+                = model(input_point_cloud, need_predicted_keypoints=True)
 
             if certification:
                 certi = certify(input_point_cloud=input_point_cloud,
