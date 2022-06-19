@@ -50,7 +50,7 @@ def self_supervised_train_one_epoch(training_loader, model, optimizer, device, h
 
         # Make predictions for this batch
         predicted_point_cloud, corrected_keypoints, _, _, correction, predicted_model_keypoints = \
-            model(input_point_cloud, need_predicted_keypoints=True)
+            model(input_point_cloud)
 
         # Certification
         certi = certify(input_point_cloud=input_point_cloud,
@@ -101,7 +101,7 @@ def validate(validation_loader, model, device, hyper_param):
             # Make predictions for this batch
             predicted_point_cloud, corrected_keypoints, \
             R_predicted, t_predicted, correction, \
-            predicted_model_keypoints = model(input_point_cloud, need_predicted_keypoints=True)
+            predicted_model_keypoints = model(input_point_cloud)
 
             # certification
             certi = certify(input_point_cloud=input_point_cloud,
@@ -247,7 +247,8 @@ def train_detector(hyper_param, detector_type='point_transformer', model_id="019
 
     # model
     model = ProposedModel(model_id=model_id, model_keypoints=model_keypoints, cad_models=cad_models,
-                          keypoint_detector=detector_type, local_max_pooling=False, correction_flag=use_corrector).to(device)
+                          keypoint_detector=detector_type, local_max_pooling=False, correction_flag=use_corrector,
+                          need_predicted_keypoints=True).to(device)
 
     if not os.path.isfile(sim_trained_model_file):
         print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")
@@ -306,7 +307,7 @@ def visual_test(test_loader, model, device=None, hyper_param=None, degeneracy_ev
         # Make predictions for this batch
         model.eval()
         predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted, _, predicted_model_keypoints \
-            = model(input_point_cloud, need_predicted_keypoints=True)
+            = model(input_point_cloud)
 
         # certification
         certi = certify(input_point_cloud=input_point_cloud,
@@ -378,7 +379,7 @@ def evaluate_model(detector_type, model_id,
                    evaluate_trained=True,
                    degeneracy_eval=False,
                    average_metrics=False):
-
+    assert (evaluate_trained or evaluate_pretrained) and not (evaluate_trained and evaluate_pretrained)
 
     hyper_param_file = "self_supervised_training.yml"
     stream = open(hyper_param_file, "r")
@@ -434,7 +435,8 @@ def evaluate_model(detector_type, model_id,
     model_keypoints = eval_dataset._get_model_keypoints().to(torch.float).to(device=device)
 
     model = ProposedModel(model_id=model_id, model_keypoints=model_keypoints, cad_models=cad_models,
-                          keypoint_detector=detector_type, local_max_pooling=False, correction_flag=use_corrector).to(device)
+                          keypoint_detector=detector_type, local_max_pooling=False, correction_flag=use_corrector,
+                          need_predicted_keypoints=True).to(device)
 
     if evaluate_pretrained:
         if not os.path.isfile(best_pre_model_save_file):

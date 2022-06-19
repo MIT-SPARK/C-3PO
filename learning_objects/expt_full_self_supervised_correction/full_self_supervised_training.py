@@ -4,36 +4,22 @@ It uses registration during supervised training. It uses registration plus corre
 
 """
 
-import torch
-# import torch.nn as nn
-# import torch.nn.functional as F
-# import torchvision
-# import torchvision.transforms as transforms
-import yaml
 import argparse
-import pickle
-# from pytorch3d import ops
-
-from torch.utils.tensorboard import SummaryWriter
-from datetime import datetime
-
 import os
+import pickle
 import sys
+import torch
+import yaml
+from datetime import datetime
+from torch.utils.tensorboard import SummaryWriter
+
 sys.path.append("../../")
 
-from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPointCloud2, DepthPC, CLASS_NAME, \
+from learning_objects.datasets.keypointnet import DepthPC, CLASS_NAME, \
     FixedDepthPC, CLASS_ID, MixedFixedDepthPC
-# from learning_objects.models.certifiability import confidence, confidence_kp
-
 from learning_objects.utils.general import display_results, TrackingMeter
-
-# loss functions
-# from learning_objects.expt_self_supervised_correction.loss_functions import chamfer_loss
-from learning_objects.expt_self_supervised_correction.loss_functions import certify
-from learning_objects.expt_self_supervised_correction.loss_functions import self_supervised_training_loss \
-    as self_supervised_loss
-from learning_objects.expt_self_supervised_correction.loss_functions import self_supervised_validation_loss \
-    as validation_loss
+from learning_objects.utils.loss_functions import certify, self_supervised_training_loss \
+    as self_supervised_loss, self_supervised_validation_loss as validation_loss
 # evaluation metrics
 from learning_objects.expt_self_supervised_correction.evaluation_metrics import evaluation_error, add_s_error
 from learning_objects.expt_self_supervised_correction.proposed_model import ProposedRegressionModel as ProposedModel
@@ -57,7 +43,7 @@ def self_supervised_train_one_epoch(training_loader, model, optimizer, device, h
 
         # Make predictions for this batch
         predicted_point_cloud, corrected_keypoints, _, _, correction, predicted_model_keypoints = \
-            model(input_point_cloud, need_predicted_keypoints=True)
+            model(input_point_cloud)
 
         # Certification
         certi = certify(input_point_cloud=input_point_cloud,
@@ -105,7 +91,7 @@ def validate(validation_loader, model, device, hyper_param):
             input_point_cloud = input_point_cloud.to(device)
 
             # Make predictions for this batch
-            predicted_point_cloud, corrected_keypoints, R_predicted, t_predicted, correction, predicted_model_keypoints = model(input_point_cloud, need_predicted_keypoints=True)
+            predicted_point_cloud, corrected_keypoints, R_predicted, t_predicted, correction, predicted_model_keypoints = model(input_point_cloud)
 
             # certification
             certi = certify(input_point_cloud=input_point_cloud,
@@ -264,7 +250,8 @@ def train_detector(hyper_param, detector_type='pointnet', class_id="03001627",
 
     # model
     model = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,
-                          keypoint_detector=detector_type, correction_flag=use_corrector).to(device)
+                          keypoint_detector=detector_type, correction_flag=use_corrector,
+                          need_predicted_keypoints=True).to(device)
 
     if not os.path.isfile(sim_trained_model_file):
         print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")
@@ -323,7 +310,7 @@ def visual_test(test_loader, model, hyper_param, device=None):
         # Make predictions for this batch
         model.eval()
         predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted, _, predicted_model_keypoints \
-            = model(input_point_cloud, need_predicted_keypoints=True)
+            = model(input_point_cloud)
 
         # certification
         certi = certify(input_point_cloud=input_point_cloud,
@@ -430,7 +417,8 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
 
     if pre_:
         model_before = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,
-                                     keypoint_detector=detector_type, correction_flag=use_corrector).to(device)
+                                     keypoint_detector=detector_type, correction_flag=use_corrector,
+                                     need_predicted_keypoints=True).to(device)
 
         if not os.path.isfile(best_pre_model_save_file):
             print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")
@@ -443,7 +431,8 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
 
     if post_:
         model_after = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,
-                                    keypoint_detector=detector_type, correction_flag=use_corrector).to(device)
+                                    keypoint_detector=detector_type, correction_flag=use_corrector,
+                                    need_predicted_keypoints=True).to(device)
 
         if not os.path.isfile(best_post_model_save_file):
             print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")
@@ -593,9 +582,3 @@ if __name__ == "__main__":
     model_class_ids = yaml.load(stream=stream, Loader=yaml.Loader)
 
     train_kp_detectors(detector_type=detector_type, model_class_ids=model_class_ids, only_categories=only_categories, use_corrector=True)
-
-
-
-
-
-

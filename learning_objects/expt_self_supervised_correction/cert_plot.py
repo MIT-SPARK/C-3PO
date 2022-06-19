@@ -1,18 +1,18 @@
 
-import torch
 import argparse
-import pickle
-import yaml
 import io
-import os
-
 import matplotlib.pyplot as plt
+import os
+import pickle
+import sys
+import torch
+import yaml
 from matplotlib import colors as mcolors
+
 plt.style.use('seaborn-whitegrid')
 
-import sys
-sys.path.append("../..")
 
+sys.path.append("../..")
 from learning_objects.datasets.keypointnet import CLASS_NAME, CLASS_ID
 
 COLORS = dict(mcolors.BASE_COLORS, **mcolors.CSS4_COLORS)

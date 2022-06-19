@@ -2,127 +2,127 @@
 ##########################################################################
 
 #echo "AIRPLANE:: POINT TRANSFORMER"
-#python self_supervised_training.py "point_transformer" "airplane"
+#python training.py "point_transformer" "airplane" "self_supervised"
 
 #echo "AIRPLANE:: POINTNET"
-#python self_supervised_training.py "pointnet" "airplane"
+#python training.py "pointnet" "airplane" "self_supervised"
 
 ##########################################################################
 
 echo "BATHTUB:: POINT TRANSFORMER"
-python self_supervised_training.py "point_transformer" "bathtub"
+python training.py "point_transformer" "bathtub" "self_supervised"
 
 #echo "BATHTUB:: POINTNET"
-#python self_supervised_training.py "pointnet" "bathtub"
+#python training.py "pointnet" "bathtub" "self_supervised"
 
 ##########################################################################
 
 echo "BED:: POINT TRANSFORMER"
-python self_supervised_training.py "point_transformer" "bed"
+python training.py "point_transformer" "bed" "self_supervised"
 
 #echo "BED:: POINTNET"
-#python self_supervised_training.py "pointnet" "bed"
+#python training.py "pointnet" "bed" "self_supervised"
 
 ##########################################################################
 
 echo "BOTTLE:: POINT TRANSFORMER"
-python self_supervised_training.py "point_transformer" "bottle"
+python training.py "point_transformer" "bottle" "self_supervised"
 
 #echo "BOTTLE:: POINTNET"
-#python self_supervised_training.py "pointnet" "bottle"
+#python training.py "pointnet" "bottle" "self_supervised"
 
 ##########################################################################
 
 echo "CAP:: POINT TRANSFORMER"
-python self_supervised_training.py "point_transformer" "cap"
+python training.py "point_transformer" "cap" "self_supervised"
 
 #echo "CAP:: POINTNET"
-#python self_supervised_training.py "pointnet" "cap"
+#python training.py "pointnet" "cap" "self_supervised"
 
 ###############################################
 
 echo "CAR:: POINT TRANSFORMER"
-python self_supervised_training.py "point_transformer" "car"
+python training.py "point_transformer" "car" "self_supervised"
 
 #echo "CAR:: POINTNET"
-#python self_supervised_training.py "pointnet" "car"
+#python training.py "pointnet" "car" "self_supervised"
 
 ###############################################
 
 echo "CHAIR:: POINT TRANSFORMER"
-python self_supervised_training.py "point_transformer" "chair"
+python training.py "point_transformer" "chair" "self_supervised"
 
 #echo "CHAIR:: POINTNET"
-#python self_supervised_training.py "pointnet" "chair"
+#python training.py "pointnet" "chair" "self_supervised"
 
 ###############################################
 
 echo "GUITAR:: POINT TRANSFORMER"
-python self_supervised_training.py "point_transformer" "guitar"
+python training.py "point_transformer" "guitar" "self_supervised"
 
 #echo "GUITAR:: POINTNET"
-#python self_supervised_training.py "pointnet" "guitar"
+#python training.py "pointnet" "guitar" "self_supervised"
 
 ##########################################################################
 
 echo "HELMET:: POINT TRANSFORMER"
-python self_supervised_training.py "point_transformer" "helmet"
+python training.py "point_transformer" "helmet" "self_supervised"
 
 #echo "HELMET:: POINTNET"
-#python self_supervised_training.py "pointnet" "helmet"
+#python training.py "pointnet" "helmet" "self_supervised"
 
 ##########################################################################
 
 echo "KNIFE:: POINT TRANSFORMER"
-python self_supervised_training.py "point_transformer" "knife"
+python training.py "point_transformer" "knife" "self_supervised"
 
 #echo "KNIFE:: POINTNET"
-#python self_supervised_training.py "pointnet" "knife"
+#python training.py "pointnet" "knife" "self_supervised"
 
 ##########################################################################
 
 echo "LAPTOP:: POINT TRANSFORMER"
-python self_supervised_training.py "point_transformer" "laptop"
+python training.py "point_transformer" "laptop" "self_supervised"
 
 #echo "LAPTOP:: POINTNET"
-#python self_supervised_training.py "pointnet" "laptop"
+#python training.py "pointnet" "laptop" "self_supervised"
 
 ##########################################################################
 
 echo "MOTORCYCLE:: POINT TRANSFORMER"
-python self_supervised_training.py "point_transformer" "motorcycle"
+python training.py "point_transformer" "motorcycle" "self_supervised"
 #
 #echo "MOTORCYCLE:: POINTNET"
-#python self_supervised_training.py "pointnet" "motorcycle"
+#python training.py "pointnet" "motorcycle" "self_supervised"
 
 ##########################################################################
 
 echo "MUG:: POINT TRANSFORMER"
-python self_supervised_training.py "point_transformer" "mug"
+python training.py "point_transformer" "mug" "self_supervised"
 #
 #echo "MUG:: POINTNET"
-#python self_supervised_training.py "pointnet" "mug"
+#python training.py "pointnet" "mug" "self_supervised"
 
 ##########################################################################
 
 echo "SKATEBOARD:: POINT TRANSFORMER"
-python self_supervised_training.py "point_transformer" "skateboard"
+python training.py "point_transformer" "skateboard" "self_supervised"
 
 #echo "SKATEBOARD:: POINTNET"
-#python self_supervised_training.py "pointnet" "skateboard"
+#python training.py "pointnet" "skateboard" "self_supervised"
 
 ##########################################################################
 
 echo "TABLE:: POINT TRANSFORMER"
-python self_supervised_training.py "point_transformer" "table"
+python training.py "point_transformer" "table" "self_supervised"
 
 #echo "TABLE:: POINTNET"
-#python self_supervised_training.py "pointnet" "table"
+#python training.py "pointnet" "table" "self_supervised"
 
 ##########################################################################
 
 echo "VESSEL:: POINT TRANSFORMER"
-python self_supervised_training.py "point_transformer" "vessel"
+python training.py "point_transformer" "vessel" "self_supervised"
 
 #echo "VESSEL:: POINTNET"
-#python self_supervised_training.py "pointnet" "vessel"
+#python training.py "pointnet" "vessel" "self_supervised"

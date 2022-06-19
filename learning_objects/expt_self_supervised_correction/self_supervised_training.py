@@ -4,28 +4,23 @@ It uses registration during supervised training. It uses registration plus corre
 
 """
 
+import argparse
+import os
+import pickle
+import sys
 import torch
 import yaml
-import argparse
-import pickle
-
-from torch.utils.tensorboard import SummaryWriter
 from datetime import datetime
+from torch.utils.tensorboard import SummaryWriter
 
-import os
-import sys
 sys.path.append("../../")
 
-from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPointCloud2, DepthPC, CLASS_NAME, \
-    FixedDepthPC, CLASS_ID
+from learning_objects.datasets.keypointnet import DepthPC, CLASS_NAME, FixedDepthPC, CLASS_ID
 from learning_objects.utils.general import display_results, TrackingMeter
 
-# loss functions
-from learning_objects.expt_self_supervised_correction.loss_functions import certify
-from learning_objects.expt_self_supervised_correction.loss_functions import self_supervised_training_loss \
-    as self_supervised_loss
-from learning_objects.expt_self_supervised_correction.loss_functions import self_supervised_validation_loss \
-    as validation_loss
+from learning_objects.utils.loss_functions import certify, self_supervised_training_loss as self_supervised_loss, \
+    self_supervised_validation_loss as validation_loss
+
 from learning_objects.expt_self_supervised_correction.evaluation_metrics import evaluation_error, add_s_error
 from learning_objects.expt_self_supervised_correction.evaluation import evaluate
 from learning_objects.expt_self_supervised_correction.proposed_model import ProposedRegressionModel as ProposedModel
@@ -46,7 +41,7 @@ def self_supervised_train_one_epoch(training_loader, model, optimizer, device, h
 
         # Make predictions for this batch
         predicted_point_cloud, corrected_keypoints, _, _, correction, predicted_model_keypoints = \
-            model(input_point_cloud, need_predicted_keypoints=True)
+            model(input_point_cloud)
 
         # Certification
         certi = certify(input_point_cloud=input_point_cloud,
@@ -97,7 +92,8 @@ def validate(validation_loader, model, device, hyper_param):
             t_target = t_target.to(device)
 
             # Make predictions for this batch
-            predicted_point_cloud, corrected_keypoints, R_predicted, t_predicted, correction, predicted_model_keypoints = model(input_point_cloud, need_predicted_keypoints=True)
+            predicted_point_cloud, corrected_keypoints, R_predicted, t_predicted, correction, \
+            predicted_model_keypoints = model(input_point_cloud)
 
             # certification
             certi = certify(input_point_cloud=input_point_cloud,
@@ -257,7 +253,8 @@ def train_detector(hyper_param, detector_type='pointnet', class_id="03001627",
 
     # model
     model = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,
-                          keypoint_detector=detector_type, correction_flag=use_corrector).to(device)
+                          keypoint_detector=detector_type, correction_flag=use_corrector,
+                          need_predicted_keypoints=True).to(device)
 
     if not os.path.isfile(sim_trained_model_file):
         print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")
@@ -314,7 +311,7 @@ def visual_test(test_loader, model, hyper_param, device=None):
         # Make predictions for this batch
         model.eval()
         predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted, _, predicted_model_keypoints \
-            = model(input_point_cloud, need_predicted_keypoints=True)
+            = model(input_point_cloud)
 
         # certification
         certi = certify(input_point_cloud=input_point_cloud,
@@ -415,7 +412,8 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
 
     if pre_:
         model_before = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,
-                                     keypoint_detector=detector_type, correction_flag=use_corrector).to(device)
+                                     keypoint_detector=detector_type, correction_flag=use_corrector,
+                                     need_predicted_keypoints=True).to(device)
 
         if not os.path.isfile(best_pre_model_save_file):
             print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")
@@ -428,7 +426,8 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
 
     if post_:
         model_after = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,
-                                    keypoint_detector=detector_type, correction_flag=use_corrector).to(device)
+                                    keypoint_detector=detector_type, correction_flag=use_corrector,
+                                    need_predicted_keypoints=True).to(device)
 
         if not os.path.isfile(best_post_model_save_file):
             print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")
@@ -484,99 +483,74 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
 
     return None
 
+def evaluate_model(detector_type, class_name, model_id,
+                   evaluate_models=True,
+                   models_to_analyze='both',
+                   visualize=True,
+                   use_corrector=True,
+                   cross=False,
+                   cross_class_id=None,
+                   cross_model_id=None):
+    class_id = CLASS_ID[class_name]
 
-## Wrapper
-def train_kp_detectors(detector_type, model_class_ids, only_categories=None, use_corrector=True):
-
-    for key, value in model_class_ids.items():
-        if key in only_categories:
-            class_id = CLASS_ID[key]
-            model_id = str(value)
-
-            hyper_param_file = "self_supervised_training.yml"
-            stream = open(hyper_param_file, "r")
-            hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
-            hyper_param = hyper_param[detector_type]
-            hyper_param['epsilon'] = hyper_param['epsilon'][key]
-
-            print(">>"*40)
-            print("Training: ", key, "; Model ID:", str(model_id))
-            train_detector(detector_type=detector_type,
-                           class_id=class_id,
-                           model_id=model_id,
-                           hyper_param=hyper_param,
-                           use_corrector=use_corrector)
+    if cross:
+        hyper_param_file = "../expt_full_self_supervised_correction/full_self_supervised_training.yml"
+    else:
+        hyper_param_file = "self_supervised_training.yml"
+    stream = open(hyper_param_file, "r")
+    hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
+    hyper_param = hyper_param[detector_type]
+    hyper_param['epsilon'] = hyper_param['epsilon'][class_name]
 
 
-def visualize_kp_detectors(detector_type, model_class_ids, only_categories=None,
-                           evaluate_models=True,
-                           models_to_analyze='both',
-                           visualize=True,
-                           use_corrector=True,
-                           cross=False,
-                           cross_class_id=None,
-                           cross_model_id=None):
-
-    for key, value in model_class_ids.items():
-        if key in only_categories:
-            class_id = CLASS_ID[key]
-            model_id = str(value)
-            class_name = CLASS_NAME[class_id]
-
-            if cross:
-                hyper_param_file = "../expt_full_self_supervised_correction/full_self_supervised_training.yml"
-            else:
-                hyper_param_file = "self_supervised_training.yml"
-            stream = open(hyper_param_file, "r")
-            hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
-            hyper_param = hyper_param[detector_type]
-            hyper_param['epsilon'] = hyper_param['epsilon'][key]
-
-
-            print(">>"*40)
-            print("Analyzing Trained Model for Object: ", key, "; Model ID:", str(model_id))
-            visualize_detector(detector_type=detector_type,
-                               class_id=class_id,
-                               model_id=model_id,
-                               hyper_param=hyper_param,
-                               evaluate_models=evaluate_models,
-                               models_to_analyze=models_to_analyze,
-                               use_corrector=use_corrector,
-                               visualize=visualize,
-                               cross=cross,
-                               cross_class_id=cross_class_id,
-                               cross_model_id=cross_model_id)
+    print(">>"*40)
+    print("Analyzing Trained Model for Object: ", class_name, "; Model ID:", str(model_id))
+    visualize_detector(detector_type=detector_type,
+                       class_id=class_id,
+                       model_id=model_id,
+                       hyper_param=hyper_param,
+                       evaluate_models=evaluate_models,
+                       models_to_analyze=models_to_analyze,
+                       use_corrector=use_corrector,
+                       visualize=visualize,
+                       cross=cross,
+                       cross_class_id=cross_class_id,
+                       cross_model_id=cross_model_id)
 
 
 
 
-if __name__ == "__main__":
-
-    """
-    usage: 
-    >> python self_supervised_training.py "point_transformer" "chair"
-    >> python self_supervised_training.py "pointnet" "chair"
-    """
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("detector_type", help="specify the detector type.", type=str)
-    parser.add_argument("class_name", help="specify the ShapeNet class name.", type=str)
-
-    args = parser.parse_args()
-
-    # print("KP detector type: ", args.detector_type)
-    # print("CAD Model class: ", args.class_name)
-    detector_type = args.detector_type
-    class_name = args.class_name
-    only_categories = [class_name]
-
-    stream = open("class_model_ids.yml", "r")
-    model_class_ids = yaml.load(stream=stream, Loader=yaml.Loader)
-
-    train_kp_detectors(detector_type=detector_type, model_class_ids=model_class_ids, only_categories=only_categories,
-                       use_corrector=True)
-
-
+# if __name__ == "__main__":
+#
+#     """
+#     usage:
+#     >> python self_supervised_training.py "point_transformer" "chair"
+#     >> python self_supervised_training.py "pointnet" "chair"
+#     """
+#
+#     parser = argparse.ArgumentParser()
+#     parser.add_argument("detector_type", help="specify the detector type.", type=str)
+#     parser.add_argument("class_name", help="specify the ShapeNet class name.", type=str)
+#
+#     args = parser.parse_args()
+#
+#     # print("KP detector type: ", args.detector_type)
+#     # print("CAD Model class: ", args.class_name)
+#     detector_type = args.detector_type
+#     class_name = args.class_name
+#     only_categories = [class_name]
+#
+#     stream = open("class_model_ids.yml", "r")
+#     model_class_ids = yaml.load(stream=stream, Loader=yaml.Loader)
+#     if class_name not in model_class_ids:
+#         raise Exception('Invalid class_name')
+#     else:
+#         model_id = model_class_ids[class_name]
+#
+#     train_kp_detectors(detector_type=detector_type, class_name=class_name, model_id=model_id,
+#                        use_corrector=True, train_mode="self_supervised")
+#
+#
 
 
 

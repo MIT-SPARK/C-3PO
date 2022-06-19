@@ -2,18 +2,16 @@
 The goal here is to evaluate the trained model for object A, on other object inputs.
 
 """
-
-import torch
-import yaml
 import argparse
 import sys
+import torch
+import yaml
 
 sys.path.append('../..')
 
 from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPC, CLASS_NAME, CLASS_ID
 from learning_objects.utils.general import display_two_pcs
-# from learning_objects.expt_self_supervised_correction.expt_supervised_training import visualize_kp_detectors
-from learning_objects.expt_self_supervised_correction.self_supervised_training import visualize_kp_detectors
+from learning_objects.expt_self_supervised_correction.self_supervised_training import evaluate_model
 
 if __name__ == "__main__":
     """
@@ -47,12 +45,15 @@ if __name__ == "__main__":
     # print("Evaluating on: ", cross_class_name)
     # print("Cross class id: ", cross_class_id)
     # print("Cross model id: ", cross_model_id)
+    if class_name not in model_class_ids:
+        raise Exception('Invalid class_name')
+    else:
+        model_id = model_class_ids[class_name]
 
-    visualize_kp_detectors(detector_type=detector_type,
-                           model_class_ids=model_class_ids,
-                           only_categories=only_categories,
-                           visualize=False, use_corrector=True, evaluate_models=True,
-                           models_to_analyze=models_to_analyze,
-                           cross=True,
-                           cross_model_id=cross_model_id,
-                           cross_class_id=cross_class_id)
+    evaluate_model(detector_type=detector_type,
+                   class_name=class_name, model_id=model_id,
+                   visualize=False, use_corrector=True, evaluate_models=True,
+                   models_to_analyze=models_to_analyze,
+                   cross=True,
+                   cross_model_id=cross_model_id,
+                   cross_class_id=cross_class_id)

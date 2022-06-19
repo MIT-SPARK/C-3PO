@@ -1,15 +1,14 @@
+import argparse
+import os
+import sys
 import torch
 import yaml
-import argparse
-import sys
-import os
-# import open3d as o3d
 
 sys.path.append('../..')
 
 from learning_objects.datasets.keypointnet import CLASS_NAME, CLASS_ID, DepthPC, FixedDepthPC
 from learning_objects.datasets.ycb import DepthYCB, DepthYCBAugment
-from learning_objects.expt_self_supervised_correction.loss_functions import certify
+from learning_objects.utils.loss_functions import certify
 from learning_objects.expt_self_supervised_correction.evaluation_metrics import evaluation_error, add_s_error
 from learning_objects.expt_self_supervised_correction.baseline_model import RANSACwICP, TEASERwICP, wICP
 from learning_objects.utils.general import display_two_pcs, pos_tensor_to_o3d
@@ -94,7 +93,7 @@ def eval_icp(model_id, detector_type, hyper_param, global_registration='ransac',
             batch_size = input_point_cloud.shape[0]
 
             _, detected_keypoints, R0, t0, _ \
-                = model(input_point_cloud, need_predicted_keypoints=False)
+                = model(input_point_cloud)
 
             if global_registration == 'ransac' or global_registration == 'teaser':
                 predicted_point_cloud, R_predicted, t_predicted = icp.forward(input_point_cloud, detected_keypoints)

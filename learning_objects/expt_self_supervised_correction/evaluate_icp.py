@@ -1,17 +1,16 @@
+import argparse
+import os
+import sys
 import torch
 import yaml
-import argparse
-import sys
-import os
-# import open3d as o3d
 
 sys.path.append('../..')
 
 from learning_objects.datasets.keypointnet import CLASS_NAME, CLASS_ID, DepthPC, FixedDepthPC
-from learning_objects.expt_self_supervised_correction.loss_functions import certify
+from learning_objects.utils.loss_functions import certify
 from learning_objects.expt_self_supervised_correction.evaluation_metrics import evaluation_error, add_s_error
 from learning_objects.expt_self_supervised_correction.baseline_model import RANSACwICP, TEASERwICP, wICP
-from learning_objects.utils.general import display_two_pcs, pos_tensor_to_o3d
+from learning_objects.utils.general import display_two_pcs
 from learning_objects.expt_self_supervised_correction.proposed_model import ProposedRegressionModel as ProposedModel
 
 
@@ -54,7 +53,7 @@ def eval_icp(class_id, model_id, detector_type, hyper_param, global_registration
     elif global_registration == 'none':
         icp = wICP(cad_models=cad_models, model_keypoints=model_keypoints)
     else:
-        print("INVALID GLOBAL REGISTRATION MODULE NAME.")
+        raise Exception("INVALID GLOBAL REGISTRATION MODULE NAME.")
 
     model = ProposedModel(class_name=class_name,
                           model_keypoints=model_keypoints,
@@ -101,7 +100,7 @@ def eval_icp(class_id, model_id, detector_type, hyper_param, global_registration
 
             print("here")
             _, detected_keypoints, R0, t0, _ \
-                = model(input_point_cloud, need_predicted_keypoints=False)
+                = model(input_point_cloud)
             print("here")
 
             if global_registration == 'ransac' or global_registration == 'teaser':
@@ -140,11 +139,7 @@ def eval_icp(class_id, model_id, detector_type, hyper_param, global_registration
             R_err += R_err_.sum()
             t_err += t_err_.sum()
             adds_err += adds_err_.sum()
-
-            # print("auc: ", auc)
-            # print("auc_: ", auc_)
             auc += auc_
-
 
             if certification:
                 # fraction certifiable
@@ -190,49 +185,45 @@ def eval_icp(class_id, model_id, detector_type, hyper_param, global_registration
     print("t error: ", ave_t_err.item())
     print("ADD-S (", int(hyper_param["adds_threshold"] * 100), "%): ", ave_adds_err.item())
     print("ADD-S AUC (", int(hyper_param["adds_auc_threshold"] * 100), "%): ", ave_auc.item())
-    print("GT-certifiable: ")
 
-    print("Evaluating certification: ")
-    print("epsilon parameter: ", hyper_param['epsilon'])
-    print("% certifiable: ", fra_cert.item())
-    print("Evaluating performance for certifiable objects: ")
-    print("pc error: ", ave_pc_err_cert.item())
-    print("kp error: ", ave_kp_err_cert.item())
-    print("R error: ", ave_R_err_cert.item())
-    print("t error: ", ave_t_err_cert.item())
-    print("ADD-S (", int(hyper_param["adds_threshold"] * 100), "%): ", ave_adds_err_cert.item())
-    print("ADD-S AUC (", int(hyper_param["adds_auc_threshold"] * 100), "%): ", ave_auc_cert.item())
-    print("GT-certifiable: ")
+    if certification:
+        print("GT-certifiable: ")
+        print("Evaluating certification: ")
+        print("epsilon parameter: ", hyper_param['epsilon'])
+        print("% certifiable: ", fra_cert.item())
+        print("Evaluating performance for certifiable objects: ")
+        print("pc error: ", ave_pc_err_cert.item())
+        print("kp error: ", ave_kp_err_cert.item())
+        print("R error: ", ave_R_err_cert.item())
+        print("t error: ", ave_t_err_cert.item())
+        print("ADD-S (", int(hyper_param["adds_threshold"] * 100), "%): ", ave_adds_err_cert.item())
+        print("ADD-S AUC (", int(hyper_param["adds_auc_threshold"] * 100), "%): ", ave_auc_cert.item())
+        print("GT-certifiable: ")
 
     del eval_dataset, eval_loader, model, state_dict_pre
     del cad_models, model_keypoints
 
     return None
 
-def evaluate_icp(model_class_ids, only_categories, detector_type, global_registration='ransac', use_corrector=False, visualize=False):
+def evaluate_icp(class_name, model_id, detector_type, global_registration='ransac', use_corrector=False, visualize=False):
+    class_id = CLASS_ID[class_name]
 
-    for key, value in model_class_ids.items():
-        if key in only_categories:
-            class_id = CLASS_ID[key]
-            model_id = str(value)
-            class_name = CLASS_NAME[class_id]
+    hyper_param_file = "self_supervised_training.yml"
+    stream = open(hyper_param_file, "r")
+    hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
+    hyper_param = hyper_param[detector_type]   # we only use the evaluation dataset parameters, which are the same
+    hyper_param['epsilon'] = hyper_param['epsilon'][class_name]
 
-            hyper_param_file = "self_supervised_training.yml"
-            stream = open(hyper_param_file, "r")
-            hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
-            hyper_param = hyper_param[detector_type]   # we only use the evaluation dataset parameters, which are the same
-            hyper_param['epsilon'] = hyper_param['epsilon'][key]
+    print(">>"*40)
+    print("Analyzing Baseline for Object: ", class_name, "; Model ID:", str(model_id))
 
-            print(">>"*40)
-            print("Analyzing Baseline for Object: ", key, "; Model ID:", str(model_id))
-
-            eval_icp(class_id=class_id,
-                     model_id=model_id,
-                     detector_type=detector_type,
-                     hyper_param=hyper_param,
-                     global_registration=global_registration,
-                     use_corrector=use_corrector,
-                     visualize=visualize)
+    eval_icp(class_id=class_id,
+             model_id=model_id,
+             detector_type=detector_type,
+             hyper_param=hyper_param,
+             global_registration=global_registration,
+             use_corrector=use_corrector,
+             visualize=visualize)
 
     return None
 
@@ -264,15 +255,19 @@ if __name__ == "__main__":
     elif corrector_flag == 'nc':
         use_corrector = False
     else:
-        print("CORRECTOR FLAG INPUT INCORRECT.")
+        raise Exception("CORRECTOR FLAG INPUT INCORRECT.")
 
     only_categories = [class_name]
 
     stream = open("class_model_ids.yml", "r")
     model_class_ids = yaml.load(stream=stream, Loader=yaml.Loader)
+    if class_name not in model_class_ids:
+        raise Exception('Invalid class_name')
+    else:
+        model_id = model_class_ids[class_name]
 
-    evaluate_icp(model_class_ids=model_class_ids,
-                 only_categories=only_categories,
+    evaluate_icp(class_name=class_name,
+                 model_id=model_id,
                  detector_type='point_transformer',
                  global_registration=global_registration,
                  use_corrector=use_corrector,

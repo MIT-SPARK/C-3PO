@@ -1,26 +1,20 @@
-
-
+import os
+import pickle
+import sys
 import torch
 import yaml
-import pickle
-import os
 
-import sys
 sys.path.append("../..")
 
 from learning_objects.datasets.keypointnet import CLASS_NAME, CLASS_ID, DepthPC
-
-from learning_objects.expt_self_supervised_correction.loss_functions import certify
+from learning_objects.utils.loss_functions import certify
 from learning_objects.expt_self_supervised_correction.evaluation_metrics import evaluation_error, add_s_error, is_pcd_nondegenerate
-from learning_objects.expt_self_supervised_correction.loss_functions import chamfer_loss
-
 from learning_objects.datasets.ycb import MODEL_TO_KPT_GROUPS as MODEL_TO_KPT_GROUPS_YCB
 from learning_objects.datasets.keypointnet import MODEL_TO_KPT_GROUPS as MODEL_TO_KPT_GROUPS_SHAPENET
 
 
 
 def evaluate(eval_loader, model, hyper_param, certification=True, degeneracy=False, device=None, normalize_adds=False):
-
     model.eval()
 
     if device==None:
@@ -76,7 +70,7 @@ def evaluate(eval_loader, model, hyper_param, certification=True, degeneracy=Fal
 
             # Make predictions for this batch
             predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted, correction, predicted_model_keypoints\
-                = model(input_point_cloud, need_predicted_keypoints=True)
+                = model(input_point_cloud)
 
             if certification:
                 certi = certify(input_point_cloud=input_point_cloud,

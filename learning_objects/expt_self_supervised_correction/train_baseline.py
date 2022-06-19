@@ -19,24 +19,28 @@ import os
 import sys
 sys.path.append("../../")
 
-from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPointCloud2, DepthPC, CLASS_NAME, \
-    FixedDepthPC, CLASS_ID
+from learning_objects.datasets.keypointnet import DepthPC, CLASS_NAME, FixedDepthPC, CLASS_ID
 from learning_objects.models.certifiability import confidence, confidence_kp
 
 from learning_objects.utils.general import display_results, TrackingMeter
 
-# loss functions
-from learning_objects.expt_self_supervised_correction.loss_functions import chamfer_loss
-from learning_objects.expt_self_supervised_correction.loss_functions import certify
-from learning_objects.expt_self_supervised_correction.loss_functions import self_supervised_training_loss \
-    as self_supervised_loss
-from learning_objects.expt_self_supervised_correction.loss_functions import self_supervised_validation_loss \
-    as validation_loss
+# loss functions migration
+# from learning_objects.expt_self_supervised_correction.loss_functions import chamfer_loss
+# from learning_objects.expt_self_supervised_correction.loss_functions import certify
+# from learning_objects.expt_self_supervised_correction.loss_functions import self_supervised_training_loss \
+#     as self_supervised_loss
+# from learning_objects.expt_self_supervised_correction.loss_functions import self_supervised_validation_loss \
+#     as validation_loss
+
+from learning_objects.utils.loss_functions import chamfer_loss, certify, self_supervised_training_loss \
+    as self_supervised_loss, self_supervised_validation_loss as validation_loss
 # evaluation metrics
 from learning_objects.expt_self_supervised_correction.evaluation_metrics import evaluation_error
 
 from learning_objects.expt_self_supervised_correction.supervised_training import train_with_supervision
 from learning_objects.expt_self_supervised_correction.proposed_model import ProposedRegressionModel as ProposedModel
+
+from learning_objects.expt_self_supervised_correction.evaluation import evaluate
 
 
 def train_detector(hyper_param, detector_type='pointnet', class_id="03001627",
@@ -154,7 +158,7 @@ def visual_test(test_loader, model, device=None):
         # Make predictions for this batch
         model.eval()
         predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted, _, predicted_model_keypoints \
-            = model(input_point_cloud, need_predicted_keypoints=True)
+            = model(input_point_cloud)
 
         # certification
         certi = certify(input_point_cloud=input_point_cloud,
@@ -216,7 +220,8 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
     model_keypoints = eval_dataset._get_model_keypoints().to(torch.float).to(device=device)
 
     model = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,
-                                     keypoint_detector=detector_type, correction_flag=use_corrector).to(device)
+                          keypoint_detector=detector_type, correction_flag=use_corrector,
+                          need_predicted_keypoints=True).to(device)
 
     if not os.path.isfile(best_model_save_file):
         print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")
@@ -258,33 +263,8 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
 
 
 # Evaluation. Use the fact that you know rotation, translation, and shape of the generated data.
-from learning_objects.expt_self_supervised_correction.evaluation import evaluate
 
-
-## Wrapper
-def train_kp_detectors(detector_type, model_class_ids, only_categories=None, use_corrector=False):
-
-    for key, value in model_class_ids.items():
-        if key in only_categories:
-            class_id = CLASS_ID[key]
-            model_id = str(value)
-
-            hyper_param_file = "baseline_training.yml"
-            stream = open(hyper_param_file, "r")
-            hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
-            hyper_param = hyper_param[detector_type]
-            hyper_param['epsilon'] = hyper_param['epsilon'][key]
-
-            print(">>"*40)
-            print("Training: ", key, "; Model ID:", str(model_id))
-            train_detector(detector_type=detector_type,
-                           class_id=class_id,
-                           model_id=model_id,
-                           hyper_param=hyper_param,
-                           use_corrector=use_corrector)
-
-
-def visualize_kp_detectors(detector_type, model_class_ids, only_categories=None,
+def evaluate_model(detector_type, class_name, model_id,
                            evaluate_models=True,
                            visualize=True,
                            use_corrector=False,
@@ -295,58 +275,58 @@ def visualize_kp_detectors(detector_type, model_class_ids, only_categories=None,
         visualize_before, visualize_after \
             = False, False
 
-    for key, value in model_class_ids.items():
-        if key in only_categories:
-            class_id = CLASS_ID[key]
-            model_id = str(value)
-            class_name = CLASS_NAME[class_id]
+    class_id = CLASS_ID[class_name]
 
-            hyper_param_file = "self_supervised_training.yml"
-            stream = open(hyper_param_file, "r")
-            hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
-            hyper_param = hyper_param[detector_type]
-            hyper_param['epsilon'] = hyper_param['epsilon'][key]
+    hyper_param_file = "self_supervised_training.yml"
+    stream = open(hyper_param_file, "r")
+    hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
+    hyper_param = hyper_param[detector_type]
+    hyper_param['epsilon'] = hyper_param['epsilon'][class_name]
 
-            print(">>"*40)
-            print("Analyzing Baseline for Object: ", key, "; Model ID:", str(model_id))
-            visualize_detector(detector_type=detector_type,
-                               class_id=class_id,
-                               model_id=model_id,
-                               hyper_param=hyper_param,
-                               evaluate_models=evaluate_models,
-                               use_corrector=use_corrector,
-                               visualize_before=visualize_before,
-                               visualize_after=visualize_after)
+    print(">>"*40)
+    print("Analyzing Baseline for Object: ", class_name, "; Model ID:", str(model_id))
+    visualize_detector(detector_type=detector_type,
+                       class_id=class_id,
+                       model_id=model_id,
+                       hyper_param=hyper_param,
+                       evaluate_models=evaluate_models,
+                       use_corrector=use_corrector,
+                       visualize_before=visualize_before,
+                       visualize_after=visualize_after)
 
 
 
 
-if __name__ == "__main__":
-
-    """
-    usage: 
-    >> python train_baseline.py "point_transformer" "chair"
-    >> python train_baseline.py "pointnet" "chair"
-    """
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("detector_type", help="specify the detector type.", type=str)
-    parser.add_argument("class_name", help="specify the ShapeNet class name.", type=str)
-
-    args = parser.parse_args()
-
-    # print("KP detector type: ", args.detector_type)
-    # print("CAD Model class: ", args.class_name)
-    detector_type = args.detector_type
-    class_name = args.class_name
-    only_categories = [class_name]
-
-    stream = open("class_model_ids.yml", "r")
-    model_class_ids = yaml.load(stream=stream, Loader=yaml.Loader)
-
-    train_kp_detectors(detector_type=detector_type, model_class_ids=model_class_ids, only_categories=only_categories,
-                       use_corrector=False)
-
+# if __name__ == "__main__":
+#
+#     """
+#     usage:
+#     >> python train_baseline.py "point_transformer" "chair"
+#     >> python train_baseline.py "pointnet" "chair"
+#     """
+#
+#     parser = argparse.ArgumentParser()
+#     parser.add_argument("detector_type", help="specify the detector type.", type=str)
+#     parser.add_argument("class_name", help="specify the ShapeNet class name.", type=str)
+#
+#     args = parser.parse_args()
+#
+#     # print("KP detector type: ", args.detector_type)
+#     # print("CAD Model class: ", args.class_name)
+#     detector_type = args.detector_type
+#     class_name = args.class_name
+#     only_categories = [class_name]
+#
+#     stream = open("class_model_ids.yml", "r")
+#     model_class_ids = yaml.load(stream=stream, Loader=yaml.Loader)
+#     if class_name not in model_class_ids:
+#         raise Exception('Invalid class_name')
+#     else:
+#         model_id = model_class_ids[class_name]
+#
+#     train_kp_detectors(detector_type=detector_type, class_name=class_name, model_id=model_id,
+#                        use_corrector=False, train_mode="baseline")
+#
 
 
 

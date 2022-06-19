@@ -31,7 +31,7 @@ class ProposedRegressionModel(nn.Module):
     """
 
     def __init__(self, class_name, model_keypoints, cad_models, keypoint_detector=None, local_max_pooling=False,
-                 correction_flag=False):
+                 correction_flag=False, need_predicted_keypoints=False):
         super().__init__()
         """ 
         model_keypoints     : torch.tensor of shape (K, 3, N)
@@ -55,6 +55,7 @@ class ProposedRegressionModel(nn.Module):
         self.K = self.model_keypoints.shape[0]  # (1, 1)
         self.local_max_pooling = local_max_pooling
         self.correction_flag = correction_flag
+        self.need_predicted_keypoints = need_predicted_keypoints
 
         # Keypoint Detector
         if keypoint_detector == None:
@@ -77,7 +78,7 @@ class ProposedRegressionModel(nn.Module):
         corrector_node = kp_corrector_reg(cad_models=self.cad_models, model_keypoints=self.model_keypoints)
         self.corrector = ParamDeclarativeFunction(problem=corrector_node)
 
-    def forward(self, input_point_cloud, need_predicted_keypoints=False):
+    def forward(self, input_point_cloud):
         """
         input:
         input_point_cloud   : torch.tensor of shape (B, 3, m)
@@ -118,7 +119,7 @@ class ProposedRegressionModel(nn.Module):
             predicted_point_cloud = R @ self.cad_models + t
 
             # return predicted_point_cloud, detected_keypoints, R, t, None
-            if not need_predicted_keypoints:
+            if not self.need_predicted_keypoints:
                 return predicted_point_cloud, detected_keypoints, R, t, None
             else:
                 predicted_model_keypoints = R @ self.model_keypoints + t
@@ -137,7 +138,7 @@ class ProposedRegressionModel(nn.Module):
                 display_results(inp, det_kp, inp, corrected_kp)
 
             # return predicted_point_cloud, corrected_keypoints, R, t, correction
-            if not need_predicted_keypoints:
+            if not self.need_predicted_keypoints:
                 return predicted_point_cloud, corrected_keypoints, R, t, correction
             else:
                 predicted_model_keypoints = R @ self.model_keypoints + t

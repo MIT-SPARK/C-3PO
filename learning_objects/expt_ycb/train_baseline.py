@@ -150,7 +150,7 @@ def visual_test(test_loader, model, device=None, hyper_param=None):
         # Make predictions for this batch
         model.eval()
         predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted, _, predicted_model_keypoints \
-            = model(input_point_cloud, need_predicted_keypoints=True)
+            = model(input_point_cloud)
 
         # certification
         certi = certify(input_point_cloud=input_point_cloud,
@@ -232,7 +232,8 @@ def visualize_detector(hyper_param, detector_type, model_id,
     model_keypoints = eval_dataset._get_model_keypoints().to(torch.float).to(device=device)
 
     model = ProposedModel(model_id=model_id, model_keypoints=model_keypoints, cad_models=cad_models,
-                                     keypoint_detector=detector_type, local_max_pooling=False, correction_flag=use_corrector).to(device)
+                          keypoint_detector=detector_type, local_max_pooling=False, correction_flag=use_corrector,
+                          need_predicted_keypoints=True).to(device)
 
     if not os.path.isfile(best_model_save_file):
         print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")
@@ -275,22 +276,19 @@ from learning_objects.expt_self_supervised_correction.evaluation import evaluate
 
 
 ## Wrapper
-def train_kp_detectors(detector_type, model_ids, only_models=None, use_corrector=False):
+def train_kp_detectors(detector_type, model_id, use_corrector=False):
+    hyper_param_file = "baseline_training.yml"
+    stream = open(hyper_param_file, "r")
+    hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
+    hyper_param = hyper_param[detector_type]
+    hyper_param['epsilon'] = hyper_param['epsilon'][model_id]
 
-    for model_id in model_ids:
-        if model_id in only_models:
-            hyper_param_file = "baseline_training.yml"
-            stream = open(hyper_param_file, "r")
-            hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
-            hyper_param = hyper_param[detector_type]
-            hyper_param['epsilon'] = hyper_param['epsilon'][model_id]
-
-            print(">>"*40)
-            print("Training Model ID: ", str(model_id))
-            train_detector(detector_type=detector_type,
-                           model_id=model_id,
-                           hyper_param=hyper_param,
-                           use_corrector=use_corrector)
+    print(">>"*40)
+    print("Training Model ID: ", str(model_id))
+    train_detector(detector_type=detector_type,
+                   model_id=model_id,
+                   hyper_param=hyper_param,
+                   use_corrector=use_corrector)
 
 
 def visualize_kp_detectors(detector_type, model_ids, only_models=None,
@@ -347,8 +345,11 @@ if __name__ == "__main__":
 
     stream = open("model_ids.yml", "r")
     model_ids = yaml.load(stream=stream, Loader=yaml.Loader)['model_ids']
+    if model_id not in model_ids:
+        raise Exception('Invalid model_id')
 
-    train_kp_detectors(detector_type=detector_type, model_ids=model_ids, only_models=only_models, use_corrector=False)
+
+    train_kp_detectors(detector_type=detector_type, model_id=model_id, use_corrector=False)
     # visualize_kp_detectors(detector_type=detector_type, model_ids=model_ids, use_corrector=False, only_models=only_models, visualize=True)
 
 

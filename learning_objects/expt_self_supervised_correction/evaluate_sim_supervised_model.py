@@ -1,8 +1,8 @@
-import torch
-import yaml
 import argparse
 import os
 import sys
+import torch
+import yaml
 
 sys.path.append('../..')
 
@@ -11,13 +11,13 @@ from learning_objects.expt_self_supervised_correction.evaluation import evaluate
 from learning_objects.utils.general import display_results
 from learning_objects.expt_self_supervised_correction.loss_functions import certify
 from learning_objects.expt_self_supervised_correction.evaluation_metrics import evaluation_error, add_s_error
+from learning_objects.expt_self_supervised_correction.proposed_model import ProposedRegressionModel as ProposedModel
 
 
 def visual_test(test_loader, model, hyper_param, device=None):
 
     if device == None:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        # torch.cuda.empty_cache()
 
     cad_models = test_loader.dataset._get_cad_models()
     cad_models = cad_models.to(device)
@@ -32,7 +32,7 @@ def visual_test(test_loader, model, hyper_param, device=None):
         # Make predictions for this batch
         model.eval()
         predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted, _, predicted_model_keypoints \
-            = model(input_point_cloud, need_predicted_keypoints=True)
+            = model(input_point_cloud)
 
         # certification
         certi = certify(input_point_cloud=input_point_cloud,
@@ -123,11 +123,10 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
     cad_models = eval_dataset._get_cad_models().to(torch.float).to(device=device)
     model_keypoints = eval_dataset._get_model_keypoints().to(torch.float).to(device=device)
 
-    from learning_objects.expt_self_supervised_correction.proposed_model import ProposedRegressionModel as ProposedModel
-
     if pre_:
         model_before = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,
-                                     keypoint_detector=detector_type, correction_flag=use_corrector).to(device)
+                                     keypoint_detector=detector_type, correction_flag=use_corrector,
+                                     need_predicted_keypoints=True).to(device)
 
         if not os.path.isfile(best_pre_model_save_file):
             print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")
@@ -140,7 +139,8 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
 
     if post_:
         model_after = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,
-                                    keypoint_detector=detector_type, correction_flag=use_corrector).to(device)
+                                    keypoint_detector=detector_type, correction_flag=use_corrector,
+                                    need_predicted_keypoints=True).to(device)
 
         if not os.path.isfile(best_post_model_save_file):
             print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")
@@ -197,33 +197,29 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
     return None
 
 
-def visualize_kp_detectors(detector_type, model_class_ids, only_categories=None,
-                           evaluate_models=True,
-                           models_to_analyze='both',
-                           visualize=True,
-                           use_corrector=False):
+def evaluate_model(detector_type, class_name, model_id,
+                   evaluate_models=True,
+                   models_to_analyze='both',
+                   visualize=True,
+                   use_corrector=False):
 
-    for key, value in model_class_ids.items():
-        if key in only_categories:
-            class_id = CLASS_ID[key]
-            model_id = str(value)
-            class_name = CLASS_NAME[class_id]
+    class_id = CLASS_ID[class_name]
 
-            hyper_param_file = "self_supervised_training.yml"
-            stream = open(hyper_param_file, "r")
-            hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
-            hyper_param = hyper_param[detector_type]
-            hyper_param['epsilon'] = hyper_param['epsilon'][key]
+    hyper_param_file = "self_supervised_training.yml"
+    stream = open(hyper_param_file, "r")
+    hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
+    hyper_param = hyper_param[detector_type]
+    hyper_param['epsilon'] = hyper_param['epsilon'][class_name]
 
-            print(">>"*40)
-            print("Analyzing Trained Model for Object: ", key, "; Model ID:", str(model_id))
-            visualize_detector(detector_type=detector_type,
-                               class_id=class_id,
-                               model_id=model_id,
-                               hyper_param=hyper_param,
-                               evaluate_models=evaluate_models,
-                               models_to_analyze=models_to_analyze,
-                               visualize=visualize)
+    print(">>"*40)
+    print("Analyzing Trained Model for Object: ", class_name, "; Model ID:", str(model_id))
+    visualize_detector(detector_type=detector_type,
+                       class_id=class_id,
+                       model_id=model_id,
+                       hyper_param=hyper_param,
+                       evaluate_models=evaluate_models,
+                       models_to_analyze=models_to_analyze,
+                       visualize=visualize)
 
 
 if __name__ == "__main__":
@@ -250,9 +246,14 @@ if __name__ == "__main__":
 
     stream = open("class_model_ids.yml", "r")
     model_class_ids = yaml.load(stream=stream, Loader=yaml.Loader)
+    if class_name not in model_class_ids:
+        raise Exception('Invalid class_name')
+    else:
+        model_id = model_class_ids[class_name]
 
-    visualize_kp_detectors(detector_type=detector_type,
-                           model_class_ids=model_class_ids,
-                           only_categories=only_categories,
-                           models_to_analyze='pre',
-                           visualize=False, evaluate_models=True, use_corrector=False)
+
+    evaluate_model(detector_type=detector_type,
+                   class_name=class_name,
+                   model_id=model_id,
+                   models_to_analyze='pre',
+                   visualize=False, evaluate_models=True, use_corrector=False)

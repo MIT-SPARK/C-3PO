@@ -1,18 +1,13 @@
-
-
+import os
+import pickle
+import sys
 import torch
 import yaml
-import pickle
-import os
 
-import sys
 sys.path.append("../..")
 
-# from learning_objects.datasets.keypointnet import CLASS_NAME, CLASS_ID, DepthPC
-
-from learning_objects.expt_self_supervised_correction.loss_functions import certify
+from learning_objects.utils.loss_functions import certify
 from learning_objects.expt_self_supervised_correction.evaluation_metrics import evaluation_error, add_s_error
-# from learning_objects.expt_self_supervised_correction.loss_functions import chamfer_loss
 
 
 def evaluate(eval_loader, model, hyper_param, certification=True, device=None, normalize_adds=False):
@@ -63,7 +58,7 @@ def evaluate(eval_loader, model, hyper_param, certification=True, device=None, n
 
             # Make predictions for this batch
             predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted, correction, predicted_model_keypoints\
-                = model(input_point_cloud, need_predicted_keypoints=True)
+                = model(input_point_cloud)
 
             if certification:
                 certi = certify(input_point_cloud=input_point_cloud,

@@ -1,15 +1,11 @@
-import torch
-import yaml
 import argparse
 import sys
+import yaml
 
 sys.path.append('../..')
 
-from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPC, CLASS_NAME, CLASS_ID
-from learning_objects.utils.general import display_two_pcs
-# from learning_objects.expt_self_supervised_correction.expt_supervised_training import visualize_kp_detectors
-# from learning_objects.expt_self_supervised_correction.self_supervised_training import visualize_kp_detectors
-from learning_objects.expt_self_supervised_correction.train_baseline import visualize_kp_detectors
+from learning_objects.datasets.keypointnet import CLASS_NAME
+from learning_objects.expt_self_supervised_correction.train_baseline import evaluate_model
 
 if __name__ == "__main__":
     """
@@ -35,11 +31,15 @@ if __name__ == "__main__":
 
     stream = open("class_model_ids.yml", "r")
     model_class_ids = yaml.load(stream=stream, Loader=yaml.Loader)
+    if class_name not in model_class_ids:
+        raise Exception('Invalid class_name')
+    else:
+        model_id = model_class_ids[class_name]
 
-    visualize_kp_detectors(detector_type=detector_type,
-                           model_class_ids=model_class_ids,
-                           only_categories=only_categories,
-                           visualize=True, evaluate_models=True,
-                           use_corrector=False,
-                           visualize_before=True,
-                           visualize_after=False)
+    evaluate_model(detector_type=detector_type,
+                   class_name=class_name,
+                   model_id=model_id,
+                   visualize=True, evaluate_models=True,
+                   use_corrector=False,
+                   visualize_before=True,
+                   visualize_after=False)

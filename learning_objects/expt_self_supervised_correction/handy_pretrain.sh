@@ -1,19 +1,19 @@
-#echo "pre-training: motorcycle"
-#python supervised_training.py "point_transformer" "motorcycle"
+echo "pre-training: motorcycle"
+python training.py "point_transformer" "motorcycle" "supervised"
 
 #echo "pre-training: mug"
-#python supervised_training.py "point_transformer" "mug"
+#python training.py "point_transformer" "mug" "supervised"
 
 #echo "pre-training: skateboard"
-#python supervised_training.py "point_transformer" "skateboard"
+#python training.py "point_transformer" "skateboard" "supervised"
 
 #echo "pre-training: table"
-#python supervised_training.py "point_transformer" "table"
+#python training.py "point_transformer" "table" "supervised"
 
 #echo "pre-training: vessel"
-#python supervised_training.py "point_transformer" "vessel"
+#python training.py "point_transformer" "vessel" "supervised"
 
-# evaluating point_transformer pre-trained models
+# evaluating point_transformer pre-trained models "supervised"
 
 #echo "Evaluating: airplane, pre"
 #python evaluate_trained_model.py "point_transformer" "airplane" "pre" >> pt_eval_results.txt

@@ -1,7 +1,6 @@
 """
 
 """
-
 import argparse
 import os
 import pickle
@@ -18,23 +17,13 @@ from torch.utils.tensorboard import SummaryWriter
 
 sys.path.append("../../")
 
-from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPointCloud2, DepthPC, CLASS_NAME, \
-    FixedDepthPC, CLASS_ID
 from learning_objects.datasets.ycb import DepthYCB
 from learning_objects.models.certifiability import confidence, confidence_kp
-
 from learning_objects.utils.general import display_results, TrackingMeter
-
-# loss functions
-# from learning_objects.expt_self_supervised_correction.loss_functions import chamfer_loss
-from learning_objects.expt_self_supervised_correction.loss_functions import certify
-from learning_objects.expt_self_supervised_correction.loss_functions import self_supervised_training_loss \
-    as self_supervised_loss
-from learning_objects.expt_self_supervised_correction.loss_functions import self_supervised_validation_loss \
-    as validation_loss
+from learning_objects.utils.loss_functions import certify, self_supervised_training_loss \
+    as self_supervised_loss, self_supervised_validation_loss as validation_loss
 # evaluation metrics
 from learning_objects.expt_self_supervised_correction.evaluation_metrics import evaluation_error, add_s_error
-
 from learning_objects.expt_ycb.supervised_training import train_with_supervision
 from learning_objects.expt_ycb.proposed_model import ProposedRegressionModel as ProposedModel
 
@@ -149,7 +138,7 @@ def visual_test(test_loader, model, device=None, hyper_param=None):
         # Make predictions for this batch
         model.eval()
         predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted, _, predicted_model_keypoints \
-            = model(input_point_cloud, need_predicted_keypoints=True)
+            = model(input_point_cloud)
 
         # certification
         certi = certify(input_point_cloud=input_point_cloud,
@@ -230,7 +219,8 @@ def visualize_detector(hyper_param, detector_type, model_id,
     model_keypoints = eval_dataset._get_model_keypoints().to(torch.float).to(device=device)
 
     model = ProposedModel(model_id=model_id, model_keypoints=model_keypoints, cad_models=cad_models,
-                                     keypoint_detector=detector_type, local_max_pooling=False, correction_flag=use_corrector).to(device)
+                          keypoint_detector=detector_type, local_max_pooling=False, correction_flag=use_corrector,
+                          need_predicted_keypoints=True).to(device)
 
     if not os.path.isfile(best_model_save_file):
         print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")

@@ -5,33 +5,23 @@ It can use registration during supervised training.
 
 """
 
-import torch
-import pickle
-import yaml
 import argparse
+import os
+import pickle
+import sys
+import torch
+import yaml
+from datetime import datetime
 from pytorch3d import ops
 from torch.utils.tensorboard import SummaryWriter
-from datetime import datetime
 
-import os
-import sys
 sys.path.append("../../")
 
 from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPC, CLASS_NAME, CLASS_ID
-from learning_objects.utils.general import display_results
-
-# SAVE_LOCATION = '../../data/learning_objects/expt_registration/runs/'
-
-# loss functions
-from learning_objects.expt_self_supervised_correction.loss_functions import \
-    keypoints_loss, rotation_loss, translation_loss, chamfer_loss
-
-from learning_objects.expt_self_supervised_correction.loss_functions import supervised_training_loss as supervised_loss
-from learning_objects.expt_self_supervised_correction.loss_functions import supervised_validation_loss as validation_loss
-
+from learning_objects.utils.general import display_results, TrackingMeter
+from learning_objects.utils.loss_functions import keypoints_loss, rotation_loss, translation_loss, chamfer_loss, \
+    supervised_training_loss as supervised_loss, supervised_validation_loss as validation_loss
 from learning_objects.expt_self_supervised_correction.proposed_model import ProposedRegressionModel as ProposedModel
-from learning_objects.utils.general import TrackingMeter
-
 
 # Training code
 def supervised_train_one_epoch(training_loader, model, optimizer, device):
@@ -304,8 +294,6 @@ def visualize_detector(hyper_param,
 
 
     # model
-    from learning_objects.expt_self_supervised_correction.proposed_model import ProposedRegressionModel as ProposedModel
-
     model = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,
                           keypoint_detector=detector_type, correction_flag=use_corrector).to(device)
 
@@ -347,75 +335,53 @@ def visualize_detector(hyper_param,
 
     return None
 
+def visualize_kp_detectors(detector_type, class_name, model_id, use_corrector=False):
 
+    class_id = CLASS_ID[class_name]
 
-### Wrappers:
+    stream = open("supervised_training.yml", "r")
+    hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
 
-def train_kp_detectors(detector_type, model_class_ids, only_categories=None, use_corrector=False):
+    print(">>"*40)
+    print("Visualizing: ", class_name, "; Model ID:", str(model_id))
 
-    for key, value in model_class_ids.items():
-        if key in only_categories:
-            class_id = CLASS_ID[key]
-            model_id = str(value)
+    visualize_detector(detector_type=detector_type,
+                       class_id=class_id,
+                       model_id=model_id,
+                       hyper_param=hyper_param,
+                       use_corrector=use_corrector)
+    torch.cuda.empty_cache()
 
-            stream = open("supervised_training.yml", "r")
-            hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
-
-            print(">>"*40)
-            print("Training: ", key, "; Model ID:", str(model_id))
-            train_detector(hyper_param=hyper_param,
-                           detector_type=detector_type,
-                           class_id=class_id,
-                           model_id=model_id,
-                           use_corrector=use_corrector)
-            torch.cuda.empty_cache()
-
-
-def visualize_kp_detectors(detector_type, model_class_ids, only_categories=None, use_corrector=False):
-
-    for key, value in model_class_ids.items():
-        if key in only_categories:
-            class_id = CLASS_ID[key]
-            model_id = str(value)
-
-            stream = open("supervised_training.yml", "r")
-            hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
-
-            print(">>"*40)
-            print("Visualizing: ", key, "; Model ID:", str(model_id))
-
-            visualize_detector(detector_type=detector_type,
-                               class_id=class_id,
-                               model_id=model_id,
-                               hyper_param=hyper_param,
-                               use_corrector=use_corrector)
-            torch.cuda.empty_cache()
-
-
-if __name__ == "__main__":
-
-    """
-    usage: 
-    >> python supervised_training.py "point_transformer" "chair"
-    >> python supervised_training.py "pointnet" "chair"
-    
-    """
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("detector_type", help="specify the detector type.", type=str)
-    parser.add_argument("class_name", help="specify the ShapeNet class name.", type=str)
-
-    args = parser.parse_args()
-
-    # print("KP detector type: ", args.detector_type)
-    # print("CAD Model class: ", args.class_name)
-    detector_type = args.detector_type
-    class_name = args.class_name
-    only_categories = [class_name]
-
-    stream = open("class_model_ids.yml", "r")
-    model_class_ids = yaml.load(stream=stream, Loader=yaml.Loader)
-
-    train_kp_detectors(detector_type=detector_type, model_class_ids=model_class_ids,
-                       only_categories=only_categories, use_corrector=False)
-
+#
+# if __name__ == "__main__":
+#
+#     """
+#     usage:
+#     >> python supervised_training.py "point_transformer" "chair"
+#     >> python supervised_training.py "pointnet" "chair"
+#
+#     """
+#
+#     parser = argparse.ArgumentParser()
+#     parser.add_argument("detector_type", help="specify the detector type.", type=str)
+#     parser.add_argument("class_name", help="specify the ShapeNet class name.", type=str)
+#
+#     args = parser.parse_args()
+#
+#     # print("KP detector type: ", args.detector_type)
+#     # print("CAD Model class: ", args.class_name)
+#     detector_type = args.detector_type
+#     class_name = args.class_name
+#     only_categories = [class_name]
+#
+#     stream = open("class_model_ids.yml", "r")
+#     model_class_ids = yaml.load(stream=stream, Loader=yaml.Loader)
+#     if class_name not in model_class_ids:
+#         raise Exception('Invalid class_name')
+#     else:
+#         model_id = model_class_ids[class_name]
+#
+#
+#     train_kp_detectors(detector_type=detector_type, class_name=class_name, model_id=model_id,
+#                        use_corrector=False, train_mode="supervised")
+#

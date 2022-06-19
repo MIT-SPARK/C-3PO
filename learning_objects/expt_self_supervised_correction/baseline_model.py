@@ -1,11 +1,8 @@
-
-import torch
 import numpy as np
 import open3d as o3d
-# import copy
-# import teaserpp_python
-
 import sys
+import torch
+
 sys.path.append("../../")
 
 from learning_objects.utils.general import pos_tensor_to_o3d
