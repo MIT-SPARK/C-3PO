@@ -1,28 +1,13 @@
-import torch
-import yaml
 import argparse
-import pickle
-
-from torch.utils.tensorboard import SummaryWriter
-from datetime import datetime
-
 import os
 import sys
+import yaml
+from datetime import datetime
+
 sys.path.append("../../")
 
-from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPointCloud2, DepthPC, CLASS_NAME, \
-    FixedDepthPC, CLASS_ID
-from learning_objects.utils.general import display_results, TrackingMeter
+from learning_objects.datasets.keypointnet import CLASS_NAME, CLASS_ID
 
-# loss functions
-from learning_objects.expt_self_supervised_correction.loss_functions import certify
-from learning_objects.expt_self_supervised_correction.loss_functions import self_supervised_training_loss \
-    as self_supervised_loss
-from learning_objects.expt_self_supervised_correction.loss_functions import self_supervised_validation_loss \
-    as validation_loss
-from learning_objects.expt_self_supervised_correction.evaluation_metrics import evaluation_error, add_s_error
-from learning_objects.expt_self_supervised_correction.evaluation import evaluate
-from learning_objects.expt_self_supervised_correction.proposed_model import ProposedRegressionModel as ProposedModel
 from learning_objects.expt_self_supervised_correction.self_supervised_training import train_detector as train_detector_self_supervised
 from learning_objects.expt_self_supervised_correction.supervised_training import train_detector as train_detector_supervised
 from learning_objects.expt_self_supervised_correction.train_baseline import train_detector as train_detector_baseline
@@ -70,6 +55,7 @@ if __name__ == "__main__":
     class_name = args.class_name
     train_mode = args.train_mode
     assert train_mode in ["self_supervised", "supervised", "baseline"]
+    use_corrector = True if train_mode == "self_supervised" else False
     only_categories = [class_name]
 
     stream = open("class_model_ids.yml", "r")
@@ -80,4 +66,4 @@ if __name__ == "__main__":
         model_id = model_class_ids[class_name]
 
     train_kp_detectors(detector_type=detector_type, class_name=class_name, model_id=model_id,
-                       use_corrector=True, train_mode=train_mode)
+                       use_corrector=use_corrector, train_mode=train_mode)

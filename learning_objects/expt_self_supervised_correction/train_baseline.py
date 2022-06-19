@@ -24,14 +24,6 @@ from learning_objects.models.certifiability import confidence, confidence_kp
 
 from learning_objects.utils.general import display_results, TrackingMeter
 
-# loss functions migration
-# from learning_objects.expt_self_supervised_correction.loss_functions import chamfer_loss
-# from learning_objects.expt_self_supervised_correction.loss_functions import certify
-# from learning_objects.expt_self_supervised_correction.loss_functions import self_supervised_training_loss \
-#     as self_supervised_loss
-# from learning_objects.expt_self_supervised_correction.loss_functions import self_supervised_validation_loss \
-#     as validation_loss
-
 from learning_objects.utils.loss_functions import chamfer_loss, certify, self_supervised_training_loss \
     as self_supervised_loss, self_supervised_validation_loss as validation_loss
 # evaluation metrics

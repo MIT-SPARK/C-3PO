@@ -1,38 +1,27 @@
 """
 
 """
-
+import argparse
+import os
+import pickle
+import sys
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision
 import torchvision.transforms as transforms
 import yaml
-import argparse
-import pickle
-from pytorch3d import ops
-
-from torch.utils.tensorboard import SummaryWriter
 from datetime import datetime
+from pytorch3d import ops
+from torch.utils.tensorboard import SummaryWriter
 
-import os
-import sys
 sys.path.append("../../")
 
-from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPointCloud2, DepthPC, CLASS_NAME, \
-    FixedDepthPC, CLASS_ID
 from learning_objects.datasets.ycb import DepthYCB, DepthYCBAugment
-from learning_objects.models.certifiability import confidence, confidence_kp
-
 from learning_objects.utils.general import display_results, TrackingMeter
 
-# loss functions
-# from learning_objects.expt_self_supervised_correction.loss_functions import chamfer_loss
-from learning_objects.expt_self_supervised_correction.loss_functions import certify
-from learning_objects.expt_self_supervised_correction.loss_functions import self_supervised_training_loss \
-    as self_supervised_loss
-from learning_objects.expt_self_supervised_correction.loss_functions import self_supervised_validation_loss \
-    as validation_loss
+from learning_objects.utils.loss_functions import certify, self_supervised_training_loss \
+    as self_supervised_loss, self_supervised_validation_loss as validation_loss
 # evaluation metrics
 from learning_objects.expt_self_supervised_correction.evaluation_metrics import evaluation_error, add_s_error
 
@@ -276,19 +265,19 @@ from learning_objects.expt_self_supervised_correction.evaluation import evaluate
 
 
 ## Wrapper
-def train_kp_detectors(detector_type, model_id, use_corrector=False):
-    hyper_param_file = "baseline_training.yml"
-    stream = open(hyper_param_file, "r")
-    hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
-    hyper_param = hyper_param[detector_type]
-    hyper_param['epsilon'] = hyper_param['epsilon'][model_id]
-
-    print(">>"*40)
-    print("Training Model ID: ", str(model_id))
-    train_detector(detector_type=detector_type,
-                   model_id=model_id,
-                   hyper_param=hyper_param,
-                   use_corrector=use_corrector)
+# def train_kp_detectors(detector_type, model_id, use_corrector=False):
+#     hyper_param_file = "baseline_training.yml"
+#     stream = open(hyper_param_file, "r")
+#     hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
+#     hyper_param = hyper_param[detector_type]
+#     hyper_param['epsilon'] = hyper_param['epsilon'][model_id]
+#
+#     print(">>"*40)
+#     print("Training Model ID: ", str(model_id))
+#     train_detector(detector_type=detector_type,
+#                    model_id=model_id,
+#                    hyper_param=hyper_param,
+#                    use_corrector=use_corrector)
 
 
 def visualize_kp_detectors(detector_type, model_ids, only_models=None,
@@ -349,7 +338,7 @@ if __name__ == "__main__":
         raise Exception('Invalid model_id')
 
 
-    train_kp_detectors(detector_type=detector_type, model_id=model_id, use_corrector=False)
+    # train_kp_detectors(detector_type=detector_type, model_id=model_id, use_corrector=False)
     # visualize_kp_detectors(detector_type=detector_type, model_ids=model_ids, use_corrector=False, only_models=only_models, visualize=True)
 
 

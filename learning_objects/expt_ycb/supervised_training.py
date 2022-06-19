@@ -20,14 +20,10 @@ sys.path.append("../../")
 from learning_objects.datasets.ycb import SE3PointCloudYCB, SE3PointCloudYCBAugment, DepthYCB
 from learning_objects.utils.general import display_results
 
-
 # loss functions
-from learning_objects.expt_self_supervised_correction.loss_functions import \
-    keypoints_loss, rotation_loss, translation_loss, chamfer_loss
-
-from learning_objects.expt_self_supervised_correction.loss_functions import supervised_training_loss as supervised_loss, \
-    avg_kpt_distance_regularizer
-from learning_objects.expt_self_supervised_correction.loss_functions import supervised_validation_loss as validation_loss
+from learning_objects.utils.loss_functions import keypoints_loss, rotation_loss, \
+    translation_loss, chamfer_loss, supervised_training_loss as supervised_loss, \
+    avg_kpt_distance_regularizer, supervised_validation_loss as validation_loss
 
 from learning_objects.expt_ycb.proposed_model import ProposedRegressionModel as ProposedModel
 from learning_objects.utils.general import TrackingMeter
@@ -352,6 +348,5 @@ if __name__ == "__main__":
     stream = open("supervised_training.yml", "r")
     hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
 
-    # train_detector(detector_type=detector_type, model_id=model_id, hyper_param=hyper_param, use_corrector=False)
     visualize_detector(detector_type=detector_type, model_id=model_id, hyper_param=hyper_param, use_corrector=False)
 

@@ -9,7 +9,7 @@ sys.path.append('../..')
 from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPC, CLASS_NAME, CLASS_ID, FixedDepthPC
 from learning_objects.expt_self_supervised_correction.evaluation import evaluate
 from learning_objects.utils.general import display_results
-from learning_objects.expt_self_supervised_correction.loss_functions import certify
+from learning_objects.utils.loss_functions import certify
 from learning_objects.expt_self_supervised_correction.evaluation_metrics import evaluation_error, add_s_error
 from learning_objects.expt_self_supervised_correction.proposed_model import ProposedRegressionModel as ProposedModel
 

@@ -42,7 +42,7 @@ if __name__ == "__main__":
 
     evaluate_model(detector_type=detector_type,
                    class_name=class_name,
-                   model_id = model_id,
+                   model_id=model_id,
                    visualize=False, evaluate_models=True,
                    models_to_analyze=models_to_analyze,
                    use_corrector=True)

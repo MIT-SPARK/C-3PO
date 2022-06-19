@@ -29,7 +29,7 @@ from learning_objects.models.certifiability import confidence, confidence_kp
 from learning_objects.utils.general import display_results, TrackingMeter, temp_expt_1_viz
 
 # loss functions
-from learning_objects.expt_self_supervised_correction.loss_functions import self_supervised_training_loss \
+from learning_objects.utils.loss_functions import self_supervised_training_loss \
     as self_supervised_loss, self_supervised_validation_loss as validation_loss, certify
 # evaluation metrics
 from learning_objects.expt_self_supervised_correction.evaluation_metrics import evaluation_error, add_s_error, \
@@ -356,19 +356,19 @@ def visual_test(test_loader, model, device=None, hyper_param=None, degeneracy_ev
             break
 
 
-## Wrapper
-def train_kp_detectors(detector_type, model_id):
-    hyper_param_file = "self_supervised_training.yml"
-    stream = open(hyper_param_file, "r")
-    hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
-    hyper_param = hyper_param[detector_type]
-    hyper_param['epsilon'] = hyper_param['epsilon'][model_id]
-
-    print(">>" * 40)
-    print("Training Model ID:", str(model_id))
-    train_detector(detector_type=detector_type,
-                   model_id=model_id,
-                   hyper_param=hyper_param)
+# ## Wrapper
+# def train_kp_detectors(detector_type, model_id):
+#     hyper_param_file = "self_supervised_training.yml"
+#     stream = open(hyper_param_file, "r")
+#     hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
+#     hyper_param = hyper_param[detector_type]
+#     hyper_param['epsilon'] = hyper_param['epsilon'][model_id]
+#
+#     print(">>" * 40)
+#     print("Training Model ID:", str(model_id))
+#     train_detector(detector_type=detector_type,
+#                    model_id=model_id,
+#                    hyper_param=hyper_param)
 
 
 def evaluate_model(detector_type, model_id,
