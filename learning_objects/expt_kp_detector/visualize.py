@@ -70,24 +70,16 @@ def visual_test(test_loader, model, hyper_param, correction_flag=False, device=N
 
 
 def visualize_detector(hyper_param, detector_type, class_id, model_id,
-                       evaluate_models=True, models_to_analyze='both',
+                       evaluate_models=True, models_to_analyze='post',
                        visualize_without_corrector=True, visualize_with_corrector=True,
                        visualize=False, device=None,
                        cross=False, cross_class_id=None, cross_model_id=None):
     """
 
     """
-
-    # print('-' * 20)
     if device==None:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    # print('device is ', device)
-    # print('-' * 20)
-    # torch.cuda.empty_cache()
-    if models_to_analyze=='both':
-        pre_ = True
-        post_ = True
-    elif models_to_analyze == 'pre':
+    if models_to_analyze == 'pre':
         pre_ = True
         post_ = False
     elif models_to_analyze == 'post':
@@ -212,7 +204,7 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
 
 def visualize_kp_detectors(detector_type, model_class_ids, only_categories=None,
                            evaluate_models=True,
-                           models_to_analyze='both',
+                           models_to_analyze='post',
                            visualize=True,
                            visualize_without_corrector=False,
                            visualize_with_corrector=True,

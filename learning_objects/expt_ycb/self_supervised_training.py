@@ -179,7 +179,6 @@ def train_without_supervision(self_supervised_train_loader, validation_loader, m
         with open(cert_save_file, 'wb') as outp:
             pickle.dump(_fra_cert, outp, pickle.HIGHEST_PROTOCOL)
 
-        # torch.cuda.empty_cache()
         if -avg_vloss > hyper_param['train_stop_cert_threshold']:
             print("ENDING TRAINING. REACHED MAX. CERTIFICATION (AT VALIDATION).")
             break
@@ -294,7 +293,6 @@ def visual_test(test_loader, model, device=None, hyper_param=None, degeneracy_ev
 
     if device == None:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        # torch.cuda.empty_cache()
 
     for i, vdata in enumerate(test_loader):
 
@@ -355,31 +353,21 @@ def visual_test(test_loader, model, device=None, hyper_param=None, degeneracy_ev
         if i >= 20:
             break
 
-
-# ## Wrapper
-# def train_kp_detectors(detector_type, model_id):
-#     hyper_param_file = "self_supervised_training.yml"
-#     stream = open(hyper_param_file, "r")
-#     hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
-#     hyper_param = hyper_param[detector_type]
-#     hyper_param['epsilon'] = hyper_param['epsilon'][model_id]
-#
-#     print(">>" * 40)
-#     print("Training Model ID:", str(model_id))
-#     train_detector(detector_type=detector_type,
-#                    model_id=model_id,
-#                    hyper_param=hyper_param)
-
-
 def evaluate_model(detector_type, model_id,
                    evaluate_models=True,
                    visualize=True,
                    use_corrector=True,
-                   evaluate_pretrained=False,
-                   evaluate_trained=True,
+                   models_to_analyze='post',
                    degeneracy_eval=False,
                    average_metrics=False):
-    assert (evaluate_trained or evaluate_pretrained) and not (evaluate_trained and evaluate_pretrained)
+    if models_to_analyze == 'pre':
+        evaluate_pretrained = True
+        evaluate_trained = False
+    elif models_to_analyze == 'post':
+        evaluate_pretrained = False
+        evaluate_trained = True
+    else:
+        return NotImplementedError
 
     hyper_param_file = "self_supervised_training.yml"
     stream = open(hyper_param_file, "r")
@@ -517,10 +505,8 @@ if __name__ == "__main__":
         if model_id not in model_ids:
             raise Exception('Invalid model_id')
 
-    #train_kp_detectors(detector_type=detector_type, model_id=model_id)
     evaluate_model(detector_type=detector_type, model_id=model_id, evaluate_models=True,
-                   visualize=False, use_corrector=True, evaluate_pretrained=False,
-                   evaluate_trained=True, degeneracy_eval=False, average_metrics=False)
+                   visualize=False, use_corrector=True, models_to_analyze = 'post', degeneracy_eval=False, average_metrics=False)
 
 
 

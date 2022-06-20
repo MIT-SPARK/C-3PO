@@ -33,10 +33,8 @@ def self_supervised_train_one_epoch(training_loader, model, optimizer, device, h
     for i, data in enumerate(training_loader):
         # Every data instance is an input + label pair
         print("i :", i)
-        # print("Running batch ", i+1, "/", len(training_loader))
         input_point_cloud, _, _ = data
         input_point_cloud = input_point_cloud.to(device)
-        # print(input_point_cloud.shape)
 
         # Zero your gradients for every batch!
         optimizer.zero_grad()
@@ -72,7 +70,6 @@ def self_supervised_train_one_epoch(training_loader, model, optimizer, device, h
         fra_certi_track.append(fra_cert)
 
         del input_point_cloud, predicted_point_cloud, correction
-        # torch.cuda.empty_cache()
 
     ave_tloss = running_loss / (i + 1)
 
@@ -165,7 +162,6 @@ def train_without_supervision(self_supervised_train_loader, validation_loader, m
         with open(cert_save_file, 'wb') as outp:
             pickle.dump(_fra_cert, outp, pickle.HIGHEST_PROTOCOL)
 
-        # torch.cuda.empty_cache()
         if -avg_vloss > hyper_param['train_stop_cert_threshold']:
             print("ENDING TRAINING. REACHED MAX. CERTIFICATION (AT VALIDATION).")
             break
@@ -186,7 +182,6 @@ def train_detector(hyper_param, detector_type='pointnet', class_id="03001627",
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print('device is ', device)
     print('-' * 20)
-    # torch.cuda.empty_cache()
 
     # shapenet
     class_name = CLASS_NAME[class_id]
@@ -216,12 +211,6 @@ def train_detector(hyper_param, detector_type='pointnet', class_id="03001627",
     num_of_points_to_sample = hyper_param['num_of_points_to_sample']
     num_of_points_selfsupervised = hyper_param['num_of_points_selfsupervised']
 
-    # self_supervised_train_dataset = DepthPC(class_id=class_id,
-    #                                         model_id=model_id,
-    #                                         n=num_of_points_selfsupervised,
-    #                                         num_of_points_to_sample=num_of_points_to_sample,
-    #                                         dataset_len=self_supervised_train_dataset_len,
-    #                                         rotate_about_z=True)
     self_supervised_train_dataset = MixedFixedDepthPC(class_id=class_id,
                                                       model_id=model_id,
                                                       n=num_of_points_selfsupervised,
@@ -293,7 +282,6 @@ def visual_test(test_loader, model, hyper_param, device=None):
 
     if device == None:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        # torch.cuda.empty_cache()
 
     cad_models = test_loader.dataset._get_cad_models()
     model_keypoints = test_loader.dataset._get_model_keypoints()
@@ -353,23 +341,15 @@ def visual_test(test_loader, model, hyper_param, device=None):
 
 def visualize_detector(hyper_param, detector_type, class_id, model_id,
                        dataset_class_id, dataset_model_id,
-                       evaluate_models=True, models_to_analyze='both',
+                       evaluate_models=True, models_to_analyze='post',
                        use_corrector=True,
                        visualize=False, device=None):
     """
 
     """
-
-    # print('-' * 20)
     if device==None:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    # print('device is ', device)
-    # print('-' * 20)
-    # torch.cuda.empty_cache()
-    if models_to_analyze=='both':
-        pre_ = True
-        post_ = True
-    elif models_to_analyze == 'pre':
+    if models_to_analyze == 'pre':
         pre_ = True
         post_ = False
     elif models_to_analyze == 'post':
@@ -390,11 +370,6 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
     # validation dataset:
     eval_dataset_len = hyper_param['eval_dataset_len']
     eval_batch_size = hyper_param['eval_batch_size']
-    # eval_dataset = MixedFixedDepthPC(class_id=class_id, model_id=model_id,
-    #                                  n=hyper_param['num_of_points_selfsupervised'],
-    #                                  num_of_points_to_sample=hyper_param['num_of_points_to_sample'],
-    #                                  dataset_len=eval_dataset_len,
-    #                                  rotate_about_z=True)
     eval_dataset = MixedFixedDepthPC(class_id=dataset_class_id,
                                      model_id=dataset_model_id,
                                      n=hyper_param['num_of_points_selfsupervised'],
@@ -461,12 +436,6 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
     # # Visual Test
     dataset_len = 20
     dataset_batch_size = 1
-    # dataset = DepthPC(class_id=class_id,
-    #                   model_id=model_id,
-    #                   n=hyper_param['num_of_points_selfsupervised'],
-    #                   num_of_points_to_sample=hyper_param['num_of_points_to_sample'],
-    #                   dataset_len=dataset_len,
-    #                   rotate_about_z=True)
     dataset = MixedFixedDepthPC(class_id=class_id,
                                 model_id=model_id,
                                 n=hyper_param['num_of_points_selfsupervised'],
@@ -493,40 +462,14 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
 
     return None
 
-
-## Wrapper
-def train_kp_detectors(detector_type, model_class_ids, only_categories=None, use_corrector=True):
-
-    for key, value in model_class_ids.items():
-        if key in only_categories:
-            class_id = CLASS_ID[key]
-            model_id = str(value)
-
-            hyper_param_file = "./full_self_supervised_training.yml"
-            stream = open(hyper_param_file, "r")
-            hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
-            hyper_param = hyper_param[detector_type]
-            hyper_param['epsilon'] = hyper_param['epsilon'][key]
-
-            print(">>"*40)
-            print("Training: ", key, "; Model ID:", str(model_id))
-            train_detector(detector_type=detector_type,
-                           class_id=class_id,
-                           model_id=model_id,
-                           hyper_param=hyper_param,
-                           use_corrector=use_corrector)
-
-
-def visualize_kp_detectors(detector_type, model_class_ids, dataset_name, only_categories=None,
+def visualize_kp_detectors(detector_type, model_class_ids, test_class_name, only_categories=None,
                            evaluate_models=True,
-                           models_to_analyze='both',
+                           models_to_analyze='post',
                            visualize=True,
                            use_corrector=True):
 
-    dataset_class_id = CLASS_ID[dataset_name]
-    dataset_model_id = model_class_ids[dataset_name]
-    # print("dataset_class_id: ", dataset_class_id)
-    # print("dataset_model_id: ", dataset_model_id)
+    dataset_class_id = CLASS_ID[test_class_name]
+    dataset_model_id = model_class_ids[test_class_name]
 
     for key, value in model_class_ids.items():
         if key in only_categories:
@@ -542,8 +485,7 @@ def visualize_kp_detectors(detector_type, model_class_ids, dataset_name, only_ca
 
             print(">>"*40)
             print("Analyzing Trained Model for Object: ", key, "; Model ID:", str(model_id))
-            print("On dataset of: ", dataset_name)
-            # print("class id: ", class_id)
+            print("On dataset of: ", test_class_name)
             visualize_detector(detector_type=detector_type,
                                class_id=class_id,
                                model_id=model_id,
@@ -554,31 +496,3 @@ def visualize_kp_detectors(detector_type, model_class_ids, dataset_name, only_ca
                                models_to_analyze=models_to_analyze,
                                use_corrector=use_corrector,
                                visualize=visualize)
-
-
-
-
-if __name__ == "__main__":
-
-    """
-    usage: 
-    >> python full_self_supervised_training.py "point_transformer" "chair"
-    >> python full_self_supervised_training.py "pointnet" "chair"
-    """
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("detector_type", help="specify the detector type.", type=str)
-    parser.add_argument("class_name", help="specify the ShapeNet class name.", type=str)
-
-    args = parser.parse_args()
-
-    # print("KP detector type: ", args.detector_type)
-    # print("CAD Model class: ", args.class_name)
-    detector_type = args.detector_type
-    class_name = args.class_name
-    only_categories = [class_name]
-
-    stream = open("class_model_ids.yml", "r")
-    model_class_ids = yaml.load(stream=stream, Loader=yaml.Loader)
-
-    train_kp_detectors(detector_type=detector_type, model_class_ids=model_class_ids, only_categories=only_categories, use_corrector=True)

@@ -70,7 +70,6 @@ def self_supervised_train_one_epoch(training_loader, model, optimizer, device, h
         fra_certi_track.append(fra_cert)
 
         del input_point_cloud, predicted_point_cloud, correction
-        # torch.cuda.empty_cache()
 
     ave_tloss = running_loss / (i + 1)
 
@@ -167,7 +166,6 @@ def train_without_supervision(self_supervised_train_loader, validation_loader, m
         with open(cert_save_file, 'wb') as outp:
             pickle.dump(_fra_cert, outp, pickle.HIGHEST_PROTOCOL)
 
-        # torch.cuda.empty_cache()
         if -avg_vloss > hyper_param['train_stop_cert_threshold']:
             print("ENDING TRAINING. REACHED MAX. CERTIFICATION (AT VALIDATION).")
             break
@@ -188,7 +186,6 @@ def train_detector(hyper_param, detector_type='pointnet', class_id="03001627",
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print('device is ', device)
     print('-' * 20)
-    # torch.cuda.empty_cache()
 
     # shapenet
     class_name = CLASS_NAME[class_id]
@@ -296,7 +293,6 @@ def visual_test(test_loader, model, hyper_param, device=None):
 
     if device == None:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        # torch.cuda.empty_cache()
 
     cad_models = test_loader.dataset._get_cad_models()
     cad_models = cad_models.to(device)
@@ -353,7 +349,7 @@ def visual_test(test_loader, model, hyper_param, device=None):
 
 
 def visualize_detector(hyper_param, detector_type, class_id, model_id,
-                       evaluate_models=True, models_to_analyze='both',
+                       evaluate_models=True, models_to_analyze='post',
                        use_corrector=True,
                        visualize=False, device=None,
                        cross=False, cross_class_id=None, cross_model_id=None):
@@ -361,16 +357,9 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
 
     """
 
-    # print('-' * 20)
     if device==None:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    # print('device is ', device)
-    # print('-' * 20)
-    # torch.cuda.empty_cache()
-    if models_to_analyze=='both':
-        pre_ = True
-        post_ = True
-    elif models_to_analyze == 'pre':
+    if models_to_analyze == 'pre':
         pre_ = True
         post_ = False
     elif models_to_analyze == 'post':
@@ -485,7 +474,7 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
 
 def evaluate_model(detector_type, class_name, model_id,
                    evaluate_models=True,
-                   models_to_analyze='both',
+                   models_to_analyze='post',
                    visualize=True,
                    use_corrector=True,
                    cross=False,
@@ -516,41 +505,6 @@ def evaluate_model(detector_type, class_name, model_id,
                        cross=cross,
                        cross_class_id=cross_class_id,
                        cross_model_id=cross_model_id)
-
-
-
-
-# if __name__ == "__main__":
-#
-#     """
-#     usage:
-#     >> python self_supervised_training.py "point_transformer" "chair"
-#     >> python self_supervised_training.py "pointnet" "chair"
-#     """
-#
-#     parser = argparse.ArgumentParser()
-#     parser.add_argument("detector_type", help="specify the detector type.", type=str)
-#     parser.add_argument("class_name", help="specify the ShapeNet class name.", type=str)
-#
-#     args = parser.parse_args()
-#
-#     # print("KP detector type: ", args.detector_type)
-#     # print("CAD Model class: ", args.class_name)
-#     detector_type = args.detector_type
-#     class_name = args.class_name
-#     only_categories = [class_name]
-#
-#     stream = open("class_model_ids.yml", "r")
-#     model_class_ids = yaml.load(stream=stream, Loader=yaml.Loader)
-#     if class_name not in model_class_ids:
-#         raise Exception('Invalid class_name')
-#     else:
-#         model_id = model_class_ids[class_name]
-#
-#     train_kp_detectors(detector_type=detector_type, class_name=class_name, model_id=model_id,
-#                        use_corrector=True, train_mode="self_supervised")
-#
-#
 
 
 

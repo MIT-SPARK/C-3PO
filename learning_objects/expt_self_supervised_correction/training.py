@@ -56,7 +56,6 @@ if __name__ == "__main__":
     train_mode = args.train_mode
     assert train_mode in ["self_supervised", "supervised", "baseline"]
     use_corrector = True if train_mode == "self_supervised" else False
-    only_categories = [class_name]
 
     stream = open("class_model_ids.yml", "r")
     model_class_ids = yaml.load(stream=stream, Loader=yaml.Loader)

@@ -191,7 +191,6 @@ def kNN_torch(query, dataset, k):
 
     dists = square_distance(query, dataset)  # dists: [B, N0, N1]
     neighbors = dists.argsort()[:, :, :k]  # neighbors: [B, N0, k]
-    #torch.cuda.empty_cache()
     return neighbors
 
 

@@ -15,8 +15,6 @@ from torch.utils.tensorboard import SummaryWriter
 
 sys.path.append("../../")
 
-from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPointCloud2, DepthPC, CLASS_NAME, \
-    FixedDepthPC, CLASS_ID, MixedFixedDepthPC
 from learning_objects.datasets.ycb import DepthYCB, DepthYCBAugment, MixedDepthYCBAugment, viz_rgb_pcd
 from learning_objects.utils.general import display_results, TrackingMeter
 from learning_objects.utils.loss_functions import certify, self_supervised_training_loss \
@@ -36,8 +34,6 @@ def self_supervised_train_one_epoch(training_loader, model, optimizer, device, h
         print("i :", i)
         input_point_cloud, _, _ = data
         input_point_cloud = input_point_cloud.to(device)
-
-        # print(input_point_cloud.shape)
 
         # Zero your gradients for every batch!
         optimizer.zero_grad()
@@ -73,7 +69,6 @@ def self_supervised_train_one_epoch(training_loader, model, optimizer, device, h
         fra_certi_track.append(fra_cert)
 
         del input_point_cloud, predicted_point_cloud, correction
-        # torch.cuda.empty_cache()
 
     ave_tloss = running_loss / (i + 1)
 
@@ -167,7 +162,6 @@ def train_without_supervision(self_supervised_train_loader, validation_loader, m
         with open(cert_save_file, 'wb') as outp:
             pickle.dump(_fra_cert, outp, pickle.HIGHEST_PROTOCOL)
 
-        # torch.cuda.empty_cache()
         if -avg_vloss > hyper_param['train_stop_cert_threshold']:
             print("ENDING TRAINING. REACHED MAX. CERTIFICATION (AT VALIDATION).")
             break
@@ -187,9 +181,8 @@ def train_detector(hyper_param, detector_type='point_transformer', model_id="003
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print('device is ', device)
     print('-' * 20)
-    # torch.cuda.empty_cache()
 
-    # shapenet
+    # ycb
     save_folder = hyper_param['save_folder']
     best_model_save_location = save_folder + '/' + model_id + '/'
     if not os.path.exists(best_model_save_location):
@@ -230,7 +223,8 @@ def train_detector(hyper_param, detector_type='point_transformer', model_id="003
 
     # model
     model = ProposedModel(model_id=model_id, model_keypoints=model_keypoints, cad_models=cad_models,
-                          keypoint_detector=detector_type, correction_flag=use_corrector,
+                          keypoint_detector=detector_type, local_max_pooling=False,
+                          correction_flag=use_corrector,
                           need_predicted_keypoints=True).to(device)
 
     if not os.path.isfile(sim_trained_model_file):
@@ -272,7 +266,6 @@ def visual_test(test_loader, model, hyper_param, device=None):
 
     if device == None:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        # torch.cuda.empty_cache()
 
     cad_models = test_loader.dataset._get_cad_models()
     model_keypoints = test_loader.dataset._get_model_keypoints()
@@ -332,23 +325,15 @@ def visual_test(test_loader, model, hyper_param, device=None):
 
 def visualize_detector(hyper_param, detector_type, model_id,
                        dataset_model_id,
-                       evaluate_models=True, models_to_analyze='both',
+                       evaluate_models=True, models_to_analyze='post',
                        use_corrector=True,
                        visualize=False, device=None):
     """
 
     """
-
-    # print('-' * 20)
     if device==None:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    # print('device is ', device)
-    # print('-' * 20)
-    # torch.cuda.empty_cache()
-    if models_to_analyze=='both':
-        pre_ = True
-        post_ = True
-    elif models_to_analyze == 'pre':
+    if models_to_analyze == 'pre':
         pre_ = True
         post_ = False
     elif models_to_analyze == 'post':
@@ -356,8 +341,6 @@ def visualize_detector(hyper_param, detector_type, model_id,
         post_ = True
     else:
         return NotImplementedError
-
-
 
     save_folder = hyper_param['save_folder']
     best_model_save_location = save_folder + '/' + model_id + '/'
@@ -380,7 +363,8 @@ def visualize_detector(hyper_param, detector_type, model_id,
 
     if pre_:
         model_before = ProposedModel(model_id=model_id, model_keypoints=model_keypoints, cad_models=cad_models,
-                                     keypoint_detector=detector_type, correction_flag=use_corrector,
+                                     keypoint_detector=detector_type, local_max_pooling=False,
+                                     correction_flag=use_corrector,
                                      need_predicted_keypoints=True).to(device)
 
         if not os.path.isfile(best_pre_model_save_file):
@@ -394,7 +378,8 @@ def visualize_detector(hyper_param, detector_type, model_id,
 
     if post_:
         model_after = ProposedModel(model_id=model_id, model_keypoints=model_keypoints, cad_models=cad_models,
-                                    keypoint_detector=detector_type, correction_flag=use_corrector,
+                                    keypoint_detector=detector_type, local_max_pooling=False,
+                                    correction_flag=use_corrector,
                                     need_predicted_keypoints=True).to(device)
 
         if not os.path.isfile(best_post_model_save_file):
@@ -424,12 +409,6 @@ def visualize_detector(hyper_param, detector_type, model_id,
     # # Visual Test
     dataset_len = 20
     dataset_batch_size = 1
-    # dataset = DepthPC(class_id=class_id,
-    #                   model_id=model_id,
-    #                   n=hyper_param['num_of_points_selfsupervised'],
-    #                   num_of_points_to_sample=hyper_param['num_of_points_to_sample'],
-    #                   dataset_len=dataset_len,
-    #                   rotate_about_z=True)
     dataset = MixedDepthYCBAugment(model_id=model_id, split='test', num_of_points=hyper_param['num_of_points_to_sample'], mixed_data=False)
 
     loader = torch.utils.data.DataLoader(dataset, batch_size=dataset_batch_size, shuffle=True)
@@ -454,8 +433,13 @@ def visualize_detector(hyper_param, detector_type, model_id,
     return None
 
 
-## Wrapper
-def train_kp_detectors(detector_type, model_ids, only_models=None, use_corrector=True):
+def visualize_kp_detectors(detector_type, model_ids, test_model_name, only_models=None,
+                           evaluate_models=True,
+                           models_to_analyze='post',
+                           visualize=True,
+                           use_corrector=True):
+
+    dataset_model_id = test_model_name
 
     for model_id in model_ids:
         if model_id in only_models:
@@ -466,32 +450,8 @@ def train_kp_detectors(detector_type, model_ids, only_models=None, use_corrector
             hyper_param['epsilon'] = hyper_param['epsilon'][model_id]
 
             print(">>"*40)
-            print("Training: Model ID:", str(model_id))
-            train_detector(detector_type=detector_type,
-                           model_id=model_id,
-                           hyper_param=hyper_param,
-                           use_corrector=use_corrector)
-
-
-def visualize_kp_detectors(detector_type, model_ids, dataset_name, only_models=None,
-                           evaluate_models=True,
-                           models_to_analyze='both',
-                           visualize=True,
-                           use_corrector=True):
-
-    dataset_model_id = dataset_name
-
-    for model_ids in model_ids:
-        if model_id in only_models:
-            hyper_param_file = "./full_self_supervised_training_ycb.yml"
-            stream = open(hyper_param_file, "r")
-            hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
-            hyper_param = hyper_param[detector_type]
-            hyper_param['epsilon'] = hyper_param['epsilon'][model_id]
-
-            print(">>"*40)
             print("Analyzing Trained Model for Object: ", str(model_id))
-            print("On dataset of: ", dataset_name)
+            print("On dataset of: ", test_model_name)
             # print("class id: ", class_id)
             visualize_detector(detector_type=detector_type,
                                model_id=model_id,
@@ -501,37 +461,6 @@ def visualize_kp_detectors(detector_type, model_ids, dataset_name, only_models=N
                                models_to_analyze=models_to_analyze,
                                use_corrector=use_corrector,
                                visualize=visualize)
-
-
-
-
-if __name__ == "__main__":
-
-    """
-    usage: 
-    >> python full_self_supervised_training.py "point_transformer" "003_cracker_box"
-    """
-    #free memory
-    torch.cuda.empty_cache()
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("detector_type", help="specify the detector type.", type=str)
-    parser.add_argument("model_id", help="specify the ycb model id.", type=str)
-
-    args = parser.parse_args()
-
-    detector_type = args.detector_type
-    model_id = args.model_id
-    only_models = [model_id]
-
-    with open("class_model_ids_ycb.yml", 'r') as stream:
-        model_ids = yaml.load(stream=stream, Loader=yaml.Loader)['model_ids']
-
-    train_kp_detectors(detector_type=detector_type, model_ids=model_ids, only_models=only_models, use_corrector=True)
-    # visualize_kp_detectors(detector_type=detector_type, model_ids=model_ids, dataset_name='006_mustard_bottle', only_models=only_models, visualize=True,
-    #                        evaluate_models=True, use_corrector=True, models_to_analyze='post')
-
-
 
 
 

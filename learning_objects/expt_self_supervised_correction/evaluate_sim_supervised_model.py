@@ -74,23 +74,15 @@ def visual_test(test_loader, model, hyper_param, device=None):
 
 
 def visualize_detector(hyper_param, detector_type, class_id, model_id,
-                       evaluate_models=True, models_to_analyze='both',
+                       evaluate_models=True, models_to_analyze='post',
                        use_corrector=False,
                        visualize=False, device=None):
     """
 
     """
-
-    # print('-' * 20)
     if device==None:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    # print('device is ', device)
-    # print('-' * 20)
-    # torch.cuda.empty_cache()
-    if models_to_analyze=='both':
-        pre_ = True
-        post_ = True
-    elif models_to_analyze == 'pre':
+    if models_to_analyze == 'pre':
         pre_ = True
         post_ = False
     elif models_to_analyze == 'post':
@@ -199,7 +191,7 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
 
 def evaluate_model(detector_type, class_name, model_id,
                    evaluate_models=True,
-                   models_to_analyze='both',
+                   models_to_analyze='post',
                    visualize=True,
                    use_corrector=False):
 

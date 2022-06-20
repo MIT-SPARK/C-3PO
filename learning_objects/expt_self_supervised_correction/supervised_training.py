@@ -267,13 +267,8 @@ def visualize_detector(hyper_param,
     """
 
     """
-
-    # print('-' * 20)
     if device==None:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    # print('device is ', device)
-    # print('-' * 20)
-    # torch.cuda.empty_cache()
 
     class_name = CLASS_NAME[class_id]
     save_folder = hyper_param['save_folder']
@@ -351,37 +346,3 @@ def visualize_kp_detectors(detector_type, class_name, model_id, use_corrector=Fa
                        hyper_param=hyper_param,
                        use_corrector=use_corrector)
     torch.cuda.empty_cache()
-
-#
-# if __name__ == "__main__":
-#
-#     """
-#     usage:
-#     >> python supervised_training.py "point_transformer" "chair"
-#     >> python supervised_training.py "pointnet" "chair"
-#
-#     """
-#
-#     parser = argparse.ArgumentParser()
-#     parser.add_argument("detector_type", help="specify the detector type.", type=str)
-#     parser.add_argument("class_name", help="specify the ShapeNet class name.", type=str)
-#
-#     args = parser.parse_args()
-#
-#     # print("KP detector type: ", args.detector_type)
-#     # print("CAD Model class: ", args.class_name)
-#     detector_type = args.detector_type
-#     class_name = args.class_name
-#     only_categories = [class_name]
-#
-#     stream = open("class_model_ids.yml", "r")
-#     model_class_ids = yaml.load(stream=stream, Loader=yaml.Loader)
-#     if class_name not in model_class_ids:
-#         raise Exception('Invalid class_name')
-#     else:
-#         model_id = model_class_ids[class_name]
-#
-#
-#     train_kp_detectors(detector_type=detector_type, class_name=class_name, model_id=model_id,
-#                        use_corrector=False, train_mode="supervised")
-#

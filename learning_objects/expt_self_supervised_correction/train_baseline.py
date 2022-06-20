@@ -138,7 +138,6 @@ def visual_test(test_loader, model, device=None):
 
     if device == None:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        # torch.cuda.empty_cache()
 
     for i, vdata in enumerate(test_loader):
         input_point_cloud, keypoints_target, R_target, t_target = vdata
@@ -285,41 +284,6 @@ def evaluate_model(detector_type, class_name, model_id,
                        use_corrector=use_corrector,
                        visualize_before=visualize_before,
                        visualize_after=visualize_after)
-
-
-
-
-# if __name__ == "__main__":
-#
-#     """
-#     usage:
-#     >> python train_baseline.py "point_transformer" "chair"
-#     >> python train_baseline.py "pointnet" "chair"
-#     """
-#
-#     parser = argparse.ArgumentParser()
-#     parser.add_argument("detector_type", help="specify the detector type.", type=str)
-#     parser.add_argument("class_name", help="specify the ShapeNet class name.", type=str)
-#
-#     args = parser.parse_args()
-#
-#     # print("KP detector type: ", args.detector_type)
-#     # print("CAD Model class: ", args.class_name)
-#     detector_type = args.detector_type
-#     class_name = args.class_name
-#     only_categories = [class_name]
-#
-#     stream = open("class_model_ids.yml", "r")
-#     model_class_ids = yaml.load(stream=stream, Loader=yaml.Loader)
-#     if class_name not in model_class_ids:
-#         raise Exception('Invalid class_name')
-#     else:
-#         model_id = model_class_ids[class_name]
-#
-#     train_kp_detectors(detector_type=detector_type, class_name=class_name, model_id=model_id,
-#                        use_corrector=False, train_mode="baseline")
-#
-
 
 
 

@@ -126,7 +126,6 @@ def visual_test(test_loader, model, device=None, hyper_param=None):
 
     if device == None:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        # torch.cuda.empty_cache()
 
     for i, vdata in enumerate(test_loader):
         input_point_cloud, keypoints_target, R_target, t_target = vdata
@@ -180,23 +179,8 @@ def visualize_detector(hyper_param, detector_type, model_id,
 
     """
 
-    # print('-' * 20)
     if device==None:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    # print('device is ', device)
-    # print('-' * 20)
-    # torch.cuda.empty_cache()
-    # if models_to_analyze=='both':
-    #     pre_ = True
-    #     post_ = True
-    # elif models_to_analyze == 'pre':
-    #     pre_ = True
-    #     post_ = False
-    # elif models_to_analyze == 'post':
-    #     pre_ = False
-    #     post_ = True
-    # else:
-    #     return NotImplementedError
 
     save_folder = hyper_param['save_folder']
     best_model_save_location = save_folder + '/' + model_id + '/'
@@ -261,26 +245,6 @@ def visualize_detector(hyper_param, detector_type, model_id,
 # Evaluation. Use the fact that you know rotation, translation, and shape of the generated data.
 from learning_objects.expt_self_supervised_correction.evaluation import evaluate
 
-
-## Wrapper
-def train_kp_detectors(detector_type, model_ids, only_models=None, use_corrector=False):
-
-    for model_id in model_ids:
-        if model_id in only_models:
-            hyper_param_file = "baseline_training.yml"
-            stream = open(hyper_param_file, "r")
-            hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
-            hyper_param = hyper_param[detector_type]
-            hyper_param['epsilon'] = hyper_param['epsilon'][model_id]
-
-            print(">>"*40)
-            print("Training Model ID: ", str(model_id))
-            train_detector(detector_type=detector_type,
-                           model_id=model_id,
-                           hyper_param=hyper_param,
-                           use_corrector=use_corrector)
-
-
 def visualize_kp_detectors(detector_type, model_ids, only_models=None,
                            evaluate_models=True,
                            visualize=True,
@@ -336,7 +300,6 @@ if __name__ == "__main__":
     stream = open("model_ids.yml", "r")
     model_ids = yaml.load(stream=stream, Loader=yaml.Loader)['model_ids']
 
-    # train_kp_detectors(detector_type=detector_type, model_ids=model_ids, only_models=only_models, use_corrector=False)
     visualize_kp_detectors(detector_type=detector_type, model_ids=model_ids, use_corrector=False, only_models=only_models, visualize=True)
 
 
