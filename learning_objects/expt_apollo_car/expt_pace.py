@@ -25,8 +25,8 @@ from learning_objects.models.keypoint_detector import HeatmapKeypoints, Regressi
 from learning_objects.models.pace import PACEmodule
 from learning_objects.models.keypoint_corrector import kp_corrector_pace
 from learning_objects.models.modelgen import ModelFromShape
-
-# from learning_objects.models.modelgen import ModelFromShape, ModelFromShapeModule
+from learning_objects.models.certifiability import chamfer_loss
+from learning_objects.utils.loss_functions import translation_loss, rotation_loss, shape_loss
 
 from learning_objects.datasets.keypointnet import SE3nIsotorpicShapePointCloud, DepthAndIsotorpicShapePointCloud
 
@@ -128,77 +128,6 @@ class ProposedModel(nn.Module):
 
 
 # loss functions
-def chamfer_loss(pc, pc_, pc_padding=None):
-    """
-    inputs:
-    pc  : torch.tensor of shape (B, 3, n)
-    pc_ : torch.tensor of shape (B, 3, m)
-    pc_padding  : torch.tensor of shape (B, n)  : indicates if the point in pc is real-input or padded in
-
-    output:
-    loss    : (B, 1)
-    """
-
-    if pc_padding == None:
-        batch_size, _, n = pc.shape
-        device_ = pc.device
-
-        # computes a padding by flagging zero vectors in the input point cloud.
-        pc_padding = ((pc == torch.zeros(3, 1).to(device=device_)).sum(dim=1) == 3)
-        # pc_padding = torch.zeros(batch_size, n).to(device=device_)
-
-    sq_dist, _, _ = ops.knn_points(torch.transpose(pc, -1, -2), torch.transpose(pc_, -1, -2), K=1, return_sorted=False)
-    # dist (B, n, 1): distance from point in X to the nearest point in Y
-
-    sq_dist = sq_dist.squeeze(-1)*torch.logical_not(pc_padding)
-    a = torch.logical_not(pc_padding)
-    loss = sq_dist.sum(dim=1)/a.sum(dim=1)
-
-    return loss.unsqueeze(-1)
-
-def keypoints_loss(kp, kp_):
-    """
-    kp  : torch.tensor of shape (B, 3, N)
-    kp_ : torch.tensor of shape (B, 3, N)
-
-    """
-
-    lossMSE = torch.nn.MSELoss(reduction='mean')
-
-    return lossMSE(kp, kp_)
-
-
-def rotation_loss(R, R_):
-
-    device_ = R.device
-
-    err_mat = R @ R_.transpose(-1, -2) - torch.eye(3, device=device_)
-    lossMSE = torch.nn.MSELoss(reduction='mean')
-
-    return lossMSE(err_mat, torch.zeros_like(err_mat))
-
-
-def translation_loss(t, t_):
-    """
-    t   : torch.tensor of shape (B, 3, N)
-    t_  : torch.tensor of shape (B, 3, N)
-
-    """
-
-    lossMSE = torch.nn.MSELoss(reduction='mean')
-
-    return lossMSE(t, t_)
-
-def shape_loss(c, c_):
-    """
-    c   : torch.tensor of shape (B, K, 1)
-    c_  : torch.tensor of shape (B, K, 1)
-
-    """
-
-    lossMSE = torch.nn.MSELoss(reduction='mean')
-
-    return lossMSE(c, c_)
 
 def self_supervised_loss(input_point_cloud, predicted_point_cloud, keypoint_correction):
     """
@@ -213,7 +142,7 @@ def self_supervised_loss(input_point_cloud, predicted_point_cloud, keypoint_corr
     """
     theta = 25.0
 
-    pc_loss = chamfer_loss(input_point_cloud, predicted_point_cloud)
+    pc_loss = chamfer_loss(input_point_cloud, predicted_point_cloud, max_loss=False)
     pc_loss = pc_loss.mean()
 
     lossMSE = torch.nn.MSELoss()
@@ -241,7 +170,7 @@ def supervised_loss(input, output):
 
     """
 
-    pc_loss = chamfer_loss(input[0], output[0])
+    pc_loss = chamfer_loss(input[0], output[0], max_loss=False)
     pc_loss = pc_loss.mean()
 
     lossMSE = torch.nn.MSELoss()
@@ -273,7 +202,7 @@ def validation_loss(input, output):
 
     """
 
-    pc_loss = chamfer_loss(input[0], output[0])
+    pc_loss = chamfer_loss(input[0], output[0], max_loss=False)
     pc_loss = pc_loss.mean()
 
     lossMSE = torch.nn.MSELoss()

@@ -7,7 +7,7 @@ import yaml
 sys.path.append("../..")
 
 from learning_objects.utils.loss_functions import certify
-from learning_objects.expt_self_supervised_correction.evaluation_metrics import evaluation_error, add_s_error
+from learning_objects.utils.evaluation_metrics import evaluation_error, add_s_error
 
 
 def evaluate(eval_loader, model, hyper_param, certification=True, device=None, normalize_adds=False):

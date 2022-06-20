@@ -32,7 +32,7 @@ from learning_objects.utils.general import display_results, TrackingMeter, temp_
 from learning_objects.utils.loss_functions import self_supervised_training_loss \
     as self_supervised_loss, self_supervised_validation_loss as validation_loss, certify
 # evaluation metrics
-from learning_objects.expt_self_supervised_correction.evaluation_metrics import evaluation_error, add_s_error, \
+from learning_objects.utils.evaluation_metrics import add_s_error, \
     is_pcd_nondegenerate
 from learning_objects.expt_self_supervised_correction.evaluation import evaluate
 

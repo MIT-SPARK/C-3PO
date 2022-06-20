@@ -1,8 +1,6 @@
-
 import torch
 import sys
 from pytorch3d import ops
-from learning_objects.datasets.ycb import MODEL_TO_KPT_GROUPS
 sys.path.append('../..')
 
 

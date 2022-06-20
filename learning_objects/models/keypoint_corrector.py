@@ -25,8 +25,6 @@ from learning_objects.utils.general import pos_tensor_to_o3d, display_two_pcs
 from learning_objects.utils.general import chamfer_distance, chamfer_half_distance, rotation_error, \
     translation_error, shape_error, update_pos_tensor_to_keypoint_markers
 
-# from learning_objects.models.pace_ddn import PACEbp
-# from learning_objects.models.pace_altern_ddn import PACEbp
 from learning_objects.models.pace import PACEmodule
 from learning_objects.models.modelgen import ModelFromShape
 
@@ -76,41 +74,6 @@ def keypoints_loss(kp, kp_):
     lossMSE = torch.nn.MSELoss(reduction='none')
 
     return lossMSE(kp, kp_).sum(1).mean(1).unsqueeze(-1)
-
-
-def rotation_loss(R, R_):
-
-    device_ = R.device
-
-    err_mat = R @ R_.transpose(-1, -2) - torch.eye(3, device=device_)
-    lossMSE = torch.nn.MSELoss(reduction='mean')
-
-    return lossMSE(err_mat, torch.zeros_like(err_mat))
-
-
-def translation_loss(t, t_):
-    """
-    t   : torch.tensor of shape (B, 3, N)
-    t_  : torch.tensor of shape (B, 3, N)
-
-    """
-
-    lossMSE = torch.nn.MSELoss(reduction='mean')
-
-    return lossMSE(t, t_)
-
-
-def shape_loss(c, c_):
-    """
-    c   : torch.tensor of shape (B, K, 1)
-    c_  : torch.tensor of shape (B, K, 1)
-
-    """
-
-    lossMSE = torch.nn.MSELoss(reduction='mean')
-
-    return lossMSE(c, c_)
-
 
 def registration_eval(R, R_, t, t_):
     """
@@ -209,11 +172,8 @@ class kp_corrector_reg():
         keypoint_estimate = R @ self.model_keypoints + t
 
         loss_pc = chamfer_loss(pc=input_point_cloud, pc_=model_estimate, max_loss=True)
-        # loss_pc = max_chamfer_loss(pc=input_point_cloud, pc_=model_estimate)
-        # loss_pc = chamfer_loss_with_surface_normals(pc=input_point_cloud, pc_=model_estimate)
 
         loss_kp = keypoints_loss(kp=detected_keypoints+correction, kp_=keypoint_estimate)
-        # loss_kp = 0.0
 
         return self.kappa*loss_pc + self.theta*loss_kp
 
@@ -448,11 +408,9 @@ class kp_corrector_pace():
         model_estimate = R @ model_estimate + t
         keypoint_estimate = R @ keypoint_estimate + t
 
-        loss_pc = chamfer_loss(pc=input_point_cloud, pc_=model_estimate)
-        # loss_pc = chamfer_loss_with_surface_normals(pc=input_point_cloud, pc_=model_estimate)
+        loss_pc = chamfer_loss(pc=input_point_cloud, pc_=model_estimate, max_loss=False)
 
         loss_kp = keypoints_loss(kp=detected_keypoints + correction, kp_=keypoint_estimate)
-        # loss_kp = 0.0
 
         return self.kappa * loss_pc + self.theta * loss_kp
 

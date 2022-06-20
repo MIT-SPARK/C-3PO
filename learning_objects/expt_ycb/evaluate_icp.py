@@ -9,7 +9,7 @@ sys.path.append('../..')
 from learning_objects.datasets.keypointnet import CLASS_NAME, CLASS_ID, DepthPC, FixedDepthPC
 from learning_objects.datasets.ycb import DepthYCB, DepthYCBAugment
 from learning_objects.utils.loss_functions import certify
-from learning_objects.expt_self_supervised_correction.evaluation_metrics import evaluation_error, add_s_error
+from learning_objects.utils.evaluation_metrics import evaluation_error, add_s_error
 from learning_objects.expt_self_supervised_correction.baseline_model import RANSACwICP, TEASERwICP, wICP
 from learning_objects.utils.general import display_two_pcs, pos_tensor_to_o3d
 from learning_objects.expt_ycb.proposed_model import ProposedRegressionModel as ProposedModel

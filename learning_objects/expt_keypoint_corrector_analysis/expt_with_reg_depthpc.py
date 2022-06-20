@@ -1,18 +1,16 @@
-
+import csv
+import os
+import pickle
+import random
+import sys
+import time
 import torch
+from datetime import datetime
 from pytorch3d import ops, transforms
 
-from datetime import datetime
-import time
-import pickle
-import csv
-import random
-
-import os
-import sys
 sys.path.append("../../")
 
-from learning_objects.datasets.keypointnet import SE3PointCloud, visualize_torch_model_n_keypoints, DepthPointCloud2, DepthPC
+from learning_objects.datasets.keypointnet import SE3PointCloud, visualize_torch_model_n_keypoints, DepthPC
 from learning_objects.datasets.keypointnet import PCD_FOLDER_NAME as KEYPOINTNET_PCD_FOLDER_NAME, \
     CLASS_NAME as KEYPOINTNET_ID2NAME, \
     CLASS_ID as KEYPOINTNET_NAME2ID
@@ -23,8 +21,7 @@ from learning_objects.models.certifiability import certifiability
 
 from learning_objects.utils.ddn.node import ParamDeclarativeFunction
 from learning_objects.utils.general import display_two_pcs, temp_expt_1_viz
-
-from learning_objects.expt_keypoint_corrector_analysis.evaluation_metrics import chamfer_metric
+from learning_objects.utils.evaluation_metrics import chamfer_dist
 
 #ToDo: This code does not use batch sizes. It would be faster using batch sizes, as now the keypoint_corrector can
 # work for large batch sizes.
@@ -287,8 +284,8 @@ class experiment():
             model_true = rotation_true @ self.cad_models + translation_true
             #save mean chamfer loss between model_estimate_naive and model_true
             #save mean chamfer loss between model_estimate and model_true
-            chamfer_pose_naive_to_gt_pose = chamfer_metric(model_estimate_naive, model_true, max_dist=False)
-            chamfer_pose_corrected_to_gt_pose = chamfer_metric(model_estimate, model_true, max_dist=False)
+            chamfer_pose_naive_to_gt_pose = chamfer_dist(model_estimate_naive, model_true, max_loss=False)
+            chamfer_pose_corrected_to_gt_pose = chamfer_dist(model_estimate, model_true, max_loss=False)
             chamfer_pose_naive_to_gt_pose_list.append(chamfer_pose_naive_to_gt_pose)
             chamfer_pose_corrected_to_gt_pose_list.append(chamfer_pose_corrected_to_gt_pose)
 

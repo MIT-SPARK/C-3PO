@@ -50,6 +50,17 @@ def translation_loss(t, t_):
 
     return lossMSE(t, t_)
 
+def shape_loss(c, c_):
+    """
+    c   : torch.tensor of shape (B, K, 1)
+    c_  : torch.tensor of shape (B, K, 1)
+
+    """
+
+    lossMSE = torch.nn.MSELoss(reduction='mean')
+
+    return lossMSE(c, c_)
+
 
 def chamfer_loss(pc, pc_, pc_padding=None, max_loss=False):
     """

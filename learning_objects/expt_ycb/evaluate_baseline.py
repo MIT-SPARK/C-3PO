@@ -23,7 +23,7 @@ from learning_objects.utils.general import display_results, TrackingMeter
 from learning_objects.utils.loss_functions import certify, self_supervised_training_loss \
     as self_supervised_loss, self_supervised_validation_loss as validation_loss
 # evaluation metrics
-from learning_objects.expt_self_supervised_correction.evaluation_metrics import evaluation_error, add_s_error
+from learning_objects.utils.evaluation_metrics import add_s_error
 from learning_objects.expt_ycb.supervised_training import train_with_supervision
 from learning_objects.expt_ycb.proposed_model import ProposedRegressionModel as ProposedModel
 

@@ -21,8 +21,7 @@ from learning_objects.datasets.ycb import SE3PointCloudYCB, SE3PointCloudYCBAugm
 from learning_objects.utils.general import display_results
 
 # loss functions
-from learning_objects.utils.loss_functions import keypoints_loss, rotation_loss, \
-    translation_loss, chamfer_loss, supervised_training_loss as supervised_loss, \
+from learning_objects.utils.loss_functions import supervised_training_loss as supervised_loss, \
     avg_kpt_distance_regularizer, supervised_validation_loss as validation_loss
 
 from learning_objects.expt_ycb.proposed_model import ProposedRegressionModel as ProposedModel
@@ -53,8 +52,6 @@ def supervised_train_one_epoch(training_loader, model, optimizer, device):
         loss = 2 * (((kp - kp_pred)**2)).sum(dim=1).mean(dim=1).mean() - .1*kp_reg
         # old_loss functions
         # loss = (((kp - kp_pred) ** 2)).sum(dim=1).mean(dim=1).mean()
-        # loss = keypoints_loss(kp, kp_pred)
-        # loss = supervised_loss(kp, kp_pred)
         loss.backward()
 
         # Adjust learning weights
@@ -90,9 +87,6 @@ def validate(validation_loader, model, device):
             # Make predictions for this batch
             predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted, _ = model(input_point_cloud)
 
-            # vloss = validation_loss(input=(input_point_cloud, keypoints_target, R_target, t_target),
-            #                        output=(predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted))
-            # vloss = keypoints_loss(keypoints_target, predicted_keypoints)
             vloss = ((keypoints_target - predicted_keypoints) ** 2).sum(dim=1).mean(dim=1).mean()
             running_vloss += vloss
 
