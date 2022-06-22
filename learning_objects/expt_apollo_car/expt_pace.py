@@ -18,7 +18,7 @@ import sys
 sys.path.append("../../")
 
 
-from learning_objects.utils.general import display_results
+from learning_objects.utils.visualization_utils import display_results
 
 from learning_objects.utils.ddn.node import AbstractDeclarativeNode, ParamDeclarativeFunction
 from learning_objects.models.keypoint_detector import HeatmapKeypoints, RegressionKeypoints

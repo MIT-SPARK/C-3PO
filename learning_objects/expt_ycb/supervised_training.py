@@ -18,7 +18,7 @@ import sys
 sys.path.append("../../")
 
 from learning_objects.datasets.ycb import SE3PointCloudYCB, SE3PointCloudYCBAugment, DepthYCB
-from learning_objects.utils.general import display_results
+from learning_objects.utils.visualization_utils import display_results
 
 # loss functions
 from learning_objects.utils.loss_functions import supervised_training_loss as supervised_loss, \

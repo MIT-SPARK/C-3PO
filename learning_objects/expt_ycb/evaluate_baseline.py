@@ -19,7 +19,8 @@ sys.path.append("../../")
 
 from learning_objects.datasets.ycb import DepthYCB
 from learning_objects.models.certifiability import confidence, confidence_kp
-from learning_objects.utils.general import display_results, TrackingMeter
+from learning_objects.utils.general import TrackingMeter
+from learning_objects.utils.visualization_utils import display_results
 from learning_objects.utils.loss_functions import certify, self_supervised_training_loss \
     as self_supervised_loss, self_supervised_validation_loss as validation_loss
 # evaluation metrics

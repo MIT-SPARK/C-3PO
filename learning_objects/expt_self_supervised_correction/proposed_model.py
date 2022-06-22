@@ -18,7 +18,7 @@ from learning_objects.models.point_set_registration import PointSetRegistration
 from learning_objects.models.keypoint_corrector import kp_corrector_reg
 
 from learning_objects.utils.ddn.node import ParamDeclarativeFunction
-from learning_objects.utils.general import display_results, pos_tensor_to_o3d
+from learning_objects.utils.visualization_utils import display_results
 
 
 class ProposedRegressionModel(nn.Module):

@@ -14,7 +14,8 @@ sys.path.append("../../")
 
 from learning_objects.models.keypoint_detector import RegressionKeypoints
 from learning_objects.datasets.catkeypointnet import NUM_KEYPOINTS, CategoryKeypointNetDataset
-from learning_objects.utils.general import display_results, TrackingMeter
+from learning_objects.utils.general import TrackingMeter
+from learning_objects.utils.visualization_utils import display_results
 
 
 # Proposed Kp Detector Model

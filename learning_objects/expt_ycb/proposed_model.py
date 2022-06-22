@@ -23,7 +23,7 @@ from learning_objects.models.keypoint_corrector import kp_corrector_reg
 from learning_objects.models.point_transformer import kNN_torch, index_points
 
 from learning_objects.utils.ddn.node import ParamDeclarativeFunction
-from learning_objects.utils.general import display_results
+from learning_objects.utils.visualization_utils import display_results
 
 class ProposedRegressionModel(nn.Module):
     """

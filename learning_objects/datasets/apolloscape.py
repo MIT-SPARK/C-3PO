@@ -1,12 +1,13 @@
+import csv
+import libmcubes
+import numpy as np
+import open3d as o3d
+import os
+import pytorch3d
+import random
+import sys
 import torch
 import torch.nn as nn
-import open3d as o3d
-import numpy as np
-import os
-import sys
-import csv
-import random
-import pytorch3d
 from pytorch3d import transforms
 
 sys.path.append("../../")
@@ -16,10 +17,10 @@ sys.path.append(os.path.join(os.path.dirname(sys.path[0]),'..','third_party','ap
 import apollo_utils as uts
 from car_instance.car_models import *
 
-import libmcubes
 
 from learning_objects.models.modelgen_apolloscape import ModelFromShapeApollo, ModelFromShapeApolloModule
 from learning_objects.utils.general import pos_tensor_to_o3d
+from learning_objects.utils.visualization_utils import visualize_model_n_keypoints, visualize_torch_model_n_keypoints
 import learning_objects.utils.general as gu
 
 MODEL_NAMES_TO_IGNORE = ['036-CAR01', '037-CAR02', 'aodi-a6', 'baoma-X5', 'baoshijie-kayan',
@@ -37,23 +38,6 @@ PATH_TO_TSDFS = "../../third_party/apolloscape/car_averaging/car_models/fused_ts
 PATH_TO_PCD: str = '../../dataset/apollo_car_3d/pointclouds/apolloscape_pointclouds_09072021/largest_cluster/'
 DEPTH_PCD_FOLDER_NAME: str = '../../dataset/apollo_car_3d/pointclouds/apolloscape_pointclouds_depth/'
 
-def display_two_pcs(pc1, pc2):
-    """
-    pc1 : torch.tensor of shape (3, n)
-    pc2 : torch.tensor of shape (3, m)
-    """
-    pc1 = pc1.to('cpu')
-    pc2 = pc2.to('cpu')
-
-    object1 = pos_tensor_to_o3d(pos=pc1)
-    object2 = pos_tensor_to_o3d(pos=pc2)
-
-    object1.paint_uniform_color([0.8, 0.0, 0.0])
-    object2.paint_uniform_color([0.0, 0.0, 0.8])
-
-    o3d.visualization.draw_geometries([object1, object2])
-
-    return None
 
 def get_model_and_keypoints(model_id):
     """
@@ -88,27 +72,6 @@ def get_model_and_keypoints(model_id):
 
     return mesh, keypoints_xyz
 
-def visualize_model_n_keypoints(model_list, keypoints_xyz, camera_locations=o3d.geometry.PointCloud()):
-
-    d = 0
-    for model in model_list:
-        max_bound = model.get_max_bound()
-        min_bound = model.get_min_bound()
-        d = max(np.linalg.norm(max_bound - min_bound, ord=2), d)
-
-    keypoint_radius = 0.01 * d
-
-    keypoint_markers = []
-    for xyz in keypoints_xyz:
-        new_mesh = o3d.geometry.TriangleMesh.create_sphere(radius=keypoint_radius)
-        new_mesh.translate(xyz)
-        new_mesh.paint_uniform_color([0.8, 0.0, 0.0])
-        keypoint_markers.append(new_mesh)
-
-    camera_locations.paint_uniform_color([0.1, 0.5, 0.1])
-    o3d.visualization.draw_geometries(keypoint_markers + model_list + [camera_locations])
-
-    return keypoint_markers
 
 def visualize_model(model_id):
     """ Given model_id this function outputs the mesh and keypoints
@@ -138,32 +101,6 @@ def visualize_torch_model(cad_models):
         point_cloud = point_cloud.paint_uniform_color([0.8, 0.8, 0.8])
         point_cloud.estimate_normals()
         o3d.visualization.draw_geometries([point_cloud])
-
-    return 0
-
-def visualize_torch_model_n_keypoints(cad_models, model_keypoints):
-    """
-    inputs:
-    cad_models      : torch.tensor of shape (B, 3, m)
-    model_keypoints : torch.tensor of shape (B, 3, N)
-
-    """
-    cad_models.cpu()
-    model_keypoints.cpu()
-    print(model_keypoints.size())
-    batch_size = model_keypoints.shape[0]
-
-    for b in range(batch_size):
-
-        point_cloud = cad_models[b, ...]
-        keypoints = model_keypoints[b, ...]
-
-        point_cloud = pos_tensor_to_o3d(pos=point_cloud)
-        point_cloud = point_cloud.paint_uniform_color([0.8, 0.8, 0.8])
-        point_cloud.estimate_normals()
-        keypoints = keypoints.cpu().transpose(0, 1).numpy()
-
-        visualize_model_n_keypoints([point_cloud], keypoints_xyz=keypoints)
 
     return 0
 

@@ -396,23 +396,6 @@ def getRGBFromDepthTransform(calibration, camera, referenceCamera):
 
     return np.dot(rgbFromRef, np.linalg.inv(irFromRef)), np.linalg.inv(rgbFromRef)
 
-def viz_rgb_pcd(target_object, viewpoint_camera, referenceCamera, viewpoint_angle, viz=False):
-    pcd = o3d.io.read_point_cloud(ycb_data_folder + target_object + \
-                                  "/clouds/rgb/pc_" + viewpoint_camera + "_" \
-                                  + referenceCamera + "_" + viewpoint_angle \
-                                  + "_masked_rgb.ply")
-    xyzrgb = np.load(ycb_data_folder + target_object + \
-                                  "/clouds/rgb/pc_" + viewpoint_camera + "_" \
-                                  + referenceCamera + "_" + viewpoint_angle \
-                                  + "_masked_rgb.npy")
-    print(xyzrgb.shape)
-    rgb = xyzrgb[0,:,3:]
-    pcd.colors = o3d.utility.Vector3dVector(rgb.astype(float) / 255.0)
-    print(np.asarray(pcd.points).shape)
-    if viz:
-        o3d.visualization.draw_geometries([pcd])
-    return pcd
-
 
 def save_rgb_pcd(target_object, viewpoint_camera, viewpoint_angle, save_full_scene=False):
     referenceCamera="NP5"
@@ -478,13 +461,10 @@ def save_rgb_pcd(target_object, viewpoint_camera, viewpoint_angle, save_full_sce
 
 if __name__ == "__main__":
     # save_rgb_pcd("002_master_chef_can", "NP2", "207")
-    # viz_rgb_pcd("002_master_chef_can", "NP2", "NP5", "207", viz=True)
 
     # save_rgb_pcd("011_banana", "NP2", "174")
-    # viz_rgb_pcd("011_banana", "NP2", "NP5", "174", viz=True)
 
     # save_rgb_pcd("037_scissors", "NP3", "183")
-    # viz_rgb_pcd("037_scissors", "NP3", "NP5", "183", viz=True)
 
     # save_rgb_pcd("052_extra_large_clamp", "NP1", "201")
     save_rgb_pcd("003_cracker_box", "NP2", "63", save_full_scene=True)

@@ -9,7 +9,7 @@ from pytorch3d import ops, transforms
 sys.path.append("../../")
 
 from learning_objects.datasets.keypointnet import SE3nAnisotropicScalingPointCloud, \
-    ScaleAxis, visualize_torch_model_n_keypoints
+    ScaleAxis
 
 from learning_objects.models.keypoint_corrector import kp_corrector_reg, kp_corrector_pace
 from learning_objects.models.pace import PACEmodule
@@ -17,7 +17,7 @@ from learning_objects.models.modelgen import ModelFromShape
 from learning_objects.models.certifiability import certifiability
 
 from learning_objects.utils.ddn.node import ParamDeclarativeFunction
-from learning_objects.utils.general import display_two_pcs
+from learning_objects.utils.visualization_utils import display_two_pcs, visualize_torch_model_n_keypoints
 
 def get_sq_distances(X, Y):
     """

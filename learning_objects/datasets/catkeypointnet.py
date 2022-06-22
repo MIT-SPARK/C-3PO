@@ -75,6 +75,7 @@ sys.path.append("../../")
 
 # from learning_objects.models.modelgen import ModelFromShape
 from learning_objects.utils.general import pos_tensor_to_o3d
+from learning_objects.utils.visualization_utils import visualize_model_n_keypoints
 import learning_objects.utils.general as gu
 
 
@@ -149,30 +150,7 @@ def get_model_and_keypoints(class_id, model_id):
     return mesh, pcd, keypoints_xyz
 
 
-def visualize_model_n_keypoints(model_list, keypoints_xyz, camera_locations=o3d.geometry.PointCloud()):
-
-    d = 0
-    for model in model_list:
-        max_bound = model.get_max_bound()
-        min_bound = model.get_min_bound()
-        d = max(np.linalg.norm(max_bound - min_bound, ord=2), d)
-
-    keypoint_radius = 0.01 * d
-
-    keypoint_markers = []
-    for xyz in keypoints_xyz:
-        new_mesh = o3d.geometry.TriangleMesh.create_sphere(radius=keypoint_radius)
-        new_mesh.translate(xyz)
-        new_mesh.paint_uniform_color([0.8, 0.0, 0.0])
-        keypoint_markers.append(new_mesh)
-
-    camera_locations.paint_uniform_color([0.1, 0.5, 0.1])
-    o3d.visualization.draw_geometries(keypoint_markers + model_list + [camera_locations])
-
-    return keypoint_markers
-
-
-def visualize_torch_model_n_keypoints(cad_models, model_keypoints):
+def visualize_torch_model_n_keypoints_all_batch(cad_models, model_keypoints):
     """
     inputs:
     cad_models      : torch.tensor of shape (B, 3, m)
@@ -351,7 +329,7 @@ if __name__ == "__main__":
 
         depth_pcd, kp, R, t = data
 
-        visualize_torch_model_n_keypoints(cad_models=depth_pcd, model_keypoints=kp)
+        visualize_torch_model_n_keypoints_all_batch(cad_models=depth_pcd, model_keypoints=kp)
         if idx >= 10:
             break
 

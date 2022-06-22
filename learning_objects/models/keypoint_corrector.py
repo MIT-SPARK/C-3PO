@@ -21,9 +21,9 @@ from learning_objects.utils.ddn.node import AbstractDeclarativeNode, ParamDeclar
 from learning_objects.models.point_set_registration import PointSetRegistration
 from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPointCloud2, SE3nIsotropicShapePointCloud, DepthPC
 
-from learning_objects.utils.general import pos_tensor_to_o3d, display_two_pcs
+from learning_objects.utils.visualization_utils import display_two_pcs, update_pos_tensor_to_keypoint_markers
 from learning_objects.utils.general import chamfer_distance, chamfer_half_distance, rotation_error, \
-    translation_error, shape_error, update_pos_tensor_to_keypoint_markers
+    translation_error, shape_error
 
 from learning_objects.models.pace import PACEmodule
 from learning_objects.models.modelgen import ModelFromShape

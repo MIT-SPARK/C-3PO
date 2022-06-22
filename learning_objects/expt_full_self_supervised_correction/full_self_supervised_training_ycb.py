@@ -15,8 +15,9 @@ from torch.utils.tensorboard import SummaryWriter
 
 sys.path.append("../../")
 
-from learning_objects.datasets.ycb import DepthYCB, DepthYCBAugment, MixedDepthYCBAugment, viz_rgb_pcd
-from learning_objects.utils.general import display_results, TrackingMeter
+from learning_objects.datasets.ycb import DepthYCB, DepthYCBAugment, MixedDepthYCBAugment
+from learning_objects.utils.general import TrackingMeter
+from learning_objects.utils.visualization_utils import display_results, viz_rgb_pcd
 from learning_objects.utils.loss_functions import certify, self_supervised_training_loss \
     as self_supervised_loss, self_supervised_validation_loss as validation_loss
 # evaluation metrics

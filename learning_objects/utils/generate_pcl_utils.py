@@ -39,6 +39,7 @@ import apollo_stereo_utils
 
 from get_3d_keypoints import get_corresponding_car_for_kpts
 from depth_to_pcl_processing import depth_img_to_pcl, save_pcl, img_to_pcl
+from learning_objects.utils.visualization_utils import visualize_model_n_keypoints
 import learning_objects.utils.general as gu
 
 
@@ -277,27 +278,6 @@ def get_stereo_depths(unrect_pts, depth_map, H_homo, K_orig_inv, K_cropped, unre
 
     return unrect_rays_est
 
-def visualize_model_n_keypoints(model_list, keypoints_xyz, camera_locations=o3d.geometry.PointCloud()):
-
-    d = 0
-    for model in model_list:
-        max_bound = model.get_max_bound()
-        min_bound = model.get_min_bound()
-        d = max(np.linalg.norm(max_bound - min_bound, ord=2), d)
-
-    keypoint_radius = 0.01 * d
-
-    keypoint_markers = []
-    for xyz in keypoints_xyz:
-        new_mesh = o3d.geometry.TriangleMesh.create_sphere(radius=keypoint_radius)
-        new_mesh.translate(xyz)
-        new_mesh.paint_uniform_color([0.8, 0.0, 0.0])
-        keypoint_markers.append(new_mesh)
-
-    camera_locations.paint_uniform_color([0.1, 0.5, 0.1])
-    o3d.visualization.draw_geometries(keypoint_markers + model_list + [camera_locations])
-
-    return keypoint_markers
 
 def save_models_as_o3d_mesh(dir_location_src=PATH_TO_CAR_MODELS, dir_location_dest=PATH_TO_O3D_CAR_MODELS, viz=True):
     model_names = car_name2id.keys()

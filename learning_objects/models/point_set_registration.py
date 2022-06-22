@@ -172,8 +172,7 @@ if __name__ == '__main__':
     target_points.requires_grad = True
 
     start = time.process_time()
-    rotation_est, translation_est = registration_fxn.forward(source_points=source_points,
-                                                           target_points=target_points)
+    rotation_est, translation_est = registration_fxn.forward(source_points=source_points, target_points=target_points)
     end = time.process_time()
 
     print("Output rotation shape: ", rotation.shape)

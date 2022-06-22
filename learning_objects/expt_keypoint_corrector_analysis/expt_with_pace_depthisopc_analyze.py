@@ -11,7 +11,8 @@ from datetime import datetime
 from matplotlib import colors as mcolors
 
 sys.path.append("../../")
-from learning_objects.utils.general import generate_filename, scatter_bar_plot
+from learning_objects.utils.general import generate_filename
+from learning_objects.utils.visualization_utils import scatter_bar_plot
 from learning_objects.datasets.keypointnet import CLASS_NAME
 from learning_objects.models.certifiability import certifiability
 plt.style.use('seaborn-whitegrid')

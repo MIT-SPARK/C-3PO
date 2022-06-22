@@ -17,6 +17,8 @@ sys.path.append("../../")
 
 from learning_objects.models.modelgen import ModelFromShape
 from learning_objects.utils.general import pos_tensor_to_o3d
+from learning_objects.utils.visualization_utils import display_two_pcs, visualize_model_n_keypoints, \
+    visualize_torch_model_n_keypoints
 import learning_objects.utils.general as gu
 
 
@@ -71,24 +73,6 @@ MODEL_TO_KPT_GROUPS = {
     "cap": [set([1])]
     }
 
-def display_two_pcs(pc1, pc2):
-    """
-    pc1 : torch.tensor of shape (3, n)
-    pc2 : torch.tensor of shape (3, m)
-    """
-    pc1 = pc1.to('cpu')
-    pc2 = pc2.to('cpu')
-
-    object1 = pos_tensor_to_o3d(pos=pc1)
-    object2 = pos_tensor_to_o3d(pos=pc2)
-
-    object1.paint_uniform_color([0.8, 0.0, 0.0])
-    object2.paint_uniform_color([0.0, 0.0, 0.8])
-
-    o3d.visualization.draw_geometries([object1, object2])
-
-    return None
-
 
 def get_model_and_keypoints(class_id, model_id):
     """
@@ -129,35 +113,6 @@ def get_model_and_keypoints(class_id, model_id):
     return mesh, pcd, keypoints_xyz
 
 
-def visualize_model_n_keypoints(model_list, keypoints_xyz, camera_locations=o3d.geometry.PointCloud()):
-    """
-    Displays one or more models and keypoints.
-    :param model_list: list of o3d Geometry objects to display
-    :param keypoints_xyz: list of 3d coordinates of keypoints to visualize
-    :param camera_locations: optional camera location to display
-    :return: list of o3d.geometry.TriangleMesh mesh objects as keypoint markers
-    """
-    d = 0
-    for model in model_list:
-        max_bound = model.get_max_bound()
-        min_bound = model.get_min_bound()
-        d = max(np.linalg.norm(max_bound - min_bound, ord=2), d)
-
-    keypoint_radius = 0.01 * d
-
-    keypoint_markers = []
-    for xyz in keypoints_xyz:
-        new_mesh = o3d.geometry.TriangleMesh.create_sphere(radius=keypoint_radius)
-        new_mesh.translate(xyz)
-        new_mesh.paint_uniform_color([0.8, 0.0, 0.0])
-        keypoint_markers.append(new_mesh)
-
-    camera_locations.paint_uniform_color([0.1, 0.5, 0.1])
-    o3d.visualization.draw_geometries(keypoint_markers + model_list + [camera_locations])
-
-    return keypoint_markers
-
-
 def visualize_model(class_id, model_id):
     """ Given class_id and model_id this function outputs the colored mesh, pcd, and keypoints
     from the KeypointNet dataset and displays them using open3d.visualization.draw_geometries"""
@@ -168,29 +123,6 @@ def visualize_model(class_id, model_id):
     _ = visualize_model_n_keypoints([pcd], keypoints_xyz=keypoints_xyz)
 
     return mesh, pcd, keypoints_xyz, keypoint_markers
-
-
-def visualize_torch_model_n_keypoints(cad_models, model_keypoints):
-    """
-    cad_models      : torch.tensor of shape (B, 3, m)
-    model_keypoints : torch.tensor of shape (B, 3, N)
-
-    """
-    batch_size = model_keypoints.shape[0]
-
-    for b in range(batch_size):
-
-        point_cloud = cad_models[b, ...]
-        keypoints = model_keypoints[b, ...].cpu()
-
-        point_cloud = pos_tensor_to_o3d(pos=point_cloud)
-        point_cloud = point_cloud.paint_uniform_color([0.0, 0.0, 1])
-        point_cloud.estimate_normals()
-        keypoints = keypoints.transpose(0, 1).numpy()
-
-        visualize_model_n_keypoints([point_cloud], keypoints_xyz=keypoints)
-
-    return 0
 
 
 def generate_depth_data(class_id, model_id, radius_multiple = [1.2, 3.0],
@@ -1582,6 +1514,8 @@ if __name__ == "__main__":
 
     diameter = dataset._get_diameter()
     model_keypoints = dataset._get_model_keypoints()
+    cad_models = dataset._get_cad_models()
+
 
     print("diameter: ", diameter)
     print("shape of model keypoints: ", model_keypoints.shape)
@@ -1662,8 +1596,8 @@ if __name__ == "__main__":
         kp_gen, pc_gen = modelgen.forward(shape=c)
         kp_gen = R @ kp_gen + t
         pc_gen = R @ pc_gen + t
-        display_two_pcs(pc1=pc[0, ...], pc2=pc_gen[0, ...])
-        display_two_pcs(pc1=kp[0, ...], pc2=kp_gen[0, ...])
+        display_two_pcs(pc1=pc, pc2=pc_gen)
+        display_two_pcs(pc1=kp, pc2=kp_gen)
 
         if i >= 5:
             break
@@ -1706,8 +1640,8 @@ if __name__ == "__main__":
         kp_gen, pc_gen = modelgen.forward(shape=c)
         kp_gen = R @ kp_gen + t
         pc_gen = R @ pc_gen + t
-        display_two_pcs(pc1=pc[0, ...], pc2=pc_gen[0, ...])
-        display_two_pcs(pc1=kp[0, ...], pc2=kp_gen[0, ...])
+        display_two_pcs(pc1=pc, pc2=pc_gen)
+        display_two_pcs(pc1=kp, pc2=kp_gen)
 
         if i >= 5:
             break

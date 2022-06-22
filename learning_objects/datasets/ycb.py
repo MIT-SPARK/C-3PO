@@ -16,6 +16,7 @@ sys.path.append("../../")
 
 from learning_objects.models.modelgen import ModelFromShape
 from learning_objects.utils.general import pos_tensor_to_o3d
+from learning_objects.utils.visualization_utils import visualize_model_n_keypoints, visualize_torch_model_n_keypoints
 import learning_objects.utils.general as gu
 
 MODEL_TO_KPT_GROUPS = {
@@ -42,41 +43,6 @@ SYMMETRIC_MODEL_IDS = ["001_chips_can", "002_master_chef_can", "003_cracker_box"
                        "009_gelatin_box", "010_potted_meat_can", "036_wood_block", "040_large_marker", \
                        "051_large_clamp", "052_extra_large_clamp", "061_foam_brick"]
 
-def viz_rgb_pcd(target_object, viewpoint_camera, referenceCamera, viewpoint_angle, viz=False):
-    pcd = o3d.io.read_point_cloud(DATASET_PATH + target_object + \
-                                  "/clouds/rgb/pc_" + viewpoint_camera + "_" \
-                                  + referenceCamera + "_" + viewpoint_angle \
-                                  + "_masked_rgb.ply")
-    xyzrgb = np.load(DATASET_PATH + target_object + \
-                                  "/clouds/rgb/pc_" + viewpoint_camera + "_" \
-                                  + referenceCamera + "_" + viewpoint_angle \
-                                  + "_masked_rgb.npy")
-    print(xyzrgb.shape)
-    rgb = xyzrgb[0,:,3:]
-    pcd.colors = o3d.utility.Vector3dVector(rgb.astype(float) / 255.0)
-    print(np.asarray(pcd.points).shape)
-    if viz:
-        o3d.visualization.draw_geometries([pcd])
-    return pcd
-
-def display_two_pcs(pc1, pc2):
-    """
-    pc1 : torch.tensor of shape (3, n)
-    pc2 : torch.tensor of shape (3, m)
-    """
-    pc1 = pc1.to('cpu')
-    pc2 = pc2.to('cpu')
-
-    object1 = pos_tensor_to_o3d(pos=pc1)
-    object2 = pos_tensor_to_o3d(pos=pc2)
-
-    object1.paint_uniform_color([0.8, 0.0, 0.0])
-    object2.paint_uniform_color([0.0, 0.0, 0.8])
-
-    o3d.visualization.draw_geometries([object1, object2])
-
-    return None
-
 
 def get_model_and_keypoints(model_id):
     """
@@ -101,29 +67,6 @@ def get_model_and_keypoints(model_id):
     return mesh, pcd, keypoints_xyz
 
 
-def visualize_model_n_keypoints(model_list, keypoints_xyz, camera_locations=o3d.geometry.PointCloud()):
-
-    d = 0
-    for model in model_list:
-        max_bound = model.get_max_bound()
-        min_bound = model.get_min_bound()
-        d = max(np.linalg.norm(max_bound - min_bound, ord=2), d)
-
-    keypoint_radius = 0.01 * d
-
-    keypoint_markers = []
-    for xyz in keypoints_xyz:
-        new_mesh = o3d.geometry.TriangleMesh.create_sphere(radius=keypoint_radius)
-        new_mesh.translate(xyz)
-        new_mesh.paint_uniform_color([0.8, 0.0, 0.0])
-        keypoint_markers.append(new_mesh)
-
-    camera_locations.paint_uniform_color([0.1, 0.5, 0.1])
-    o3d.visualization.draw_geometries(keypoint_markers + model_list + [camera_locations])
-
-    return keypoint_markers
-
-
 def visualize_model(model_id):
     """ Given class_id and model_id this function outputs the colored mesh and keypoints
     from the ycb dataset and plots them using open3d.visualization.draw_geometries"""
@@ -133,30 +76,6 @@ def visualize_model(model_id):
     keypoint_markers = visualize_model_n_keypoints([mesh], keypoints_xyz=keypoints_xyz)
 
     return mesh, None, keypoints_xyz, keypoint_markers
-
-
-def visualize_torch_model_n_keypoints(cad_models, model_keypoints):
-    """
-    inputs:
-    cad_models      : torch.tensor of shape (B, 3, m)
-    model_keypoints : torch.tensor of shape (B, 3, N)
-
-    """
-    batch_size = model_keypoints.shape[0]
-
-    for b in range(batch_size):
-
-        point_cloud = cad_models[b, ...]
-        keypoints = model_keypoints[b, ...]
-
-        point_cloud = pos_tensor_to_o3d(pos=point_cloud)
-        point_cloud = point_cloud.paint_uniform_color([0.8, 0.8, 0.8])
-        point_cloud.estimate_normals()
-        keypoints = keypoints.transpose(0, 1).numpy()
-
-        visualize_model_n_keypoints([point_cloud], keypoints_xyz=keypoints)
-
-    return 0
 
 
 class SE3PointCloudYCB(torch.utils.data.Dataset):

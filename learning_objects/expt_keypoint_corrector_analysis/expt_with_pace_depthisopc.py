@@ -11,7 +11,7 @@ from pytorch3d import ops, transforms
 
 sys.path.append("../../")
 
-from learning_objects.datasets.keypointnet import SE3nIsotropicShapePointCloud, visualize_torch_model_n_keypoints, \
+from learning_objects.datasets.keypointnet import SE3nIsotropicShapePointCloud, \
     DepthIsoPC, DepthAnisoPC, ScaleAxis
 
 from learning_objects.datasets.keypointnet import PCD_FOLDER_NAME as KEYPOINTNET_PCD_FOLDER_NAME
@@ -25,7 +25,7 @@ from learning_objects.models.modelgen import ModelFromShape
 from learning_objects.models.certifiability import certifiability
 
 from learning_objects.utils.ddn.node import ParamDeclarativeFunction
-from learning_objects.utils.general import display_two_pcs
+from learning_objects.utils.visualization_utils import display_two_pcs, visualize_torch_model_n_keypoints
 
 def get_sq_distances(X, Y):
     """

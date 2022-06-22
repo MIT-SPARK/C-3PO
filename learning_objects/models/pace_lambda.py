@@ -20,7 +20,7 @@ from learning_objects.datasets.keypointnet import SE3nAnisotropicScalingPointClo
 from learning_objects.datasets.keypointnet import PCD_FOLDER_NAME as KEYPOINTNET_PCD_FOLDER_NAME, \
     CLASS_NAME as KEYPOINTNET_ID2NAME, \
     CLASS_ID as KEYPOINTNET_NAME2ID
-from learning_objects.utils.general import display_two_pcs
+from learning_objects.utils.visualization_utils import display_two_pcs
 
 PATH_TO_OPTIMIZED_LAMBDA_CONSTANTS = '../../data/KeypointNet/KeypointNet/lambda_constants/'
 

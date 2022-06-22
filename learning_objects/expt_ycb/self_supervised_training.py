@@ -23,10 +23,11 @@ sys.path.append("../../")
 
 # model and datasets
 from learning_objects.expt_ycb.proposed_model import ProposedRegressionModel as ProposedModel
-from learning_objects.datasets.ycb import DepthYCB, DepthYCBAugment, viz_rgb_pcd, MODEL_TO_KPT_GROUPS as MODEL_TO_KPT_GROUPS_YCB
+from learning_objects.datasets.ycb import DepthYCB, DepthYCBAugment, MODEL_TO_KPT_GROUPS as MODEL_TO_KPT_GROUPS_YCB
 from learning_objects.models.certifiability import confidence, confidence_kp
 
-from learning_objects.utils.general import display_results, TrackingMeter, temp_expt_1_viz
+from learning_objects.utils.general import TrackingMeter
+from learning_objects.utils.visualization_utils import display_results, temp_expt_1_viz, viz_rgb_pcd
 
 # loss functions
 from learning_objects.utils.loss_functions import self_supervised_training_loss \
