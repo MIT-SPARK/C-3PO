@@ -16,7 +16,7 @@ sys.path.append("../../")
 from learning_objects.models.pace import PACEmodule
 from learning_objects.models.modelgen import ModelFromShape
 from learning_objects.datasets.keypointnet import SE3nAnisotropicScalingPointCloud, \
-    DepthAndAnisotropicScalingPointCloud, ScaleAxis
+    DepthAnisoPC, ScaleAxis
 from learning_objects.datasets.keypointnet import PCD_FOLDER_NAME as KEYPOINTNET_PCD_FOLDER_NAME, \
     CLASS_NAME as KEYPOINTNET_ID2NAME, \
     CLASS_ID as KEYPOINTNET_NAME2ID
@@ -220,8 +220,8 @@ def run_full_optimize_and_save(class_id_to_model_id_samples):
             break
         for model_id in model_ids:
             # if the depth dataset is uncommented, viz must be set to true in test_lambda
-            # dataset = DepthAndAnisotropicScalingPointCloud(class_id=class_id, model_id=model_id,
-            #                                                num_of_points=2048,
+            # dataset = DepthAnisoPC(class_id=class_id, model_id=model_id, n=2048,
+            #                                                num_of_points_to_sample=2048,
             #                                                dataset_len=10,
             #                                                shape_scaling=torch.tensor([0.5, 2.0]),
             #                                                scale_direction=ScaleAxis.X)
@@ -253,8 +253,8 @@ if __name__ == "__main__":
     # for model_id in chair_models:
     #     print("testing on new model_id within category", class_id)
     #     # if the depth dataset is uncommented, viz must be set to true in test_lambda
-    #     # dataset = DepthAndAnisotropicScalingPointCloud(class_id=class_id, model_id=model_id,
-    #     #                                                num_of_points=2048,
+    #     # dataset = DepthAnisoPc(class_id=class_id, model_id=model_id, n=2048,
+    #     #                                                num_of_points_to_sample=2048,
     #     #                                                dataset_len=10,
     #     #                                                shape_scaling=torch.tensor([0.5, 2.0]),
     #     #                                                scale_direction=ScaleAxis.X)
@@ -303,8 +303,8 @@ if __name__ == "__main__":
     # for model_id in motorcycle_models:
     #     print("testing on new model_id within category", class_id)
     #     #if the depth dataset is uncommented, viz must be set to true in test_lambda
-    #     dataset = DepthAndAnisotropicScalingPointCloud(class_id=class_id, model_id=model_id,
-    #                                                    num_of_points=2048,
+    #     dataset = DepthAnisoPC(class_id=class_id, model_id=model_id, n=2048,
+    #                                                    num_of_points_to_sample=2048,
     #                                                    dataset_len=10,
     #                                                    shape_scaling=torch.tensor([0.5, 2.0]),
     #                                                    scale_direction=ScaleAxis.X)

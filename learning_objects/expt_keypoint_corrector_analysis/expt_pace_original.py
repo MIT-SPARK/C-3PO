@@ -1,16 +1,14 @@
-
+import csv
+import os
+import pickle
+import sys
 import torch
+from datetime import datetime
 from pytorch3d import ops, transforms
 
-from datetime import datetime
-import pickle
-import csv
-
-import os
-import sys
 sys.path.append("../../")
 
-from learning_objects.datasets.keypointnet import SE3nIsotorpicShapePointCloud, SE3nAnisotropicScalingPointCloud, \
+from learning_objects.datasets.keypointnet import SE3nAnisotropicScalingPointCloud, \
     ScaleAxis, visualize_torch_model_n_keypoints
 
 from learning_objects.models.keypoint_corrector import kp_corrector_reg, kp_corrector_pace

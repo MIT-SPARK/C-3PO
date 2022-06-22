@@ -12,8 +12,8 @@ import sys
 import random
 sys.path.append("../../")
 
-from learning_objects.datasets.keypointnet import SE3nIsotorpicShapePointCloud, visualize_torch_model_n_keypoints, \
-    DepthAndIsotorpicShapePointCloud, DepthAndAnisotropicScalingPointCloud, ScaleAxis
+from learning_objects.datasets.keypointnet import SE3nIsotropicShapePointCloud, visualize_torch_model_n_keypoints, \
+    DepthIsoPC, DepthAnisoPC, ScaleAxis
 
 from learning_objects.datasets.keypointnet import PCD_FOLDER_NAME as KEYPOINTNET_PCD_FOLDER_NAME
 from learning_objects.datasets.keypointnet import CLASS_NAME as KEYPOINTNET_ID2NAME, \
@@ -174,19 +174,19 @@ class experiment():
         self.kappa = kappa
 
         # experiment name
-        self.name = 'Analyzing keypoint corrector with simple registration on DepthAndAnisotropicScalingPointCloud dataset'
+        self.name = 'Analyzing keypoint corrector with simple registration on DepthAnisoPC dataset'
 
 
         # setting up data
-        # self.se3_dataset = DepthAndIsotorpicShapePointCloud(class_id=self.class_id, model_id=self.model_id,
-        #                                                     num_of_points=self.num_points,
-        #                                                     dataset_len=self.num_iterations,
-        #                                                     shape_scaling=self.shape_scaling)
-        self.se3_dataset = DepthAndAnisotropicScalingPointCloud(class_id=self.class_id, model_id=self.model_id,
-                                                                num_of_points=self.num_points,
-                                                                dataset_len=self.num_iterations,
-                                                                shape_scaling=self.shape_scaling,
-                                                                scale_direction=ScaleAxis.X)
+        self.se3_dataset = DepthIsoPC(class_id=self.class_id, model_id=self.model_id,
+                                      n=self.num_points, num_of_points_to_sample=self.num_points,
+                                      dataset_len=self.num_iterations, shape_scaling=self.shape_scaling)
+
+        self.se3_dataset = DepthAnisoPC(class_id=self.class_id, model_id=self.model_id, n=self.num_points,
+                                        num_of_points_to_sample=self.num_points,
+                                        dataset_len=self.num_iterations,
+                                        shape_scaling=self.shape_scaling,
+                                        scale_direction=ScaleAxis.X)
         self.se3_dataset_loader = torch.utils.data.DataLoader(self.se3_dataset, batch_size=1, shuffle=False)
 
         self.model_keypoints = self.se3_dataset._get_model_keypoints()  # (2, 3, N)

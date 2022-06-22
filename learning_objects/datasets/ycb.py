@@ -865,7 +865,6 @@ class MixedDepthYCBAugment(torch.utils.data.Dataset):
 
 if __name__ == "__main__":
 
-    # Testing the workings of DepthPointCloud(torch.utils.data.Dataset) and SE3PointCloud(torch.utils.data.Dataset)
     dir_location = '../../data/learning_objects/ycb_datasets/'
     model_id = "021_bleach_cleanser"  # a particular chair model
     batch_size = 5
@@ -939,36 +938,3 @@ if __name__ == "__main__":
     #         break
     #
     #
-    # #
-    # print("Test: DepthPoiontCloud(torch.utils.data.Dataset)")
-    # dataset = DepthPointCloud(class_id=class_id, model_id=model_id)
-    #
-    # model = dataset.model_pcd
-    # length = dataset.len
-    # class_id = dataset.class_id
-    # model_id = dataset.model_id
-    #
-    # diameter = dataset._get_diameter()
-    # model_keypoints = dataset._get_model_keypoints()
-    # cad_models = dataset._get_cad_models()
-    #
-    # print("diameter: ", diameter)
-    # print("shape of model keypoints: ", model_keypoints.shape)
-    # print("shape of cad models: ", cad_models.shape)
-    #
-    # #
-    # print("Test: visualize_torch_model_n_keypoints()")
-    # visualize_torch_model_n_keypoints(cad_models=cad_models, model_keypoints=model_keypoints)
-    # dataset._visualize()
-    #
-    #
-    # loader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
-    #
-    # for i, data in enumerate(loader):
-    #     pc = data
-    #     kp = model_keypoints
-    #     print(pc.shape)
-    #     print(kp.shape)
-    #     visualize_torch_model_n_keypoints(cad_models=pc, model_keypoints=kp)
-    #     if i >= 2:
-    #         break

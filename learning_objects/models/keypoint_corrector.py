@@ -19,7 +19,7 @@ sys.path.append("../../")
 from learning_objects.utils.ddn.node import AbstractDeclarativeNode, ParamDeclarativeFunction
 
 from learning_objects.models.point_set_registration import point_set_registration, PointSetRegistration
-from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPointCloud2, SE3nIsotorpicShapePointCloud, DepthPC
+from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPointCloud2, SE3nIsotropicShapePointCloud, DepthPC
 
 from learning_objects.utils.general import pos_tensor_to_o3d, display_two_pcs
 from learning_objects.utils.general import chamfer_distance, chamfer_half_distance, rotation_error, \
@@ -765,7 +765,7 @@ if __name__ == "__main__":
     print("Verifying kp_corrector_pace() with SE3nIsotropicShapePointCloud(dataset) and keypoint_perturbation(): ")
 
     B = 1
-    se3_dataset = SE3nIsotorpicShapePointCloud(class_id=class_id, model_id=model_id, num_of_points=500, dataset_len=1000)
+    se3_dataset = SE3nIsotropicShapePointCloud(class_id=class_id, model_id=model_id, num_of_points=500, dataset_len=1000)
     se3_dataset_loader = torch.utils.data.DataLoader(se3_dataset, batch_size=B, shuffle=False)
 
     model_keypoints = se3_dataset._get_model_keypoints()    # (1, 3, N)

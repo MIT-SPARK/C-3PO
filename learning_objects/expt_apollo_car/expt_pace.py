@@ -28,7 +28,7 @@ from learning_objects.models.modelgen import ModelFromShape
 from learning_objects.models.certifiability import chamfer_loss
 from learning_objects.utils.loss_functions import translation_loss, rotation_loss, shape_loss
 
-from learning_objects.datasets.keypointnet import SE3nIsotorpicShapePointCloud, DepthAndIsotorpicShapePointCloud
+from learning_objects.datasets.keypointnet import SE3nIsotropicShapePointCloud, DepthIsoPC
 
 
 SAVE_LOCATION = '../../data/learning_objects/expt_pace/runs/'
@@ -537,21 +537,21 @@ if __name__ == "__main__":
     lr_sgd = 0.02
     momentum_sgd = 0.9
     lr_adam = 0.001
+    n = 500
     num_of_points = 500
 
     # supervised and self-supervised training data
-    supervised_train_dataset = SE3nIsotorpicShapePointCloud(class_id=class_id,
+    supervised_train_dataset = SE3nIsotropicShapePointCloud(class_id=class_id,
                                                             model_id=model_id,
                                                             num_of_points=num_of_points,
                                                             dataset_len=supervised_train_dataset_len)
     supervised_train_loader = torch.utils.data.DataLoader(supervised_train_dataset,
                                                           batch_size=supervised_train_batch_size,
                                                           shuffle=False)
-
-    self_supervised_train_dataset = DepthAndIsotorpicShapePointCloud(class_id=class_id,
-                                                                     model_id=model_id,
-                                                                     num_of_points=num_of_points,
-                                                                     dataset_len=self_supervised_train_dataset_len)
+    self_supervised_train_dataset = DepthIsoPC(class_id=class_id,model_id=model_id,
+                                               n=n,
+                                               num_of_points_to_sample=num_of_points,
+                                               dataset_len=self_supervised_train_dataset_len)
     self_supervised_train_loader = torch.utils.data.DataLoader(self_supervised_train_dataset,
                                                                batch_size=self_supervised_train_batch_size,
                                                                shuffle=False)
