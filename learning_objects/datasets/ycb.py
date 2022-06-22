@@ -1,20 +1,17 @@
 import copy
-from enum import Enum
-
-DATASET_PATH: str = '../../data/ycb/models/ycb/'
-
-
 import csv
-import torch
-import pandas as pd
-import open3d as o3d
 import json
 import numpy as np
+import open3d as o3d
+import os
+import pandas as pd
 import pytorch3d
+import sys
+import torch
+from enum import Enum
 from pytorch3d import transforms, ops
 
-import os
-import sys
+DATASET_PATH: str = '../../data/ycb/models/ycb/'
 sys.path.append("../../")
 
 from learning_objects.models.modelgen import ModelFromShape
@@ -216,14 +213,6 @@ class SE3PointCloudYCB(torch.utils.data.Dataset):
 
         return R @ model_pcd_torch + t, R @ self.keypoints_xyz.squeeze(0) + t, R, t
 
-    def _get_cad_models_as_mesh(self):
-        """
-        Returns the open3d Mesh object of the ShapeNetCore model
-
-        """
-
-        return self.model_mesh
-
     def _get_cad_models(self):
         """
         Returns a sampled point cloud of the ShapeNetcore model with self.num_of_points points.
@@ -276,7 +265,7 @@ class SE3PointCloudYCB(torch.utils.data.Dataset):
 class SE3PointCloudYCBAugment(torch.utils.data.Dataset):
     """
     Given model_id, and number of points generates various point clouds and SE3 transformations
-    of the ycb object with all points perturbed by some random noise
+    of the ycb object with all points perturbed by some gaussian noise.
 
     Returns a batch of
         input_point_cloud, keypoints, rotation, translation
@@ -330,14 +319,6 @@ class SE3PointCloudYCBAugment(torch.utils.data.Dataset):
         model_pcd_torch = model_pcd_torch.to(torch.float)
 
         return R @ model_pcd_torch + t, R @ self.keypoints_xyz.squeeze(0) + t, R, t
-
-    def _get_cad_models_as_mesh(self):
-        """
-        Returns the open3d Mesh object of the ShapeNetCore model
-
-        """
-
-        return self.model_mesh
 
     def _get_cad_models(self):
         """
@@ -520,14 +501,6 @@ class DepthYCB(torch.utils.data.Dataset):
 
         return point_cloud, R_true @ self.keypoints_xyz.squeeze(0) + t_true, R_true, t_true
 
-    def _get_cad_models_as_mesh(self):
-        """
-        Returns the open3d Mesh object of the ShapeNetCore model
-
-        """
-
-        return self.model_mesh
-
     def _get_cad_models(self):
         """
         Returns a sampled point cloud of the ShapeNetcore model with self.num_of_points points.
@@ -607,12 +580,6 @@ class DepthYCBAugment(torch.utils.data.Dataset):
 
         # get model
         self.model_mesh, _, self.keypoints_xyz = get_model_and_keypoints(model_id)
-        # #center the cad model WE DON'T DO THIS FOR REAL DEPTH DATA BECAUSE WE DON'T HAVE
-        # TRANSFORMATIONS TO A CENTERED VERSION OF THE PCL
-        # center = self.model_mesh.get_center()
-        # self.model_mesh.translate(-center)
-        #
-        # self.keypoints_xyz = self.keypoints_xyz - center
         self.keypoints_xyz = torch.from_numpy(self.keypoints_xyz).transpose(0, 1).unsqueeze(0).to(torch.float)
 
         # size of the model
@@ -648,7 +615,6 @@ class DepthYCBAugment(torch.utils.data.Dataset):
 
         #load ground truth R, ground truth t
         _, viewpoint_camera, reference_camera, viewpoint_angle, _, _, _ = tuple(self.split_filenames[idx].split('_'))
-        # return R @ model_pcd_torch + t, R, t
         rgbFromObj_filename = os.path.join(DATASET_PATH + self.model_id, "poses/gt_wrt_rgb/",
                                            '{0}_{1}_pose.npy'.format(viewpoint_camera, viewpoint_angle))
         rgbFromObj = np.load(rgbFromObj_filename)
@@ -656,14 +622,6 @@ class DepthYCBAugment(torch.utils.data.Dataset):
         t_true = torch.from_numpy(rgbFromObj[:3,3]).unsqueeze(-1).to(torch.float)
 
         return point_cloud, R_true @ self.keypoints_xyz.squeeze(0) + t_true, R_true, t_true
-
-    def _get_cad_models_as_mesh(self):
-        """
-        Returns the open3d Mesh object of the ShapeNetCore model
-
-        """
-
-        return self.model_mesh
 
     def _get_cad_models(self):
         """
@@ -720,7 +678,7 @@ class MixedDepthYCBAugment(torch.utils.data.Dataset):
     Dataset is a total of 5000 images with 1000 each of 002, 006, 011, 037, 052
 
     Returns a batch of
-        input_point_cloud, keypoints, rotation, translation
+        input_point_cloud, rotation, translation
     """
     def __init__(self, model_id, split='train', num_of_points=500,
                  dir_location='../../data/learning-objects/ycb_datasets/', mixed_data=True):
@@ -746,17 +704,10 @@ class MixedDepthYCBAugment(torch.utils.data.Dataset):
 
         # get model
         self.model_mesh, _, self.keypoints_xyz = get_model_and_keypoints(model_id)
-        # #center the cad model WE DON'T DO THIS FOR REAL DEPTH DATA BECAUSE WE DON'T HAVE
-        # TRANSFORMATIONS TO A CENTERED VERSION OF THE PCL
-        # center = self.model_mesh.get_center()
-        # self.model_mesh.translate(-center)
-        #
-        # self.keypoints_xyz = self.keypoints_xyz - center
         self.keypoints_xyz = torch.from_numpy(self.keypoints_xyz).transpose(0, 1).unsqueeze(0).to(torch.float)
 
         # size of the model
         self.diameter = np.linalg.norm(np.asarray(self.model_mesh.get_max_bound()) - np.asarray(self.model_mesh.get_min_bound()))
-
 
     def __len__(self):
 
@@ -792,26 +743,15 @@ class MixedDepthYCBAugment(torch.utils.data.Dataset):
         else:
             pcd_filename = full_pcd_filename[0]
 
-        # _, viewpoint_camera, reference_camera, viewpoint_angle, _, _, _ = tuple(pcd_filename.split('_'))
         _, viewpoint_camera, reference_camera, viewpoint_angle, *_ = tuple(self.split_filenames[idx].split('_'))
 
-        # return R @ model_pcd_torch + t, R, t
         rgbFromObj_filename = os.path.join(DATASET_PATH + self.model_id, "poses/gt_wrt_rgb/",
                                            '{0}_{1}_pose.npy'.format(viewpoint_camera, viewpoint_angle))
         rgbFromObj = np.load(rgbFromObj_filename)
         R_true = torch.from_numpy(rgbFromObj[:3, :3]).to(torch.float)
         t_true = torch.from_numpy(rgbFromObj[:3,3]).unsqueeze(-1).to(torch.float)
 
-        # return point_cloud, R_true @ self.keypoints_xyz.squeeze(0) + t_true, R_true, t_true
         return point_cloud, R_true, t_true
-
-    def _get_cad_models_as_mesh(self):
-        """
-        Returns the open3d Mesh object of the ShapeNetCore model
-
-        """
-
-        return self.model_mesh
 
     def _get_cad_models(self):
         """
@@ -872,7 +812,7 @@ if __name__ == "__main__":
     #
     print("Test: DepthYCB()")
     dataset = DepthYCB(model_id=model_id, split='test')
-    loader = torch.utils.data.DataLoader(dataset, batch_size=10, shuffle=False)
+    loader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
 
     for i, data in enumerate(loader):
         pc, kp, R, t = data
@@ -881,60 +821,68 @@ if __name__ == "__main__":
         print(R.shape)
         print(t.shape)
         visualize_torch_model_n_keypoints(cad_models=pc, model_keypoints=kp)
-        if i >= 50:
+        if i >= 5:
             break
 
-    #
+    print("Test: DepthYCBAugment")
+    dataset = DepthYCBAugment(model_id=model_id, split='test')
+    loader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
 
-    #
+    for i, data in enumerate(loader):
+        pc, kp, R, t = data
+        print(pc.shape)
+        print(kp.shape)
+        print(R.shape)
+        print(t.shape)
+        visualize_torch_model_n_keypoints(cad_models=pc, model_keypoints=kp)
+        if i >= 5:
+            break
+
+    print("Test: SE3PointCloudYCB()")
+    dataset = SE3PointCloudYCB(model_id=model_id)
+    loader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
+
+    for i, data in enumerate(loader):
+        pc, kp, R, t = data
+        print(pc.shape)
+        print(kp.shape)
+        print(R.shape)
+        print(t.shape)
+        visualize_torch_model_n_keypoints(cad_models=pc, model_keypoints=kp)
+        if i >= 5:
+            break
+
+    print("Test: SE3PointCloudYCBAugment")
+    dataset = SE3PointCloudYCBAugment(model_id=model_id)
+    loader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
+
+    for i, data in enumerate(loader):
+        pc, kp, R, t = data
+        print(pc.shape)
+        print(kp.shape)
+        print(R.shape)
+        print(t.shape)
+        visualize_torch_model_n_keypoints(cad_models=pc, model_keypoints=kp)
+        if i >= 5:
+            break
+
+    print("Test: MixedDepthYCBAugment")
+    dataset = MixedDepthYCBAugment(model_id=model_id, split='test')
+    loader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
+
+    for i, data in enumerate(loader):
+        pc, R, t = data
+        print(pc.shape)
+        print(R.shape)
+        print(t.shape)
+        if i >= 5:
+            break
+
     print("Test: get_model_and_keypoints()")
     mesh, _, keypoints_xyz = get_model_and_keypoints(model_id=model_id)
-    # print(keypoints_xyz)
-    # print(type(keypoints_xyz))
-    # print(type(keypoints_xyz[0]))
 
-    #
     print("Test: visualize_model_n_keypoints()")
     visualize_model_n_keypoints([mesh], keypoints_xyz=keypoints_xyz)
 
-    #
     print("Test: visualize_model()")
     visualize_model(model_id=model_id)
-
-    #
-    # print("Test: SE3PoiontCloud(torch.utils.data.Dataset)")
-    # dataset = SE3PointCloud(class_id=class_id, model_id=model_id)
-    #
-    # model = dataset.model_mesh
-    # length = dataset.len
-    # class_id = dataset.class_id
-    # model_id = dataset.model_id
-    # num_of_points = dataset.num_of_points
-    #
-    # print("Shape of keypoints_xyz: ", keypoints_xyz.shape)
-    #
-    # diameter = dataset._get_diameter()
-    # model_keypoints = dataset._get_model_keypoints()
-    # cad_models = dataset._get_cad_models_as_point_clouds()
-    #
-    # print("diameter: ", diameter)
-    # print("shape of model keypoints: ", model_keypoints.shape)
-    # print("shape of cad models: ", cad_models.shape)
-    #
-    # #
-    # print("Test: visualize_torch_model_n_keypoints()")
-    # visualize_torch_model_n_keypoints(cad_models=cad_models, model_keypoints=model_keypoints)
-    # dataset._visualize()
-    #
-    #
-    # loader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
-    #
-    # for i, data in enumerate(loader):
-    #     pc, kp, R, t = data
-    #     print(pc.shape)
-    #     print(kp.shape)
-    #     visualize_torch_model_n_keypoints(cad_models=pc, model_keypoints=kp)
-    #     if i >= 2:
-    #         break
-    #
-    #

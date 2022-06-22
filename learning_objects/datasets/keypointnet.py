@@ -1153,26 +1153,6 @@ class SE3PointCloud(torch.utils.data.Dataset):
 
         return R @ model_pcd_torch + t, R @ self.keypoints_xyz.squeeze(0) + t, R, t
 
-    def _get_cad_models_as_point_clouds(self):
-        """
-        Use _get_cad_models() instead of this function.
-
-        """
-
-        model_pcd = self.model_mesh.sample_points_uniformly(number_of_points=self.num_of_points)
-        model_pcd_torch = torch.from_numpy(np.asarray(model_pcd.points)).transpose(0, 1)  # (3, m)
-        model_pcd_torch = model_pcd_torch.to(torch.float)
-
-        return model_pcd_torch.unsqueeze(0)
-
-    def _get_cad_models_as_mesh(self):
-        """
-        Returns the open3d Mesh object of the ShapeNetCore model
-
-        """
-
-        return self.model_mesh
-
     def _get_cad_models(self):
         """
         Returns a sampled point cloud of the ShapeNetcore model with self.num_of_points points.
@@ -1602,7 +1582,6 @@ if __name__ == "__main__":
 
     diameter = dataset._get_diameter()
     model_keypoints = dataset._get_model_keypoints()
-    cad_models = dataset._get_cad_models_as_point_clouds()
 
     print("diameter: ", diameter)
     print("shape of model keypoints: ", model_keypoints.shape)
