@@ -2,23 +2,23 @@
 This implements the keypoint correction with registration, pace, as (1) a class and (2) as an AbstractDeclarativeNode
 
 """
-import time
-
-import torch
-import open3d as o3d
-import numpy as np
-from scipy import optimize
-from pytorch3d import ops
-from pytorch3d.loss import chamfer_distance as pyt_chamfer_distance
-import torch.nn as nn
 import cvxpy as cp
+import numpy as np
+import open3d as o3d
 import os
 import sys
+import time
+import torch
+import torch.nn as nn
+from pytorch3d import ops
+from pytorch3d.loss import chamfer_distance as pyt_chamfer_distance
+from scipy import optimize
+
 sys.path.append("../../")
 
 from learning_objects.utils.ddn.node import AbstractDeclarativeNode, ParamDeclarativeFunction
 
-from learning_objects.models.point_set_registration import point_set_registration, PointSetRegistration
+from learning_objects.models.point_set_registration import PointSetRegistration
 from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPointCloud2, SE3nIsotropicShapePointCloud, DepthPC
 
 from learning_objects.utils.general import pos_tensor_to_o3d, display_two_pcs
@@ -101,12 +101,11 @@ def pace_eval(R, R_, t, t_, c, c_):
     return rotation_error(R, R_) + translation_error(t, t_) + shape_error(c, c_)
 
 
-def keypoint_perturbation(keypoints_true, var=0.8, type='uniform', fra=0.2):
+def keypoint_perturbation(keypoints_true, var=0.8, fra=0.2):
     """
     inputs:
     keypoints_true  :  torch.tensor of shape (B, 3, N)
     var             :  float
-    type            : 'uniform' or 'sporadic'
     fra             :  float    : used if type == 'sporadic'
 
     output:
@@ -114,24 +113,13 @@ def keypoint_perturbation(keypoints_true, var=0.8, type='uniform', fra=0.2):
     """
     device_ = keypoints_true.device
 
-    if type=='uniform':
-        # detected_keypoints = keypoints_true + var*torch.randn_like(keypoints_true)
-        detected_keypoints = keypoints_true + var * (torch.rand(size=keypoints_true.shape).to(device=device_)-0.5)
+    mask = (torch.rand(size=keypoints_true.shape).to(device=device_) < fra).int().float()
+    detected_keypoints = keypoints_true + var * (torch.rand(size=keypoints_true.shape).to(device=device_)-0.5) * mask
 
-        return detected_keypoints
-
-    elif type=='sporadic':
-        mask = (torch.rand(size=keypoints_true.shape).to(device=device_) < fra).int().float()
-        # detected_keypoints = keypoints_true + var*torch.randn_like(keypoints_true)*mask
-        detected_keypoints = keypoints_true + var * (torch.rand(size=keypoints_true.shape).to(device=device_)-0.5) * mask
-
-        return detected_keypoints
-
-    else:
-        return None
+    return detected_keypoints
 
 
-class kp_corrector_reg():
+class kp_corrector_reg:
     def __init__(self, cad_models, model_keypoints, theta=50.0, kappa=10.0, algo='torch', animation_update=False, vis=None):
         super().__init__()
         """
@@ -367,7 +355,7 @@ class kp_corrector_reg():
 
 
 
-class kp_corrector_pace():
+class kp_corrector_pace:
     def __init__(self, cad_models, model_keypoints, theta=10.0, kappa=50.0, algo='torch'):
         super().__init__()
         """

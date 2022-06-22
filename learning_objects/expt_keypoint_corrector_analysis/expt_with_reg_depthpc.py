@@ -16,8 +16,9 @@ from learning_objects.datasets.keypointnet import PCD_FOLDER_NAME as KEYPOINTNET
     CLASS_ID as KEYPOINTNET_NAME2ID
 
 from learning_objects.models.keypoint_corrector import kp_corrector_reg
-from learning_objects.models.point_set_registration import PointSetRegistration #point_set_registration
+from learning_objects.models.point_set_registration import PointSetRegistration
 from learning_objects.models.certifiability import certifiability
+from learning_objects.models.keypoint_corrector import keypoint_perturbation
 
 from learning_objects.utils.ddn.node import ParamDeclarativeFunction
 from learning_objects.utils.general import display_two_pcs, temp_expt_1_viz
@@ -51,33 +52,6 @@ def get_sq_distances(X, Y):
 def get_kp_sq_distances(kp, kp_):
     sq_dist = ((kp-kp_)**2).sum(dim=1)
     return sq_dist #check output dimensions
-
-def keypoint_perturbation(keypoints_true, var=0.8, type='uniform', fra=0.2):
-    """
-    inputs:
-    keypoints_true  :  torch.tensor of shape (B, 3, N)
-    var             :  float
-    type            : 'uniform' or 'sporadic'
-    fra             :  float    : used if type == 'sporadic'
-
-    output:
-    detected_keypoints  : torch.tensor of shape (B, 3, N)
-    """
-    device_ = keypoints_true.device
-
-    if type=='uniform':
-        # detected_keypoints = keypoints_true + var*torch.randn_like(keypoints_true)
-        detected_keypoints = keypoints_true + var * (torch.rand(size=keypoints_true.shape).to(device=device_) - 0.5)
-
-    elif type=='sporadic':
-        mask = (torch.rand(size=keypoints_true.shape).to(device=device_) < fra).int().float()
-        # detected_keypoints = keypoints_true + var*torch.randn_like(keypoints_true)*mask
-        detected_keypoints = keypoints_true + var * (torch.rand(size=keypoints_true.shape).to(device=device_) - 0.5) * mask
-    else:
-        return ValueError
-
-    return detected_keypoints
-
 
 def translation_error(t, t_):
     """
@@ -125,9 +99,9 @@ def rotation_error(R, R_):
 
 
 
-class experiment():
+class Experiment:
     def __init__(self, class_id, model_id, num_points, num_iterations, kp_noise_var_range,
-                 kp_noise_type='sporadic', kp_noise_fra=0.2,
+                 kp_noise_fra=0.2,
                  certify=certifiability(epsilon=0.8, delta=0.5, radius=0.3),
                  theta=50.0, kappa=10.0, device='cpu', do_certification=False):
         super().__init__()
@@ -141,7 +115,6 @@ class experiment():
         self.num_iterations = num_iterations
 
         # keypoint noise parameters
-        self.kp_noise_type = kp_noise_type
         self.kp_noise_fra = kp_noise_fra
         self.kp_noise_var_range = kp_noise_var_range
 
@@ -186,7 +159,7 @@ class experiment():
         self.parameters['model_id'] = self.model_id
         self.parameters['num_points'] = self.num_points
         self.parameters['num_iterations'] = self.num_iterations
-        self.parameters['kp_noise_type'] = self.kp_noise_type
+        self.parameters['kp_noise_type'] = 'sporadic'
         self.parameters['kp_noise_fra'] = self.kp_noise_fra
         self.parameters['kp_noise_var_range'] = self.kp_noise_var_range
         self.parameters['certify'] = self.certify
@@ -233,7 +206,7 @@ class experiment():
             # generating perturbed keypoints
             # keypoints_true = rotation_true @ self.model_keypoints + translation_true
             # detected_keypoints = keypoints_true
-            detected_keypoints = keypoint_perturbation(keypoints_true=keypoints_true, type=self.kp_noise_type,
+            detected_keypoints = keypoint_perturbation(keypoints_true=keypoints_true,
                                                        fra=self.kp_noise_fra, var=kp_noise_var*self.diameter)
             if visualization:
                 temp_expt_1_viz(cad_models=input_point_cloud, model_keypoints=detected_keypoints, gt_keypoints = keypoints_true)
@@ -418,7 +391,7 @@ class experiment():
         return location + filename
 
 
-def run_experiments_on(class_id, model_id, kp_noise_type, kp_noise_fra=0.2, only_visualize=False, do_certification=False):
+def run_experiments_on(class_id, model_id, kp_noise_fra=0.2, only_visualize=False, do_certification=False):
 
     # model parameters
     num_points = 500
@@ -447,13 +420,12 @@ def run_experiments_on(class_id, model_id, kp_noise_type, kp_noise_fra=0.2, only
     print("Experiment: ")
     print("class_id: ", class_id)
     print("model_id: ", model_id)
-    print("kp_noise_type: ", kp_noise_type)
     print("kp_noise_fra: ", kp_noise_fra)
     print("-" * 40)
 
-    expt = experiment(class_id=class_id, model_id=model_id, num_points=num_points,
+    expt = Experiment(class_id=class_id, model_id=model_id, num_points=num_points,
                       num_iterations=num_iterations, kp_noise_var_range=kp_noise_var_range,
-                      kp_noise_type=kp_noise_type, kp_noise_fra=kp_noise_fra,
+                      kp_noise_fra=kp_noise_fra,
                       certify=certify, theta=theta, kappa=kappa, device=device, do_certification=do_certification)
 
     if only_visualize:
@@ -470,7 +442,7 @@ def run_experiments_on(class_id, model_id, kp_noise_type, kp_noise_fra=0.2, only
         expt = dict()
         expt['class_id'] = class_id
         expt['model_id'] = model_id
-        expt['kp_noise_type'] = kp_noise_type
+        expt['kp_noise_type'] = 'sporadic'
         expt['kp_noise_fra'] = kp_noise_fra
         expt['filename'] = filename
         expt['num_iterations'] = num_iterations
@@ -523,7 +495,7 @@ def run_full_experiment(kp_noise_fra=0.8, do_certification=False):
     class_id_to_model_id_samples = choose_models(num_models=1, use_random=False)
     for class_id, model_id_samples in class_id_to_model_id_samples.items():
         for model_id in model_id_samples:
-            run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='sporadic', kp_noise_fra=kp_noise_fra, do_certification=do_certification)
+            run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_fra=kp_noise_fra, do_certification=do_certification)
 
 
 if __name__ == "__main__":
@@ -537,13 +509,11 @@ if __name__ == "__main__":
     # class_id = "02876657"
     # model_id = "41a2005b595ae783be1868124d5ddbcb" # a particular bottle model
     #
-    # run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='sporadic', kp_noise_fra=0.2)
-    # run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='sporadic', kp_noise_fra=0.8)
+    # run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_fra=0.2)
+    # run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_fra=0.8)
     #
-    # run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='uniform', kp_noise_fra=0.8, only_visualize=True)
 
-    # run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='sporadic', kp_noise_fra=0.2,
+    # run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_fra=0.2,
     #                    only_visualize=True)
-    # run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='sporadic', kp_noise_fra=0.8,
+    # run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_fra=0.8,
     #                    only_visualize=True)
-    # run_experiments_on(class_id=class_id, model_id=model_id, kp_noise_type='uniform')

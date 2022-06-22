@@ -12,9 +12,7 @@ from learning_objects.datasets.keypointnet import SE3nAnisotropicScalingPointClo
     ScaleAxis, visualize_torch_model_n_keypoints
 
 from learning_objects.models.keypoint_corrector import kp_corrector_reg, kp_corrector_pace
-from learning_objects.models.point_set_registration import point_set_registration
 from learning_objects.models.pace import PACEmodule
-# from learning_objects.test.test_pace import PACEAltern
 from learning_objects.models.modelgen import ModelFromShape
 from learning_objects.models.certifiability import certifiability
 
@@ -104,7 +102,7 @@ def rotation_error(R, R_):
 
 
 
-class experiment():
+class Experiment:
     def __init__(self, class_id, model_id, num_points, num_iterations,
                  certify=certifiability(epsilon=0.8, delta=0.5, radius=0.3),
                  theta=50.0, kappa=10.0, shape_scaling=torch.tensor([0.5, 2.0]), dataset_weights = None):
@@ -316,7 +314,7 @@ def run_experiments_on(class_id, model_id, only_visualize=False):
     print("model_id: ", model_id)
     print("-" * 40)
 
-    expt = experiment(class_id=class_id, model_id=model_id, num_points=num_points, shape_scaling=shape_scaling,
+    expt = Experiment(class_id=class_id, model_id=model_id, num_points=num_points, shape_scaling=shape_scaling,
                       num_iterations=num_iterations, theta=theta, kappa=kappa, dataset_weights = shape_1_weight)
 
     if only_visualize:

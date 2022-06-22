@@ -2,32 +2,32 @@
 This code will compare the compute time of corrector with algo='torch' and algo='scipy'.
 
 """
-import time
-import numpy as np
-import torch
-import pickle
-import yaml
 import matplotlib.pyplot as plt
-from matplotlib import colors as mcolors
-# from datetime import datetime
+import numpy as np
 import os
+import pickle
 import sys
+import time
+import torch
+import yaml
+from matplotlib import colors as mcolors
+
 sys.path.append("../../")
 
 COLORS = dict(mcolors.BASE_COLORS, **mcolors.CSS4_COLORS)
 
 from learning_objects.datasets.keypointnet import DepthPC, CLASS_ID
-from learning_objects.models.keypoint_corrector import kp_corrector_reg
+from learning_objects.models.keypoint_corrector import kp_corrector_reg, keypoint_perturbation
 from learning_objects.models.point_set_registration import PointSetRegistration
 from learning_objects.utils.ddn.node import ParamDeclarativeFunction
 
 
 EXPT_NAME = "corrector_time_analysis"
 
-class experiment():
+class Experiment:
     def __init__(self, class_id, model_id, num_points, batch_range,
                  num_iterations=10, kp_noise_var=0.6,
-                 kp_noise_type='sporadic', kp_noise_fra=0.8,
+                 kp_noise_fra=0.8,
                  theta=50.0, kappa=10.0, device='gpu'):
         super().__init__()
 
@@ -43,7 +43,6 @@ class experiment():
         self.num_iterations = num_iterations
 
         # keypoint noise parameters
-        self.kp_noise_type = kp_noise_type
         self.kp_noise_fra = kp_noise_fra
         self.kp_noise_var = kp_noise_var
 
@@ -68,44 +67,13 @@ class experiment():
         self.parameters['model_id'] = self.model_id
         self.parameters['num_points'] = self.num_points
         self.parameters['num_iterations'] = self.num_iterations
-        self.parameters['kp_noise_type'] = self.kp_noise_type
+        self.parameters['kp_noise_type'] = 'sporadic'
         self.parameters['kp_noise_fra'] = self.kp_noise_fra
         self.parameters['kp_noise_var'] = self.kp_noise_var
         self.parameters['theta'] = self.theta
         self.parameters['kappa'] = self.kappa
         self.parameters['name'] = self.name
         self.parameters['batch_range'] = self.batch_range
-
-    def keypoint_perturbation(self, keypoints_true):
-        """
-        inputs:
-        keypoints_true  :  torch.tensor of shape (B, 3, N)
-        var             :  float
-        type            : 'uniform' or 'sporadic'
-        fra             :  float    : used if type == 'sporadic'
-
-        output:
-        detected_keypoints  : torch.tensor of shape (B, 3, N)
-        """
-        device_ = self.device_
-        print("Device: ", device_)
-        var = self.kp_noise_var
-        type = self.kp_noise_type
-        fra = self.kp_noise_fra
-
-        if type == 'uniform':
-            # detected_keypoints = keypoints_true + var*torch.randn_like(keypoints_true)
-            detected_keypoints = keypoints_true + var * (torch.rand(size=keypoints_true.shape).to(device=device_) - 0.5)
-
-        elif type == 'sporadic':
-            mask = (torch.rand(size=keypoints_true.shape).to(device=device_) < fra).int().float()
-            # detected_keypoints = keypoints_true + var*torch.randn_like(keypoints_true)*mask
-            detected_keypoints = keypoints_true + var * (
-                        torch.rand(size=keypoints_true.shape).to(device=device_) - 0.5) * mask
-        else:
-            return ValueError
-
-        return detected_keypoints.to(device=device_)
 
     def _single_loop(self, batch_size, algo):
 
@@ -141,7 +109,7 @@ class experiment():
             rotation_true = rotation_true.to(device=self.device_)
             translation_true = translation_true.to(device=self.device_)
 
-            detected_keypoints = self.keypoint_perturbation(keypoints_true)
+            detected_keypoints = keypoint_perturbation(keypoints_true, self.kp_noise_var, self.kp_noise_fra).to(device=self.device_)
 
             # estimate model: using the keypoint corrector
 
@@ -230,7 +198,6 @@ def run_experiments_on(class_id, model_id):
     num_iterations = 10
 
     # kp_noise parameters
-    kp_noise_type = 'sporadic'
     kp_noise_fra = 0.8
     kp_noise_var = 0.6
 
@@ -247,14 +214,13 @@ def run_experiments_on(class_id, model_id):
     print("Experiment: ")
     print("class_id: ", class_id)
     print("model_id: ", model_id)
-    print("kp_noise_type: ", kp_noise_type)
     print("kp_noise_fra: ", kp_noise_fra)
     print("-" * 40)
 
-    expt = experiment(class_id=class_id, model_id=model_id, num_points=num_points,
+    expt = Experiment(class_id=class_id, model_id=model_id, num_points=num_points,
                       batch_range=batch_range,
                       num_iterations=num_iterations, kp_noise_var=kp_noise_var,
-                      kp_noise_type=kp_noise_type, kp_noise_fra=kp_noise_fra,
+                      kp_noise_fra=kp_noise_fra,
                       theta=theta, kappa=kappa, device='gpu')
 
     expt.execute_n_save()
