@@ -9,7 +9,7 @@ from learning_objects.utils.ddn.node import ParamDeclarativeFunction
 
 from learning_objects.utils.general import generate_random_keypoints
 
-from learning_objects.models.keypoint_detector import HeatmapKeypoints, RegressionKeypoints
+from learning_objects.models.keypoint_detector import RegressionKeypoints
 from learning_objects.models.pace_ddn import PACEbp
 from learning_objects.models.modelgen import ModelFromShape
 from learning_objects.discard.keypoint_corrector_old import PACEwKeypointCorrection, from_y
@@ -47,8 +47,6 @@ class ProposedModel(nn.Module):
 
         # Keypoint Detector
         self.keypoint_detector = RegressionKeypoints(k=self.N, method=keypoint_method)
-        if keypoint_type == 'heatmap':
-            self.keypoint_detector = HeatmapKeypoints(k=self.N, method=keypoint_method)
 
         # PACE
         self.pace_fn = PACEbp(weights=self.weights, model_keypoints=self.model_keypoints)

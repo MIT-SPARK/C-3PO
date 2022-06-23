@@ -9,18 +9,17 @@ Reference:
     Perception" RSS 2021.
 
 """
-import time
-
-import torch
 import cvxpy as cp
+import numpy as np
+import os
 import pymanopt as pym
+import sys
+import time
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from cvxpylayers.torch import CvxpyLayer
-import numpy as np
 
-import os
-import sys
 sys.path.append("../../")
 
 from learning_objects.models.point_set_registration import wahba

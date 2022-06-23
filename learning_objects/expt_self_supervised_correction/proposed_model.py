@@ -13,7 +13,7 @@ import torch.nn as nn
 
 sys.path.append("../../")
 
-from learning_objects.models.keypoint_detector import HeatmapKeypoints, RegressionKeypoints
+from learning_objects.models.keypoint_detector import RegressionKeypoints
 from learning_objects.models.point_set_registration import PointSetRegistration
 from learning_objects.models.keypoint_corrector import kp_corrector_reg
 
@@ -39,9 +39,6 @@ class ProposedRegressionModel(nn.Module):
         keypoint_detector   : torch.nn.Module   : detects N keypoints for any sized point cloud input       
                                                   should take input : torch.tensor of shape (B, 3, m)
                                                   should output     : torch.tensor of shape (B, 3, N)
-
-        keypoint_detector_type  : 'regression' or 'heatmap'
-
         """
 
         # Parameters

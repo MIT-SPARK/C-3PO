@@ -323,26 +323,6 @@ class kp_corrector_reg:
 
         return correction
 
-    def solve_algo3(self, *xs, correction):
-        #ToDo: Not tested. See if this works. This is from the ddn library pnp_node.py
-        with torch.enable_grad():
-            opt = torch.optim.LBFGS([correction],
-                                    lr=1.0,
-                                    max_iter=1000,
-                                    max_eval=None,
-                                    tolerance_grad=1e-40,
-                                    tolerance_change=1e-40,
-                                    history_size=100,
-                                    line_search_fn="strong_wolfe"
-                                    )
-            def reevaluate():
-                opt.zero_grad()
-                f = self.objective(*xs, correction=correction).sum() # sum over batch elements
-                f.backward()
-                return f
-            opt.step(reevaluate)
-        return correction
-
     def gradient(self, detected_keypoints, input_point_cloud, y=None, v=None, ctx=None):
 
         if v==None:

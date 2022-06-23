@@ -4,11 +4,11 @@ pc and pc_ it determines if the registration + shape alignment is certifiable or
 
 """
 
+import os
+import sys
 import torch
 from pytorch3d import ops
 
-import os
-import sys
 sys.path.append("../../")
 
 #ToDo: change max_loss to False!!
