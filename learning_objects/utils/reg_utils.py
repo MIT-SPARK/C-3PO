@@ -21,7 +21,6 @@ from car_instance.car_models import *
 # solvers
 # sys.path.append("../solvers")
 # import category_gnc as cgnc
-# from category_gnc import rotation_error, translation_error
 
 # pyrender
 os.environ["PYOPENGL_PLATFORM"] = "egl"

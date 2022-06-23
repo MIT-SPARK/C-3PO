@@ -26,7 +26,7 @@ from learning_objects.models.point_set_registration import wahba
 from learning_objects.utils.ddn.node import EqConstDeclarativeNode, ParamDeclarativeFunction, AbstractDeclarativeNode
 
 from learning_objects.utils.general import generate_random_keypoints
-from learning_objects.utils.general import shape_error, translation_error, rotation_error
+from learning_objects.utils.evaluation_metrics import shape_error, translation_error, rotation_euler_error
 
 
 class PACErotationNshape():
@@ -745,7 +745,7 @@ if __name__ == "__main__":
 
     er_shape = shape_error(shape, shape_est)
     er_trans = translation_error(translations, trans_est)
-    er_rot = rotation_error(rotations, rot_est)
+    er_rot = rotation_euler_error(rotations, rot_est)
 
     print("rotation error: ", er_rot.mean())
     print("translation error: ", er_trans.mean())

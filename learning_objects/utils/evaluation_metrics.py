@@ -1,6 +1,18 @@
-import torch
+import copy
+import csv
+import numpy as np
+import open3d as o3d
+import open3d.visualization.gui as gui
+import open3d.visualization.rendering as rendering
+import random
+import string
 import sys
+import time
+import torch
+import torch.nn.functional as F
 from pytorch3d import ops
+from pytorch3d import transforms
+
 sys.path.append('../..')
 
 
@@ -61,8 +73,6 @@ def chamfer_dist(pc, pc_, pc_padding=None, max_loss=False):
 
     return loss.unsqueeze(-1)
 
-
-
 def translation_error(t, t_):
     """
     inputs:
@@ -92,20 +102,59 @@ def rotation_error(R, R_):
 
     if R.dim() == 2:
         return torch.arccos(0.5*(torch.trace(R.T @ R)-1))
-        # return transforms.matrix_to_euler_angles(torch.matmul(R.T, R_), "XYZ").abs().sum()/3.0
-        # return torch.abs(0.5*(torch.trace(R.T @ R_) - 1).unsqueeze(-1))
-        # return 1 - 0.5*(torch.trace(R.T @ R_) - 1).unsqueeze(-1)
-        # return torch.norm(R.T @ R_ - torch.eye(3, device=R.device), p='fro')
     elif R.dim() == 3:
-        # return transforms.matrix_to_euler_angles(torch.transpose(R, 1, 2) @ R_, "XYZ").abs().mean(1).unsqueeze(1)
         error = 0.5 * (torch.einsum('bii->b', torch.transpose(R, -1, -2) @ R_) - 1).unsqueeze(-1)
         epsilon = 1e-8
         return torch.acos(torch.clamp(error, -1 + epsilon, 1 - epsilon))
-        # return 1 - 0.5 * (torch.einsum('bii->b', torch.transpose(R, 1, 2) @ R_) - 1).unsqueeze(-1)
-        # return torch.norm(R.transpose(-1, -2) @ R_ - torch.eye(3, device=R.device), p='fro', dim=[1, 2])
     else:
         return ValueError
 
+def rotation_euler_error(R, R_): #no clamp
+    """
+    inputs:
+    R: torch.tensor of shape (3, 3) or (B, 3, 3)
+    R_: torch.tensor of shape (3, 3) or (B, 3, 3)
+
+    output:
+    R_err: torch.tensor of shape (1, 1) or (B, 1)
+    """
+
+    if R.dim() == 2:
+        return transforms.matrix_to_euler_angles(torch.matmul(R.T, R_), "XYZ").abs().sum()/3.0
+    elif R.dim() == 3:
+        return transforms.matrix_to_euler_angles(torch.transpose(R, 1, 2) @ R_, "XYZ").abs().mean(1).unsqueeze(1)
+    else:
+        return ValueError
+
+def rotation_matrix_error(R, R_):
+    """
+    R   : torch.tensor of shape (3, 3) or (B, 3, 3)
+    R_  : torch.tensor of shape (3, 3) or (B, 3, 3)
+
+    out: torch.tensor of shape (1,) or (B, 1)
+
+    """
+    device_ = R.device
+
+    ErrorMat = R @ R_.transpose(-1, -2) - torch.eye(3).to(device=device_)
+
+    return (ErrorMat**2).sum(dim=(-1, -2)).unsqueeze(-1)
+
+def shape_error(c, c_):
+    """
+    inputs:
+    c: torch.tensor of shape (K, 1) or (B, K, 1)
+    c_: torch.tensor of shape (K, 1) or (B, K, 1)
+
+    output:
+    c_err: torch.tensor of shape (1, 1) or (B, 1)
+    """
+    if c.dim() == 2:
+        return torch.norm(c - c_, p=2)/c.shape[0]
+    elif c.dim() == 3:
+        return torch.norm(c - c_, p=2, dim=1)/c.shape[1]
+    else:
+        return ValueError
 
 def keypoints_error(kp, kp_):
     """

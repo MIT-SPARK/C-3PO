@@ -12,7 +12,8 @@ from learning_objects.models.pace import PACEmodule
 from learning_objects.models.pace_ddn import PACEbp, PACEddn
 from learning_objects.models.pace_altern_ddn import PACEbp as PACEalternbp
 from learning_objects.utils.category_gnc import solve_3dcat_with_sdp, solve_3dcat_with_altern
-from learning_objects.utils.general import shape_error, rotation_error, translation_error, check_rot_mat, generate_random_keypoints
+from learning_objects.utils.general import check_rot_mat, generate_random_keypoints
+from learning_objects.utils.evaluation_metrics import shape_error, translation_error, rotation_euler_error
 
 class PACEAltern():
     def __init__(self, model_keypoints, weights=None, lambda_constant=None):
@@ -114,7 +115,7 @@ class PACEimplementation():
             self.t_ji[batch, ...] = bt_ji
             self.c_ji[batch, ...] = bc_ji
 
-        R_ji_err = rotation_error(self.R_ji, self.R)
+        R_ji_err = rotation_euler_error(self.R_ji, self.R)
         t_ji_err = translation_error(self.t_ji, self.t)
         c_ji_err = shape_error(self.c_ji, self.c)
 
@@ -136,7 +137,7 @@ class PACEimplementation():
         R_fn, t_fn, c_fn = fn(self.input_keypoints)
 
         # write and print error
-        R_fn_err = rotation_error(R_fn, self.R)
+        R_fn_err = rotation_euler_error(R_fn, self.R)
         t_fn_err = translation_error(t_fn, self.t)
         c_fn_err = shape_error(c_fn, self.c)
 
@@ -148,7 +149,7 @@ class PACEimplementation():
 
 
         print("Error wrt Jingnan's output: ")
-        R_err = rotation_error(R_fn, self.R_ji)
+        R_err = rotation_euler_error(R_fn, self.R_ji)
         t_err = translation_error(t_fn, self.t_ji)
         c_err = shape_error(c_fn, self.c_ji)
         print("Rotation error: ", R_err.mean())

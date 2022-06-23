@@ -25,8 +25,7 @@ from learning_objects.models.keypoint_detector import RegressionKeypoints
 from learning_objects.models.pace import PACEmodule
 from learning_objects.models.keypoint_corrector import kp_corrector_pace
 from learning_objects.models.modelgen import ModelFromShape
-from learning_objects.models.certifiability import chamfer_loss
-from learning_objects.utils.loss_functions import translation_loss, rotation_loss, shape_loss
+from learning_objects.utils.loss_functions import translation_loss, rotation_loss, shape_loss, chamfer_loss
 
 from learning_objects.datasets.keypointnet import SE3nIsotropicShapePointCloud, DepthIsoPC
 

@@ -12,59 +12,22 @@ Note:
 
 """
 
+import os
+import pickle
+import sys
 import torch
 import torch.nn as nn
-import pickle
 
-
-import os
-import sys
 sys.path.append("../../")
 
 from learning_objects.utils.general import generate_random_keypoints
+from learning_objects.utils.evaluation_metrics import shape_error, translation_error, rotation_matrix_error
 from learning_objects.datasets.keypointnet import CLASS_NAME, CLASS_ID
 
 from learning_objects.models.sdp import RotationSDP
 
 PATH_TO_OPTIMIZED_LAMBDA_CONSTANTS = '../../data/KeypointNet/KeypointNet/lambda_constants/'
 
-def rotation_error(R, R_):
-    """
-    R   : torch.tensor of shape (3, 3) or (B, 3, 3)
-    R_  : torch.tensor of shape (3, 3) or (B, 3, 3)
-
-    out: torch.tensor of shape (1,) or (B, 1)
-
-    """
-    device_ = R.device
-
-    ErrorMat = R @ R_.transpose(-1, -2) - torch.eye(3).to(device=device_)
-
-    return (ErrorMat**2).sum(dim=(-1, -2)).unsqueeze(-1)
-
-def translation_error(t, t_):
-    """
-    t   : torch.tensor of shape (3, 1) or (B, 3, 1)
-    t_  : torch.tensor of shape (3, 1) or (B, 3, 1)
-
-    out: torch.tensor of shape (1,) or (B, 1)
-
-    """
-    ErrorMat = t - t_
-
-    return (ErrorMat ** 2).sum(dim=(-1, -2)).unsqueeze(-1)
-
-def shape_error(c, c_):
-    """
-    c   : torch.tensor of shape (K, 1) or (B, K, 1)
-    c_  : torch.tensor of shape (K, 1) or (B, K, 1)
-
-    out: torch.tensor of shape (1,) or (B, 1)
-
-    """
-    ErrorMat = c - c_
-
-    return (ErrorMat ** 2).sum(dim=(-1, -2)).unsqueeze(-1)
 
 def is_psd(mat):
 
@@ -407,7 +370,7 @@ if __name__ == "__main__":
 
     er_shape = shape_error(shape, shape_est)
     er_trans = translation_error(translations, trans_est)
-    er_rot = rotation_error(rotations, rot_est)
+    er_rot = rotation_matrix_error(rotations, rot_est)
 
     print("rotation error: ", er_rot.mean())
     print("translation error: ", er_trans.mean())

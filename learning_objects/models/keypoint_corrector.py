@@ -11,7 +11,6 @@ import time
 import torch
 import torch.nn as nn
 from pytorch3d import ops
-from pytorch3d.loss import chamfer_distance as pyt_chamfer_distance
 from scipy import optimize
 
 sys.path.append("../../")
@@ -19,61 +18,15 @@ sys.path.append("../../")
 from learning_objects.utils.ddn.node import AbstractDeclarativeNode, ParamDeclarativeFunction
 
 from learning_objects.models.point_set_registration import PointSetRegistration
-from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPointCloud2, SE3nIsotropicShapePointCloud, DepthPC
+from learning_objects.datasets.keypointnet import SE3PointCloud, SE3nIsotropicShapePointCloud, DepthPC
 
 from learning_objects.utils.visualization_utils import display_two_pcs, update_pos_tensor_to_keypoint_markers
-from learning_objects.utils.general import chamfer_distance, chamfer_half_distance, rotation_error, \
-    translation_error, shape_error
+from learning_objects.utils.loss_functions import chamfer_loss, keypoints_loss
+from learning_objects.utils.evaluation_metrics import shape_error, translation_error, rotation_euler_error
 
 from learning_objects.models.pace import PACEmodule
 from learning_objects.models.modelgen import ModelFromShape
 
-
-def chamfer_loss(pc, pc_, pc_padding=None, max_loss=False):
-    """
-    inputs:
-    pc  : torch.tensor of shape (B, 3, n)
-    pc_ : torch.tensor of shape (B, 3, m)
-    pc_padding  : torch.tensor of shape (B, n)  : indicates if the point in pc is real-input or padded in
-    max_loss : boolean : indicates if output loss should be maximum of the distances between pc and pc_ instead of the mean
-
-    output:
-    loss    : (B, 1)
-        returns max_loss if max_loss is true
-    """
-
-    if pc_padding == None:
-        batch_size, _, n = pc.shape
-        device_ = pc.device
-
-        # computes a padding by flagging zero vectors in the input point cloud.
-        pc_padding = ((pc == torch.zeros(3, 1).to(device=device_)).sum(dim=1) == 3)
-        # pc_padding = torch.zeros(batch_size, n).to(device=device_)
-
-    sq_dist, _, _ = ops.knn_points(torch.transpose(pc, -1, -2), torch.transpose(pc_, -1, -2), K=1)
-    # dist (B, n, 1): distance from point in X to the nearest point in Y
-
-    sq_dist = sq_dist.squeeze(-1)*torch.logical_not(pc_padding)
-    a = torch.logical_not(pc_padding)
-
-    if max_loss:
-        loss = sq_dist.max(dim=1)[0]
-    else:
-        loss = sq_dist.sum(dim=1)/a.sum(dim=1)
-
-    return loss.unsqueeze(-1)
-
-
-def keypoints_loss(kp, kp_):
-    """
-    kp  : torch.tensor of shape (B, 3, N)
-    kp_ : torch.tensor of shape (B, 3, N)
-
-    """
-
-    lossMSE = torch.nn.MSELoss(reduction='none')
-
-    return lossMSE(kp, kp_).sum(1).mean(1).unsqueeze(-1)
 
 def registration_eval(R, R_, t, t_):
     """
@@ -85,7 +38,7 @@ def registration_eval(R, R_, t, t_):
     loss    : torch.tensor of shape (B, 1)
     """
 
-    return rotation_error(R, R_) + translation_error(t, t_)
+    return rotation_euler_error(R, R_) + translation_error(t, t_)
 
 
 def pace_eval(R, R_, t, t_, c, c_):
@@ -98,7 +51,7 @@ def pace_eval(R, R_, t, t_, c, c_):
     loss    : torch.tensor of shape (B, 1)
     """
 
-    return rotation_error(R, R_) + translation_error(t, t_) + shape_error(c, c_)
+    return rotation_euler_error(R, R_) + translation_error(t, t_) + shape_error(c, c_)
 
 
 def keypoint_perturbation(keypoints_true, var=0.8, fra=0.2):
@@ -356,7 +309,7 @@ class kp_corrector_pace:
         model_estimate = R @ model_estimate + t
         keypoint_estimate = R @ keypoint_estimate + t
 
-        loss_pc = chamfer_loss(pc=input_point_cloud, pc_=model_estimate, max_loss=False)
+        loss_pc = chamfer_loss(pc=input_point_cloud, pc_=model_estimate, max_loss=True)
 
         loss_kp = keypoints_loss(kp=detected_keypoints + correction, kp_=keypoint_estimate)
 
@@ -560,7 +513,7 @@ if __name__ == "__main__":
     corrector_node = kp_corrector_reg(cad_models=cad_models, model_keypoints=model_keypoints)
     corrector = ParamDeclarativeFunction(problem=corrector_node)
 
-
+    print("model_keypoints shape", model_keypoints.shape)
     point_set_reg = PointSetRegistration(source_points=model_keypoints)
 
     for i, data in enumerate(se3_dataset_loader):
@@ -575,7 +528,7 @@ if __name__ == "__main__":
         # generating perturbed keypoints
         # keypoints_true = rotation_true @ model_keypoints + translation_true
         # detected_keypoints = keypoints_true
-        detected_keypoints = keypoint_perturbation(keypoints_true=keypoints_true, type='sporadic', var=0.8, fra=1.0)
+        detected_keypoints = keypoint_perturbation(keypoints_true=keypoints_true, var=0.8, fra=1.0)
         detected_keypoints = detected_keypoints.to(device=device)
 
         # estimate model: using point set registration on perturbed keypoints
@@ -584,7 +537,7 @@ if __name__ == "__main__":
         end = time.perf_counter()
         print("Naive registration time: ", 1000*(end-start)/B, " ms")
         # model_estimate = R_naive @ cad_models + t_naive
-        # display_two_pcs(pc1=input_point_cloud[0, ...].detach(), pc2=model_estimate[0, ...].detach())
+        # display_two_pcs(pc1=input_point_cloud, pc2=model_estimate)
 
         # # estimate model: using the keypoint corrector
         detected_keypoints.requires_grad = True
@@ -605,7 +558,7 @@ if __name__ == "__main__":
         # correction = torch.zeros_like(correction)
         R, t = point_set_reg.forward(target_points=detected_keypoints+correction)
         # model_estimate = R @ cad_models + t
-        # display_two_pcs(pc1=input_point_cloud[0, ...].detach(), pc2=model_estimate[0, ...].detach())
+        # display_two_pcs(pc1=input_point_cloud, pc2=model_estimate)
 
         # evaluate the two metrics
         print("Evaluation error (wo correction): ", registration_eval(R_naive, rotation_true, t_naive, translation_true).mean())
@@ -651,7 +604,7 @@ if __name__ == "__main__":
 
         # generating perturbed keypoints
         # detected_keypoints = keypoints_true
-        detected_keypoints = keypoint_perturbation(keypoints_true=keypoints_true, type='sporadic', var=0.8, fra=1.0)
+        detected_keypoints = keypoint_perturbation(keypoints_true=keypoints_true, var=0.8, fra=1.0)
         detected_keypoints = detected_keypoints.to(device=device)
 
         # estimate model: using point set registration on perturbed keypoints
@@ -660,7 +613,7 @@ if __name__ == "__main__":
         end = time.process_time()
         print("Naive registration time: ", 1000 * (end - start) / B, " ms")
         # model_estimate = R_naive @ cad_models + t_naive
-        # display_two_pcs(pc1=input_point_cloud[0, ...].detach(), pc2=model_estimate[0, ...].detach())
+        # display_two_pcs(pc1=input_point_cloud, pc2=model_estimate)
 
         # estimate model: using the keypoint corrector
         detected_keypoints.requires_grad = True
@@ -681,7 +634,6 @@ if __name__ == "__main__":
         # correction = torch.zeros_like(correction)
         R, t = point_set_reg.forward(target_points=detected_keypoints+correction)
         # model_estimate = R @ cad_models + t
-        # display_two_pcs(pc1=input_point_cloud[0, ...].detach(), pc2=model_estimate[0, ...].detach())
 
         # evaluate the two metrics
         print("Evaluation error (wo correction): ", registration_eval(R_naive, rotation_true, t_naive, translation_true).mean())
@@ -732,7 +684,7 @@ if __name__ == "__main__":
         # generating perturbed keypoints
         # keypoints_true = rotation_true @ model_keypoints + translation_true
         # detected_keypoints = keypoints_true
-        detected_keypoints = keypoint_perturbation(keypoints_true=keypoints_true, type='sporadic', var=0.8, fra=0.2)
+        detected_keypoints = keypoint_perturbation(keypoints_true=keypoints_true, var=0.8, fra=0.2)
         detected_keypoints = detected_keypoints.to(device=device)
 
         # estimate model: using point set registration on perturbed keypoints
@@ -743,7 +695,7 @@ if __name__ == "__main__":
         keypoint_naive, model_naive = modelgen.forward(shape=c_naive)
         model_naive = R_naive @ model_naive + t_naive
         keypoint_naive = R_naive @ keypoint_naive + t_naive
-        display_two_pcs(pc1=input_point_cloud[0, ...].detach(), pc2=model_naive[0, ...].detach())
+        display_two_pcs(pc1=input_point_cloud, pc2=model_naive)
 
 
         # # estimate model: using the keypoint corrector
@@ -770,7 +722,7 @@ if __name__ == "__main__":
         model = R_naive @ model + t_naive
         keypoints = R_naive @ keypoints + t_naive
         # model_estimate = R @ cad_models + t
-        display_two_pcs(pc1=input_point_cloud[0, ...].detach(), pc2=model[0, ...].detach())
+        display_two_pcs(pc1=input_point_cloud, pc2=model)
 
         # evaluate the two metrics
         print("Evaluation error (wo correction): ", pace_eval(R_naive, rotation_true, t_naive, translation_true, c_naive, shape_true).mean())

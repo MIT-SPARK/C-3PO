@@ -1,16 +1,27 @@
+import copy
+import csv
+import numpy as np
+import open3d as o3d
+import open3d.visualization.gui as gui
+import open3d.visualization.rendering as rendering
+import random
+import string
 import sys
+import time
 import torch
+import torch.nn.functional as F
 from pytorch3d import ops
+from pytorch3d import transforms
 
 sys.path.append('../..')
 
 from learning_objects.models.certifiability import confidence, confidence_kp
 
-def keypoints_loss(kp, kp_):
+def keypoints_loss_batch_average(kp, kp_):
     """
     kp  : torch.tensor of shape (B, 3, N)
     kp_ : torch.tensor of shape (B, 3, N)
-
+    returns Tensor with one scalar value
     """
 
     lossMSE = torch.nn.MSELoss(reduction='none')
@@ -18,6 +29,17 @@ def keypoints_loss(kp, kp_):
     kp_loss = kp_loss.sum(dim=1).sum(dim=1).mean()  # Note: this is not normalized by number of keypoints
 
     return kp_loss
+
+def keypoints_loss(kp, kp_):
+    """
+    kp  : torch.tensor of shape (B, 3, N)
+    kp_ : torch.tensor of shape (B, 3, N)
+    returns Tensor with length B
+    """
+
+    lossMSE = torch.nn.MSELoss(reduction='none')
+
+    return lossMSE(kp, kp_).sum(1).mean(1).unsqueeze(-1)
 
 def avg_kpt_distance_regularizer(kp):
     kp_contiguous = torch.transpose(kp, -1, -2).contiguous()
@@ -82,7 +104,7 @@ def chamfer_loss(pc, pc_, pc_padding=None, max_loss=False):
         # computes a padding by flagging zero vectors in the input point cloud.
         pc_padding = ((pc == torch.zeros(3, 1).to(device=device_)).sum(dim=1) == 3)
 
-    sq_dist, _, _ = ops.knn_points(torch.transpose(pc, -1, -2), torch.transpose(pc_, -1, -2), K=1)
+    sq_dist, _, _ = ops.knn_points(torch.transpose(pc, -1, -2), torch.transpose(pc_, -1, -2), K=1, return_sorted=False)
     # dist (B, n, 1): distance from point in X to the nearest point in Y
 
     sq_dist = sq_dist.squeeze(-1)*torch.logical_not(pc_padding)
@@ -117,7 +139,7 @@ def supervised_training_loss(input, output):
     pc_loss = chamfer_loss(pc=input[0], pc_=output[0])
     pc_loss = pc_loss.mean()
 
-    kp_loss = keypoints_loss(input[1], output[1])
+    kp_loss = keypoints_loss_batch_average(input[1], output[1])
 
     R_loss = rotation_loss(input[2], output[2]).mean()
     t_loss = translation_loss(input[3], output[3]).mean()
@@ -144,7 +166,7 @@ def supervised_validation_loss(input, output):
     pc_loss = chamfer_loss(pc=input[0], pc_=output[0])
     pc_loss = pc_loss.mean()
 
-    kp_loss = keypoints_loss(input[1], output[1])
+    kp_loss = keypoints_loss_batch_average(input[1], output[1])
 
     R_loss = rotation_loss(input[2], output[2]).mean()
     t_loss = translation_loss(input[3], output[3]).mean()
@@ -246,3 +268,6 @@ def self_supervised_validation_loss(input_pc, predicted_pc, certi=None):
         vloss = -fra_certi
 
     return vloss
+
+if __name__ == "__main__":
+    print("hi")

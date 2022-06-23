@@ -23,7 +23,7 @@ from learning_objects.models.keypoint_corrector import keypoint_perturbation
 from learning_objects.utils.ddn.node import ParamDeclarativeFunction
 from learning_objects.utils.visualization_utils import display_two_pcs, visualize_torch_model_n_keypoints, \
     temp_expt_1_viz
-from learning_objects.utils.evaluation_metrics import chamfer_dist
+from learning_objects.utils.evaluation_metrics import chamfer_dist, translation_error, rotation_error
 
 #ToDo: This code does not use batch sizes. It would be faster using batch sizes, as now the keypoint_corrector can
 # work for large batch sizes.
@@ -53,51 +53,6 @@ def get_sq_distances(X, Y):
 def get_kp_sq_distances(kp, kp_):
     sq_dist = ((kp-kp_)**2).sum(dim=1)
     return sq_dist #check output dimensions
-
-def translation_error(t, t_):
-    """
-    inputs:
-    t: torch.tensor of shape (3, 1) or (B, 3, 1)
-    t_: torch.tensor of shape (3, 1) or (B, 3, 1)
-
-    output:
-    t_err: torch.tensor of shape (1, 1) or (B, 1)
-    """
-    if t.dim() == 2:
-        return torch.norm(t - t_, p=2)/3.0
-    elif t.dim() == 3:
-        return torch.norm(t-t_, p=2, dim=1)/3.0
-    else:
-        return ValueError
-
-
-def rotation_error(R, R_):
-    """
-    inputs:
-    R: torch.tensor of shape (3, 3) or (B, 3, 3)
-    R_: torch.tensor of shape (3, 3) or (B, 3, 3)
-
-    output:
-    R_err: torch.tensor of shape (1, 1) or (B, 1)
-    """
-
-    if R.dim() == 2:
-        return torch.arccos(0.5*(torch.trace(R.T @ R)-1))
-        # return transforms.matrix_to_euler_angles(torch.matmul(R.T, R_), "XYZ").abs().sum()/3.0
-        # return torch.abs(0.5*(torch.trace(R.T @ R_) - 1).unsqueeze(-1))
-        # return 1 - 0.5*(torch.trace(R.T @ R_) - 1).unsqueeze(-1)
-        # return torch.norm(R.T @ R_ - torch.eye(3, device=R.device), p='fro')
-    elif R.dim() == 3:
-        # return transforms.matrix_to_euler_angles(torch.transpose(R, 1, 2) @ R_, "XYZ").abs().mean(1).unsqueeze(1)
-        error = 0.5*(torch.einsum('bii->b', torch.transpose(R, -1, -2) @ R_) - 1).unsqueeze(-1)
-        epsilon = 1e-8
-        return torch.acos(torch.clamp(error, -1 + epsilon, 1 - epsilon))
-        # return torch.acos(0.5*(torch.einsum('bii->b', torch.transpose(R, -1, -2) @ R_) - 1).unsqueeze(-1))
-        # return 1 - 0.5 * (torch.einsum('bii->b', torch.transpose(R, 1, 2) @ R_) - 1).unsqueeze(-1)
-        # return torch.norm(R.transpose(-1, -2) @ R_ - torch.eye(3, device=R.device), p='fro', dim=[1, 2])
-    else:
-        return ValueError
-
 
 
 class Experiment:

@@ -6,34 +6,9 @@ import sys
 import time
 import torch
 from pytorch3d import transforms
+from learning_objects.utils.evaluation_metrics import translation_error, rotation_matrix_error
 
 sys.path.append("../../")
-
-def rotation_error(R, R_):
-    """
-    R   : torch.tensor of shape (3, 3) or (B, 3, 3)
-    R_  : torch.tensor of shape (3, 3) or (B, 3, 3)
-
-    out: torch.tensor of shape (1,) or (B, 1)
-
-    """
-    device_ = R.device
-
-    ErrorMat = R @ R_.transpose(-1, -2) - torch.eye(3).to(device=device_)
-
-    return (ErrorMat**2).sum(dim=(-1, -2)).unsqueeze(-1)
-
-def translation_error(t, t_):
-    """
-    t   : torch.tensor of shape (3, 1) or (B, 3, 1)
-    t_  : torch.tensor of shape (3, 1) or (B, 3, 1)
-
-    out: torch.tensor of shape (1,) or (B, 1)
-
-    """
-    ErrorMat = t - t_
-
-    return (ErrorMat ** 2).sum(dim=(-1, -2)).unsqueeze(-1)
 
 def wahba(source_points, target_points, device_=None):
     """
@@ -74,7 +49,7 @@ class PointSetRegistration:
 
         self.source_points = source_points
 
-    def forward(self, target_points):
+    def forward(self, target_points, weights=None, device_=None):
         """
         inputs:
         target_points   : torch.tensor of shape (B, 3, N)
@@ -126,7 +101,8 @@ if __name__ == '__main__':
     N = 10
     d = 3
 
-    source_points = torch.rand(B, d, N).to(device=device)
+    source_points = torch.rand(1, d, N).to(device=device)
+    print(source_points.shape)
     registration_fxn = PointSetRegistration(source_points=source_points)
 
     rotation = transforms.random_rotations(B).to(device=device)
@@ -135,16 +111,18 @@ if __name__ == '__main__':
     target_points += 0.01*torch.rand(size=target_points.shape).to(device=device)
     target_points.requires_grad = True
 
+    print("target_points.shape", target_points.shape)
     print('-' * 40)
     print("Testing wahba()")
     print('-' * 40)
+    source_points_repeat = source_points.repeat(B, 1, 1)
     start = time.process_time()
-    rotation_est = wahba(source_points=source_points - source_points.mean(-1).unsqueeze(-1),
+    rotation_est = wahba(source_points=source_points_repeat - source_points_repeat.mean(-1).unsqueeze(-1),
                          target_points=target_points-target_points.mean(-1).unsqueeze(-1))
     end = time.process_time()
     print("Output shape: ", rotation_est.shape)
 
-    err = rotation_error(rotation, rotation_est)
+    err = rotation_matrix_error(rotation, rotation_est)
     print("Rotation error: ", err.mean())
     print("Time for wahba: ", 1000*(end-start)/B, ' ms')
 
@@ -163,7 +141,8 @@ if __name__ == '__main__':
     N = 10
     d = 3
 
-    source_points = torch.rand(B, d, N).to(device=device)
+    source_points = torch.rand(1, d, N).to(device=device)
+
     rotation = transforms.random_rotations(B).to(device=device)
     translation = torch.rand(B, d, 1).to(device=device)
 
@@ -172,7 +151,7 @@ if __name__ == '__main__':
     target_points.requires_grad = True
 
     start = time.process_time()
-    rotation_est, translation_est = registration_fxn.forward(source_points=source_points, target_points=target_points)
+    rotation_est, translation_est = registration_fxn.forward(target_points=target_points)
     end = time.process_time()
 
     print("Output rotation shape: ", rotation.shape)
