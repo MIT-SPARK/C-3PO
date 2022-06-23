@@ -199,14 +199,14 @@ class kp_corrector_reg:
         """
 
         if self.algo == 'scipy':
-            correction = self.solve_algo1(detected_keypoints, input_point_cloud)
+            correction = self.scipy_trust_region(detected_keypoints, input_point_cloud)
         elif self.algo == 'torch':
-            correction = self.solve_algo2(detected_keypoints, input_point_cloud)
+            correction = self.batch_gradient_descent(detected_keypoints, input_point_cloud)
         else:
             raise NotImplementedError
         return correction, None
 
-    def solve_algo1(self, detected_keypoints, input_point_cloud, lr=0.1, num_steps=20):
+    def scipy_trust_region(self, detected_keypoints, input_point_cloud, lr=0.1, num_steps=20):
         """
         inputs:
         detected_keypoints  : torch.tensor of shape (B, 3, N)
@@ -235,29 +235,9 @@ class kp_corrector_reg:
                 fun = lambda x: self.objective_numpy(detected_keypoints=kp, input_point_cloud=pc, correction=x)
 
 
-                # loss_before = fun(x=batch_correction_init)
-                # print("loss before optimization: ", loss_before)
-
-                # result = optimize.minimize(fun=fun, x0=batch_correction_init, method='Nelder-Mead')         #Note: tried, does not work
-                # result = optimize.minimize(fun=fun, x0=batch_correction_init, method='Powell')              #Note: tried, best so far. Promising visually. Misses orientation a few times. Takes a few seconds.
-                # result = optimize.minimize(fun=fun, x0=batch_correction_init, method='CG')                  #Note: tried, does not work
-                # result = optimize.minimize(fun=fun, x0=batch_correction_init, method='BFGS')                #Note: tried, does not work
-                # result = optimize.minimize(fun=fun, x0=batch_correction_init, method='Newton-CG')           #Note: requires jacobian. can be computed. haven't done. #ToDo
-                # result = optimize.minimize(fun=fun, x0=batch_correction_init, method='L-BFGS-B')            #Note: tried, does not work
-                # result = optimize.minimize(fun=fun, x0=batch_correction_init, method='TNC')                 #Note: tried, does not work
-                # result = optimize.minimize(fun=fun, x0=batch_correction_init, method='COBYLA')              #Note: tried. the two point clouds get closer. returns a False flag for success. Fast.
-                # result = optimize.minimize(fun=fun, x0=batch_correction_init, method='SLSQP')               #Note: tried, does not work
+                # Note: tried other methods and trust-constr works the best
                 result = optimize.minimize(fun=fun, x0=batch_correction_init, method='trust-constr')        #Note: tried, best so far. Promising visually. Misses orientation a few times. Faster than 'Powell'.
-                # result = optimize.minimize(fun=fun, x0=batch_correction_init, method='dogleg')              #Note: requires jacobian. can be computed. haven't done. #ToDo
-                # result = optimize.minimize(fun=fun, x0=batch_correction_init, method='trust-ncg')           #Note: requires jacobian. can be computed. haven't done. #ToDo
-                # result = optimize.minimize(fun=fun, x0=batch_correction_init, method='trust-exact')         #Note: requires jacobian. can be computed. haven't done. #ToDo
-                # result = optimize.minimize(fun=fun, x0=batch_correction_init, method='trust-krylov')        #Note: requires jacobian. can be computed. haven't done. #ToDo
 
-
-                # print("loss after optimization: ", result.fun)
-                # print("opt status: ", result.status)
-                # print("num of steps: ", result.nit)
-                # print("corrector optimization successful: ", result.success)
                 batch_correction = torch.from_numpy(result.x).to(torch.float)
                 batch_correction = batch_correction.reshape(3, N)
 
@@ -265,7 +245,7 @@ class kp_corrector_reg:
 
         return correction.to(device=device_)
 
-    def solve_algo2(self, detected_keypoints, input_point_cloud, lr=0.1, max_iterations=1000, tol=1e-12):
+    def batch_gradient_descent(self, detected_keypoints, input_point_cloud, lr=0.1, max_iterations=1000, tol=1e-12):
         """
         inputs:
         detected_keypoints  : torch.tensor of shape (B, 3, N)
@@ -417,15 +397,15 @@ class kp_corrector_pace:
         """
 
         if self.algo == 'scipy':
-            correction = self.solve_algo1(detected_keypoints, input_point_cloud)
+            correction = self.scipy_trust_region(detected_keypoints, input_point_cloud)
         elif self.algo == 'torch':
-            correction = self.solve_algo2(detected_keypoints, input_point_cloud)
+            correction = self.batch_gradient_descent(detected_keypoints, input_point_cloud)
         else:
             raise NotImplementedError
 
         return correction, None
 
-    def solve_algo2(self, detected_keypoints, input_point_cloud, lr=0.1, max_iterations=1000, tol=1e-12):
+    def batch_gradient_descent(self, detected_keypoints, input_point_cloud, lr=0.1, max_iterations=1000, tol=1e-12):
 
         """
         inputs:
@@ -487,7 +467,7 @@ class kp_corrector_pace:
 
         return correction
 
-    def solve_algo1(self, detected_keypoints, input_point_cloud):
+    def scipy_trust_region(self, detected_keypoints, input_point_cloud):
         """
         inputs:
         detected_keypoints  : torch.tensor of shape (B, 3, N)
@@ -524,21 +504,8 @@ class kp_corrector_pace:
                 loss_before = fun(x=batch_correction_init)
                 print("loss before optimization: ", loss_before)
 
-                # result = optimize.minimize(fun=fun, x0=batch_correction_init, method='Nelder-Mead')         #Note: tried, does not work
-                # result = optimize.minimize(fun=fun, x0=batch_correction_init, method='Powell')              #Note: tried, best so far. Promising visually. Misses orientation a few times. Takes a few seconds.
-                # result = optimize.minimize(fun=fun, x0=batch_correction_init, method='CG')                  #Note: tried, does not work
-                # result = optimize.minimize(fun=fun, x0=batch_correction_init, method='BFGS')                #Note: tried, does not work
-                # result = optimize.minimize(fun=fun, x0=batch_correction_init, method='Newton-CG')           #Note: requires jacobian. can be computed. haven't done. #ToDo
-                # result = optimize.minimize(fun=fun, x0=batch_correction_init, method='L-BFGS-B')            #Note: tried, does not work
-                # result = optimize.minimize(fun=fun, x0=batch_correction_init, method='TNC')                 #Note: tried, does not work
-                # result = optimize.minimize(fun=fun, x0=batch_correction_init, method='COBYLA')              #Note: tried. the two point clouds get closer. returns a False flag for success. Fast.
-                # result = optimize.minimize(fun=fun, x0=batch_correction_init, method='SLSQP')               #Note: tried, does not work
+                # Note: tried other methods and trust-constr works the best.
                 result = optimize.minimize(fun=fun, x0=batch_correction_init, method='trust-constr')        #Note: tried, best so far. Promising visually. Misses orientation a few times. Faster than 'Powell'.
-                # result = optimize.minimize(fun=fun, x0=batch_correction_init, method='dogleg')              #Note: requires jacobian. can be computed. haven't done. #ToDo
-                # result = optimize.minimize(fun=fun, x0=batch_correction_init, method='trust-ncg')           #Note: requires jacobian. can be computed. haven't done. #ToDo
-                # result = optimize.minimize(fun=fun, x0=batch_correction_init, method='trust-exact')         #Note: requires jacobian. can be computed. haven't done. #ToDo
-                # result = optimize.minimize(fun=fun, x0=batch_correction_init, method='trust-krylov')        #Note: requires jacobian. can be computed. haven't done. #ToDo
-
 
                 print("loss after optimization: ", result.fun)
                 print("opt status: ", result.status)
@@ -548,8 +515,6 @@ class kp_corrector_pace:
                 batch_correction = batch_correction.reshape(3, N)
 
                 correction[batch, ...] = batch_correction
-
-
         return correction
 
     def gradient(self, detected_keypoints, input_point_cloud, y=None, v=None, ctx=None):
