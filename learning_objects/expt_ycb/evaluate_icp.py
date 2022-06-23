@@ -6,7 +6,6 @@ import yaml
 
 sys.path.append('../..')
 
-from learning_objects.datasets.keypointnet import CLASS_NAME, CLASS_ID, DepthPC, FixedDepthPC
 from learning_objects.datasets.ycb import DepthYCB, DepthYCBAugment
 from learning_objects.utils.loss_functions import certify
 from learning_objects.utils.evaluation_metrics import evaluation_error, add_s_error

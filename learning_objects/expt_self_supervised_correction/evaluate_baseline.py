@@ -4,7 +4,7 @@ import yaml
 
 sys.path.append('../..')
 
-from learning_objects.datasets.keypointnet import CLASS_NAME
+from learning_objects.datasets.shapenet import CLASS_NAME
 from learning_objects.expt_self_supervised_correction.train_baseline import evaluate_model
 
 if __name__ == "__main__":

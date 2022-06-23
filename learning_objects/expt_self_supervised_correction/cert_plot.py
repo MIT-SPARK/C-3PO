@@ -13,7 +13,7 @@ plt.style.use('seaborn-whitegrid')
 
 
 sys.path.append("../..")
-from learning_objects.datasets.keypointnet import CLASS_NAME, CLASS_ID
+from learning_objects.datasets.shapenet import CLASS_NAME, CLASS_ID
 
 COLORS = dict(mcolors.BASE_COLORS, **mcolors.CSS4_COLORS)
 

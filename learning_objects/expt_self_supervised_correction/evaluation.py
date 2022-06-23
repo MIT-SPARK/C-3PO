@@ -6,11 +6,11 @@ import yaml
 
 sys.path.append("../..")
 
-from learning_objects.datasets.keypointnet import CLASS_NAME, CLASS_ID, DepthPC
+from learning_objects.datasets.shapenet import CLASS_NAME, CLASS_ID, DepthPC
 from learning_objects.utils.loss_functions import certify
 from learning_objects.utils.evaluation_metrics import evaluation_error, add_s_error, is_pcd_nondegenerate
 from learning_objects.datasets.ycb import MODEL_TO_KPT_GROUPS as MODEL_TO_KPT_GROUPS_YCB
-from learning_objects.datasets.keypointnet import MODEL_TO_KPT_GROUPS as MODEL_TO_KPT_GROUPS_SHAPENET
+from learning_objects.datasets.shapenet import MODEL_TO_KPT_GROUPS as MODEL_TO_KPT_GROUPS_SHAPENET
 
 
 

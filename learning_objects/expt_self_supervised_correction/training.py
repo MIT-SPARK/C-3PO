@@ -6,7 +6,7 @@ from datetime import datetime
 
 sys.path.append("../../")
 
-from learning_objects.datasets.keypointnet import CLASS_NAME, CLASS_ID
+from learning_objects.datasets.shapenet import CLASS_NAME, CLASS_ID
 
 from learning_objects.expt_self_supervised_correction.self_supervised_training import train_detector as train_detector_self_supervised
 from learning_objects.expt_self_supervised_correction.supervised_training import train_detector as train_detector_supervised

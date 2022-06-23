@@ -10,8 +10,8 @@ from pytorch3d import ops, transforms
 
 sys.path.append("../../")
 
-from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPC
-from learning_objects.datasets.keypointnet import PCD_FOLDER_NAME as KEYPOINTNET_PCD_FOLDER_NAME, \
+from learning_objects.datasets.shapenet import SE3PointCloud, DepthPC
+from learning_objects.datasets.shapenet import PCD_FOLDER_NAME as KEYPOINTNET_PCD_FOLDER_NAME, \
     CLASS_NAME as KEYPOINTNET_ID2NAME, \
     CLASS_ID as KEYPOINTNET_NAME2ID
 

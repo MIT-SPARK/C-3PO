@@ -15,9 +15,9 @@ sys.path.append("../../")
 
 from learning_objects.models.pace import PACEmodule
 from learning_objects.models.modelgen import ModelFromShape
-from learning_objects.datasets.keypointnet import SE3nAnisotropicScalingPointCloud, \
+from learning_objects.datasets.shapenet import SE3nAnisotropicScalingPointCloud, \
     DepthAnisoPC, ScaleAxis
-from learning_objects.datasets.keypointnet import PCD_FOLDER_NAME as KEYPOINTNET_PCD_FOLDER_NAME, \
+from learning_objects.datasets.shapenet import PCD_FOLDER_NAME as KEYPOINTNET_PCD_FOLDER_NAME, \
     CLASS_NAME as KEYPOINTNET_ID2NAME, \
     CLASS_ID as KEYPOINTNET_NAME2ID
 from learning_objects.utils.visualization_utils import display_two_pcs

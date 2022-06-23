@@ -15,7 +15,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 sys.path.append("../../")
 
-from learning_objects.datasets.keypointnet import DepthPC, CLASS_NAME, FixedDepthPC, CLASS_ID
+from learning_objects.datasets.shapenet import DepthPC, CLASS_NAME, FixedDepthPC, CLASS_ID
 from learning_objects.utils.general import TrackingMeter
 from learning_objects.utils.visualization_utils import display_results
 

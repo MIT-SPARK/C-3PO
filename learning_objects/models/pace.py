@@ -22,7 +22,7 @@ sys.path.append("../../")
 
 from learning_objects.utils.general import generate_random_keypoints
 from learning_objects.utils.evaluation_metrics import shape_error, translation_error, rotation_matrix_error
-from learning_objects.datasets.keypointnet import CLASS_NAME, CLASS_ID
+from learning_objects.datasets.shapenet import CLASS_NAME, CLASS_ID
 
 from learning_objects.models.sdp import RotationSDP
 

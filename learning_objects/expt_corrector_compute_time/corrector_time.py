@@ -16,7 +16,7 @@ sys.path.append("../../")
 
 COLORS = dict(mcolors.BASE_COLORS, **mcolors.CSS4_COLORS)
 
-from learning_objects.datasets.keypointnet import DepthPC, CLASS_ID
+from learning_objects.datasets.shapenet import DepthPC, CLASS_ID
 from learning_objects.models.keypoint_corrector import kp_corrector_reg, keypoint_perturbation
 from learning_objects.models.point_set_registration import PointSetRegistration
 from learning_objects.utils.ddn.node import ParamDeclarativeFunction

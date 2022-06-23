@@ -12,7 +12,7 @@ from matplotlib import colors as mcolors
 
 sys.path.append("../../")
 from learning_objects.utils.general import generate_filename
-from learning_objects.datasets.keypointnet import CLASS_NAME
+from learning_objects.datasets.shapenet import CLASS_NAME
 
 plt.style.use('seaborn-whitegrid')
 COLORS = dict(mcolors.BASE_COLORS, **mcolors.CSS4_COLORS)

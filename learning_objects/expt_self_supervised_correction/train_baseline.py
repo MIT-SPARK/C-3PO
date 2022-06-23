@@ -19,7 +19,7 @@ import os
 import sys
 sys.path.append("../../")
 
-from learning_objects.datasets.keypointnet import DepthPC, CLASS_NAME, FixedDepthPC, CLASS_ID
+from learning_objects.datasets.shapenet import DepthPC, CLASS_NAME, FixedDepthPC, CLASS_ID
 from learning_objects.models.certifiability import confidence, confidence_kp
 
 from learning_objects.utils.general import TrackingMeter

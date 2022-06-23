@@ -18,7 +18,7 @@ sys.path.append("../../")
 from learning_objects.utils.ddn.node import AbstractDeclarativeNode, ParamDeclarativeFunction
 
 from learning_objects.models.point_set_registration import PointSetRegistration
-from learning_objects.datasets.keypointnet import SE3PointCloud, SE3nIsotropicShapePointCloud, DepthPC
+from learning_objects.datasets.shapenet import SE3PointCloud, SE3nIsotropicShapePointCloud, DepthPC
 
 from learning_objects.utils.visualization_utils import display_two_pcs, update_pos_tensor_to_keypoint_markers
 from learning_objects.utils.loss_functions import chamfer_loss, keypoints_loss

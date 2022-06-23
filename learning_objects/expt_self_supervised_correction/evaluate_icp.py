@@ -6,7 +6,7 @@ import yaml
 
 sys.path.append('../..')
 
-from learning_objects.datasets.keypointnet import CLASS_NAME, CLASS_ID, DepthPC, FixedDepthPC
+from learning_objects.datasets.shapenet import CLASS_NAME, CLASS_ID, DepthPC, FixedDepthPC
 from learning_objects.utils.loss_functions import certify
 from learning_objects.utils.evaluation_metrics import evaluation_error, add_s_error
 from learning_objects.expt_self_supervised_correction.baseline_model import RANSACwICP, TEASERwICP, wICP

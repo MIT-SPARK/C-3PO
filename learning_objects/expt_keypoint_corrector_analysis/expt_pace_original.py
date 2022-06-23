@@ -8,7 +8,7 @@ from pytorch3d import ops, transforms
 
 sys.path.append("../../")
 
-from learning_objects.datasets.keypointnet import SE3nAnisotropicScalingPointCloud, \
+from learning_objects.datasets.shapenet import SE3nAnisotropicScalingPointCloud, \
     ScaleAxis
 
 from learning_objects.models.keypoint_corrector import kp_corrector_reg, kp_corrector_pace

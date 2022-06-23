@@ -6,7 +6,7 @@ import yaml
 
 sys.path.append('../..')
 
-from learning_objects.datasets.keypointnet import SE3PointCloud, DepthPC, CLASS_NAME, CLASS_ID, FixedDepthPC
+from learning_objects.datasets.shapenet import SE3PointCloud, DepthPC, CLASS_NAME, CLASS_ID, FixedDepthPC
 from learning_objects.expt_self_supervised_correction.evaluation import evaluate
 from learning_objects.utils.visualization_utils import display_results
 from learning_objects.utils.loss_functions import certify

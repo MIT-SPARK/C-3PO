@@ -27,7 +27,7 @@ from learning_objects.models.keypoint_corrector import kp_corrector_pace
 from learning_objects.models.modelgen import ModelFromShape
 from learning_objects.utils.loss_functions import translation_loss, rotation_loss, shape_loss, chamfer_loss
 
-from learning_objects.datasets.keypointnet import SE3nIsotropicShapePointCloud, DepthIsoPC
+from learning_objects.datasets.shapenet import SE3nIsotropicShapePointCloud, DepthIsoPC
 
 
 SAVE_LOCATION = '../../data/learning_objects/expt_pace/runs/'
