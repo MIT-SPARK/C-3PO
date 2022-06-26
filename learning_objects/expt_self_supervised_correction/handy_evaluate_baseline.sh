@@ -1,4 +1,4 @@
-BASELINE_SUPERVISED_FILE="./eval/baseline_supervised_eval.txt"
+BASELINE_SUPERVISED_FILE="./eval/baseline_supervised_eval_main.txt"
 
 now=$(date)
 echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" >> $BASELINE_SUPERVISED_FILE

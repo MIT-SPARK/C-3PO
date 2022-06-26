@@ -5,7 +5,7 @@ import yaml
 
 sys.path.append('../..')
 
-from learning_objects.datasets.shapenet import SE3PointCloud, DepthPC, CLASS_NAME, CLASS_ID
+from learning_objects.datasets.shapenet import CLASS_NAME, CLASS_ID
 from learning_objects.utils.visualization_utils import display_two_pcs
 from learning_objects.expt_self_supervised_correction.self_supervised_training import evaluate_model
 
@@ -31,7 +31,6 @@ if __name__ == "__main__":
     models_to_analyze = args.models_to_analyze
     # print("KP detector type: ", args.detector_type)
     # print("CAD Model class: ", args.class_name)
-    only_categories = [class_name]
 
     stream = open("class_model_ids.yml", "r")
     model_class_ids = yaml.load(stream=stream, Loader=yaml.Loader)

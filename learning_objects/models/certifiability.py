@@ -10,7 +10,39 @@ import torch
 from pytorch3d import ops
 
 sys.path.append("../../")
-from learning_objects.utils.loss_functions import chamfer_loss
+
+def chamfer_loss(pc, pc_, pc_padding=None, max_loss=True):
+    """
+    inputs:
+    pc  : torch.tensor of shape (B, 3, n)
+    pc_ : torch.tensor of shape (B, 3, m)
+    pc_padding  : torch.tensor of shape (B, n)  : indicates if the point in pc is real-input or padded in
+    max_loss : boolean : indicates if output loss should be maximum of the distances between pc and pc_ instead of the mean
+
+    output:
+    loss    : (B, 1)
+        returns max_loss if max_loss is true
+    """
+
+    if pc_padding == None:
+        batch_size, _, n = pc.shape
+        device_ = pc.device
+
+        # computes a padding by flagging zero vectors in the input point cloud.
+        pc_padding = ((pc == torch.zeros(3, 1).to(device=device_)).sum(dim=1) == 3)
+
+    sq_dist, _, _ = ops.knn_points(torch.transpose(pc, -1, -2), torch.transpose(pc_, -1, -2), K=1, return_sorted=False)
+    # dist (B, n, 1): distance from point in X to the nearest point in Y
+
+    sq_dist = sq_dist.squeeze(-1)*torch.logical_not(pc_padding)
+    a = torch.logical_not(pc_padding)
+
+    if max_loss:
+        loss = sq_dist.max(dim=1)[0]
+    else:
+        loss = sq_dist.sum(dim=1)/a.sum(dim=1)
+
+    return loss.unsqueeze(-1)
 
 def confidence(pc, pc_):
     """

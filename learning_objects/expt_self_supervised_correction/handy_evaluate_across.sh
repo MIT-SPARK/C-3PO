@@ -1,4 +1,4 @@
-FILE_NAME="./eval/model_eval_across.txt"
+FILE_NAME="./eval/model_eval_across_main.txt"
 
 now=$(date +'%c')
 echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" >> $FILE_NAME
