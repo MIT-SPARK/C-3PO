@@ -5,16 +5,16 @@ It can use registration during supervised training.
 
 """
 
-import torch
-import pickle
-import yaml
 import argparse
+import os
+import pickle
+import sys
+import torch
+import yaml
+from datetime import datetime
 from pytorch3d import ops
 from torch.utils.tensorboard import SummaryWriter
-from datetime import datetime
 
-import os
-import sys
 sys.path.append("../../")
 
 from learning_objects.datasets.ycb import SE3PointCloudYCB, SE3PointCloudYCBAugment, DepthYCB
@@ -304,22 +304,7 @@ def visualize_detector(hyper_param,
     print("Visualizing the trained model.")
     visual_test(test_loader=loader, model=model, device=device)
 
-    # # Test 2:
-    # dataset = SE3PointCloud(class_id=class_id,
-    #                         model_id=model_id,
-    #                         num_of_points=200,
-    #                         dataset_len=10)
-    # loader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
-    # visual_test(test_loader=loader, model=model, device=device)
-    #
-    # dataset = SE3PointCloud(class_id=class_id,
-    #                         model_id=model_id,
-    #                         num_of_points=100,
-    #                         dataset_len=10)
-    # loader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
-    # visual_test(test_loader=loader, model=model, device=device)
-
-    # Test 3: testing on real dataset
+    # Test 2: testing on real dataset
     real_dataset = DepthYCB(model_id=model_id, split='test', num_of_points=1000)
     real_loader = torch.utils.data.DataLoader(real_dataset, batch_size=1, shuffle=False)
     visual_test(test_loader=real_loader, model=model, device=device)
@@ -327,6 +312,9 @@ def visualize_detector(hyper_param,
 
 
 if __name__ == "__main__":
+    """
+    Change dataset used in visualize_detector function code to visualize trained model results on simulated or real data.
+    """
 
     parser = argparse.ArgumentParser()
     parser.add_argument("detector_type", help="specify the detector type.", type=str)

@@ -15,16 +15,15 @@ from torch.utils.tensorboard import SummaryWriter
 
 sys.path.append("../../")
 
-from learning_objects.datasets.shapenet import DepthPC, CLASS_NAME, \
-    FixedDepthPC, CLASS_ID, MixedFixedDepthPC
+from learning_objects.datasets.ycb import DepthYCB, DepthYCBAugment, MixedDepthYCBAugment
 from learning_objects.utils.general import TrackingMeter
-from learning_objects.utils.visualization_utils import display_results
+from learning_objects.utils.visualization_utils import display_results, viz_rgb_pcd
 from learning_objects.utils.loss_functions import certify, self_supervised_training_loss \
     as self_supervised_loss, self_supervised_validation_loss as validation_loss
 # evaluation metrics
 from learning_objects.utils.evaluation_metrics import add_s_error
-from learning_objects.expt_self_supervised_correction.proposed_model import ProposedRegressionModel as ProposedModel
-from learning_objects.expt_full_self_supervised_correction.evaluation import evaluate
+from learning_objects.expt_ycb.proposed_model import ProposedRegressionModel as ProposedModel
+from learning_objects.expt_fully_self_supervised.evaluation import evaluate
 
 # Train
 def self_supervised_train_one_epoch(training_loader, model, optimizer, device, hyper_param):
@@ -140,7 +139,8 @@ def train_without_supervision(self_supervised_train_loader, validation_loader, m
         # Validation. We don't need gradients on to do reporting.
         model.train(False)
         print("Validation on real data: ")
-        avg_vloss = validate(validation_loader, model, device=device, hyper_param=hyper_param)
+        avg_vloss = validate(validation_loader, model,
+                             device=device, hyper_param=hyper_param)
 
         print('LOSS self-supervised train {}, valid (%cert) {}'.format(ave_loss_self_supervised, -avg_vloss))
         train_loss.add_item(ave_loss_self_supervised)
@@ -171,8 +171,7 @@ def train_without_supervision(self_supervised_train_loader, validation_loader, m
 
 
 # Train
-def train_detector(hyper_param, detector_type='pointnet', class_id="03001627",
-                   model_id="1e3fba4500d20bb49b9f2eb77f5e247e", use_corrector=True):
+def train_detector(hyper_param, detector_type='point_transformer', model_id="003_cracker_box", use_corrector=True):
     """
 
     """
@@ -184,19 +183,13 @@ def train_detector(hyper_param, detector_type='pointnet', class_id="03001627",
     print('device is ', device)
     print('-' * 20)
 
-    # shapenet
-    class_name = CLASS_NAME[class_id]
+    # ycb
     save_folder = hyper_param['save_folder']
-    best_model_save_location = save_folder + class_name + '/' + model_id + '/'
+    best_model_save_location = save_folder + '/' + model_id + '/'
     if not os.path.exists(best_model_save_location):
         os.makedirs(best_model_save_location)
 
-    if class_name == 'car':
-        sim_trained_model_file = best_model_save_location + '_best_supervised_kp_' + detector_type + '.pth'
-        # sim_trained_model_file = best_model_save_location + '_best_self_supervised_kp_' + detector_type + '_mid.pth'
-    else:
-        sim_trained_model_file = best_model_save_location + '_best_supervised_kp_' + detector_type + '.pth'
-
+    sim_trained_model_file = best_model_save_location + '_best_supervised_kp_' + detector_type + '_data_augment.pth'
     best_model_save_file = best_model_save_location + '_best_self_supervised_kp_' + detector_type + '.pth'
     train_loss_save_file = best_model_save_location + '_sstrain_loss_' + detector_type + '.pkl'
     val_loss_save_file = best_model_save_location + '_ssval_loss_' + detector_type + '.pkl'
@@ -207,29 +200,20 @@ def train_detector(hyper_param, detector_type='pointnet', class_id="03001627",
     momentum_sgd = hyper_param['momentum_sgd']
 
     # real dataset:
-    self_supervised_train_dataset_len = hyper_param['self_supervised_train_dataset_len']
     self_supervised_train_batch_size = hyper_param['self_supervised_train_batch_size']
     num_of_points_to_sample = hyper_param['num_of_points_to_sample']
-    num_of_points_selfsupervised = hyper_param['num_of_points_selfsupervised']
 
-    self_supervised_train_dataset = MixedFixedDepthPC(class_id=class_id,
-                                                      model_id=model_id,
-                                                      n=num_of_points_selfsupervised,
-                                                      num_of_points_to_sample=num_of_points_to_sample,
-                                                      base_dataset_folder=hyper_param['dataset_folder'])
+
+    self_supervised_train_dataset = MixedDepthYCBAugment(model_id=model_id, split='train', num_of_points=num_of_points_to_sample)
     print("Dataset length: ", self_supervised_train_dataset.len)
     self_supervised_train_loader = torch.utils.data.DataLoader(self_supervised_train_dataset,
                                                                batch_size=self_supervised_train_batch_size,
                                                                shuffle=True)
 
     # validation dataset:
-    val_dataset_len = hyper_param['val_dataset_len']
     val_batch_size = hyper_param['val_batch_size']
-    val_dataset = MixedFixedDepthPC(class_id=class_id,
-                                    model_id=model_id,
-                                    n=num_of_points_selfsupervised,
-                                    num_of_points_to_sample=num_of_points_to_sample,
-                                    base_dataset_folder=hyper_param['val_dataset_folder'])
+    val_dataset = MixedDepthYCBAugment(model_id=model_id, split='val', num_of_points=num_of_points_to_sample)
+
     val_loader = torch.utils.data.DataLoader(val_dataset,
                                              batch_size=val_batch_size,
                                              shuffle=True)
@@ -239,8 +223,9 @@ def train_detector(hyper_param, detector_type='pointnet', class_id="03001627",
     model_keypoints = self_supervised_train_dataset._get_model_keypoints().to(torch.float).to(device=device)
 
     # model
-    model = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,
-                          keypoint_detector=detector_type, correction_flag=use_corrector,
+    model = ProposedModel(model_id=model_id, model_keypoints=model_keypoints, cad_models=cad_models,
+                          keypoint_detector=detector_type, local_max_pooling=False,
+                          correction_flag=use_corrector,
                           need_predicted_keypoints=True).to(device)
 
     if not os.path.isfile(sim_trained_model_file):
@@ -253,7 +238,6 @@ def train_detector(hyper_param, detector_type='pointnet', class_id="03001627",
 
     # optimizer
     optimizer = torch.optim.SGD(model.parameters(), lr=lr_sgd, momentum=momentum_sgd)
-
     # training
     train_loss, val_loss, fra_cert_ = train_without_supervision(self_supervised_train_loader=self_supervised_train_loader,
                                                                 validation_loader=val_loader,
@@ -340,8 +324,8 @@ def visual_test(test_loader, model, hyper_param, device=None):
             break
 
 
-def visualize_detector(hyper_param, detector_type, class_id, model_id,
-                       dataset_class_id, dataset_model_id,
+def visualize_detector(hyper_param, detector_type, model_id,
+                       dataset_model_id,
                        evaluate_models=True, models_to_analyze='post',
                        use_corrector=True,
                        visualize=False, device=None):
@@ -359,41 +343,29 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
     else:
         return NotImplementedError
 
-
-
-    class_name = CLASS_NAME[class_id]
     save_folder = hyper_param['save_folder']
-    best_model_save_location = save_folder + class_name + '/' + model_id + '/'
+    best_model_save_location = save_folder + '/' + model_id + '/'
     best_pre_model_save_file = best_model_save_location + '_best_supervised_kp_' + detector_type + '.pth'
     best_post_model_save_file = best_model_save_location + '_best_self_supervised_kp_' + detector_type + '.pth'
 
     # Evaluation
     # validation dataset:
-    eval_dataset_len = hyper_param['eval_dataset_len']
-    eval_batch_size = hyper_param['eval_batch_size']
-    eval_dataset = MixedFixedDepthPC(class_id=dataset_class_id,
-                                     model_id=dataset_model_id,
-                                     n=hyper_param['num_of_points_selfsupervised'],
-                                     num_of_points_to_sample=hyper_param['num_of_points_to_sample'],
-                                     base_dataset_folder=hyper_param['eval_dataset_folder'],
-                                     mixed_data=False)
+    eval_batch_size = hyper_param['eval_batch_size'][model_id]
+    eval_dataset = MixedDepthYCBAugment(model_id=dataset_model_id, split='test', num_of_points=hyper_param['num_of_points_to_sample'], mixed_data=False)
     eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=eval_batch_size, shuffle=True)
 
 
     # model
-    temp_dataset = MixedFixedDepthPC(class_id=class_id,
-                                     model_id=model_id,
-                                     n=hyper_param['num_of_points_selfsupervised'],
-                                     num_of_points_to_sample=hyper_param['num_of_points_to_sample'],
-                                     base_dataset_folder=hyper_param['eval_dataset_folder'],
-                                     mixed_data=False)
+    temp_dataset = MixedDepthYCBAugment(model_id=model_id, split='test', num_of_points=hyper_param['num_of_points_to_sample'], mixed_data=False)
+
     cad_models = temp_dataset._get_cad_models().to(torch.float).to(device=device)
     model_keypoints = temp_dataset._get_model_keypoints().to(torch.float).to(device=device)
     del temp_dataset
 
     if pre_:
-        model_before = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,
-                                     keypoint_detector=detector_type, correction_flag=use_corrector,
+        model_before = ProposedModel(model_id=model_id, model_keypoints=model_keypoints, cad_models=cad_models,
+                                     keypoint_detector=detector_type, local_max_pooling=False,
+                                     correction_flag=use_corrector,
                                      need_predicted_keypoints=True).to(device)
 
         if not os.path.isfile(best_pre_model_save_file):
@@ -406,8 +378,9 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
         print("Number of trainable parameters: ", num_parameters)
 
     if post_:
-        model_after = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,
-                                    keypoint_detector=detector_type, correction_flag=use_corrector,
+        model_after = ProposedModel(model_id=model_id, model_keypoints=model_keypoints, cad_models=cad_models,
+                                    keypoint_detector=detector_type, local_max_pooling=False,
+                                    correction_flag=use_corrector,
                                     need_predicted_keypoints=True).to(device)
 
         if not os.path.isfile(best_post_model_save_file):
@@ -437,11 +410,8 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
     # # Visual Test
     dataset_len = 20
     dataset_batch_size = 1
-    dataset = MixedFixedDepthPC(class_id=class_id,
-                                model_id=model_id,
-                                n=hyper_param['num_of_points_selfsupervised'],
-                                num_of_points_to_sample=hyper_param['num_of_points_to_sample'],
-                                base_dataset_folder=hyper_param['val_dataset_folder'])
+    dataset = MixedDepthYCBAugment(model_id=model_id, split='test', num_of_points=hyper_param['num_of_points_to_sample'], mixed_data=False)
+
     loader = torch.utils.data.DataLoader(dataset, batch_size=dataset_batch_size, shuffle=True)
 
     if visualize and pre_:
@@ -463,37 +433,35 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
 
     return None
 
-def visualize_kp_detectors(detector_type, model_class_ids, test_class_name, only_categories=None,
+
+def visualize_kp_detectors(detector_type, model_ids, test_model_name, only_models=None,
                            evaluate_models=True,
                            models_to_analyze='post',
                            visualize=True,
                            use_corrector=True):
 
-    dataset_class_id = CLASS_ID[test_class_name]
-    dataset_model_id = model_class_ids[test_class_name]
+    dataset_model_id = test_model_name
 
-    for key, value in model_class_ids.items():
-        if key in only_categories:
-            class_id = CLASS_ID[key]
-            model_id = str(value)
-            class_name = CLASS_NAME[class_id]
-
-            hyper_param_file = "./full_self_supervised_training.yml"
+    for model_id in model_ids:
+        if model_id in only_models:
+            hyper_param_file = "./full_self_supervised_training_ycb.yml"
             stream = open(hyper_param_file, "r")
             hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
             hyper_param = hyper_param[detector_type]
-            hyper_param['epsilon'] = hyper_param['epsilon'][key]
+            hyper_param['epsilon'] = hyper_param['epsilon'][model_id]
 
             print(">>"*40)
-            print("Analyzing Trained Model for Object: ", key, "; Model ID:", str(model_id))
-            print("On dataset of: ", test_class_name)
+            print("Analyzing Trained Model for Object: ", str(model_id))
+            print("On dataset of: ", test_model_name)
+            # print("class id: ", class_id)
             visualize_detector(detector_type=detector_type,
-                               class_id=class_id,
                                model_id=model_id,
-                               dataset_class_id=dataset_class_id,
                                dataset_model_id=dataset_model_id,
                                hyper_param=hyper_param,
                                evaluate_models=evaluate_models,
                                models_to_analyze=models_to_analyze,
                                use_corrector=use_corrector,
                                visualize=visualize)
+
+
+

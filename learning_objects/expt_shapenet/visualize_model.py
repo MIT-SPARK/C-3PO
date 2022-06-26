@@ -1,3 +1,4 @@
+
 import torch
 import yaml
 import argparse
@@ -5,14 +6,14 @@ import sys
 
 sys.path.append('../..')
 
-from learning_objects.expt_full_self_supervised_correction.full_self_supervised_training import visualize_kp_detectors
+from learning_objects.expt_shapenet.self_supervised_training import evaluate_model
 
 if __name__ == "__main__":
     """
     usage: 
     >> python visualize_model.py "point_transformer" "chair" "pre"
     >> python visualize_model.py "pointnet" "chair" "post"
-
+    
     """
 
     parser = argparse.ArgumentParser()
@@ -31,11 +32,15 @@ if __name__ == "__main__":
 
     stream = open("class_model_ids.yml", "r")
     model_class_ids = yaml.load(stream=stream, Loader=yaml.Loader)
+    if class_name not in model_class_ids:
+        raise Exception('Invalid class_name')
+    else:
+        model_id = model_class_ids[class_name]
 
-    visualize_kp_detectors(detector_type=detector_type,
-                           model_class_ids=model_class_ids,
-                           only_categories=only_categories,
-                           visualize=True,
-                           evaluate_models=False,
-                           use_corrector=False,
-                           models_to_analyze=models_to_analyze)
+    evaluate_model(detector_type=detector_type,
+                   class_name=class_name,
+                   model_id=model_id,
+                   visualize=True,
+                   evaluate_models=False,
+                   use_corrector=True,
+                   models_to_analyze=models_to_analyze)

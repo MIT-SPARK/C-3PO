@@ -22,7 +22,7 @@ from learning_objects.utils.general import TrackingMeter
 from learning_objects.utils.visualization_utils import display_results
 from learning_objects.utils.loss_functions import \
     supervised_training_loss as supervised_loss, supervised_validation_loss as validation_loss
-from learning_objects.expt_self_supervised_correction.proposed_model import ProposedRegressionModel as ProposedModel
+from learning_objects.expt_shapenet.proposed_model import ProposedRegressionModel as ProposedModel
 
 # Training code
 def supervised_train_one_epoch(training_loader, model, optimizer, device):

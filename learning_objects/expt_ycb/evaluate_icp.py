@@ -9,7 +9,7 @@ sys.path.append('../..')
 from learning_objects.datasets.ycb import DepthYCB, DepthYCBAugment
 from learning_objects.utils.loss_functions import certify
 from learning_objects.utils.evaluation_metrics import evaluation_error, add_s_error
-from learning_objects.expt_self_supervised_correction.baseline_model import RANSACwICP, TEASERwICP, wICP
+from learning_objects.expt_shapenet.baseline_model import RANSACwICP, TEASERwICP, wICP
 from learning_objects.utils.visualization_utils import display_two_pcs
 from learning_objects.expt_ycb.proposed_model import ProposedRegressionModel as ProposedModel
 

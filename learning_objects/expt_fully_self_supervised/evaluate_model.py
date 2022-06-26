@@ -5,16 +5,16 @@ import yaml
 
 sys.path.append('../..')
 
-from learning_objects.expt_full_self_supervised_correction.full_self_supervised_training import visualize_kp_detectors
-from learning_objects.expt_full_self_supervised_correction.full_self_supervised_training_ycb import visualize_kp_detectors \
+from learning_objects.expt_fully_self_supervised.full_self_supervised_training import visualize_kp_detectors
+from learning_objects.expt_fully_self_supervised.full_self_supervised_training_ycb import visualize_kp_detectors \
     as visualize_kp_detectors_ycb
 
 if __name__ == "__main__":
     """
     usage: 
     shapenet
-    >> python evaluate_trained_model.py "point_transformer" "chair" "pre" "table" "shapenet"
-    >> python evaluate_trained_model.py "pointnet" "chair" "post" "chair" "shapenet"
+    >> python evaluate_proposed_model.py "point_transformer" "chair" "pre" "table" "shapenet"
+    >> python evaluate_proposed_model.py "pointnet" "chair" "post" "chair" "shapenet"
     
     ycb
     >> python full_self_supervised_training.py "point_transformer" "003_cracker_box" "post" "003_cracker_box" "ycb"

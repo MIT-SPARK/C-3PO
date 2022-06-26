@@ -35,7 +35,7 @@ from learning_objects.utils.loss_functions import self_supervised_training_loss 
 # evaluation metrics
 from learning_objects.utils.evaluation_metrics import add_s_error, \
     is_pcd_nondegenerate
-from learning_objects.expt_self_supervised_correction.evaluation import evaluate
+from learning_objects.expt_shapenet.evaluation import evaluate
 
 def self_supervised_train_one_epoch(training_loader, model, optimizer, device, hyper_param):
     running_loss = 0.
@@ -479,35 +479,4 @@ def evaluate_model(detector_type, model_id,
         return eval_metrics
     else:
         return None
-
-
-if __name__ == "__main__":
-
-    """
-    usage: 
-    >> python self_supervised_training.py "point_transformer" "021_bleach_cleanser"
-    """
-    #free memory
-    torch.cuda.empty_cache()
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("detector_type", help="specify the detector type.", type=str)
-    parser.add_argument("model_id", help="specify the ycb model id.", type=str)
-
-    args = parser.parse_args()
-
-    print("KP detector type: ", args.detector_type)
-    print("CAD Model class: ", args.model_id)
-    detector_type = args.detector_type
-    model_id = args.model_id
-    # keeping for code monkey param happiness
-    with open("model_ids.yml", 'r') as stream:
-        model_ids = yaml.load(stream=stream, Loader=yaml.Loader)['model_ids']
-        if model_id not in model_ids:
-            raise Exception('Invalid model_id')
-
-    evaluate_model(detector_type=detector_type, model_id=model_id, evaluate_models=True,
-                   visualize=False, use_corrector=True, models_to_analyze = 'post', degeneracy_eval=False, average_metrics=False)
-
-
 

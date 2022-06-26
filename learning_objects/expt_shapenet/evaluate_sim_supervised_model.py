@@ -7,11 +7,11 @@ import yaml
 sys.path.append('../..')
 
 from learning_objects.datasets.shapenet import SE3PointCloud, DepthPC, CLASS_NAME, CLASS_ID, FixedDepthPC
-from learning_objects.expt_self_supervised_correction.evaluation import evaluate
+from learning_objects.expt_shapenet.evaluation import evaluate
 from learning_objects.utils.visualization_utils import display_results
 from learning_objects.utils.loss_functions import certify
 from learning_objects.utils.evaluation_metrics import add_s_error
-from learning_objects.expt_self_supervised_correction.proposed_model import ProposedRegressionModel as ProposedModel
+from learning_objects.expt_shapenet.proposed_model import ProposedRegressionModel as ProposedModel
 
 
 def visual_test(test_loader, model, hyper_param, device=None):

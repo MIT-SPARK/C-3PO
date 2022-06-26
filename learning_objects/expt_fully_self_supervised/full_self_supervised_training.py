@@ -1,5 +1,5 @@
 """
-This code implements supervised and self-supervised training, and validation, for keypoint detector with registration.
+This code implements full self-supervised training, and validation, for keypoint detector with registration.
 It uses registration during supervised training. It uses registration plus corrector during self-supervised training.
 
 """
@@ -15,16 +15,16 @@ from torch.utils.tensorboard import SummaryWriter
 
 sys.path.append("../../")
 
-from learning_objects.datasets.shapenet import DepthPC, CLASS_NAME, FixedDepthPC, CLASS_ID
+from learning_objects.datasets.shapenet import DepthPC, CLASS_NAME, \
+    FixedDepthPC, CLASS_ID, MixedFixedDepthPC
 from learning_objects.utils.general import TrackingMeter
 from learning_objects.utils.visualization_utils import display_results
-
-from learning_objects.utils.loss_functions import certify, self_supervised_training_loss as self_supervised_loss, \
-    self_supervised_validation_loss as validation_loss
-
+from learning_objects.utils.loss_functions import certify, self_supervised_training_loss \
+    as self_supervised_loss, self_supervised_validation_loss as validation_loss
+# evaluation metrics
 from learning_objects.utils.evaluation_metrics import add_s_error
-from learning_objects.expt_self_supervised_correction.evaluation import evaluate
-from learning_objects.expt_self_supervised_correction.proposed_model import ProposedRegressionModel as ProposedModel
+from learning_objects.expt_shapenet.proposed_model import ProposedRegressionModel as ProposedModel
+from learning_objects.expt_fully_self_supervised.evaluation import evaluate
 
 # Train
 def self_supervised_train_one_epoch(training_loader, model, optimizer, device, hyper_param):
@@ -33,8 +33,8 @@ def self_supervised_train_one_epoch(training_loader, model, optimizer, device, h
 
     for i, data in enumerate(training_loader):
         # Every data instance is an input + label pair
-        # print("Running batch ", i+1, "/", len(training_loader))
-        input_point_cloud, _, _, _ = data
+        print("i :", i)
+        input_point_cloud, _, _ = data
         input_point_cloud = input_point_cloud.to(device)
 
         # Zero your gradients for every batch!
@@ -85,15 +85,11 @@ def validate(validation_loader, model, device, hyper_param):
         running_vloss = 0.0
 
         for i, vdata in enumerate(validation_loader):
-            input_point_cloud, keypoints_target, R_target, t_target = vdata
+            input_point_cloud, _, _ = vdata
             input_point_cloud = input_point_cloud.to(device)
-            keypoints_target = keypoints_target.to(device)
-            R_target = R_target.to(device)
-            t_target = t_target.to(device)
 
             # Make predictions for this batch
-            predicted_point_cloud, corrected_keypoints, R_predicted, t_predicted, correction, \
-            predicted_model_keypoints = model(input_point_cloud)
+            predicted_point_cloud, corrected_keypoints, R_predicted, t_predicted, correction, predicted_model_keypoints = model(input_point_cloud)
 
             # certification
             certi = certify(input_point_cloud=input_point_cloud,
@@ -108,7 +104,7 @@ def validate(validation_loader, model, device, hyper_param):
 
             running_vloss += vloss
 
-            del input_point_cloud, keypoints_target, R_target, t_target, \
+            del input_point_cloud, \
                 predicted_point_cloud, corrected_keypoints, R_predicted, t_predicted, certi
 
         avg_vloss = running_vloss / (i + 1)
@@ -216,34 +212,27 @@ def train_detector(hyper_param, detector_type='pointnet', class_id="03001627",
     num_of_points_to_sample = hyper_param['num_of_points_to_sample']
     num_of_points_selfsupervised = hyper_param['num_of_points_selfsupervised']
 
-    # self_supervised_train_dataset = DepthPC(class_id=class_id,
-    #                                         model_id=model_id,
-    #                                         n=num_of_points_selfsupervised,
-    #                                         num_of_points_to_sample=num_of_points_to_sample,
-    #                                         dataset_len=self_supervised_train_dataset_len,
-    #                                         rotate_about_z=True)
-    self_supervised_train_dataset = FixedDepthPC(class_id=class_id,
-                                                 model_id=model_id,
-                                                 n=num_of_points_selfsupervised,
-                                                 num_of_points_to_sample=num_of_points_to_sample,
-                                                 base_dataset_folder=hyper_param['dataset_folder'])
+    self_supervised_train_dataset = MixedFixedDepthPC(class_id=class_id,
+                                                      model_id=model_id,
+                                                      n=num_of_points_selfsupervised,
+                                                      num_of_points_to_sample=num_of_points_to_sample,
+                                                      base_dataset_folder=hyper_param['dataset_folder'])
     print("Dataset length: ", self_supervised_train_dataset.len)
     self_supervised_train_loader = torch.utils.data.DataLoader(self_supervised_train_dataset,
                                                                batch_size=self_supervised_train_batch_size,
-                                                               shuffle=False)
+                                                               shuffle=True)
 
     # validation dataset:
     val_dataset_len = hyper_param['val_dataset_len']
     val_batch_size = hyper_param['val_batch_size']
-    val_dataset = DepthPC(class_id=class_id,
-                          model_id=model_id,
-                          n=num_of_points_selfsupervised,
-                          num_of_points_to_sample=num_of_points_to_sample,
-                          dataset_len=val_dataset_len,
-                          rotate_about_z=True)
+    val_dataset = MixedFixedDepthPC(class_id=class_id,
+                                    model_id=model_id,
+                                    n=num_of_points_selfsupervised,
+                                    num_of_points_to_sample=num_of_points_to_sample,
+                                    base_dataset_folder=hyper_param['val_dataset_folder'])
     val_loader = torch.utils.data.DataLoader(val_dataset,
                                              batch_size=val_batch_size,
-                                             shuffle=False)
+                                             shuffle=True)
 
     # Generate a shape category, CAD model objects, etc.
     cad_models = self_supervised_train_dataset._get_cad_models().to(torch.float).to(device=device)
@@ -296,14 +285,16 @@ def visual_test(test_loader, model, hyper_param, device=None):
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     cad_models = test_loader.dataset._get_cad_models()
+    model_keypoints = test_loader.dataset._get_model_keypoints()
     cad_models = cad_models.to(device)
+    model_keypoints = model_keypoints.to(device)
 
     for i, vdata in enumerate(test_loader):
-        input_point_cloud, keypoints_target, R_target, t_target = vdata
+        input_point_cloud, R_target, t_target = vdata
         input_point_cloud = input_point_cloud.to(device)
-        keypoints_target = keypoints_target.to(device)
         R_target = R_target.to(device)
         t_target = t_target.to(device)
+        keypoints_target = R_target @ model_keypoints + t_target
 
         # Make predictions for this batch
         model.eval()
@@ -332,13 +323,13 @@ def visual_test(test_loader, model, hyper_param, device=None):
         kp = keypoints_target.clone().detach().to('cpu')
         kp_p = predicted_keypoints.clone().detach().to('cpu')
         print("DISPLAY: INPUT PC")
-        display_results(input_point_cloud=pc, detected_keypoints=None, target_point_cloud=None,
-                        target_keypoints=kp)
+        display_results(input_point_cloud=pc, detected_keypoints=kp, target_point_cloud=pc,
+                        target_keypoints=None)
         print("DISPLAY: INPUT AND PREDICTED PC")
         display_results(input_point_cloud=pc, detected_keypoints=kp_p, target_point_cloud=pc_p,
                         target_keypoints=kp)
         print("DISPLAY: TRUE AND PREDICTED PC")
-        display_results(input_point_cloud=pc_t, detected_keypoints=kp_p, target_point_cloud=pc_p,
+        display_results(input_point_cloud=pc_p, detected_keypoints=kp_p, target_point_cloud=pc_t,
                         target_keypoints=kp)
 
         del pc, pc_p, kp, kp_p, pc_t
@@ -350,14 +341,13 @@ def visual_test(test_loader, model, hyper_param, device=None):
 
 
 def visualize_detector(hyper_param, detector_type, class_id, model_id,
+                       dataset_class_id, dataset_model_id,
                        evaluate_models=True, models_to_analyze='post',
                        use_corrector=True,
-                       visualize=False, device=None,
-                       cross=False, cross_class_id=None, cross_model_id=None):
+                       visualize=False, device=None):
     """
 
     """
-
     if device==None:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     if models_to_analyze == 'pre':
@@ -381,24 +371,25 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
     # validation dataset:
     eval_dataset_len = hyper_param['eval_dataset_len']
     eval_batch_size = hyper_param['eval_batch_size']
-    eval_dataset = FixedDepthPC(class_id=class_id, model_id=model_id,
-                                n=hyper_param['num_of_points_selfsupervised'],
-                                num_of_points_to_sample=hyper_param['num_of_points_to_sample'],
-                                dataset_len=eval_dataset_len,
-                                rotate_about_z=True)
-    eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=eval_batch_size, shuffle=False)
+    eval_dataset = MixedFixedDepthPC(class_id=dataset_class_id,
+                                     model_id=dataset_model_id,
+                                     n=hyper_param['num_of_points_selfsupervised'],
+                                     num_of_points_to_sample=hyper_param['num_of_points_to_sample'],
+                                     base_dataset_folder=hyper_param['eval_dataset_folder'],
+                                     mixed_data=False)
+    eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=eval_batch_size, shuffle=True)
+
 
     # model
-    cad_models = eval_dataset._get_cad_models().to(torch.float).to(device=device)
-    model_keypoints = eval_dataset._get_model_keypoints().to(torch.float).to(device=device)
-
-    if cross:
-        eval_dataset = FixedDepthPC(class_id=cross_class_id, model_id=cross_model_id,
-                                    n=hyper_param['num_of_points_selfsupervised'],
-                                    num_of_points_to_sample=hyper_param['num_of_points_to_sample'],
-                                    dataset_len=eval_dataset_len,
-                                    rotate_about_z=True)
-        eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=eval_batch_size, shuffle=False)
+    temp_dataset = MixedFixedDepthPC(class_id=class_id,
+                                     model_id=model_id,
+                                     n=hyper_param['num_of_points_selfsupervised'],
+                                     num_of_points_to_sample=hyper_param['num_of_points_to_sample'],
+                                     base_dataset_folder=hyper_param['eval_dataset_folder'],
+                                     mixed_data=False)
+    cad_models = temp_dataset._get_cad_models().to(torch.float).to(device=device)
+    model_keypoints = temp_dataset._get_model_keypoints().to(torch.float).to(device=device)
+    del temp_dataset
 
     if pre_:
         model_before = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,
@@ -446,13 +437,12 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
     # # Visual Test
     dataset_len = 20
     dataset_batch_size = 1
-    dataset = DepthPC(class_id=class_id,
-                      model_id=model_id,
-                      n=hyper_param['num_of_points_selfsupervised'],
-                      num_of_points_to_sample=hyper_param['num_of_points_to_sample'],
-                      dataset_len=dataset_len,
-                      rotate_about_z=True)
-    loader = torch.utils.data.DataLoader(dataset, batch_size=dataset_batch_size, shuffle=False)
+    dataset = MixedFixedDepthPC(class_id=class_id,
+                                model_id=model_id,
+                                n=hyper_param['num_of_points_selfsupervised'],
+                                num_of_points_to_sample=hyper_param['num_of_points_to_sample'],
+                                base_dataset_folder=hyper_param['val_dataset_folder'])
+    loader = torch.utils.data.DataLoader(dataset, batch_size=dataset_batch_size, shuffle=True)
 
     if visualize and pre_:
         print(">>" * 40)
@@ -473,40 +463,37 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
 
     return None
 
-def evaluate_model(detector_type, class_name, model_id,
-                   evaluate_models=True,
-                   models_to_analyze='post',
-                   visualize=True,
-                   use_corrector=True,
-                   cross=False,
-                   cross_class_id=None,
-                   cross_model_id=None):
-    class_id = CLASS_ID[class_name]
+def visualize_kp_detectors(detector_type, model_class_ids, test_class_name, only_categories=None,
+                           evaluate_models=True,
+                           models_to_analyze='post',
+                           visualize=True,
+                           use_corrector=True):
 
-    if cross:
-        hyper_param_file = "../expt_full_self_supervised_correction/full_self_supervised_training.yml"
-    else:
-        hyper_param_file = "self_supervised_training.yml"
-    stream = open(hyper_param_file, "r")
-    hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
-    hyper_param = hyper_param[detector_type]
-    hyper_param['epsilon'] = hyper_param['epsilon'][class_name]
+    dataset_class_id = CLASS_ID[test_class_name]
+    dataset_model_id = model_class_ids[test_class_name]
 
+    for key, value in model_class_ids.items():
+        if key in only_categories:
+            class_id = CLASS_ID[key]
+            model_id = str(value)
+            class_name = CLASS_NAME[class_id]
 
-    print(">>"*40)
-    print("Analyzing Trained Model for Object: ", class_name, "; Model ID:", str(model_id))
-    visualize_detector(detector_type=detector_type,
-                       class_id=class_id,
-                       model_id=model_id,
-                       hyper_param=hyper_param,
-                       evaluate_models=evaluate_models,
-                       models_to_analyze=models_to_analyze,
-                       use_corrector=use_corrector,
-                       visualize=visualize,
-                       cross=cross,
-                       cross_class_id=cross_class_id,
-                       cross_model_id=cross_model_id)
+            hyper_param_file = "./full_self_supervised_training.yml"
+            stream = open(hyper_param_file, "r")
+            hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
+            hyper_param = hyper_param[detector_type]
+            hyper_param['epsilon'] = hyper_param['epsilon'][key]
 
-
-
-
+            print(">>"*40)
+            print("Analyzing Trained Model for Object: ", key, "; Model ID:", str(model_id))
+            print("On dataset of: ", test_class_name)
+            visualize_detector(detector_type=detector_type,
+                               class_id=class_id,
+                               model_id=model_id,
+                               dataset_class_id=dataset_class_id,
+                               dataset_model_id=dataset_model_id,
+                               hyper_param=hyper_param,
+                               evaluate_models=evaluate_models,
+                               models_to_analyze=models_to_analyze,
+                               use_corrector=use_corrector,
+                               visualize=visualize)

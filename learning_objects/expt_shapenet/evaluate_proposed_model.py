@@ -7,14 +7,14 @@ sys.path.append('../..')
 
 from learning_objects.datasets.shapenet import CLASS_NAME, CLASS_ID
 from learning_objects.utils.visualization_utils import display_two_pcs
-from learning_objects.expt_self_supervised_correction.self_supervised_training import evaluate_model
+from learning_objects.expt_shapenet.self_supervised_training import evaluate_model
 
 if __name__ == "__main__":
 
     """
     usage: 
-    >> python evaluate_trained_model.py "point_transformer" "chair" "pre"
-    >> python evaluate_trained_model.py "pointnet" "chair" "post"
+    >> python evaluate_proposed_model.py "point_transformer" "chair" "pre"
+    >> python evaluate_proposed_model.py "pointnet" "chair" "post"
     
     """
 

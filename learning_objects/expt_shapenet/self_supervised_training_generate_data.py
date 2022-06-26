@@ -3,7 +3,7 @@
 import yaml
 import sys
 sys.path.append("../..")
-from learning_objects.expt_self_supervised_correction.evaluation import generate_depthpc_eval_data
+from learning_objects.expt_shapenet.evaluation import generate_depthpc_eval_data
 
 if __name__ == "__main__":
 

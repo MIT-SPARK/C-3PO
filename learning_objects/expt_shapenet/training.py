@@ -8,9 +8,9 @@ sys.path.append("../../")
 
 from learning_objects.datasets.shapenet import CLASS_NAME, CLASS_ID
 
-from learning_objects.expt_self_supervised_correction.self_supervised_training import train_detector as train_detector_self_supervised
-from learning_objects.expt_self_supervised_correction.supervised_training import train_detector as train_detector_supervised
-from learning_objects.expt_self_supervised_correction.train_baseline import train_detector as train_detector_baseline
+from learning_objects.expt_shapenet.self_supervised_training import train_detector as train_detector_self_supervised
+from learning_objects.expt_shapenet.supervised_training import train_detector as train_detector_supervised
+from learning_objects.expt_shapenet.train_baseline import train_detector as train_detector_baseline
 
 
 def train_kp_detectors(detector_type, class_name, model_id, use_corrector=True, train_mode="self_supervised"):

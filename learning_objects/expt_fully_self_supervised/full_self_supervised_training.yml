@@ -46,7 +46,7 @@ point_transformer:
     table: 0.999 #0.99
 
   eval_dataset_len: 50
-  eval_batch_size: 50
+  eval_batch_size: 25 #50
 
   adds_threshold: 0.02  # 5% of the object diameter
   adds_auc_threshold: 0.05  # 5% of the object diameter

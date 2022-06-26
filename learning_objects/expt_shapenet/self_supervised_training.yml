@@ -17,7 +17,7 @@ point_transformer:
   baseline_momentum_sgd: 0.9
 
   self_supervised_train_dataset_len: 500
-  self_supervised_train_batch_size: 50
+  self_supervised_train_batch_size: 25 #50
   num_of_points_to_sample: 1000
   num_of_points_selfsupervised: 2048
   # train_dataset_len: 50000
@@ -55,7 +55,7 @@ point_transformer:
 
 
   eval_dataset_len: 50
-  eval_batch_size: 50
+  eval_batch_size: 25 # 50
 
   adds_threshold: 0.02  # 5% of the object diameter
   adds_auc_threshold: 0.05  # 5% of the object diameter

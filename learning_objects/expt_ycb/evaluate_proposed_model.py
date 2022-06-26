@@ -5,7 +5,6 @@ import yaml
 
 sys.path.append('../..')
 
-# from learning_objects.datasets.shapenet import CLASS_NAME, CLASS_ID
 from learning_objects.utils.visualization_utils import display_two_pcs
 from learning_objects.expt_ycb.self_supervised_training import evaluate_model
 
@@ -13,8 +12,8 @@ if __name__ == "__main__":
 
     """
     usage: 
-    >> python evaluate_trained_model.py "point_transformer" "021_bleach_cleanser" "pre"
-    >> python evaluate_trained_model.py "point_transformer" "021_bleach_cleanser" "post"
+    >> python evaluate_proposed_model.py "point_transformer" "021_bleach_cleanser" "pre"
+    >> python evaluate_proposed_model.py "point_transformer" "021_bleach_cleanser" "post"
     
     """
 

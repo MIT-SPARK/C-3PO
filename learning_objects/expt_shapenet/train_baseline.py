@@ -28,10 +28,10 @@ from learning_objects.utils.visualization_utils import display_results
 from learning_objects.utils.loss_functions import certify, self_supervised_training_loss \
     as self_supervised_loss, self_supervised_validation_loss as validation_loss
 
-from learning_objects.expt_self_supervised_correction.supervised_training import train_with_supervision
-from learning_objects.expt_self_supervised_correction.proposed_model import ProposedRegressionModel as ProposedModel
+from learning_objects.expt_shapenet.supervised_training import train_with_supervision
+from learning_objects.expt_shapenet.proposed_model import ProposedRegressionModel as ProposedModel
 
-from learning_objects.expt_self_supervised_correction.evaluation import evaluate
+from learning_objects.expt_shapenet.evaluation import evaluate
 
 
 def train_detector(hyper_param, detector_type='pointnet', class_id="03001627",

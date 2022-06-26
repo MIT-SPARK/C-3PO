@@ -222,7 +222,7 @@ def visualize_kp_detectors(detector_type, model_class_ids, only_categories=None,
             class_name = CLASS_NAME[class_id]
 
             if cross:
-                hyper_param_file = "../expt_full_self_supervised_correction/full_self_supervised_training.yml"
+                hyper_param_file = "../expt_fully_self_supervised/full_self_supervised_training.yml"
             else:
                 hyper_param_file = "self_supervised_training.yml"
             stream = open(hyper_param_file, "r")
