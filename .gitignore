@@ -19,7 +19,7 @@ learning_objects/expt_keypoint_corrector_analysis/expt_with_pace_depthisopc
 learning_objects/expt_keypoint_corrector_analysis/expt_with_reg_se3pc
 learning_objects/expt_keypoint_corrector_analysis/expt_with_reg_depthpc
 learning_objects/expt_pace_compute_time/runs
-learning_objects/expt_corrector_compute_time/runs
+learning_objects/expt_corrector_compute_time_analysis_analysis/runs
 
 # Misc folders
 example_package/
@@ -126,4 +126,4 @@ venv.bak/
 
 #
 /learning_objects/expt_keypoint_corrector_analysis/expt_with_pace_depthisopc/
-/learning_objects/expt_corrector_compute_time/runs/
+/learning_objects/expt_corrector_compute_time_analysis_analysis/runs/
