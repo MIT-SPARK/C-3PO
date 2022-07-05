@@ -6,25 +6,11 @@ dataset/
 data/
 learning_objects/data/
 
-#more bulky dataset files
-KeypointNetLearning-Objects/models/*
-KeypointNetLearning-Objects/pcds/*
-KeypointNetLearning-Objects/annotations/*
-KeypointNetLearning-Objects/benchmark_scripts/cache
-KeypointNetLearning-Objects/benchmark_scripts/correspondance_log
-
 # Temporary experimental data
-learning_objects/expt_keypoint_corrector_analysis/expt_with_pace_se3isopc
-learning_objects/expt_keypoint_corrector_analysis/expt_with_pace_depthisopc
 learning_objects/expt_keypoint_corrector_analysis/expt_with_reg_se3pc
 learning_objects/expt_keypoint_corrector_analysis/expt_with_reg_depthpc
 learning_objects/expt_pace_compute_time/runs
 learning_objects/expt_corrector_compute_time_analysis_analysis/runs
-
-# Misc folders
-example_package/
-DeepSDF/
-learning_objects/discard/
 
 # Dependencies
 third_party/

@@ -20,8 +20,6 @@ sys.path.append("../../")
 from learning_objects.models.point_transformer import PointTransformerSegment, PointTransformerCls
 from learning_objects.models.pointnet import PointNetDenseCls, PointNetCls
 
-CORRESPONDENCE_LOG_FOLER: str = '../../KeypointNetLearning-Objects/benchmark_scripts/correspondence_log/'
-
 
 class ModelWrapper(torch.nn.Module):
     def __init__(self, model_impl) -> None:

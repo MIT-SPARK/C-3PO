@@ -4,19 +4,19 @@ now=$(date +'%c')
 echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" >> $FILE_NAME
 echo "$now" >> $FILE_NAME
 echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" >> $FILE_NAME
-#
-#echo "$now"
-#echo "002_master_chef_can:: POINT TRANSFORMER"
-#echo "002_master_chef_can:: POINT TRANSFORMER" >> $FILE_NAME
-#echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" >> $FILE_NAME
-#echo "$now" >> $FILE_NAME
-#echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" >> $FILE_NAME
-#python evaluate_model.py "point_transformer" "002_master_chef_can" "pre" "002_master_chef_can" "ycb" >> $FILE_NAME
-#python evaluate_model.py "point_transformer" "002_master_chef_can" "post" "002_master_chef_can" "ycb" >> $FILE_NAME
-#python evaluate_model.py "point_transformer" "002_master_chef_can" "post" "006_mustard_bottle" "ycb" >> $FILE_NAME
-#python evaluate_model.py "point_transformer" "002_master_chef_can" "post" "011_banana" "ycb" >> $FILE_NAME
-#python evaluate_model.py "point_transformer" "002_master_chef_can" "post" "037_scissors" "ycb" >> $FILE_NAME
-#python evaluate_model.py "point_transformer" "002_master_chef_can" "post" "052_extra_large_clamp" "ycb" >> $FILE_NAME
+
+echo "$now"
+echo "002_master_chef_can:: POINT TRANSFORMER"
+echo "002_master_chef_can:: POINT TRANSFORMER" >> $FILE_NAME
+echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" >> $FILE_NAME
+echo "$now" >> $FILE_NAME
+echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" >> $FILE_NAME
+python evaluate_model.py "point_transformer" "002_master_chef_can" "pre" "002_master_chef_can" "ycb" >> $FILE_NAME
+python evaluate_model.py "point_transformer" "002_master_chef_can" "post" "002_master_chef_can" "ycb" >> $FILE_NAME
+python evaluate_model.py "point_transformer" "002_master_chef_can" "post" "006_mustard_bottle" "ycb" >> $FILE_NAME
+python evaluate_model.py "point_transformer" "002_master_chef_can" "post" "011_banana" "ycb" >> $FILE_NAME
+python evaluate_model.py "point_transformer" "002_master_chef_can" "post" "037_scissors" "ycb" >> $FILE_NAME
+python evaluate_model.py "point_transformer" "002_master_chef_can" "post" "052_extra_large_clamp" "ycb" >> $FILE_NAME
 
 echo "$now"
 echo "006_mustard_bottle:: POINT TRANSFORMER"

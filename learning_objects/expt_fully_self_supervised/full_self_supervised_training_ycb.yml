@@ -68,5 +68,5 @@ point_transformer:
     061_foam_brick: 20
 
   adds_threshold: 0.01  # 1cm
-  adds_auc_threshold: 0.5  # 5cm
+  adds_auc_threshold: 0.05  # 5cm
   adds_max: True      # unused
