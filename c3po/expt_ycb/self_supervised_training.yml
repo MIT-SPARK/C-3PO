@@ -1,0 +1,194 @@
+point_transformer:
+  save_folder: './'
+
+  lr_sgd: 0.1
+  momentum_sgd: 0.9
+  only_load_nondegenerate_pcds: False
+
+#  self_supervised_train_batch_size:
+#    001_chips_can: 60
+#    002_master_chef_can: 60
+#    003_cracker_box: 60
+#    004_sugar_box: 60
+#    005_tomato_soup_can: 60
+#    006_mustard_bottle: 60
+#    007_tuna_fish_can: 60
+#    008_pudding_box: 60
+#    009_gelatin_box: 50
+#    010_potted_meat_can: 60
+#    011_banana: 60
+#    019_pitcher_base: 60
+#    021_bleach_cleanser: 120 #96 #60
+#    035_power_drill: 60
+#    036_wood_block: 60
+#    037_scissors: 116 #in 232 in training set compared to 480
+#    040_large_marker: 60
+#    051_large_clamp: 52 #260 training set
+#    052_extra_large_clamp: 52
+#    061_foam_brick: 60
+  # data augmentation fixed dataset
+  self_supervised_train_batch_size:
+    001_chips_can: 120
+    002_master_chef_can: 120
+    003_cracker_box: 120
+    004_sugar_box: 120
+    005_tomato_soup_can: 120
+    006_mustard_bottle: 120
+    007_tuna_fish_can: 120
+    008_pudding_box: 120
+    009_gelatin_box: 92
+    010_potted_meat_can: 120
+    011_banana: 120
+    019_pitcher_base: 120
+    021_bleach_cleanser: 120 #96 #60
+    035_power_drill: 120
+    036_wood_block: 120
+    037_scissors: 108
+    040_large_marker: 60
+    051_large_clamp: 67
+    052_extra_large_clamp: 92
+    061_foam_brick: 120
+
+  num_of_points_to_sample: 1000
+
+  train_stop_cert_threshold: 0.99
+
+  val_batch_size:
+    001_chips_can: 20
+    002_master_chef_can: 20
+    003_cracker_box: 20
+    004_sugar_box: 20
+    005_tomato_soup_can: 20
+    006_mustard_bottle: 20
+    007_tuna_fish_can: 20
+    008_pudding_box: 20
+    009_gelatin_box: 28
+    010_potted_meat_can: 20
+    011_banana: 20
+    019_pitcher_base: 20
+    021_bleach_cleanser: 20
+    035_power_drill: 20
+    036_wood_block: 20
+    037_scissors: 29
+    040_large_marker: 20
+    051_large_clamp: 26
+    052_extra_large_clamp: 26
+    061_foam_brick: 20
+  # data augmentation fixed dataset
+#  val_batch_size:
+#    001_chips_can: 20
+#    002_master_chef_can: 20
+#    003_cracker_box: 20
+#    004_sugar_box: 20
+#    005_tomato_soup_can: 20
+#    006_mustard_bottle: 20
+#    007_tuna_fish_can: 20
+#    008_pudding_box: 20
+#    009_gelatin_box: 101
+#    010_potted_meat_can: 20
+#    011_banana: 20
+#    019_pitcher_base: 20
+#    021_bleach_cleanser: 20
+#    035_power_drill: 20
+#    036_wood_block: 20
+#    037_scissors: 27
+#    040_large_marker: 20
+#    051_large_clamp: 67
+#    052_extra_large_clamp: 23
+#    061_foam_brick: 20
+
+  num_epochs: 50
+
+  theta: 25.0       # self-supervised loss function, pc_loss coefficient
+  epsilon:
+    001_chips_can: .9999
+    002_master_chef_can: .9999
+    003_cracker_box: .9998 #degeneracy.... but not in the way we expect from mugs
+    004_sugar_box: .9999 #same box degeneracy
+    005_tomato_soup_can: .99995 #top of can matches bottom of can issue
+    006_mustard_bottle: .9999
+    007_tuna_fish_can: .99994 #top of can degeneracy
+    008_pudding_box: .99995
+    009_gelatin_box: .99995
+    010_potted_meat_can: .9999
+    011_banana: .99992 #degeneracy fitting curve of banana
+    019_pitcher_base: 0.99975
+    021_bleach_cleanser: .99987
+    035_power_drill: .99992
+    036_wood_block: .9999
+    037_scissors: .99991
+    040_large_marker: .9999  #there's no pointclouds!
+    051_large_clamp: .99995
+    052_extra_large_clamp: .99992
+    061_foam_brick: .99995
+
+  # manually filtered evaluation data without degeneracies DON'T USE ANYMORE
+#  eval_batch_size:
+#    001_chips_can: 49 #20
+#    002_master_chef_can: 52 #20
+#    003_cracker_box: 44 #20
+#    004_sugar_box: 50 #20
+#    005_tomato_soup_can: 48 #20
+#    006_mustard_bottle: 20
+#    007_tuna_fish_can: 44 #20
+#    008_pudding_box: 47 #20
+#    009_gelatin_box: 45 #28
+#    010_potted_meat_can: 20
+#    011_banana: 20
+#    019_pitcher_base: 20
+#    021_bleach_cleanser: 20
+#    035_power_drill: 20
+#    036_wood_block: 45 #20
+#    037_scissors: 29
+#    040_large_marker: 20
+#    051_large_clamp: 26
+#    052_extra_large_clamp: 26 #11 #59 # 11
+#    061_foam_brick: 44 #20
+  # all depth point clouds default eval split
+  eval_batch_size:
+    001_chips_can: 20
+    002_master_chef_can: 20
+    003_cracker_box: 20
+    004_sugar_box: 20
+    005_tomato_soup_can: 60 #20
+    006_mustard_bottle: 20
+    007_tuna_fish_can: 20
+    008_pudding_box: 20
+    009_gelatin_box: 28
+    010_potted_meat_can: 20
+    011_banana: 60 #20
+    019_pitcher_base: 20
+    021_bleach_cleanser: 20
+    035_power_drill: 20
+    036_wood_block: 20
+    037_scissors: 29
+    040_large_marker: 20
+    051_large_clamp: 26
+    052_extra_large_clamp: 26 #11 #59 # 11
+    061_foam_brick: 20
+#    data augmentation
+#  eval_batch_size:
+#    001_chips_can: 20
+#    002_master_chef_can: 20
+#    003_cracker_box: 20
+#    004_sugar_box: 20
+#    005_tomato_soup_can: 20
+#    006_mustard_bottle: 20
+#    007_tuna_fish_can: 20
+#    008_pudding_box: 20
+#    009_gelatin_box: 101
+#    010_potted_meat_can: 20
+#    011_banana: 20
+#    019_pitcher_base: 20
+#    021_bleach_cleanser: 20
+#    035_power_drill: 20
+#    036_wood_block: 20
+#    037_scissors: 27
+#    040_large_marker: 20
+#    051_large_clamp: 67
+#    052_extra_large_clamp: 23 #11 #59 # 11
+#    061_foam_brick: 20
+
+  adds_threshold: .01
+  adds_auc_threshold: 0.05  # 5% of the object diameter
+  adds_max: True      # unused

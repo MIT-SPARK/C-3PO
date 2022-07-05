@@ -1,0 +1,7 @@
+dataset_folder: '../../data/learning_objects/shapenet_depthpc_eval_data/'
+
+num_of_points_to_sample: 1000         # Make sure to keep this same as in training
+num_of_points_selfsupervised: 2048    # Make sure to keep this same as in training
+
+eval_dataset_len: 50
+eval_batch_size: 50

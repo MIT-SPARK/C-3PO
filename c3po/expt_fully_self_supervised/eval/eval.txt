@@ -1,0 +1,136 @@
+CHAIR:: POINT TRANSFORMER
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  chair ; Model ID: 1cc6f2ed3d684fa245f213b8994b4a04
+Number of trainable parameters:  894622
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PRE-TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.020432643592357635
+kp error:  0.1095244362950325
+R error:  0.8656289577484131
+t error:  0.009466568008065224
+ADD-S ( 2 %):  66.0
+ADD-S AUC ( 5 %):  60.089500427246094
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  66.0
+Evaluating performance for certifiable objects: 
+pc error:  0.01110806129872799
+kp error:  0.011472761631011963
+R error:  0.0283513106405735
+t error:  0.0032431194558739662
+ADD-S ( 2 %):  100.0
+ADD-S AUC ( 5 %):  83.36627960205078
+GT-certifiable: 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  chair ; Model ID: 1cc6f2ed3d684fa245f213b8994b4a04
+Number of trainable parameters:  894622
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+pc error:  0.011133193969726562
+kp error:  0.011459995992481709
+R error:  0.03169101104140282
+t error:  0.003170531941577792
+ADD-S ( 2 %):  100.0
+ADD-S AUC ( 5 %):  83.20907592773438
+GT-certifiable: 
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  100.0
+Evaluating performance for certifiable objects: 
+pc error:  0.011133193969726562
+kp error:  0.011459996923804283
+R error:  0.03169101104140282
+t error:  0.003170531941577792
+ADD-S ( 2 %):  100.0
+ADD-S AUC ( 5 %):  83.20907592773438
+GT-certifiable: 
+
+
+---
+
+CHAIR:: POINT TRANSFORMER
+dataset_class_id:  04379243
+dataset_model_id:  3f5daa8fe93b68fa87e2d08958d6900c
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  chair ; Model ID: 1cc6f2ed3d684fa245f213b8994b4a04
+On dataset of:  table
+Number of trainable parameters:  894622
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  0.0
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+dataset_class_id:  02876657
+dataset_model_id:  41a2005b595ae783be1868124d5ddbcb
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  chair ; Model ID: 1cc6f2ed3d684fa245f213b8994b4a04
+On dataset of:  bottle
+Number of trainable parameters:  894622
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  2.000000238418579
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+dataset_class_id:  03642806
+dataset_model_id:  519e98268bee56dddbb1de10c9529bf7
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  chair ; Model ID: 1cc6f2ed3d684fa245f213b8994b4a04
+On dataset of:  laptop
+Number of trainable parameters:  894622
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  0.0
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+CHAIR:: POINT TRANSFORMER
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Analyzing Trained Model for Object:  chair ; Model ID: 1cc6f2ed3d684fa245f213b8994b4a04
+On dataset of:  skateboard
+Number of trainable parameters:  894622
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+(SELF-SUPERVISED) TRAINED MODEL:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> EVALUATING MODEL >>>>>>>>>>>>>>>>>>>>
+Evaluating performance across all objects:
+ADD-S ( 2 %):  0.0
+ADD-S AUC ( 5 %):  0.0
+Evaluating certification: 
+epsilon parameter:  0.999
+% certifiable:  0.0
+Evaluating performance for certifiable objects: 
+ADD-S ( 2 %):  nan
+ADD-S AUC ( 5 %):  0.0
+
+
+

@@ -1,6 +1,0 @@
-all models (except car, helmet) from:
-	Commit on Mar 29, 2022. "Evaluate PT: model_eval.txt". Branch: supercloud_expt2_models.
-
-car, helmet from:
-	Commit on Apr 08, 2022. "cad, helmet, bathtub, bed models trained". Branch: supercloud_expt2_models.
-
