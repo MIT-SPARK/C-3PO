@@ -148,13 +148,13 @@ conda env list
 # Usage
 Quick Links:
 
-- [Proposed Model](##proposed-model)
+- [Proposed Model](#proposed-model)
 
-- [Experiments Overview](##experiments-overview)
-	- [Experiment 1](##i-experiment-1)
-	- [Experiment 2](##ii-experiment-2)
-	- [Experiment 3](##iii-experiment-3)
- 	- [Experiment 4](##iv-experiment-4)
+- [Experiments Overview](#experiments-overview)
+	- [Experiment 1](#i-experiment-1)
+	- [Experiment 2](#ii-experiment-2)
+	- [Experiment 3](#iii-experiment-3)
+ 	- [Experiment 4](#iv-experiment-4)
 
 ## Proposed Model
 Our proposed model is in `c3po/expt_shapenet/proposed_model.py` for use with the shapenet dataset and `c3po/expt_ycb/proposed_model.py` for use with the ycb dataset. A brief description of parameters is below:
