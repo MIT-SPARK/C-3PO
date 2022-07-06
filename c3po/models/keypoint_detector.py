@@ -21,38 +21,6 @@ from c3po.models.point_transformer import PointTransformerSegment, PointTransfor
 from c3po.models.pointnet import PointNetDenseCls, PointNetCls
 
 
-class ModelWrapper(torch.nn.Module):
-    def __init__(self, model_impl) -> None:
-        super().__init__()
-        self.model_impl = model_impl
-
-    def forward(self, data):
-        pc = data[0]
-        if isinstance(pc, np.ndarray):
-            pc = torch.from_numpy(pc).float()
-        res = self.model_impl(pc.transpose(1, 2).cuda())
-        return res
-
-class CorrespondenceCriterion(torch.nn.Module):
-    def __init__(self) -> None:
-        super().__init__()
-
-    def forward(self, inputs, outputs):
-        print("---------------------------------------------------")
-        print("inside CorrespondenceCriterion")
-        print("inputs.shape", inputs.shape)
-        print("outputs.shape", outputs.shape)
-        kp_indexs = inputs[1]
-
-        loss = []
-        for b, kp_index in enumerate(kp_indexs):
-            loss_rot = []
-            for rot_kp_index in kp_index:
-                loss_rot.append(F.cross_entropy(outputs[b][None], rot_kp_index[None].long().cuda(), ignore_index=-1))
-            loss.append(torch.min(torch.stack(loss_rot)))
-        loss = torch.mean(torch.stack(loss))
-        return loss
-
 class RegressionKeypoints(nn.Module):
     """
     This module generates keypoints as a regression of the input point cloud.

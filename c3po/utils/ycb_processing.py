@@ -44,7 +44,7 @@ from reg_utils import (render_cad,
 import apollo_stereo_utils
 
 from get_3d_keypoints import project2d, plot_pts_on_image
-from depth_to_pcl_processing import depth_img_to_pcl, save_pcl, img_to_pcl
+from generate_pcl_utils import depth_img_to_pcl, save_pcl, img_to_pcl
 import c3po.utils.general as gu
 from c3po.datasets.ycb import DepthYCB
 

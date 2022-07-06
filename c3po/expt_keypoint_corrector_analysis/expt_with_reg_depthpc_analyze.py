@@ -21,24 +21,6 @@ plt.style.use('seaborn-whitegrid')
 COLORS = dict(mcolors.BASE_COLORS, **mcolors.CSS4_COLORS)
 
 
-# def masked_var_mean(data, mask):
-#     """
-#     inputs:
-#     data    : torch.tensor of shape (B, n)
-#     mask    : torch.tensor of shape (B, n). dtype=torch.bool
-#
-#     outputs:
-#     mean    : torch.tensor of shape (B, 1)
-#     var     : torch.tensor of shape (B, 1)
-#     """
-#
-#     mean = (torch.sum(data*mask.float(), dim=1)/torch.sum(mask.float(), dim=1)).unsqueeze(-1)
-#
-#     data_centered = data - mean
-#     var = (torch.sum((data_centered**2)*mask.float(), dim=1)/(torch.sum(mask.float(), dim=1)-1)).unsqueeze(-1)
-#
-#     return var.squeeze(-1), mean.squeeze(-1)
-
 def masked_varul_mean(data, mask):
     """
     inputs:
@@ -159,12 +141,12 @@ def certification(data, epsilon, delta, num_iterations=100, full_batch=False):
 
 if __name__ == '__main__':
     use_adds_metric = True
-    # file_names = ["./expt_with_reg_depthpc/02958343/ad45b2d40c7801ef2074a73831d8a3a2/20220218_021749_experiment.pickle"]
-    # file_names = ["./expt_with_reg_depthpc/03467517/5df08ba7af60e7bfe72db292d4e13056/20220218_041231_experiment.pickle"]
     file_names = ["./expt_with_reg_depthpc/02876657/41a2005b595ae783be1868124d5ddbcb_wchamfer/20220227_170722_experiment.pickle"]
+    # the following pickle files are the experiment metrics to generate plots from the paper
     # file_names = ["./expt_with_reg_depthpc/02691156/3db61220251b3c9de719b5362fe06bbb_wchamfer/20220610_185655_experiment.pickle",
     #               "./expt_with_reg_depthpc/02808440/90b6e958b359c1592ad490d4d7fae486_wchamfer/20220610_194647_experiment.pickle",
     #               "./expt_with_reg_depthpc/02818832/7c8eb4ab1f2c8bfa2fb46fb8b9b1ac9f_wchamfer/20220610_203643_experiment.pickle",
+    #               "./expt_with_reg_depthpc/02876657/41a2005b595ae783be1868124d5ddbcb_wchamfer/20220227_170722_experiment.pickle",
     #               "./expt_with_reg_depthpc/02954340/3dec0d851cba045fbf444790f25ea3db_wchamfer/20220610_212958_experiment.pickle",
     #               "./expt_with_reg_depthpc/02958343/ad45b2d40c7801ef2074a73831d8a3a2_wchamfer/20220610_222513_experiment.pickle",
     #               "./expt_with_reg_depthpc/03001627/1cc6f2ed3d684fa245f213b8994b4a04_wchamfer/20220610_232015_experiment.pickle",
@@ -294,7 +276,7 @@ if __name__ == '__main__':
                          ecolor='salmon', elinewidth=1, capsize=3, label='corrector')
             plt.errorbar(x=kp_noise_var_range, y=chamfer_metric_corrected_certi_mean, yerr=chamfer_metric_corrected_certi_var, fmt='--o',
                          color='orangered', ecolor='salmon', elinewidth=3, capsize=0, label='corrector + certification')
-            # new colors
+            # alternate colors
             # plt.errorbar(x=kp_noise_var_range, y=chamfer_metric_naive_mean, yerr=chamfer_metric_naive_var,
             #              fmt='-', color='red', ecolor='red', elinewidth=1, capsize=3, label='naive')
             # plt.errorbar(x=kp_noise_var_range, y=chamfer_metric_naive_certi_mean, yerr=chamfer_metric_naive_certi_var,
@@ -328,7 +310,7 @@ if __name__ == '__main__':
         plt.errorbar(x=kp_noise_var_range, y=Rerr_corrector_certi_mean, yerr=Rerr_corrector_certi_var, fmt='--o',
                      color='orangered', ecolor='salmon', elinewidth=3, capsize=0, label='corrector + certification')
 
-        # new colors
+        # alternate colors
         # plt.errorbar(x=kp_noise_var_range, y=Rerr_naive_mean, yerr=Rerr_naive_var, fmt='-', color='red', ecolor='red', elinewidth=1, capsize=3, label='naive')
         # plt.errorbar(x=kp_noise_var_range, y=Rerr_naive_certi_mean, yerr=Rerr_naive_certi_var, fmt='--o', color='red', ecolor=(1.0,0,0,0.3), elinewidth=3, capsize=3, label='naive + certification')
         # plt.errorbar(x=kp_noise_var_range, y=Rerr_corrector_mean, yerr=Rerr_corrector_var, fmt='-', color='green', ecolor='green', elinewidth=1, capsize=3, label='corrector')
@@ -361,7 +343,7 @@ if __name__ == '__main__':
         plt.errorbar(x=kp_noise_var_range, y=terr_corrector_certi_mean, yerr=terr_corrector_certi_var, fmt='--o',
                      color='salmon', ecolor='orangered', elinewidth=3, capsize=0, label='corrector + certification')
 
-        #new colors
+        #alternate colors
         # plt.errorbar(x=kp_noise_var_range, y=terr_naive_mean, yerr=terr_naive_var, fmt='-', color='red', ecolor='red', elinewidth=1, capsize=3, label='naive')
         # plt.errorbar(x=kp_noise_var_range, y=terr_naive_certi_mean, yerr=terr_naive_certi_var, fmt='--o', color='red', ecolor=(1.0,0,0,0.3), elinewidth=3, capsize=3, label='naive + certification')
         # plt.errorbar(x=kp_noise_var_range, y=terr_corrector_mean, yerr=terr_corrector_var, fmt='-', color='green', ecolor='green', elinewidth=1, capsize=3, label='corrector')

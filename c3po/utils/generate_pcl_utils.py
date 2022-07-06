@@ -38,7 +38,6 @@ from reg_utils import (render_cad,
 import apollo_stereo_utils
 
 from get_3d_keypoints import get_corresponding_car_for_kpts
-from depth_to_pcl_processing import depth_img_to_pcl, save_pcl, img_to_pcl
 from c3po.utils.visualization_utils import visualize_model_n_keypoints
 import c3po.utils.general as gu
 
@@ -72,6 +71,55 @@ K_cropped_inv = np.linalg.inv(K_cropped)
 
 # calculate stereo params
 stereo_params = apollo_stereo_utils.get_stereo_rectify_params()
+
+def depth_img_to_pcl(depth_o3d, camera_intrinsic, cv2_depth_filepath = None):
+    # if cv2_depth_filepath is not None:
+    #     assert os.path.exists(cv2_depth_filepath)
+    #     depth_o3d = o3d.io.read_image(cv2_depth_filepath)
+
+    print(depth_o3d)
+    plt.subplot()
+    plt.imshow(depth_o3d)
+    plt.show()
+    cam = o3d.camera.PinholeCameraIntrinsic()
+    cam.intrinsic_matrix = camera_intrinsic
+    pcd = o3d.geometry.PointCloud.create_from_depth_image(depth_o3d, cam)
+    print("pcd", pcd)
+    if len(pcd.points) == 0:
+        return pcd
+    # Flip it, otherwise the pointcloud will be upside down
+    pcd.transform([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]])
+
+    o3d.geometry.PointCloud.estimate_normals(pcd, search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=0.1,
+                                                                                max_nn=30))
+    o3d.geometry.PointCloud.orient_normals_towards_camera_location(pcd, camera_location=np.array([0., 0., 0.]))
+    pcd.paint_uniform_color([.5, .5, .5])
+    if VISUALIZE:
+        o3d.visualization.draw_geometries([pcd])
+    return pcd
+
+
+def img_to_pcl(rgbd, camera_intrinsic, viz=False):
+    cam = o3d.camera.PinholeCameraIntrinsic()
+    cam.intrinsic_matrix = camera_intrinsic
+    pcd = o3d.geometry.PointCloud.create_from_rgbd_image(rgbd, cam)
+    # Flip it, otherwise the pointcloud will be upside down
+    pcd.transform([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]])
+    o3d.geometry.PointCloud.estimate_normals(pcd, search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=0.1,
+                                                                                max_nn=30))
+    o3d.geometry.PointCloud.orient_normals_towards_camera_location(pcd, camera_location=np.array([0., 0., 0.]))
+    # pcd.paint_uniform_color([.5, .5, 1])
+    print(pcd)
+    if viz:
+        o3d.visualization.draw_geometries([pcd])
+    return pcd
+
+
+def save_pcl(path, pointcloud):
+    if os.path.exists(path):
+        print("saved pointcloud file already exists, NOT overwriting")
+        return
+    o3d.io.write_point_cloud(path, pointcloud)
 
 
 def apply_mask_to_depth(depth_map, car_mask):

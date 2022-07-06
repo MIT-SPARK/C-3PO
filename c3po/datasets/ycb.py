@@ -134,7 +134,7 @@ class SE3PointCloudYCB(torch.utils.data.Dataset):
 
     def _get_cad_models(self):
         """
-        Returns a sampled point cloud of the ShapeNetcore model with self.num_of_points points.
+        Returns a sampled point cloud of the ycb model with self.num_of_points points.
 
         output:
         cad_models  : torch.tensor of shape (1, 3, self.num_of_points)
@@ -149,7 +149,7 @@ class SE3PointCloudYCB(torch.utils.data.Dataset):
 
     def _get_model_keypoints(self):
         """
-        Returns keypoints of the ShapeNetCore model annotated in the KeypointNet dataset.
+        Returns keypoints of the ycb model annotated in the KeypointNet dataset.
 
         output:
         model_keypoints : torch.tensor of shape (1, 3, N)
@@ -241,7 +241,7 @@ class SE3PointCloudYCBAugment(torch.utils.data.Dataset):
 
     def _get_cad_models(self):
         """
-        Returns a sampled point cloud of the ShapeNetcore model with self.num_of_points points.
+        Returns a sampled point cloud of the ycb model with self.num_of_points points.
 
         output:
         cad_models  : torch.tensor of shape (1, 3, self.num_of_points)
@@ -256,7 +256,7 @@ class SE3PointCloudYCBAugment(torch.utils.data.Dataset):
 
     def _get_model_keypoints(self):
         """
-        Returns keypoints of the ShapeNetCore model annotated in the KeypointNet dataset.
+        Returns keypoints of the ycb model annotated in the KeypointNet dataset.
 
         output:
         model_keypoints : torch.tensor of shape (1, 3, N)
@@ -422,7 +422,7 @@ class DepthYCB(torch.utils.data.Dataset):
 
     def _get_cad_models(self):
         """
-        Returns a sampled point cloud of the ShapeNetcore model with self.num_of_points points.
+        Returns a sampled point cloud of the ycb model with self.num_of_points points.
 
         output:
         cad_models  : torch.tensor of shape (1, 3, self.num_of_points)
@@ -437,7 +437,7 @@ class DepthYCB(torch.utils.data.Dataset):
 
     def _get_model_keypoints(self):
         """
-        Returns keypoints of the ShapeNetCore model annotated in the KeypointNet dataset.
+        Returns keypoints of the ycb model annotated in the KeypointNet dataset.
 
         output:
         model_keypoints : torch.tensor of shape (1, 3, N)
@@ -544,7 +544,7 @@ class DepthYCBAugment(torch.utils.data.Dataset):
 
     def _get_cad_models(self):
         """
-        Returns a sampled point cloud of the ShapeNetcore model with self.num_of_points points.
+        Returns a sampled point cloud of the ycb model with self.num_of_points points.
 
         output:
         cad_models  : torch.tensor of shape (1, 3, self.num_of_points)
@@ -559,7 +559,7 @@ class DepthYCBAugment(torch.utils.data.Dataset):
 
     def _get_model_keypoints(self):
         """
-        Returns keypoints of the ShapeNetCore model annotated in the KeypointNet dataset.
+        Returns keypoints of the ycb model annotated in the KeypointNet dataset.
 
         output:
         model_keypoints : torch.tensor of shape (1, 3, N)
@@ -674,7 +674,7 @@ class MixedDepthYCBAugment(torch.utils.data.Dataset):
 
     def _get_cad_models(self):
         """
-        Returns a sampled point cloud of the ShapeNetcore model with self.num_of_points points.
+        Returns a sampled point cloud of the ycb model with self.num_of_points points.
 
         output:
         cad_models  : torch.tensor of shape (1, 3, self.num_of_points)
@@ -689,7 +689,7 @@ class MixedDepthYCBAugment(torch.utils.data.Dataset):
 
     def _get_model_keypoints(self):
         """
-        Returns keypoints of the ShapeNetCore model annotated in the KeypointNet dataset.
+        Returns keypoints of the ycb model annotated in the KeypointNet dataset.
 
         output:
         model_keypoints : torch.tensor of shape (1, 3, N)
