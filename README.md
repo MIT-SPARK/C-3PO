@@ -148,15 +148,13 @@ conda env list
 # Usage
 Quick Links:
 
-- [Proposed Model] (##-Proposed-Model)
+- [Proposed Model](##proposed-model)
 
-- [Experiments Overview] (##-Experiments-Overview)
-	- [Experiment 1] (##-i.-Experiment-1:-`c3po/expt_keypoint_corrector_analysis/`)
-	- [Experiment 2] (##-ii.-Experiment-2:-`c3po/expt_shapenet/`
-)
-	- [Experiment 3] (##-iii.-Experiment-3:-`c3po/expt_ycb/`
-)
- 	- [Experiment 4] (##-iv.-Experiment-4:-`c3po/expt_fully_self_supervised/`)
+- [Experiments Overview](##experiments-overview)
+	- [Experiment 1](##i-experiment-1)
+	- [Experiment 2](##ii-experiment-2)
+	- [Experiment 3](##iii-experiment-3)
+ 	- [Experiment 4](##iv-experiment-4)
 
 ## Proposed Model
 Our proposed model is in `c3po/expt_shapenet/proposed_model.py` for use with the shapenet dataset and `c3po/expt_ycb/proposed_model.py` for use with the ycb dataset. A brief description of parameters is below:
@@ -174,14 +172,15 @@ Our proposed model is in `c3po/expt_shapenet/proposed_model.py` for use with the
 ## Experiments Overview
 Our repository is organized into experiments inside our c3po folder. The numbering corresponds to the order of appearance in our paper. Read descriptions under each experiment for details.
 
-## i. Experiment 1: `c3po/expt_keypoint_corrector_analysis/`
-###Description
+## i. Experiment 1: 
+`c3po/expt_keypoint_corrector_analysis/`
+### Description
 This experiment aims to show the effectiveness of our keypoint corrector module. It uses shapenet dataset models. For each input point cloud, we perturb 80% of the the keypoints with varying amounts of noise and then pass the input through the corrector module and then the registration module. Averaged errors for 100 iterations of the corrector forward pass per noise variance parameter are saved for plot generation.
 
-###Results
+### Results
 Our plots from the paper are saved at filepath: `c3po/expt_keypoint_corrector_analysis/expt_with_reg_depthpc/<CLASS_ID>/<MODEL_ID>_wchamfer/`
 
-###Replication
+### Replication
 To run our full experiment and save metrics for plot generation, run: 
 
 ```
@@ -193,15 +192,16 @@ The experiment will save metrics for plot generation in the filepath `c3po/expt_
 
 To regenerate plots, change the `file_names` parameter inside `expt_with_reg_depthpc_analyze.py` to the pickle filepath containing saved metrics from the previous step, and run `python expt_with_reg_depthpc_analyze.py`
 
-## ii. Experiment 2: `c3po/expt_shapenet/`
-###Description
+## ii. Experiment 2: 
+`c3po/expt_shapenet/`
+### Description
 
 This folder contains our proposed model as well as supervised training, self-supervised training, various ICP baseline training, and evaluation code for ***simulated*** depth point clouds using shapenet models. 
 
-###Results
+### Results
 Saved models are saved at filepath: `c3po/expt_shapenet/<CLASS_NAME>/<MODEL_ID>/`
 
-###Replication
+### Replication
 To run training and save models for evaluation (***this will overwrite existing models***), run: 
 
 ```
@@ -243,15 +243,16 @@ bash handy_evaluate_icp.sh
 ```
 
 
-## iii. Experiment 3: `c3po/expt_ycb/`
-###Description
+## iii. Experiment 3: 
+`c3po/expt_ycb/`
+### Description
 
 This folder contains our proposed model as well as supervised training, self-supervised training, various ICP baseline training, and evaluation code for ***real*** depth point clouds using ycb models. 
 
-###Results
+### Results
 Saved models are saved at filepath: `c3po/expt_ycb/<MODEL_ID>/`
 
-###Replication
+### Replication
 To run training and save models for evaluation (***this will overwrite existing models***), run: 
 
 ```
@@ -292,14 +293,15 @@ cd c3po/expt_ycb/
 bash handy_evaluate_icp.sh
 ```
 
-## iv. Experiment 4: `c3po/expt_fully_self_supervised/`
-###Description
+## iv. Experiment 4: 
+`c3po/expt_fully_self_supervised/`
+### Description
 This folder contains our training and evaluation code for our proposed model using multiple object types as input data for ***simulated*** and ***real*** depth point clouds using shapenet and ycb models respectively. 
 
-###Results
+### Results
 Saved models are saved at filepath: `c3po/expt_fully_self_supervised/<MODEL_ID>/` for ycb objects and `c3po/expt_fully_self_supervised/<CLASS_NAME>/<MODEL_ID>/` for shapenet objects.
 
-###Replication
+### Replication
 To run training and save models for evaluation (***this will overwrite existing models***), run: 
 
 ```
