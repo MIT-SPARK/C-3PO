@@ -11,12 +11,15 @@
 <br>
 <br>
 
-# C3PO: A New Approach to Self-Supervised 3D Object Perception
+# C-3PO: A New Approach to Self-Supervised 3D Object Perception
 
 **Authors:** Rajat Talak, Lisa Peng, [Luca Carlone](https://lucacarlone.mit.edu/)
 
 ## Introduction
 **todo[lisa]: put some pretty gifs here**
+
+correction, certify, certify
+figure 1
 
 C3PO is a new keypoint-based self-supervised object pose estimation method that uses keypoint correction, a certificate of correctness and a certificate of nondegeneracy to predict and verify object poses from input depth point clouds. 
 
@@ -136,13 +139,8 @@ conda env list
 - bottler
 - pytorch3d
 - scipy
-- pymanopt
 - yaml
 - open3d
-- jupyterlab
-- cvxpy
-- cvxpylayers 
-
 
 
 # Usage
