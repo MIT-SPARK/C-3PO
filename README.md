@@ -16,10 +16,11 @@
 **Authors:** Rajat Talak, Lisa Peng, [Luca Carlone](https://lucacarlone.mit.edu/)
 
 ## Introduction
-**todo[lisa]: put some pretty gifs here**
 
-correction, certify, certify
-figure 1
+| **C** orrect | **C** ertify Correctness | **C** ertify (Non)degeneracy |
+|:---:|:---:|:---:|
+| <img src="docs/media/correct.gif" width="100%" >  | <img src="docs/media/cert.gif" width="100%" > | <img src="docs/media/cert_and_degen.gif" width="50%" > <img src="docs/media/cert_and_nondegen.gif" width="50%" > |
+
 
 C3PO is a new keypoint-based self-supervised object pose estimation method that uses keypoint correction, a certificate of correctness and a certificate of nondegeneracy to predict and verify object poses from input depth point clouds. 
 
@@ -155,7 +156,7 @@ Quick Links:
  	- [Experiment 4](#iv-experiment-4)
 
 ## Proposed Model
-Our proposed model is in `c3po/expt_shapenet/proposed_model.py` for use with the shapenet dataset and `c3po/expt_ycb/proposed_model.py` for use with the ycb dataset. A brief description of parameters is below:
+Our proposed model is in `c3po/expt_shapenet/proposed_model.py` for use with the ShapeNet dataset and `c3po/expt_ycb/proposed_model.py` for use with the YCB dataset. A brief description of parameters is below:
 
 ```
 - class_name/model_id: The category of the object.
@@ -167,13 +168,22 @@ Our proposed model is in `c3po/expt_shapenet/proposed_model.py` for use with the
 - need_predicted_keypoints: Boolean to specify whether to return predicted model keypoints (ground truth model keypoints transformed by predicted R and t) in the forward pass.
 ```
 
+|<img src="docs/media/opening-fig-01.png" width="100%">|<img src="docs/media/opening-fig-02.png" width="100%">|<img src="docs/media/opening-fig-03.png" width="100%">|
+|:---:|:---:|:---:|
+| keypoint detector trained in simulation | detector and registration fails on real depth point cloud data | success after self-supervised training using proposed model|
+
 ## Experiments Overview
 Our repository is organized into experiments inside our c3po folder. The numbering corresponds to the order of appearance in our paper. Read descriptions under each experiment for details.
+
 
 ## i. Experiment 1: 
 `c3po/expt_keypoint_corrector_analysis/`
 ### Description
-This experiment aims to show the effectiveness of our keypoint corrector module. It uses shapenet dataset models. For each input point cloud, we perturb 80% of the the keypoints with varying amounts of noise and then pass the input through the corrector module and then the registration module. Averaged errors for 100 iterations of the corrector forward pass per noise variance parameter are saved for plot generation.
+This experiment aims to show the effectiveness of our keypoint corrector module. It uses ShapeNet dataset models. For each input point cloud, we perturb 80% of the the keypoints with varying amounts of noise and then pass the input through the corrector module and then the registration module. Averaged ADD-S errors for 100 iterations of the corrector forward pass per noise variance parameter are saved for plot generation.
+
+|<img src="docs/media/table-adds.jpg" width="100%">|<img src="docs/media/vessel-adds.jpg" width="100%">|<img src="docs/media/skateboard-adds.jpg" width="100%">|
+|:---:|:---:|:---:|
+| corrector results on table model | corrector results on vessel model | corrector results on skateboard model |
 
 ### Results
 Our plots from the paper are saved at filepath: `c3po/expt_keypoint_corrector_analysis/expt_with_reg_depthpc/<CLASS_ID>/<MODEL_ID>_wchamfer/`
@@ -194,7 +204,11 @@ To regenerate plots, change the `file_names` parameter inside `expt_with_reg_dep
 `c3po/expt_shapenet/`
 ### Description
 
-This folder contains our proposed model as well as supervised training, self-supervised training, various ICP baseline training, and evaluation code for ***simulated*** depth point clouds using shapenet models. 
+This folder contains our proposed model as well as supervised training, self-supervised training, various ICP baseline training, and evaluation code for ***simulated*** depth point clouds using ShapeNet models. 
+
+|<img src="docs/media/expt-shapenet.png" width="100%">|
+|:---:|
+| Evaluation for the proposed model and baselines for the ShapeNet experiment. | 
 
 ### Results
 Saved models are saved at filepath: `c3po/expt_shapenet/<CLASS_NAME>/<MODEL_ID>/`
@@ -243,9 +257,17 @@ bash handy_evaluate_icp.sh
 
 ## iii. Experiment 3: 
 `c3po/expt_ycb/`
+
 ### Description
 
-This folder contains our proposed model as well as supervised training, self-supervised training, various ICP baseline training, and evaluation code for ***real*** depth point clouds using ycb models. 
+This folder contains our proposed model as well as supervised training, self-supervised training, various ICP baseline training, and evaluation code for ***real*** depth point clouds using YCB models. 
+
+
+|<img src="docs/media/expt-ycb.png" width="100%">|
+|:---:|
+| Evaluation for the proposed model and baselines for the YCB experiment. | 
+
+
 
 ### Results
 Saved models are saved at filepath: `c3po/expt_ycb/<MODEL_ID>/`
@@ -294,10 +316,10 @@ bash handy_evaluate_icp.sh
 ## iv. Experiment 4: 
 `c3po/expt_fully_self_supervised/`
 ### Description
-This folder contains our training and evaluation code for our proposed model using multiple object types as input data for ***simulated*** and ***real*** depth point clouds using shapenet and ycb models respectively. 
+This folder contains our training and evaluation code for our proposed model using multiple object types as input data for ***simulated*** and ***real*** depth point clouds using ShapeNet and YCB models respectively. 
 
 ### Results
-Saved models are saved at filepath: `c3po/expt_fully_self_supervised/<MODEL_ID>/` for ycb objects and `c3po/expt_fully_self_supervised/<CLASS_NAME>/<MODEL_ID>/` for shapenet objects.
+Saved models are saved at filepath: `c3po/expt_fully_self_supervised/<MODEL_ID>/` for YCB objects and `c3po/expt_fully_self_supervised/<CLASS_NAME>/<MODEL_ID>/` for ShapeNet objects.
 
 ### Replication
 To run training and save models for evaluation (***this will overwrite existing models***), run: 
