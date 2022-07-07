@@ -1,5 +1,5 @@
 """
-Thanks to Jingnan and Henk for this piece of code. We have used it only for verifying the correctness of our PACE implementation.
+Thanks to Jingnan and Hank for this piece of code. We have used it only for verifying the correctness of our PACE implementation.
 """
 
 import numpy as np

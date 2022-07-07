@@ -18,10 +18,6 @@ sys.path.append(os.path.join(os.path.dirname(sys.path[0]),'..','third_party','ap
 import apollo_utils as uts
 from car_instance.car_models import *
 
-# solvers
-# sys.path.append("../solvers")
-# import category_gnc as cgnc
-
 # pyrender
 os.environ["PYOPENGL_PLATFORM"] = "egl"
 import pyrender

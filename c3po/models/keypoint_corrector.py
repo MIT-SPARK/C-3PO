@@ -2,7 +2,6 @@
 This implements the keypoint correction with registration
 
 """
-import cvxpy as cp
 import numpy as np
 import open3d as o3d
 import os
