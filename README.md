@@ -342,3 +342,6 @@ bash handy_evaluate_<shapenet/ycb>.py
 
 # License
 Our C3PO project is released under MIT license.
+
+# Acknowledgement
+This work was partially funded by ARL DCIST CRA W911NF-17-2-0181, ONR RAIDER N00014-18-1-2828, and NSF CAREER award "Certifiable Perception for Autonomous Cyber-Physical Systems".
