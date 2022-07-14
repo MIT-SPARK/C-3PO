@@ -1,337 +1,236 @@
 # Correct and Certify: A New Approach to Self-Supervised 3D Object Perception
 
-**Authors:** [Rajat Talak](https://www.rajattalak.com/), Lisa Peng, [Luca Carlone](https://lucacarlone.mit.edu/)
-
-## Introduction
-
-This is C-3PO, an open-source implementation of our approach for solving certifiable pose estimation and model fitting problem.
-
-| **C**orrect | **C**ertify Correctness | **C**ertify (Non)degeneracy |
-|:---:|:---:|:---:|
-| <img src="docs/media/correct.gif" width="100%" >  | <img src="docs/media/cert.gif" width="100%" > | <img src="docs/media/cert_and_degen.gif" width="50%" > <img src="docs/media/cert_and_nondegen.gif" width="50%" > |
+**Authors:** [Rajat Talak](), Lisa Peng, [Luca Carlone]()
 
 
-C-3PO is a new keypoint-based self-supervised object pose estimation method that uses keypoint correction, a certificate of correctness and a certificate of nondegeneracy to predict and verify object poses from input depth point clouds. 
+## About
 
-## Citation
-We kindly ask to cite our paper if you find this library useful:
-
-- R. Talak, L. Peng, L. Carlone, "Correct and Certify: A New Approach to Self-Supervised 3D-Object Perception,". [arXiv:2206.11215](https://arxiv.org/abs/2206.11215) [cs.CV], Jun. 2022.
+This is **C-3PO** -- an open-source implementation of our work titled "Correct and Certify: A New Approach to Self-Supervised 3D Object Perception" (see [paper](##Paper)).
+**C-3PO** solves the certifiable object pose estimation problem, where -- given a partial point cloud of an object -- the goal is to estimate the object pose, fit a CAD model to the sensor data, and provide certification guarantees. 
 
 
+
+**C-3PO** uses a semantic keypoint-based pose estimation model, that is initially trained in simulation, 
+and augments it with a self-supervised training procedure on the real-data that uses:
+
+1. **A Corrector Module** *that corrects errors in the detected keypoints (blue: detected keypoints, red: corrected keypoints)* 
+
+	![Figure1](docs/media/correct.gif)
+
+
+2. **A Certificate of Correctness** *that flags if the pose output produced by the model is correct or not (red: corrected keypoints, green: ground-truth)* 
+
+    ![Figure2](docs/media/cert.gif)
+
+
+3. and also predicts **A Certificate of Non-Degeneracy** *that flags if the input partial point cloud admits more than one correct pose, for a solution* 
+
+   | Degenerate Case                              | Non-Degenerate Case                           |
+   |----------------------------------------------|-----------------------------------------------|
+   | ![Figure3](docs/media/cert_and_degen.gif)    | ![Figure4](docs/media/cert_and_nondegen.gif)  |
+   | *Input exhibits multiple solutions possible* | *Input exhibits a unique solution*            |
+
+
+**C-3PO** provides implementation of our proposed model in the [paper](##Paper) and the code to reproduce the experimental results.
+Our experiments rely on processed [ShapeNet](https://shapenet.org/), [KeypointNet](https://github.com/qq456cvb/KeypointNet), and the [YCB](https://www.ycbbenchmarks.com/object-models/) datasets. 
+We provide the processed versions of these datasets for you to be able to reproduce and verify our results (see [datassets](##Datasets)). 
+
+
+## Paper 
+
+R. Talak, L. Peng, L. Carlone, "Correct and Certify: A New Approach to Self-Supervised 3D-Object Perception,". [arXiv:2206.11215](https://arxiv.org/abs/2206.11215) [cs.CV], Jun. 2022.
+
+**Abstract:** We consider a certifiable object pose estimation problem, where -- given a partial point cloud of an object -- the goal is to estimate the object pose, fit a CAD model to the sensor data, and provide certification guarantees. We solve this problem by combining (i) a novel self-supervised training approach, and (ii) a certification procedure, that not only verifies whether the output produced by the model is correct or not (i.e. *certifiability*), but also flags uniqueness of the produced solution (i.e. *strong certifiability*). We use a semantic keypoint-based pose estimation model, that is initially trained in simulation and does not perform well on real-data due to the domain gap. Our self-supervised training procedure uses a *corrector* and a *certification* module to improve the detector. The corrector module corrects the detected keypoints to compensate for the domain gap, and is implemented as a declarative layer, for which we develop a simple differentiation rule. The certification module declares whether the corrected output produced by the model is certifiable (i.e. correct) or not. At each iteration, the approach optimizes over the loss induced only by the certifiable input-output pairs. As training progresses, we see that the fraction of outputs that are certifiable increases, eventually reaching near 100% in many cases. We conduct extensive experiments to evaluate the performance of the corrector, the certification, and the proposed self-supervised training using the ShapeNet and YCB datasets, and show the proposed approach achieves performance comparable to fully supervised baselines while not using any annotation for supervision on real data. 
+
+**Citation** If you find our project useful, do not hesitate, to cite our paper.
 ```bibtex
-@misc{https://doi.org/10.48550/arxiv.2206.11215,
-  doi = {10.48550/ARXIV.2206.11215},
-  url = {https://arxiv.org/abs/2206.11215},
+@article{Talak22arxiv-correctAndCertify,
+  title = {Correct and {{Certify}}: {{A New Approach}} to {{Self-Supervised 3D-Object Perception}}},
   author = {Talak, Rajat and Peng, Lisa and Carlone, Luca},
-  keywords = {Computer Vision and Pattern Recognition (cs.CV), Machine Learning (cs.LG), Robotics (cs.RO), FOS: Computer and information sciences, FOS: Computer and information sciences},
-  title = {Correct and Certify: A New Approach to Self-Supervised 3D-Object Perception},
-  publisher = {arXiv},
-  year = {2022}
+  year = {2022},
+  month = {Jun.},
+  journal = {arXiv preprint arXiv: 2206.11215},
+  eprint = {2206.11215},
+  note = {\linkToPdf{https://arxiv.org/pdf/2206.11215.pdf}},
+  pdf={https://arxiv.org/pdf/2206.11215.pdf},
+  Year = {2022}
 }
 
 ```
 
-## Quick Links:
 
-- [Proposed Model](#proposed-model)
+## Overview and Quick Links
 
-- [Experiments Overview](#experiments-overview)
-	- [Experiment 1](#i-experiment-1)
-	- [Experiment 2](#ii-experiment-2)
-	- [Experiment 3](#iii-experiment-3)
- 	- [Experiment 4](#iv-experiment-4)
+- [Installation](##Installation)
+- [Experiments](##Experiments)
+	- [Keypoint Corrector Analysis](###keypoint-corrector-analysis)
+	- [The ShapeNet Experiment](###the-shapeNet-experiment)
+	- [The YCB Experiment](###the-ycb-experiment)
+- [Datasets](##Datasets)
+- [License and Acknowledgement](##License)
 
 
-## Proposed Model
-Our proposed model is in `c3po/expt_shapenet/proposed_model.py` for use with the ShapeNet dataset and `c3po/expt_ycb/proposed_model.py` for use with the YCB dataset. A brief description of parameters is below:
+## Installation 
 
-```
-- class_name/model_id: The category of the object.
-- model_keypoints: torch.tensor of shape (K, 3, N). The keypoints of our cad model where N is number of keypoints, specified per model.
-- cad_models: torch.tensor of shape (K, 3, n). Sampled point cloud of the cad model with number of points specified in the dataloader.
-- keypoint_detector: Specifies which keypoint detector architecture to use. Supports 'pointnet' and 'point_transformer' out of the box. See RegressionKeypoints class to customize your own detector.
-- local_max_pooling: Boolean to specify whether to take the max or mean of local features in the forward pass of the 'point_transformer' keypoint detector (if used).
-- correction_flag: Boolean to specify whether to use the corrector or not.
-- need_predicted_keypoints: Boolean to specify whether to return predicted model keypoints (ground truth model keypoints transformed by predicted R and t) in the forward pass.
+##### Step 1: Clone C-3PO
+
+```bash
+git clone https://github.com/MIT-SPARK/C-3PO.git 
 ```
 
-|<img src="docs/media/opening-fig-01.png" width="100%">|<img src="docs/media/opening-fig-02.png" width="100%">|<img src="docs/media/opening-fig-03.png" width="100%">|
-|:---:|:---:|:---:|
-| keypoint detector trained in simulation | detector and registration fails on real depth point cloud data | success after self-supervised training using proposed model|
+##### Step 2: Set up conda environment
 
-
-## Installation
-
-### Environment Setup
-We use *anaconda environments* to manage our dependencies. C-3PO has been tested on Ubuntu 18.04 with python 3.8 and python 3.9.
-
-We've provided two yml environment files to clone from. This will be the easiest way to replicate our environment and install all dependencies. `environment_learning_objects_38.yml` uses python 3.8 and cuda 11.1. `environment_learning_objects_39.yml` uses python 3.9 and cuda 10.2. Both virtual environments are compatible with our code.
-
-```
-# Clone the environment. This line will take a while to execute. 
+```bash
+cd C-3PO/
 conda env create -f environment_learning_objects_3*.yml
+```
 
-# Activate the environment
-# The first line of the yml file sets the environment's name:
-# learning-objects-00 or learning-objects-01
-conda activate <NAME OF ENVIRONMENT>
+Use the yml file that best suits your requirement. We provide two options:
+| python | cuda | yml file | 
+| -------| -----| -------- |
+| 3.8 | 11.1 | environment_c3po_38.yml |
+| 3.9 | 10.2 | environment_c3po_39.yml |
 
-# Clone C3PO
-git clone https://github.com/MIT-SPARK/C3PO.git
+##### Step 3: Activate the conda environment
 
-# Install C3PO
+```bash
+conda activate learning-objects-00
+```
+
+##### Step 4: Install C-3PO
+
+```bash
 python setup.py develop
-
-# Verify environment installed
-conda env list
-
-```
-### Verify the following libraries are installed:
-
-cudatoolkit, pytorch, pytorch-geometric, fvcore, iopath, bottler, pytorch3d, scipy, yaml, and open3d
-
-
-## Experiments Overview
-Our repository is organized into experiments inside our c3po folder. The numbering corresponds to the order of appearance in our paper. Read descriptions under each experiment for details.
-
-
-## i. Experiment 1: 
-`c3po/expt_keypoint_corrector_analysis/`
-### Description
-This experiment aims to show the effectiveness of our keypoint corrector module. It uses ShapeNet dataset models. For each input point cloud, we perturb 80% of the the keypoints with varying amounts of noise and then pass the input through the corrector module and then the registration module. Averaged ADD-S errors for 100 iterations of the corrector forward pass per noise variance parameter are saved for plot generation.
-
-|<img src="docs/media/table-adds.jpg" width="100%">|<img src="docs/media/vessel-adds.jpg" width="100%">|<img src="docs/media/skateboard-adds.jpg" width="100%">|
-|:---:|:---:|:---:|
-| corrector results on table model | corrector results on vessel model | corrector results on skateboard model |
-
-### Results
-Our plots from the paper are saved at filepath: `c3po/expt_keypoint_corrector_analysis/expt_with_reg_depthpc/<CLASS_ID>/<MODEL_ID>_wchamfer/`
-
-### Replication
-To run our full experiment and save metrics for plot generation, run: 
-
-```
-cd c3po/expt_keypoint_corrector_analysis/
-python expt_with_reg_depthpc.py
 ```
 
-The experiment will save metrics for plot generation in the filepath `c3po/expt_keypoint_corrector_analysis/expt_with_reg_depthpc/<CLASS_ID>/<MODEL_ID>_wchamfer/<TIMESTAMP>_experiment.pickle`
-
-To regenerate plots, change the `file_names` parameter inside `expt_with_reg_depthpc_analyze.py` to the pickle filepath containing saved metrics from the previous step, and run `python expt_with_reg_depthpc_analyze.py`
-
-## ii. Experiment 2: 
-`c3po/expt_shapenet/`
-### Description
-
-This folder contains our proposed model as well as supervised training, self-supervised training, various ICP baseline training, and evaluation code for ***simulated*** depth point clouds using ShapeNet models. 
-
-|<img src="docs/media/expt-shapenet.png" width="100%">|
-|:---:|
-| Evaluation for the proposed model and baselines for the ShapeNet experiment. | 
-
-### Results
-Saved models are saved at filepath: `c3po/expt_shapenet/<CLASS_NAME>/<MODEL_ID>/`
-
-### Replication
-To run training and save models for evaluation (***this will overwrite existing models***), run: 
-
-```
-cd c3po/expt_shapenet/
-
-# to run supervised training, edit and run
-bash handy_supervised_train.sh
-
-# to run self-supervised training, edit and run
-bash handy_self_supervised_train.sh
-
-# to run baseline training, edit and run
-bash handy_train_baseline.sh
-
-```
-
-To evaluate trained models, run:
-
-```
-cd c3po/expt_shapenet/
-
-# for models trained with supervision, edit and run
-bash handy_evaluate_sim_trained.sh
-
-# for models trained with self-supervision, edit and run
-bash handy_evaluate.sh
-
-# for baseline models, edit and run
-bash handy_evaluate_baseline.sh
-```
-
-To run ICP and/or RANSAC baselines, run:
-
-```
-cd c3po/expt_shapenet/
-
-# edit and run
-bash handy_evaluate_icp.sh
-```
-
-
-## iii. Experiment 3: 
-`c3po/expt_ycb/`
-
-### Description
-
-This folder contains our proposed model as well as supervised training, self-supervised training, various ICP baseline training, and evaluation code for ***real*** depth point clouds using YCB models. 
-
-
-|<img src="docs/media/expt-ycb.png" width="100%">|
-|:---:|
-| Evaluation for the proposed model and baselines for the YCB experiment. | 
-
-
-
-### Results
-Saved models are saved at filepath: `c3po/expt_ycb/<MODEL_ID>/`
-
-### Replication
-To run training and save models for evaluation (***this will overwrite existing models***), run: 
-
-```
-cd c3po/expt_ycb/
-
-# to run supervised training, edit and run
-bash handy_supervised_train.sh
-
-# to run self-supervised training, edit and run
-bash handy_self_supervised_train.sh
-
-# to run baseline training, edit and run
-bash handy_train_baseline.sh
-
-```
-
-To evaluate trained models, run:
-
-```
-cd c3po/expt_ycb/
-
-# for models trained with supervision, edit and run
-bash handy_evaluate_sim_trained.sh
-
-# for models trained with self-supervision, edit and run
-bash handy_evaluate.sh
-
-# for baseline models, edit and run
-bash handy_evaluate_baseline.sh
-```
-
-To run ICP and/or RANSAC baselines, run:
-
-```
-cd c3po/expt_ycb/
-
-# edit and run
-bash handy_evaluate_icp.sh
-```
-
-## iv. Experiment 4: 
-`c3po/expt_fully_self_supervised/`
-### Description
-This folder contains our training and evaluation code for our proposed model using multiple object types as input data for ***simulated*** and ***real*** depth point clouds using ShapeNet and YCB models respectively. 
-
-### Results
-Saved models are saved at filepath: `c3po/expt_fully_self_supervised/<MODEL_ID>/` for YCB objects and `c3po/expt_fully_self_supervised/<CLASS_NAME>/<MODEL_ID>/` for ShapeNet objects.
-
-### Replication
-To run training and save models for evaluation (***this will overwrite existing models***), run: 
-
-```
-cd c3po/expt_fully_self_supervised/
-
-bash handy_train_<shapenet/ycb>.py
-
-```
-
-To evaluate trained models, run:
-
-```
-cd c3po/expt_fully_self_supervised/
-
-bash handy_evaluate_<shapenet/ycb>.py
-```
+Verify that the following libraries are installed: `cudatoolkit`, `pytorch`, `pytorch-geometric`, `fvcore`, `iopath`, `bottler`, `pytorch3d`, `scipy`, `yaml`, and `open3d` 
 
 
 
 
+## Experiments
+
+### Keypoint Corrector Analysis
+
+**Description.** This experiment aims to show the effectiveness of our keypoint corrector module. It uses ShapeNet dataset models. For each input point cloud, we perturb 80% of the the keypoints with varying amounts of noise and then pass the input through the corrector module and then the registration module. Averaged ADD-S errors for 100 iterations of the corrector forward pass per noise variance parameter are saved for plot generation. 
+
+**Location.** `c3po/expt_keypoint_corrector_analysis/` 
+
+
+% Add Figure
+
+
+**Results.** Our analysis plots are saved in: `c3po/expt_keypoint_corrector_analysis/expt_with_reg_depthpc/<CLASS_ID>/<MODEL_ID>_wchamfer/`
+
+**Replication.** To replicate our results do the following. 
+
+1. Run the experiment and save performance metrics for plot generation.
+	```bash 
+	cd c3po/expt_keypoint_corrector_analysis/
+	python expt_with_reg_depthpc.py
+	```
+	
+	The generated performance metrics will be saved in the following pickle file.
+	`c3po/expt_keypoint_corrector_analysis/expt_with_reg_depthpc/<CLASS_ID>/<MODEL_ID>_wchamfer/<TIMESTAMP>_experiment.pickle`
+
+
+2. Generate plots from the saved pickle file. 
+	
+	To regenerate plots, change the `file_names` parameter inside `expt_with_reg_depthpc_analyze.py` to the pickle filepath containing saved metrics from the previous step, and run `python expt_with_reg_depthpc_analyze.py`
+
+
+
+
+
+### The ShapeNet Experiment
+
+This experiment shows the success of the proposed self-supervised training on a dataset of generated depth point clouds using ShapeNet models. We are able to generate data across various object categories in ShapeNet and show the power of our proposed model, in matching a supervised baseline, without using any annotation on the generated, training data.
+
+**Replication.** The proposed model requires one to specify the object category and the architecture used to implement the keypoint detector. We show how to train and evaluate the proposed model for **object**: *chair* and **keypoint detector**: *point transformer*. 
+
+1. Move to the ShapeNet experiment directory:
+    ```bash 
+       cd c3po/expt_shapenet/
+    ```
+
+2. Trained models are saved in the repo. To evaluate the trained models, run:
+    ```bash
+       python evaluate_proposed_model.py "point_transformer" "chair" "post" 
+    ```
+   *Note: argument "post" asks it to evaluate the model that is trained (self-superviised) on the real-data. Changing it to "pre" will evaluate the simulation-trained model on real-world data.*
+
+
+2. To run self-supervised training: 
+   ```bash
+      python training.py "point_transformer" "chair" "self_supervised"
+   ```
+    *Note: this will overwrite the trained and saved model.*
+
+
+3. To run the supervised training on simulated data:
+    ```bash
+       python training.py "point_transformer" "chair" "supervised"
+    ```
+   *Note: this will overwrite the trained and saved model.* 
+
+
+
+### The YCB Experiment 
+
+This experiment shows that the proposed self-supervised training method also works on real-world dataset such as RGB-D images. We see that the proposed model -- after self-supervised training -- is able to match or exceed the performance of a supervised baseline, without using any annotation for training.
+
+**Replication**
+
+1. Trained models are saved in the repo. To evaluate the trained models, run:
+	```bash
+	
+	```
+2.  
 
 
 
 ## Datasets
 
-Our experiments rely on the [ShapeNet](https://shapenet.org/), [KeypointNet](https://github.com/qq456cvb/KeypointNet), [YCB](https://www.ycbbenchmarks.com/object-models/) and our processed versions of these datasets. Please view ShapeNet's terms of use [here](https://shapenet.org/terms). There's no need to download the datasets seperately. Follow the steps below to download and save the relevant data for this project. 
+Our experiments rely on  the [ShapeNet](https://shapenet.org/), [KeypointNet](https://github.com/qq456cvb/KeypointNet), and the [YCB](https://www.ycbbenchmarks.com/object-models/) datasets. Please view ShapeNet's terms of use [here](https://shapenet.org/terms). 
+
+There's no need to download the datasets seperately. Our experiments use a processed version of these datasets. Follow the steps below to download and save the relevant dataset. 
 
 1. Download our processed dataset files on Google Drive [here](https://drive.google.com/drive/folders/1IPHZ-KiuT42ugZQ27-CZuiZfvy5LLvIa?usp=sharing) and move all the files to the same directory this README is in (the C3PO repo). We've provided the dataset as a zip archive split into 1GB chunks of the format ```c3po-data.z**```.
+
 2. Combine the archives into one zip file: 
-	- ```zip -F c3po-data.zip --out data.zip```
+	```bash 
+	zip -F c3po-data.zip --out data.zip
+	```
+
 3. Unzip the file:
-	- ```unzip data.zip```
+	```bash
+	unzip data.zip
+	```
+
 4. Verify your directory structure looks as follows:
-
-```
-C3PO
-│   README.md
-│   c3po   
-│   setup.py
-└───data
-│   │   learning-objects
-│   |   └───...
-│   │
-│   │   KeypointNet
-│   |   └───...
-│   │
-│   └───ycb
-│       │   models
-│       └───...
-│   
-└───...
-```
-### Dataset Citations
-
-```
-@techreport{shapenet2015,
-  title       = {{ShapeNet: An Information-Rich 3D Model Repository}},
-  author      = {Chang, Angel X. and Funkhouser, Thomas and Guibas, Leonidas and Hanrahan, Pat and Huang, Qixing and Li, Zimo and Savarese, Silvio and Savva, Manolis and Song, Shuran and Su, Hao and Xiao, Jianxiong and Yi, Li and Yu, Fisher},
-  number      = {arXiv:1512.03012 [cs.GR]},
-  institution = {Stanford University --- Princeton University --- Toyota Technological Institute at Chicago},
-  year        = {2015}
-}
-
-@article{you2020keypointnet,
-  title={KeypointNet: A Large-scale 3D Keypoint Dataset Aggregated from Numerous Human Annotations},
-  author={You, Yang and Lou, Yujing and Li, Chengkun and Cheng, Zhoujun and Li, Liangwei and Ma, Lizhuang and Lu, Cewu and Wang, Weiming},
-  journal={arXiv preprint arXiv:2002.12687},
-  year={2020}
-}
-
-@article{Calli_2015,
-	doi = {10.1109/mra.2015.2448951},
-	url = {https://doi.org/10.1109%2Fmra.2015.2448951},
-	year = 2015,
-	month = {sep},
-	publisher = {Institute of Electrical and Electronics Engineers ({IEEE})},
-	volume = {22},
-	number = {3},
-	pages = {36--52},
-	author = {Berk Calli and Aaron Walsman and Arjun Singh and Siddhartha Srinivasa and Pieter Abbeel and Aaron M. Dollar},
-	title = {Benchmarking in Manipulation Research: Using the Yale-{CMU}-Berkeley Object and Model Set},
-	journal = {{IEEE} Robotics {\&}amp$\mathsemicolon$ Automation Magazine}
-}
-```
+	```
+	C3PO
+	│   README.md
+	│   c3po   
+	│   setup.py
+	└───data
+	│   │   learning-objects
+	│   |   └───...
+	│   │
+	│   │   KeypointNet
+	│   |   └───...
+	│   │
+	│   └───ycb
+	│       │   models
+	│       └───...
+	│   
+	└───...
+	```
 
 
+## License
+Our C-3PO project is released under MIT license.
 
 
-# License
-Our C3PO project is released under MIT license.
-
-# Acknowledgement
+## Acknowledgement
 This work was partially funded by ARL DCIST CRA W911NF-17-2-0181, ONR RAIDER N00014-18-1-2828, and NSF CAREER award "Certifiable Perception for Autonomous Cyber-Physical Systems".
