@@ -15,20 +15,20 @@ and augments it with a self-supervised training procedure on the real-data that 
 
 1. **A Corrector Module** *that corrects errors in the detected keypoints (blue: detected keypoints, red: corrected keypoints)* 
 
-	![Figure1](docs/media/correct.gif)
+	<img src="docs/media/correct.gif" width="50%" > 
 
 
 2. **A Certificate of Correctness** *that flags if the pose output produced by the model is correct or not (red: corrected keypoints, green: ground-truth)* 
 
-    ![Figure2](docs/media/cert.gif)
+    <img src="docs/media/cert.gif" width="30%" >
 
 
 3. and also predicts **A Certificate of Non-Degeneracy** *that flags if the input partial point cloud admits more than one correct pose, for a solution* 
 
-   | Degenerate Case                              | Non-Degenerate Case                           |
-   |----------------------------------------------|-----------------------------------------------|
-   | ![Figure3](docs/media/cert_and_degen.gif)    | ![Figure4](docs/media/cert_and_nondegen.gif)  |
-   | *Input exhibits multiple solutions possible* | *Input exhibits a unique solution*            |
+   | Degenerate Case                                       | Non-Degenerate Case                                       |
+   |-------------------------------------------------------|-----------------------------------------------------------|
+   | <img src="docs/media/cert_and_degen.gif" width="90%"> | <img src="docs/media/cert_and_nondegen.gif" width="80%" > |
+   | *Input exhibits multiple solutions possible*          | *Input exhibits a unique solution*                        |
 
 
 **C-3PO** provides implementation of our proposed model in the [paper](##paper) and the code to reproduce the experimental results.
