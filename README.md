@@ -1,11 +1,11 @@
 # Correct and Certify: A New Approach to Self-Supervised 3D Object Perception
 
-**Authors:** [Rajat Talak](), Lisa Peng, [Luca Carlone]()
+**Authors:** [Rajat Talak](https://www.rajattalak.com/), Lisa Peng, [Luca Carlone](https://lucacarlone.mit.edu/)
 
 
 ## About
 
-This is **C-3PO** -- an open-source implementation of our work titled "Correct and Certify: A New Approach to Self-Supervised 3D Object Perception" (see [paper](##Paper)).
+This is **C-3PO** -- an open-source implementation of our work titled "*Correct and Certify: A New Approach to Self-Supervised 3D Object Perception*" (see [paper](##paper)).
 **C-3PO** solves the certifiable object pose estimation problem, where -- given a partial point cloud of an object -- the goal is to estimate the object pose, fit a CAD model to the sensor data, and provide certification guarantees. 
 
 
@@ -31,7 +31,7 @@ and augments it with a self-supervised training procedure on the real-data that 
    | *Input exhibits multiple solutions possible* | *Input exhibits a unique solution*            |
 
 
-**C-3PO** provides implementation of our proposed model in the [paper](##Paper) and the code to reproduce the experimental results.
+**C-3PO** provides implementation of our proposed model in the [paper](##paper) and the code to reproduce the experimental results.
 Our experiments rely on processed [ShapeNet](https://shapenet.org/), [KeypointNet](https://github.com/qq456cvb/KeypointNet), and the [YCB](https://www.ycbbenchmarks.com/object-models/) datasets. 
 We provide the processed versions of these datasets for you to be able to reproduce and verify our results (see [datassets](##Datasets)). 
 
