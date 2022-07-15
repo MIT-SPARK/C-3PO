@@ -10,11 +10,13 @@ import sys
 import torch
 from datetime import datetime
 from matplotlib import colors as mcolors
+import argparse
+import yaml
 
 sys.path.append("../../")
 from c3po.utils.general import generate_filename
 from c3po.utils.visualization_utils import scatter_bar_plot
-from c3po.datasets.shapenet import CLASS_NAME
+from c3po.datasets.shapenet import CLASS_NAME, CLASS_ID
 from c3po.models.certifiability import certifiability
 
 plt.style.use('seaborn-whitegrid')
@@ -139,9 +141,20 @@ def certification(data, epsilon, delta, num_iterations=100, full_batch=False):
 
     return certi_naive, certi_corrector
 
-if __name__ == '__main__':
-    use_adds_metric = True
-    file_names = ["./expt_with_reg_depthpc/02876657/41a2005b595ae783be1868124d5ddbcb_wchamfer/20220227_170722_experiment.pickle"]
+
+def expt_wrapper(class_id, model_id, use_adds_metric=True):
+
+    _dir_name =  "./expt_with_reg_depthpc/" + class_id + '/' + model_id + '_wchamfer' + '/'
+    for file in os.listdir(_dir_name):
+        print(file)
+        #TODO: Have to add the latest .pickle file in the folder. Use that in the file_names.
+        #file_path = os.path.join(_dir_name, file)
+        #if os.path.isfile(file_path):
+        #    file_extension = os.path.splitext(file_path)[1]
+        #    print(file, "ends in", file_extension)
+
+    file_names = [
+        "./expt_with_reg_depthpc/02876657/41a2005b595ae783be1868124d5ddbcb_wchamfer/20220227_170722_experiment.pickle"]
     # the following pickle files are the experiment metrics to generate plots from the paper
     # file_names = ["./expt_with_reg_depthpc/02691156/3db61220251b3c9de719b5362fe06bbb_wchamfer/20220610_185655_experiment.pickle",
     #               "./expt_with_reg_depthpc/02808440/90b6e958b359c1592ad490d4d7fae486_wchamfer/20220610_194647_experiment.pickle",
@@ -165,13 +178,16 @@ if __name__ == '__main__':
     for name in file_names:
 
         fp = open(name, 'rb')
+        print(fp)
         parameters, data = pickle.load(fp)
         fp.close()
 
         if use_adds_metric:
             for noise_idx in range(len(data['chamfer_pose_naive_to_gt_pose_list'])):
-                data['chamfer_pose_naive_to_gt_pose_list'][noise_idx] = np.asarray(data['chamfer_pose_naive_to_gt_pose_list'][noise_idx][0].squeeze().to('cpu'))
-                data['chamfer_pose_corrected_to_gt_pose_list'][noise_idx] = np.asarray(data['chamfer_pose_corrected_to_gt_pose_list'][noise_idx][0].squeeze().to('cpu'))
+                data['chamfer_pose_naive_to_gt_pose_list'][noise_idx] = np.asarray(
+                    data['chamfer_pose_naive_to_gt_pose_list'][noise_idx][0].squeeze().to('cpu'))
+                data['chamfer_pose_corrected_to_gt_pose_list'][noise_idx] = np.asarray(
+                    data['chamfer_pose_corrected_to_gt_pose_list'][noise_idx][0].squeeze().to('cpu'))
 
         print("-" * 80)
 
@@ -199,9 +215,10 @@ if __name__ == '__main__':
         sqdist_kp_correctorest = data['sqdist_kp_correctorest']
 
         if use_adds_metric:
-            chamfer_pose_naive_to_gt_pose_list = torch.from_numpy(np.asarray(data['chamfer_pose_naive_to_gt_pose_list']))
-            chamfer_pose_corrected_to_gt_pose_list = torch.from_numpy(np.asarray(data['chamfer_pose_corrected_to_gt_pose_list']))
-
+            chamfer_pose_naive_to_gt_pose_list = torch.from_numpy(
+                np.asarray(data['chamfer_pose_naive_to_gt_pose_list']))
+            chamfer_pose_corrected_to_gt_pose_list = torch.from_numpy(
+                np.asarray(data['chamfer_pose_corrected_to_gt_pose_list']))
 
         kp_noise_var_range = parameters['kp_noise_var_range'].to('cpu')
         kp_noise_type = parameters['kp_noise_type']
@@ -214,22 +231,27 @@ if __name__ == '__main__':
         fig = plt.figure()
 
         plt = scatter_bar_plot(plt, x=kp_noise_var_range, y=Rerr_naive, label='naive', color='lightgray')
-        plt = scatter_bar_plot(plt, x=kp_noise_var_range, y=Rerr_naive*certi_naive, label='naive + certification', color='royalblue')
+        plt = scatter_bar_plot(plt, x=kp_noise_var_range, y=Rerr_naive * certi_naive, label='naive + certification',
+                               color='royalblue')
         plt.show()
         plt.close(fig)
 
         fig = plt.figure()
         plt = scatter_bar_plot(plt, x=kp_noise_var_range, y=Rerr_corrector, label='corrector', color='lightgray')
-        plt = scatter_bar_plot(plt, x=kp_noise_var_range, y=Rerr_corrector * certi_corrector, label='corrector + certification',
+        plt = scatter_bar_plot(plt, x=kp_noise_var_range, y=Rerr_corrector * certi_corrector,
+                               label='corrector + certification',
                                color='orangered')
         plt.show()
         plt.close(fig)
 
         if use_adds_metric:
             chamfer_metric_naive_var, chamfer_metric_naive_mean = varul_mean(chamfer_pose_naive_to_gt_pose_list)
-            chamfer_metric_corrected_var, chamfer_metric_corrected_mean = varul_mean(chamfer_pose_corrected_to_gt_pose_list)
-            chamfer_metric_naive_certi_var, chamfer_metric_naive_certi_mean = masked_varul_mean(chamfer_pose_naive_to_gt_pose_list, mask=certi_naive)
-            chamfer_metric_corrected_certi_var, chamfer_metric_corrected_certi_mean = masked_varul_mean(chamfer_pose_corrected_to_gt_pose_list, mask=certi_corrector)
+            chamfer_metric_corrected_var, chamfer_metric_corrected_mean = varul_mean(
+                chamfer_pose_corrected_to_gt_pose_list)
+            chamfer_metric_naive_certi_var, chamfer_metric_naive_certi_mean = masked_varul_mean(
+                chamfer_pose_naive_to_gt_pose_list, mask=certi_naive)
+            chamfer_metric_corrected_certi_var, chamfer_metric_corrected_certi_mean = masked_varul_mean(
+                chamfer_pose_corrected_to_gt_pose_list, mask=certi_corrector)
 
         Rerr_naive_var, Rerr_naive_mean = varul_mean(Rerr_naive)
         Rerr_corrector_var, Rerr_corrector_mean = varul_mean(Rerr_corrector)
@@ -245,7 +267,6 @@ if __name__ == '__main__':
             varul_mean(1 - certi_naive.float())
         fraction_not_certified_corrector_var, fraction_not_certified_corrector_mean = \
             varul_mean(1 - certi_corrector.float())
-
 
         Rerr_naive_var = torch.sqrt(Rerr_naive_var).T
         Rerr_corrector_var = torch.sqrt(Rerr_corrector_var).T
@@ -266,15 +287,17 @@ if __name__ == '__main__':
 
         # plotting chamfer metric
         if use_adds_metric:
-
             fig = plt.figure()
             plt.errorbar(x=kp_noise_var_range, y=chamfer_metric_naive_mean, yerr=chamfer_metric_naive_var,
                          fmt='-x', color='black', ecolor='gray', elinewidth=1, capsize=3, label='naive')
             plt.errorbar(x=kp_noise_var_range, y=chamfer_metric_naive_certi_mean, yerr=chamfer_metric_naive_certi_var,
-                         fmt='--o', color='grey', ecolor='lightgray', elinewidth=3, capsize=0, label='naive + certification')
-            plt.errorbar(x=kp_noise_var_range, y=chamfer_metric_corrected_mean, yerr=chamfer_metric_corrected_var, fmt='-x', color='red',
+                         fmt='--o', color='grey', ecolor='lightgray', elinewidth=3, capsize=0,
+                         label='naive + certification')
+            plt.errorbar(x=kp_noise_var_range, y=chamfer_metric_corrected_mean, yerr=chamfer_metric_corrected_var,
+                         fmt='-x', color='red',
                          ecolor='salmon', elinewidth=1, capsize=3, label='corrector')
-            plt.errorbar(x=kp_noise_var_range, y=chamfer_metric_corrected_certi_mean, yerr=chamfer_metric_corrected_certi_var, fmt='--o',
+            plt.errorbar(x=kp_noise_var_range, y=chamfer_metric_corrected_certi_mean,
+                         yerr=chamfer_metric_corrected_certi_var, fmt='--o',
                          color='orangered', ecolor='salmon', elinewidth=3, capsize=0, label='corrector + certification')
             # alternate colors
             # plt.errorbar(x=kp_noise_var_range, y=chamfer_metric_naive_mean, yerr=chamfer_metric_naive_var,
@@ -297,11 +320,10 @@ if __name__ == '__main__':
             fig.savefig(filename)
             plt.close(fig)
 
-
-
         # plotting rotation errors
         fig = plt.figure()
-        plt.errorbar(x=kp_noise_var_range, y=Rerr_naive_mean, yerr=Rerr_naive_var, fmt='-x', color='black', ecolor='gray',
+        plt.errorbar(x=kp_noise_var_range, y=Rerr_naive_mean, yerr=Rerr_naive_var, fmt='-x', color='black',
+                     ecolor='gray',
                      elinewidth=1, capsize=3, label='naive')
         plt.errorbar(x=kp_noise_var_range, y=Rerr_naive_certi_mean, yerr=Rerr_naive_certi_var, fmt='--o', color='grey',
                      ecolor='lightgray', elinewidth=3, capsize=0, label='naive + certification')
@@ -323,18 +345,14 @@ if __name__ == '__main__':
         plt.show()
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         rand_string = generate_filename()
-        filename = fig_save_prefix[:-7] + '_rotation_error_plot_' + timestamp + '_' + rand_string +'.jpg'
+        filename = fig_save_prefix[:-7] + '_rotation_error_plot_' + timestamp + '_' + rand_string + '.jpg'
         fig.savefig(filename)
         plt.close(fig)
 
-
-
-
-
-
         # Plotting translation errors
         fig = plt.figure()
-        plt.errorbar(x=kp_noise_var_range, y=terr_naive_mean, yerr=terr_naive_var, fmt='-x', color='black', ecolor='gray',
+        plt.errorbar(x=kp_noise_var_range, y=terr_naive_mean, yerr=terr_naive_var, fmt='-x', color='black',
+                     ecolor='gray',
                      elinewidth=1, capsize=3, label='naive')
         plt.errorbar(x=kp_noise_var_range, y=terr_naive_certi_mean, yerr=terr_naive_certi_var, fmt='--o', color='grey',
                      ecolor='lightgray', elinewidth=3, capsize=0, label='naive + certification')
@@ -343,7 +361,7 @@ if __name__ == '__main__':
         plt.errorbar(x=kp_noise_var_range, y=terr_corrector_certi_mean, yerr=terr_corrector_certi_var, fmt='--o',
                      color='salmon', ecolor='orangered', elinewidth=3, capsize=0, label='corrector + certification')
 
-        #alternate colors
+        # alternate colors
         # plt.errorbar(x=kp_noise_var_range, y=terr_naive_mean, yerr=terr_naive_var, fmt='-', color='red', ecolor='red', elinewidth=1, capsize=3, label='naive')
         # plt.errorbar(x=kp_noise_var_range, y=terr_naive_certi_mean, yerr=terr_naive_certi_var, fmt='--o', color='red', ecolor=(1.0,0,0,0.3), elinewidth=3, capsize=3, label='naive + certification')
         # plt.errorbar(x=kp_noise_var_range, y=terr_corrector_mean, yerr=terr_corrector_var, fmt='-', color='green', ecolor='green', elinewidth=1, capsize=3, label='corrector')
@@ -360,15 +378,14 @@ if __name__ == '__main__':
         fig.savefig(filename)
         plt.close(fig)
 
-
         # Plotting fraction not certified
         fig = plt.figure()
-        plt.bar(x=kp_noise_var_range-0.01, width=0.02, height=fraction_not_certified_naive_mean,
+        plt.bar(x=kp_noise_var_range - 0.01, width=0.02, height=fraction_not_certified_naive_mean,
                 color='grey', align='center', label='naive')
         # plt.errorbar(x=kp_noise_var_range-0.01, y=fraction_not_certified_naive_mean,
         #              yerr=fraction_not_certified_naive_var,
         #              fmt='o', color='black', ecolor='darkgray', elinewidth=1, capsize=3)
-        plt.bar(x=kp_noise_var_range+0.01, width=0.02, height=fraction_not_certified_corrector_mean,
+        plt.bar(x=kp_noise_var_range + 0.01, width=0.02, height=fraction_not_certified_corrector_mean,
                 color='salmon', align='center', label='corrector')
         # plt.errorbar(x=kp_noise_var_range+0.01, y=fraction_not_certified_corrector_mean,
         #              yerr=fraction_not_certified_corrector_var,
@@ -384,4 +401,33 @@ if __name__ == '__main__':
         filename = fig_save_prefix[:-7] + '_fraction_not_certifiable_plot_' + timestamp + '_' + rand_string + '.jpg'
         fig.savefig(filename)
         plt.close(fig)
+
+
+
+
+if __name__ == '__main__':
+
+    """
+    usage: 
+    >> python expt_with_reg_depthpc_analyze.py "chair"
+    >> python expt_with_reg_depthpc_analyze.py "car"
+    """
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("class_name", help="specify the ShapeNet class name.", type=str)
+
+    args = parser.parse_args()
+    class_name = args.class_name
+    class_id = CLASS_ID[class_name]
+
+    stream = open("class_model_ids.yml", "r")
+    model_class_ids = yaml.load(stream=stream, Loader=yaml.Loader)
+    if class_name not in model_class_ids:
+        raise Exception('Invalid class_name')
+    else:
+        model_id = model_class_ids[class_name]
+
+    expt_wrapper(class_id=class_id, model_id=model_id, use_adds_metric=True)
+
+
 

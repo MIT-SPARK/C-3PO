@@ -80,20 +80,20 @@ git clone https://github.com/MIT-SPARK/C-3PO.git
 
 ```bash
 cd C-3PO/
-conda env create -f environment_learning_objects_3*.yml
+conda env create -f env_c3po_py3*.yml
 ```
 
 Use the yml file that best suits your requirement. We provide two options:
 
 | python | cuda | yml file | 
 | -------| -----| -------- |
-| 3.8 | 11.1 | environment_c3po_38.yml |
-| 3.9 | 10.2 | environment_c3po_39.yml |
+| 3.8 | 11.1 | env_c3po_38.yml |
+| 3.9 | 10.2 | env_c3po_39.yml |
 
 ##### Step 3: Activate the conda environment
 
 ```bash
-conda activate learning-objects-00
+conda activate env-c3po
 ```
 
 ##### Step 4: Install C-3PO
@@ -143,7 +143,7 @@ Verify that the following libraries are installed: `cudatoolkit`, `pytorch`, `py
 
 ### The ShapeNet Experiment
 
-This experiment shows the success of the proposed self-supervised training on a dataset of simulated depth point clouds using ShapeNet models. We are able to generate data across various object categories in ShapeNet and show the power of our proposed model in matching a supervised baseline, without using any annotation on the generated training data.
+**Description.** This experiment shows the success of the proposed self-supervised training on a dataset of simulated depth point clouds using ShapeNet models. We are able to generate data across various object categories in ShapeNet and show the power of our proposed model in matching a supervised baseline, without using any annotation on the generated training data.
 
 **Replication.** The proposed model requires one to specify the object category and the architecture used for the keypoint detector. We show how to train and evaluate the proposed model for **object**: *chair* and **keypoint detector**: *point transformer*. 
 
@@ -176,7 +176,7 @@ This experiment shows the success of the proposed self-supervised training on a 
 
 ### The YCB Experiment 
 
-This experiment shows that the proposed self-supervised training method also works on a real-world dataset comprised of RGB-D images. We see that the proposed model -- after self-supervised training -- is able to match or exceed the performance of a supervised baseline, without using any annotations for training.
+**Description.** This experiment shows that the proposed self-supervised training method also works on a real-world dataset comprised of RGB-D images. We see that the proposed model -- after self-supervised training -- is able to match or exceed the performance of a supervised baseline, without using any annotations for training.
 
 **Replication** The proposed model requires one to specify the object category and the architecture used for the keypoint detector. We show how to train and evaluate the proposed model for **object**: *002\_master\_chef\_can* and **keypoint detector**: *point transformer*. 
 
