@@ -1,4 +1,4 @@
-# C-3PO
+# C-3PO: Self-Supervised and Certifiable 3D Object Pose Estimator
 
 **Authors:** [Rajat Talak](https://www.rajattalak.com/), Lisa Peng, [Luca Carlone](https://lucacarlone.mit.edu/)
 
