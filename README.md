@@ -74,12 +74,14 @@ R. Talak, L. Peng, L. Carlone, "Correct and Certify: A New Approach to Self-Supe
 
 ```bash
 git clone https://github.com/MIT-SPARK/C-3PO.git 
+cd C-3PO/
 ```
 
 ##### Step 2: Set up conda environment
 
+There are two ways to set up the virtual environment. Either, install from the yml file provided, as shown below:
+
 ```bash
-cd C-3PO/
 conda env create -f env_c3po_py3*.yml
 ```
 
@@ -89,6 +91,9 @@ Use the yml file that best suits your requirement. We provide two options:
 | -------| -----| -------- |
 | 3.8 | 11.1 | env_c3po_38.yml |
 | 3.9 | 10.2 | env_c3po_39.yml |
+
+Or, create a conda virtual environment `env-c3po` and install the following libraries: `pytorch`, `pytorch-geometric`, `open3d`, `pytorch3d`, `matplotlib`, `pandas`, `tensorboard`.
+
 
 ##### Step 3: Activate the conda environment
 
@@ -102,7 +107,7 @@ conda activate env-c3po
 python setup.py develop
 ```
 
-Verify that the following libraries are installed: `cudatoolkit`, `pytorch`, `pytorch-geometric`, `fvcore`, `iopath`, `bottler`, `pytorch3d`, `scipy`, `yaml`, and `open3d` 
+Verify that the following libraries are installed: `pytorch`, `pytorch-geometric`, `open3d`, `pytorch3d`, `matplotlib`, `pandas`, `tensorboard`, `cudatoolkit`, `scipy`, `yaml`,`fvcore`, `iopath`, `bottler`, 
 
 
 
@@ -128,17 +133,11 @@ Verify that the following libraries are installed: `cudatoolkit`, `pytorch`, `py
     ```bash
     python expt_with_reg_depthpc.py
     ```
-	
-    The generated performance metrics will be saved in the following pickle file.
-    `c3po/expt_keypoint_corrector_analysis/expt_with_reg_depthpc/<CLASS_ID>/<MODEL_ID>_wchamfer/<TIMESTAMP>_experiment.pickle`
 
-
-2. Generate plots from the saved pickle file. 
-	
-	To regenerate plots, change the `file_names` parameter inside `expt_with_reg_depthpc_analyze.py` to the pickle filepath containing saved metrics from the previous step, and run `python expt_with_reg_depthpc_analyze.py`
-
-
-
+3. Generate plots from the saved pickle file. To generate plots for, say, the ShapeNet object "chair" run:
+    ```bash
+   python expt_with_reg_depthpc_analyze.py "chair" 
+   ```
 
 
 ### The ShapeNet Experiment

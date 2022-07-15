@@ -12,6 +12,7 @@ from datetime import datetime
 from matplotlib import colors as mcolors
 import argparse
 import yaml
+import io
 
 sys.path.append("../../")
 from c3po.utils.general import generate_filename
@@ -22,6 +23,23 @@ from c3po.models.certifiability import certifiability
 plt.style.use('seaborn-whitegrid')
 COLORS = dict(mcolors.BASE_COLORS, **mcolors.CSS4_COLORS)
 
+
+class CPU_Unpickler(pickle.Unpickler):
+    def find_class(self, module, name):
+        if module == 'torch.storage' and name == '_load_from_bytes':
+            return lambda b: torch.load(io.BytesIO(b), map_location='cpu')
+        if module == 'learning_objects.utils.general':
+            return super().find_class('c3po.utils.general', name)
+        if module == 'learning_objects.expt_keypoint_corrector_analysis.expt_with_reg_depthpc_analyze':
+            return super().find_class('c3po.expt_keypoint_corrector_analysis.expt_with_reg_depthpc_analyze', name)
+        if module == 'learning_objects.expt_keypoint_corrector_analysis.expt_with_reg_depthpc':
+            return super().find_class('c3po.expt_keypoint_corrector_analysis.expt_with_reg_depthpc', name)
+        if module == 'learning_objects.expt_keypoint_corrector_analysis':
+            return super().find_class('c3po.expt_keypoint_corrector_analysis', name)
+        if module == 'learning_objects':
+            return super().find_class('c3po', name)
+        else:
+            return super().find_class(module, name)
 
 def masked_varul_mean(data, mask):
     """
@@ -93,7 +111,6 @@ def varul_mean(data):
     return var, mean.squeeze(-1)
 
 
-
 def certification(data, epsilon, delta, num_iterations=100, full_batch=False):
     device_ = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     certify=certifiability(epsilon=epsilon, delta=delta, radius=0.3)
@@ -146,15 +163,13 @@ def expt_wrapper(class_id, model_id, use_adds_metric=True):
 
     _dir_name =  "./expt_with_reg_depthpc/" + class_id + '/' + model_id + '_wchamfer' + '/'
     for file in os.listdir(_dir_name):
-        print(file)
-        #TODO: Have to add the latest .pickle file in the folder. Use that in the file_names.
-        #file_path = os.path.join(_dir_name, file)
-        #if os.path.isfile(file_path):
-        #    file_extension = os.path.splitext(file_path)[1]
-        #    print(file, "ends in", file_extension)
+        ext = os.path.splitext(file)[1]
+        if ext == '.pickle':
+            file_path = os.path.join(_dir_name, file)
+            file_names = [file_path]
 
-    file_names = [
-        "./expt_with_reg_depthpc/02876657/41a2005b595ae783be1868124d5ddbcb_wchamfer/20220227_170722_experiment.pickle"]
+    # file_names = [
+    #    "./expt_with_reg_depthpc/02876657/41a2005b595ae783be1868124d5ddbcb_wchamfer/20220227_170722_experiment.pickle"]
     # the following pickle files are the experiment metrics to generate plots from the paper
     # file_names = ["./expt_with_reg_depthpc/02691156/3db61220251b3c9de719b5362fe06bbb_wchamfer/20220610_185655_experiment.pickle",
     #               "./expt_with_reg_depthpc/02808440/90b6e958b359c1592ad490d4d7fae486_wchamfer/20220610_194647_experiment.pickle",
@@ -180,6 +195,7 @@ def expt_wrapper(class_id, model_id, use_adds_metric=True):
         fp = open(name, 'rb')
         print(fp)
         parameters, data = pickle.load(fp)
+        # parameters, data = CPU_Unpickler(fp).load()
         fp.close()
 
         if use_adds_metric:
