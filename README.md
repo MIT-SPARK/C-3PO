@@ -1,6 +1,6 @@
 # Correct and Certify: A New Approach to Self-Supervised 3D Object Perception
 
-**Authors:** [Rajat Talak](https://www.rajattalak.com/){:target="_blank"}, Lisa Peng, [Luca Carlone](https://lucacarlone.mit.edu/)
+**Authors:** [Rajat Talak](https://www.rajattalak.com/), Lisa Peng, [Luca Carlone](https://lucacarlone.mit.edu/)
 
 
 ## About
