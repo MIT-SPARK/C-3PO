@@ -183,33 +183,33 @@ This experiment shows that the proposed self-supervised training method also wor
 
 1. Move to the YCB experiment directory:
 
-	```
+	```bash
 	cd c3po/expt_ycb/
 	```
 	
 2. Trained models are saved in the repo. To evaluate the trained models, run:
 
-	```
+	```bash
 	python evaluate_proposed_model.py "point_transformer" "002_master_chef_can" "post"
 	```
 	
-*Note: argument "post" asks it to evaluate the model that is trained (self-supervised) on the real-data. Changing it to "pre" will evaluate the simulation-trained model on real-world data.*
+	*Note: argument "post" asks it to evaluate the model that is trained (self-supervised) on the real-data. Changing it to "pre" will evaluate the simulation-trained model on real-world data.*
 
 3. To run self-supervised training:
 
-	```
+	```bash
 	python training.py "point_transformer" "002_master_chef_can" "self_supervised"
 	```
 	
-*Note: this will overwrite the trained and saved model.*
+	*Note: this will overwrite the trained and saved model.*
 
 4. To run the supervised training on simulated data:
 	
-	```
+	```bash
 	python training.py "point_transformer" "002_master_chef_can" "supervised"
 	```
 	
-*Note: this will overwrite the trained and saved model.*
+	*Note: this will overwrite the trained and saved model.*
 
 
 
