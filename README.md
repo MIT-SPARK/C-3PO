@@ -13,19 +13,19 @@ and augments it with a self-supervised training procedure on the real-data. It i
 
 1. **A Corrector Module** *that corrects errors in the detected keypoints (blue: detected keypoints, red: corrected keypoints)* 
 
-	<img src="docs/media/correct.gif" width="50%" > 
+<center><img src="docs/media/correct.gif" width="50%" ></center> 
 
 
 2. **A Certificate of Correctness** *that flags if the pose output produced by the model is correct or not (red: corrected keypoints, green: ground-truth)* 
 
-    <img src="docs/media/cert.gif" width="30%" >
+<center><img src="docs/media/cert.gif" width="30%" ></center>
 
 
 3. and **A Certificate of Non-Degeneracy** *that flags if the input partial point cloud admits more than one correct pose, for a solution* 
 
    | Degenerate Case                                       | Non-Degenerate Case                                       |
    |-------------------------------------------------------|-----------------------------------------------------------|
-   | <img src="docs/media/cert_and_degen.gif" width="90%"> | <img src="docs/media/cert_and_nondegen.gif" width="80%" > |
+   | <center><img src="docs/media/cert_and_degen.gif" width="90%"></center> | <center><img src="docs/media/cert_and_nondegen.gif" width="80%" ></center> |
    | *Input exhibits multiple solutions possible*          | *Input exhibits a unique solution*                        |
 
 
@@ -41,6 +41,7 @@ R. Talak, L. Peng, L. Carlone, "Correct and Certify: A New Approach to Self-Supe
 **Abstract:** We consider a certifiable object pose estimation problem, where -- given a partial point cloud of an object -- the goal is to estimate the object pose, fit a CAD model to the sensor data, and provide certification guarantees. We solve this problem by combining (i) a novel self-supervised training approach, and (ii) a certification procedure, that not only verifies whether the output produced by the model is correct or not (i.e. *certifiability*), but also flags uniqueness of the produced solution (i.e. *strong certifiability*). We use a semantic keypoint-based pose estimation model, that is initially trained in simulation and does not perform well on real-data due to the domain gap. Our self-supervised training procedure uses a *corrector* and a *certification* module to improve the detector. The corrector module corrects the detected keypoints to compensate for the domain gap, and is implemented as a declarative layer, for which we develop a simple differentiation rule. The certification module declares whether the corrected output produced by the model is certifiable (i.e. correct) or not. At each iteration, the approach optimizes over the loss induced only by the certifiable input-output pairs. As training progresses, we see that the fraction of outputs that are certifiable increases, eventually reaching near 100% in many cases. We conduct extensive experiments to evaluate the performance of the corrector, the certification, and the proposed self-supervised training using the ShapeNet and YCB datasets, and show the proposed approach achieves performance comparable to fully supervised baselines while not using any annotation for supervision on real data. 
 
 **Citation** If you find our project useful, do not hesitate, to cite our paper.
+
 ```bibtex
 @article{Talak22arxiv-correctAndCertify,
   title = {Correct and {{Certify}}: {{A New Approach}} to {{Self-Supervised 3D-Object Perception}}},
@@ -107,7 +108,7 @@ conda activate env-c3po
 python setup.py develop
 ```
 
-Verify that the following libraries are installed: `pytorch`, `pytorch-geometric`, `open3d`, `pytorch3d`, `matplotlib`, `pandas`, `tensorboard`, `cudatoolkit`, `scipy`, `yaml`,`fvcore`, `iopath`, `bottler`, 
+Verify that the following libraries are installed: `pytorch`, `pytorch-geometric`, `open3d`, `pytorch3d`, `matplotlib`, `pandas`, `tensorboard`, `cudatoolkit`, `scipy`, `yaml`,`fvcore`, `iopath`, `bottler`. 
 
 
 
