@@ -3,8 +3,8 @@
 **Authors:** [Rajat Talak](https://www.rajattalak.com/), Lisa Peng, [Luca Carlone](https://lucacarlone.mit.edu/)
 
 
-This is **C-3PO** -- an open-source implementation of our work titled "*Correct and Certify: A New Approach to Self-Supervised 3D Object Perception*" (see [paper](#paper)).
-**C-3PO** solves the certifiable object pose estimation problem, where -- given a partial point cloud of an object -- the goal is to estimate the object pose, fit a CAD model to the sensor data, and provide certification guarantees. 
+**C-3PO** is an open-source implementation of our work titled "*Correct and Certify: A New Approach to Self-Supervised 3D Object Perception*" (see [paper](#paper)).
+It solves the certifiable object pose estimation problem, where -- given a partial point cloud of an object -- the goal is to estimate the object pose, fit a CAD model to the sensor data, and provide certification guarantees. 
 
 
 
@@ -30,8 +30,8 @@ and augments it with a self-supervised training procedure on the real-data that 
 
 
 **C-3PO** provides implementation of our proposed model in the [paper](#paper) and the code to reproduce the experimental results.
-Our experiments rely on processed [ShapeNet](https://shapenet.org/), [KeypointNet](https://github.com/qq456cvb/KeypointNet), and the [YCB](https://www.ycbbenchmarks.com/object-models/) datasets. 
-We provide the processed versions of these datasets for you to be able to reproduce and verify our results (see [datassets](#Datasets)). 
+Our experiments rely on the processed [ShapeNet](https://shapenet.org/), [KeypointNet](https://github.com/qq456cvb/KeypointNet), and [YCB](https://www.ycbbenchmarks.com/object-models/) datasets. 
+We provide these processed datasets for you to be able to reproduce and verify our results (see [datassets](#Datasets)). 
 
 
 ## Paper 
@@ -84,6 +84,7 @@ conda env create -f environment_learning_objects_3*.yml
 ```
 
 Use the yml file that best suits your requirement. We provide two options:
+
 | python | cuda | yml file | 
 | -------| -----| -------- |
 | 3.8 | 11.1 | environment_c3po_38.yml |
