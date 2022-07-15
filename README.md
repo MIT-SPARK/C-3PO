@@ -1,9 +1,7 @@
-# Correct and Certify: A New Approach to Self-Supervised 3D Object Perception
+# C-3PO
 
 **Authors:** [Rajat Talak](https://www.rajattalak.com/), Lisa Peng, [Luca Carlone](https://lucacarlone.mit.edu/)
 
-
-## About
 
 This is **C-3PO** -- an open-source implementation of our work titled "*Correct and Certify: A New Approach to Self-Supervised 3D Object Perception*" (see [paper](#paper)).
 **C-3PO** solves the certifiable object pose estimation problem, where -- given a partial point cloud of an object -- the goal is to estimate the object pose, fit a CAD model to the sensor data, and provide certification guarantees. 
