@@ -143,9 +143,9 @@ Verify that the following libraries are installed: `cudatoolkit`, `pytorch`, `py
 
 ### The ShapeNet Experiment
 
-This experiment shows the success of the proposed self-supervised training on a dataset of generated depth point clouds using ShapeNet models. We are able to generate data across various object categories in ShapeNet and show the power of our proposed model, in matching a supervised baseline, without using any annotation on the generated, training data.
+This experiment shows the success of the proposed self-supervised training on a dataset of simulated depth point clouds using ShapeNet models. We are able to generate data across various object categories in ShapeNet and show the power of our proposed model in matching a supervised baseline, without using any annotation on the generated training data.
 
-**Replication.** The proposed model requires one to specify the object category and the architecture used to implement the keypoint detector. We show how to train and evaluate the proposed model for **object**: *chair* and **keypoint detector**: *point transformer*. 
+**Replication.** The proposed model requires one to specify the object category and the architecture used for the keypoint detector. We show how to train and evaluate the proposed model for **object**: *chair* and **keypoint detector**: *point transformer*. 
 
 1. Move to the ShapeNet experiment directory:
     ```bash 
@@ -156,7 +156,7 @@ This experiment shows the success of the proposed self-supervised training on a 
     ```bash
        python evaluate_proposed_model.py "point_transformer" "chair" "post" 
     ```
-   *Note: argument "post" asks it to evaluate the model that is trained (self-superviised) on the real-data. Changing it to "pre" will evaluate the simulation-trained model on real-world data.*
+   *Note: argument "post" asks it to evaluate the model that is trained (self-supervised) on the real-data. Changing it to "pre" will evaluate the simulation-trained model on real-world data.*
 
 
 2. To run self-supervised training: 
@@ -176,15 +176,40 @@ This experiment shows the success of the proposed self-supervised training on a 
 
 ### The YCB Experiment 
 
-This experiment shows that the proposed self-supervised training method also works on real-world dataset such as RGB-D images. We see that the proposed model -- after self-supervised training -- is able to match or exceed the performance of a supervised baseline, without using any annotation for training.
+This experiment shows that the proposed self-supervised training method also works on a real-world dataset comprised of RGB-D images. We see that the proposed model -- after self-supervised training -- is able to match or exceed the performance of a supervised baseline, without using any annotations for training.
 
-**Replication**
+**Replication** The proposed model requires one to specify the object category and the architecture used for the keypoint detector. We show how to train and evaluate the proposed model for **object**: *002\_master\_chef\_can* and **keypoint detector**: *point transformer*. 
 
-1. Trained models are saved in the repo. To evaluate the trained models, run:
-	```bash
+
+1. Move to the YCB experiment directory:
+
+	```
+	cd c3po/expt_ycb/
+	```
+	
+2. Trained models are saved in the repo. To evaluate the trained models, run:
+
+	```
+	python evaluate_proposed_model.py "point_transformer" "002_master_chef_can" "post"
+	```
+	
+*Note: argument "post" asks it to evaluate the model that is trained (self-supervised) on the real-data. Changing it to "pre" will evaluate the simulation-trained model on real-world data.*
+
+3. To run self-supervised training:
+
+	```
+	python training.py "point_transformer" "002_master_chef_can" "self_supervised"
+	```
+	
+*Note: this will overwrite the trained and saved model.*
+
+4. To run the supervised training on simulated data:
 	
 	```
-2.  
+	python training.py "point_transformer" "002_master_chef_can" "supervised"
+	```
+	
+*Note: this will overwrite the trained and saved model.*
 
 
 
@@ -194,7 +219,7 @@ Our experiments rely on  the [ShapeNet](https://shapenet.org/), [KeypointNet](ht
 
 There's no need to download the datasets seperately. Our experiments use a processed version of these datasets. Follow the steps below to download and save the relevant dataset. 
 
-1. Download our processed dataset files on Google Drive [here](https://drive.google.com/drive/folders/1IPHZ-KiuT42ugZQ27-CZuiZfvy5LLvIa?usp=sharing) and move all the files to the same directory this README is in (the C3PO repo). We've provided the dataset as a zip archive split into 1GB chunks of the format ```c3po-data.z**```.
+1. Download our processed dataset files on Google Drive [here](https://drive.google.com/drive/folders/1EYa8B0dID1vk9bze93pzil8rVj2-fYb5?usp=sharing) and move all the files to the same directory this README is in (the C3PO repo). We've provided the dataset as a zip archive split into 1GB chunks of the format ```c3po-data.z**```.
 
 2. Combine the archives into one zip file: 
 	```bash 
@@ -207,6 +232,7 @@ There's no need to download the datasets seperately. Our experiments use a proce
 	```
 
 4. Verify your directory structure looks as follows:
+
 	```
 	C3PO
 	│   README.md
