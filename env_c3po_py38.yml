@@ -1,4 +1,4 @@
-name: learning-objects-01
+name: env-c3po
 channels:
   - pytorch-lts
   - pyg

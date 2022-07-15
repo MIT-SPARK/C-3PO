@@ -1,4 +1,4 @@
-name: learning-objects-00
+name: env-c3po
 channels:
   - pytorch3d
   - pytorch
