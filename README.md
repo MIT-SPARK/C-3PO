@@ -9,7 +9,7 @@ It solves the certifiable object pose estimation problem, where -- given a parti
 
 
 **C-3PO** uses a semantic keypoint-based pose estimation model, that is initially trained in simulation, 
-and augments it with a self-supervised training procedure on the real-data that uses:
+and augments it with a self-supervised training procedure on the real-data. It implements:
 
 1. **A Corrector Module** *that corrects errors in the detected keypoints (blue: detected keypoints, red: corrected keypoints)* 
 
@@ -21,7 +21,7 @@ and augments it with a self-supervised training procedure on the real-data that 
     <img src="docs/media/cert.gif" width="30%" >
 
 
-3. and also predicts **A Certificate of Non-Degeneracy** *that flags if the input partial point cloud admits more than one correct pose, for a solution* 
+3. and **A Certificate of Non-Degeneracy** *that flags if the input partial point cloud admits more than one correct pose, for a solution* 
 
    | Degenerate Case                                       | Non-Degenerate Case                                       |
    |-------------------------------------------------------|-----------------------------------------------------------|
