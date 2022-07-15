@@ -113,24 +113,24 @@ Verify that the following libraries are installed: `cudatoolkit`, `pytorch`, `py
 
 **Description.** This experiment aims to show the effectiveness of our keypoint corrector module. It uses ShapeNet dataset models. For each input point cloud, we perturb 80% of the the keypoints with varying amounts of noise and then pass the input through the corrector module and then the registration module. Averaged ADD-S errors for 100 iterations of the corrector forward pass per noise variance parameter are saved for plot generation. 
 
-**Location.** `c3po/expt_keypoint_corrector_analysis/` 
-
-
-% Add Figure
-
-
-**Results.** Our analysis plots are saved in: `c3po/expt_keypoint_corrector_analysis/expt_with_reg_depthpc/<CLASS_ID>/<MODEL_ID>_wchamfer/`
+|<img src="docs/media/table-adds.jpg" width="100%">|<img src="docs/media/vessel-adds.jpg" width="100%">|<img src="docs/media/skateboard-adds.jpg" width="100%">|
+|:---:|:---:|:---:|
+| corrector results on table model | corrector results on vessel model | corrector results on skateboard model |
 
 **Replication.** To replicate our results do the following. 
 
-1. Run the experiment and save performance metrics for plot generation.
-	```bash 
-	cd c3po/expt_keypoint_corrector_analysis/
-	python expt_with_reg_depthpc.py
-	```
+1. Move to the experiment directory:
+    ```bash
+   cd c3po/expt_keypoint_corrector_analysis/
+   ```
+   
+2. Run the experiment and save performance metrics for plot generation.
+    ```bash
+    python expt_with_reg_depthpc.py
+    ```
 	
-	The generated performance metrics will be saved in the following pickle file.
-	`c3po/expt_keypoint_corrector_analysis/expt_with_reg_depthpc/<CLASS_ID>/<MODEL_ID>_wchamfer/<TIMESTAMP>_experiment.pickle`
+    The generated performance metrics will be saved in the following pickle file.
+    `c3po/expt_keypoint_corrector_analysis/expt_with_reg_depthpc/<CLASS_ID>/<MODEL_ID>_wchamfer/<TIMESTAMP>_experiment.pickle`
 
 
 2. Generate plots from the saved pickle file. 
