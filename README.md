@@ -14,13 +14,13 @@ and augments it with a self-supervised training procedure on the real-data. It i
 1. **A Corrector Module** *that corrects errors in the detected keypoints (blue: detected keypoints, red: corrected keypoints)* 
 
 <p align="center">
-	<img src="docs/media/correct.gif" width="50%" >
+	<img src="docs/media/correct.gif" width="300" >
 </p>
 
 2. **A Certificate of Correctness** *that flags if the pose output produced by the model is correct or not (red: corrected keypoints, green: ground-truth)* 
 
 <p align="center">
-	<img src="docs/media/cert.gif" width="30%" >
+	<img src="docs/media/cert.gif" width="300" >
 </p>
 
 3. and **A Certificate of Non-Degeneracy** *that flags if the input partial point cloud admits more than one correct pose, for a solution* 
