@@ -4,11 +4,9 @@ import json
 import numpy as np
 import open3d as o3d
 import os
-import pandas as pd
 import pytorch3d
 import sys
 import torch
-from enum import Enum
 from pytorch3d import transforms, ops
 
 DATASET_PATH: str = '../../data/ycb/models/ycb/'
