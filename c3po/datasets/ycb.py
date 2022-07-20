@@ -84,8 +84,7 @@ class SE3PointCloudYCB(torch.utils.data.Dataset):
     Returns a batch of
         input_point_cloud, keypoints, rotation, translation
     """
-    def __init__(self, model_id, num_of_points=1000, dataset_len=10000,
-                 dir_location='../../data/learning-objects/ycb_datasets/'):
+    def __init__(self, model_id, num_of_points=1000, dataset_len=10000):
         """
         model_id        : str   : model id of a ycb object
         num_of_points   : int   : max. number of points the depth point cloud will contain
@@ -187,8 +186,7 @@ class SE3PointCloudYCBAugment(torch.utils.data.Dataset):
     Returns a batch of
         input_point_cloud, keypoints, rotation, translation
     """
-    def __init__(self, model_id, num_of_points=1000, dataset_len=10000,
-                 dir_location='../../data/learning-objects/ycb_datasets/'):
+    def __init__(self, model_id, num_of_points=1000, dataset_len=10000):
         """
         model_id        : str   : model id of a ycb object
         num_of_points   : int   : max. number of points the depth point cloud will contain
@@ -293,8 +291,7 @@ class DepthYCB(torch.utils.data.Dataset):
     Returns a batch of
         input_point_cloud, keypoints, rotation, translation
     """
-    def __init__(self, model_id, split='train', num_of_points=500, only_load_nondegenerate_pcds = False,
-                 dir_location='../../data/learning-objects/ycb_datasets/'):
+    def __init__(self, model_id, split='train', num_of_points=500, only_load_nondegenerate_pcds = False):
         """
         model_id        : str   : model id of a ycb object
         num_of_points   : int   : max. number of points the depth point cloud will contain
@@ -474,8 +471,7 @@ class DepthYCBAugment(torch.utils.data.Dataset):
     Returns a batch of
         input_point_cloud, keypoints, rotation, translation
     """
-    def __init__(self, model_id, split='train', num_of_points=500, only_load_nondegenerate_pcds = False,
-                 dir_location='../../data/learning-objects/ycb_datasets/'):
+    def __init__(self, model_id, split='train', num_of_points=500, only_load_nondegenerate_pcds = False):
         """
         model_id        : str   : model id of a ycb object
         num_of_points   : int   : max. number of points the depth point cloud will contain
@@ -597,8 +593,7 @@ class MixedDepthYCBAugment(torch.utils.data.Dataset):
     Returns a batch of
         input_point_cloud, rotation, translation
     """
-    def __init__(self, model_id, split='train', num_of_points=500,
-                 dir_location='../../data/learning-objects/ycb_datasets/', mixed_data=True):
+    def __init__(self, model_id, split='train', num_of_points=500, mixed_data=True):
         """
         model_id        : str   : model id of a ycb object
         num_of_points   : int   : max. number of points the depth point cloud will contain
@@ -722,7 +717,6 @@ class MixedDepthYCBAugment(torch.utils.data.Dataset):
 
 if __name__ == "__main__":
 
-    dir_location = '../../data/learning_objects/ycb_datasets/'
     model_id = "021_bleach_cleanser"  # a particular chair model
     batch_size = 5
     #

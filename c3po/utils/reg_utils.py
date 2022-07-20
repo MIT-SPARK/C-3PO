@@ -8,7 +8,6 @@ import cv2
 import open3d as o3d
 import trimesh
 import numpy as np
-import pymeshfix
 import meshlab_pickedpoints
 from scipy.spatial import ConvexHull, convex_hull_plot_2d
 from scipy.spatial import KDTree

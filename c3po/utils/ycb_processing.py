@@ -126,7 +126,7 @@ def pick_points(pcd):
     print("")
     return vis.get_picked_points()
 
-def save_kpts(kpt_idxs, points_xyz, target_oject):
+def save_kpts(kpt_idxs, points_xyz, target_object, data_folder = ycb_data_folder, kpt_filename = "kpts_xyz.npy"):
     """
     Takes list of kpt indices in the points_xyz np.ndarray and saves into npy file
     :param kpt_idxs:
@@ -134,10 +134,16 @@ def save_kpts(kpt_idxs, points_xyz, target_oject):
     :return:
     """
     kpt_xyz = np.asarray(points_xyz)[kpt_idxs]
-    kpt_filename = os.path.join(ycb_data_folder + target_object, "kpts_xyz.npy")
-    np.save(kpt_filename, kpt_xyz)
-    loaded_array = np.load(kpt_filename)
+    kpt_path = os.path.join(data_folder + target_object, kpt_filename)
+    np.save(kpt_path, kpt_xyz)
+    loaded_array = np.load(kpt_path)
     print("saved and loaded array", loaded_array)
+
+def load_kpts(target_object, data_folder = ycb_data_folder, kpt_filename = "kpts_xyz.npy"):
+    kpt_path = os.path.join(data_folder + target_object, kpt_filename)
+    kpt_xyz = np.load(kpt_path)
+    print("kpt_xyz array", kpt_xyz)
+    return kpt_xyz
 
 def load_obj_from_ref_H(target_object, camera, viewpoint_angle):
     calibrationFilename = os.path.join(ycb_data_folder + target_object, "calibration.h5")
@@ -167,26 +173,24 @@ def get_closest_cluster(input_pcd, gt_pcd, viz=False):
         print("pcd now has reduced number of points", len(input_pcd.points))
 
     input_points = torch.Tensor(np.array(input_pcd.points)).unsqueeze(0)
-    gt_pcd = torch.Tensor(np.array(gt_pcd.points)).unsqueeze(0)
-    print(input_points.shape)
-    print(gt_pcd.shape)
-    sq_dist, _, _ = ops.knn_points(input_points, gt_pcd, K=1, return_sorted=False)
+    gt_pcd_points = torch.Tensor(np.array(gt_pcd.points)).unsqueeze(0)
+    sq_dist, _, _ = ops.knn_points(input_points, gt_pcd_points, K=1, return_sorted=False)
     #mask sq_dist (if it is a numpy array)
-    print("sq_dist", sq_dist.shape)
     mask_dist = torch.sqrt(sq_dist).le(0.01).squeeze(0) #keep points within a centimeter to the closest point
-    print("mask_dist shape", mask_dist.shape)
     mask_dist = torch.hstack((mask_dist, mask_dist, mask_dist))
-    print("mask_dist shape", mask_dist.shape)
     output_points = torch.masked_select(input_points.squeeze(0), mask_dist)
     output_points = output_points.reshape((-1, 3))
-    print("output points shape", output_points.shape)
     output_pcd = o3d.geometry.PointCloud()
     output_pcd.points = o3d.utility.Vector3dVector(output_points.numpy()) #nts: .numpy() is optimized conversion to numpy array
 
     if viz:
         input_pcd.paint_uniform_color([.5, 0, 0])
-
+        gt_pcd.paint_uniform_color([0, 0, .9])
         o3d.visualization.draw_geometries([input_pcd])
+        o3d.visualization.draw_geometries([gt_pcd])
+
+        o3d.visualization.draw_geometries([input_pcd] + [gt_pcd])
+
         output_pcd.paint_uniform_color([0, .5, 0])
 
         o3d.visualization.draw_geometries([output_pcd])
@@ -338,7 +342,7 @@ def load_image_and_model2(target_object, viewpoint_camera, viewpoint_angle):
 
 def save_rgbFromObj(target_object, viewpoint_camera, viewpoint_angle, only_return = False):
     '''
-    Calculates the transformation matrix from the object origin of the poisson reconstructed mesh model wrt the rgb viewpoint camera at framew viewpoint_angle
+    Calculates the transformation matrix from the object origin of the poisson reconstructed mesh model wrt the rgb viewpoint camera at frame viewpoint_angle
     :param target_object: the object we're calculating transformations from
     :param viewpoint_camera: the rgb camera ("NP1", "NP2", etc.) of interest
     :param viewpoint_angle: the angle the camera is viewing the object from (only used to locate files due to naming conventions)
