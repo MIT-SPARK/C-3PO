@@ -3,7 +3,7 @@
 
 # Dataset folders
 dataset/
-data/
+data
 c3po/data/
 
 # Temporary experimental data
