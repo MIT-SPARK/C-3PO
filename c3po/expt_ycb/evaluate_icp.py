@@ -6,10 +6,10 @@ import yaml
 
 sys.path.append('../..')
 
-from c3po.datasets.ycb import DepthYCB, DepthYCBAugment
+from c3po.datasets.ycb import DepthYCB
 from c3po.utils.loss_functions import certify
 from c3po.utils.evaluation_metrics import evaluation_error, add_s_error
-from c3po.expt_shapenet.baseline_model import RANSACwICP, TEASERwICP, wICP
+from c3po.baselines.icp import RANSACwICP, TEASERwICP, wICP
 from c3po.utils.visualization_utils import display_two_pcs
 from c3po.expt_ycb.proposed_model import ProposedRegressionModel as ProposedModel
 
