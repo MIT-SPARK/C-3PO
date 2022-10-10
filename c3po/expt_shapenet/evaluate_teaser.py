@@ -6,35 +6,26 @@ import yaml
 
 sys.path.append('../..')
 
-from c3po.datasets.shapenet import CLASS_NAME, CLASS_ID, DepthPC, FixedDepthPC
+from c3po.datasets.shapenet import CLASS_NAME, CLASS_ID, FixedDepthPC
 from c3po.utils.loss_functions import certify
 from c3po.utils.evaluation_metrics import evaluation_error, add_s_error
-from c3po.expt_shapenet.baseline_model import RANSACwICP, TEASERwICP, wICP, TEASER
+from c3po.expt_shapenet.baseline_model import TEASER
 from c3po.utils.visualization_utils import display_two_pcs
-from c3po.expt_shapenet.proposed_model import ProposedRegressionModel as ProposedModel
 
 
-def eval_teaser(class_id, model_id, detector_type, hyper_param,
-             use_corrector=False, certification=True, visualize=False):
+def eval_teaser(class_id, model_id, hyper_param,
+                certification=True, visualize=False):
 
-    #ToDo: modify code to evaluate teaser++
-    # - use the TEASER class from baseline_model.py
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     class_name = CLASS_NAME[class_id]
     save_folder = hyper_param['save_folder']
     best_model_save_location = save_folder + class_name + '/' + model_id + '/'
-    best_pre_model_save_file = best_model_save_location + '_best_supervised_kp_' + detector_type + '.pth'
 
     # setting up the dataset and dataloader
     # validation dataset:
     eval_dataset_len = hyper_param['eval_dataset_len']
     eval_batch_size = hyper_param['eval_batch_size']
-    # eval_dataset = DepthPC(class_id=class_id, model_id=model_id,
-    #                        n=hyper_param['num_of_points_selfsupervised'],
-    #                        num_of_points_to_sample=hyper_param['num_of_points_to_sample'],
-    #                        dataset_len=eval_dataset_len,
-    #                        rotate_about_z=True)
     eval_dataset = FixedDepthPC(class_id=class_id, model_id=model_id,
                                 n=hyper_param['num_of_points_selfsupervised'],
                                 num_of_points_to_sample=hyper_param['num_of_points_to_sample'],
@@ -44,29 +35,9 @@ def eval_teaser(class_id, model_id, detector_type, hyper_param,
 
     # get cad models
     cad_models = eval_dataset._get_cad_models().to(torch.float).to(device=device)
-    model_keypoints = eval_dataset._get_model_keypoints().to(torch.float).to(device=device)
 
     # initialize the teaser module
     teaser = TEASER(source_points=cad_models)
-
-
-    # model = ProposedModel(class_name=class_name,
-    #                       model_keypoints=model_keypoints,
-    #                       cad_models=cad_models,
-    #                       keypoint_detector=detector_type,
-    #                       correction_flag=use_corrector).to(device=device)
-    #
-    # if not os.path.isfile(best_pre_model_save_file):
-    #     print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")
-    #
-    # state_dict_pre = torch.load(best_pre_model_save_file, map_location=device)
-    # model.load_state_dict(state_dict_pre)
-    #
-    # num_parameters = sum(param.numel() for param in model.parameters() if param.requires_grad)
-    # print("Number of trainable parameters in the keypoint detector: ", num_parameters)
-    #
-    # model.eval()
-
 
     # for the data batch evaluate icp output from ICP
     pc_err = 0.0
@@ -84,7 +55,6 @@ def eval_teaser(class_id, model_id, detector_type, hyper_param,
     auc_cert = 0.0
 
     num_cert = 0.0
-    num_batches = len(eval_loader)
 
     with torch.no_grad():
         for i, vdata in enumerate(eval_loader):
@@ -95,18 +65,17 @@ def eval_teaser(class_id, model_id, detector_type, hyper_param,
             t_target = t_target.to(device)
             batch_size = input_point_cloud.shape[0]
 
-            # _, detected_keypoints, R0, t0, _ = model(input_point_cloud)
-            #ToDo: (option): we can use R0, t0 as an initial guess, and use teaser to refine the pose.
             R, t = teaser.forward(input_point_cloud)
-
             R_predicted = R
             t_predicted = t
-            predicted_point_cloud = R_predicted @ input_point_cloud + t_predicted
+            predicted_point_cloud = R_predicted @ cad_models + t_predicted
+            ground_truth_point_cloud = R_target @ cad_models + t_target
 
             if visualize:
-                pc_in = input_point_cloud[0, ...]
-                pc_pred = predicted_point_cloud[0, ...]
-                display_two_pcs(pc1=pc_in, pc2=pc_pred)
+                print("Displaying input pc and model with gt transformation:")
+                display_two_pcs(pc1=input_point_cloud, pc2=ground_truth_point_cloud)
+                print("Displaying input pc and model with teaser transformation:")
+                display_two_pcs(pc1=input_point_cloud, pc2=predicted_point_cloud)
 
             if certification:
                 certi = certify(input_point_cloud=input_point_cloud,
@@ -119,7 +88,6 @@ def eval_teaser(class_id, model_id, detector_type, hyper_param,
                 evaluation_error(input=(input_point_cloud, keypoints_target, R_target, t_target),
                                  output=(predicted_point_cloud, keypoints_target, R_predicted, t_predicted))
 
-            ground_truth_point_cloud = R_target @ cad_models + t_target
             adds_err_, _ = add_s_error(predicted_point_cloud, ground_truth_point_cloud,
                                        threshold=hyper_param["adds_threshold"])
             _, auc_ = add_s_error(predicted_point_cloud, ground_truth_point_cloud,
@@ -149,7 +117,7 @@ def eval_teaser(class_id, model_id, detector_type, hyper_param,
                 auc_cert += auc_cert_
 
             del input_point_cloud, keypoints_target, R_target, t_target, \
-                predicted_point_cloud, R_predicted, t_predicted, detected_keypoints, ground_truth_point_cloud, R0, t0
+                predicted_point_cloud, R_predicted, t_predicted, ground_truth_point_cloud
 
     # avg_vloss = running_vloss / (i + 1)
     ave_pc_err = pc_err / ((i + 1) * batch_size)
@@ -192,19 +160,19 @@ def eval_teaser(class_id, model_id, detector_type, hyper_param,
         print("ADD-S AUC (", int(hyper_param["adds_auc_threshold"] * 100), "%): ", ave_auc_cert.item())
         print("GT-certifiable: ")
 
-    del eval_dataset, eval_loader, model, state_dict_pre
-    del cad_models, model_keypoints
+    del eval_dataset, eval_loader
+    del cad_models
 
     return None
 
 
-def evaluate_teaser(class_name, model_id, detector_type, use_corrector=False, visualize=False):
+def evaluate_teaser(class_name, model_id, visualize=False):
 
     class_id = CLASS_ID[class_name]
     hyper_param_file = "self_supervised_training.yml"
     stream = open(hyper_param_file, "r")
     hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
-    hyper_param = hyper_param[detector_type]   # we only use the evaluation dataset parameters, which are the same
+    hyper_param = hyper_param['point_transformer']   # we only use the evaluation dataset parameters, which are the same
     hyper_param['epsilon'] = hyper_param['epsilon'][class_name]
 
     print(">>"*40)
@@ -212,9 +180,7 @@ def evaluate_teaser(class_name, model_id, detector_type, use_corrector=False, vi
 
     eval_teaser(class_id=class_id,
                 model_id=model_id,
-                detector_type=detector_type,
                 hyper_param=hyper_param,
-                use_corrector=use_corrector,
                 visualize=visualize)
 
     return None
@@ -244,6 +210,4 @@ if __name__ == "__main__":
 
     evaluate_teaser(class_name=class_name,
                     model_id=model_id,
-                    detector_type='point_transformer',
-                    use_corrector=False,
                     visualize=False)
