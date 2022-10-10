@@ -2,6 +2,7 @@ import numpy as np
 import open3d as o3d
 import sys
 import torch
+import teaserpp_python
 
 sys.path.append("../../")
 
@@ -42,17 +43,6 @@ def ransac(source_points, target_points):
         target=tar,
         corres=corres_init,
         max_correspondence_distance=0.001)
-    # The following is from open3d, just for reference: #ToDo: remove in the final version.
-    # result = o3d.pipelines.registration.registration_ransac_based_on_feature_matching(
-    #     source_down, target_down, source_fpfh, target_fpfh, True,
-    #     distance_threshold,
-    #     o3d.pipelines.registration.TransformationEstimationPointToPoint(False),
-    #     3, [
-    #         o3d.pipelines.registration.CorrespondenceCheckerBasedOnEdgeLength(
-    #             0.9),
-    #         o3d.pipelines.registration.CorrespondenceCheckerBasedOnDistance(
-    #             distance_threshold)
-    #     ], o3d.pipelines.registration.RANSACConvergenceCriteria(100000, 0.999))
 
     # extracting result
     T = result_ransac.transformation
@@ -61,8 +51,6 @@ def ransac(source_points, target_points):
     R = torch.from_numpy(R_)
     t = torch.from_numpy(t_)
     t = t.unsqueeze(-1)
-    # print("R shape: ", R.shape)
-    # print("t shape: ", t.shape)
 
     return R.to(device=device_), t.to(device=device_)
 
@@ -85,7 +73,7 @@ def teaser(source_points, target_points):
     # print("Here!")
 
     # convert source_points, target_points to numpy src, tar
-    src = source_points.to('cpu').numpy()
+    src = source_points.squeeze(0).to('cpu').numpy()
     tar = target_points.to('cpu').numpy()
 
     solver_params = teaserpp_python.RobustRegistrationSolver.Params()
@@ -226,7 +214,13 @@ class TEASER():
 
         for b in range(batch_size):
             tar = target_points[b, ...]
-            R_batch, t_batch = teaser(source_points=self.source_points, target_points=tar)
+
+            # pruning the tar of all zero points
+            idx = torch.any(tar == 0, 0)
+            tar_new = tar[:, torch.logical_not(idx)]
+
+            # teaser
+            R_batch, t_batch = teaser(source_points=self.source_points, target_points=tar_new)
             R[b, ...] = R_batch
             t[b, ...] = t_batch
 
@@ -427,9 +421,5 @@ class wICP():
 
         # re-centering
         t = t + center
-
-        #
-        # R = R0
-        # t = t0 + center
 
         return R @ self.cad_models + t, R, t
