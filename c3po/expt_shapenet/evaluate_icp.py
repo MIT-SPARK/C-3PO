@@ -25,14 +25,8 @@ def eval_icp(class_id, model_id, detector_type, hyper_param, global_registration
     best_pre_model_save_file = best_model_save_location + '_best_supervised_kp_' + detector_type + '.pth'
 
     # define dataset and dataloader
-    # validation dataset:
     eval_dataset_len = hyper_param['eval_dataset_len']
     eval_batch_size = hyper_param['eval_batch_size']
-    # eval_dataset = DepthPC(class_id=class_id, model_id=model_id,
-    #                        n=hyper_param['num_of_points_selfsupervised'],
-    #                        num_of_points_to_sample=hyper_param['num_of_points_to_sample'],
-    #                        dataset_len=eval_dataset_len,
-    #                        rotate_about_z=True)
     eval_dataset = FixedDepthPC(class_id=class_id, model_id=model_id,
                                 n=hyper_param['num_of_points_selfsupervised'],
                                 num_of_points_to_sample=hyper_param['num_of_points_to_sample'],
@@ -45,7 +39,6 @@ def eval_icp(class_id, model_id, detector_type, hyper_param, global_registration
     model_keypoints = eval_dataset._get_model_keypoints().to(torch.float).to(device=device)
 
     # initialize the ICP model with the cad_models
-    # icp = ICP(cad_models=cad_models, model_keypoints=model_keypoints)
     if global_registration == 'ransac':
         icp = RANSACwICP(cad_models=cad_models, model_keypoints=model_keypoints)
     elif global_registration == 'teaser':
@@ -87,7 +80,6 @@ def eval_icp(class_id, model_id, detector_type, hyper_param, global_registration
     auc_cert = 0.0
 
     num_cert = 0.0
-    num_batches = len(eval_loader)
 
     with torch.no_grad():
         for i, vdata in enumerate(eval_loader):
@@ -98,10 +90,8 @@ def eval_icp(class_id, model_id, detector_type, hyper_param, global_registration
             t_target = t_target.to(device)
             batch_size = input_point_cloud.shape[0]
 
-            print("here")
             _, detected_keypoints, R0, t0, _ \
                 = model(input_point_cloud)
-            print("here")
 
             if global_registration == 'ransac' or global_registration == 'teaser':
                 predicted_point_cloud, R_predicted, t_predicted = icp.forward(input_point_cloud, detected_keypoints)
@@ -205,9 +195,11 @@ def eval_icp(class_id, model_id, detector_type, hyper_param, global_registration
 
     return None
 
-def evaluate_icp(class_name, model_id, detector_type, global_registration='ransac', use_corrector=False, visualize=False):
-    class_id = CLASS_ID[class_name]
 
+def evaluate_icp(class_name, model_id, detector_type,
+                 global_registration='ransac', use_corrector=False, visualize=False):
+
+    class_id = CLASS_ID[class_name]
     hyper_param_file = "self_supervised_training.yml"
     stream = open(hyper_param_file, "r")
     hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
