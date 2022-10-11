@@ -1,4 +1,4 @@
-name: env-c3po
+name: c3po
 channels:
   - pytorch3d
   - pytorch
