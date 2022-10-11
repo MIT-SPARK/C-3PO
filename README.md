@@ -85,31 +85,24 @@ cd C-3PO/
 There are two ways to set up the virtual environment. Either, install from the yml file provided, as shown below:
 
 ```bash
-conda env create -f env_c3po_py3*.yml
+conda env create -f environment.yml
 ```
 
-Use the yml file that best suits your requirement. We provide two options:
-
-| python | cuda | yml file | 
-| -------| -----| -------- |
-| 3.8 | 11.1 | env_c3po_38.yml |
-| 3.9 | 10.2 | env_c3po_39.yml |
-
-Or, create a conda virtual environment `env-c3po` and install the following libraries: `pytorch`, `pytorch-geometric`, `open3d`, `pytorch3d`, `matplotlib`, `pandas`, `tensorboard`.
-
+This is tested for python 3.9 and cuda 10.2. For any other version of python and cuda, you may try manual installation 
+using instructions [here](./docs/manually-creating-conda-environment.md).
 
 ##### Step 3: Activate the conda environment
 
 ```bash
-conda activate env-c3po
+conda activate c3po
 ```
 
-##### Step 4: Install C-3PO
+##### Step 4: Install C-3PO (Optional)
 
 ```bash
 python setup.py develop
 ```
-
+##### Step 5: Verify Installation
 Verify that the following libraries are installed: `pytorch`, `pytorch-geometric`, `open3d`, `pytorch3d`, `matplotlib`, `pandas`, `tensorboard`, `cudatoolkit`, `scipy`, `yaml`,`fvcore`, `iopath`, `bottler`. 
 
 
