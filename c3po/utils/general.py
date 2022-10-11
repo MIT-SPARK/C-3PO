@@ -7,15 +7,16 @@ import copy
 import csv
 import numpy as np
 import open3d as o3d
-import open3d.visualization.gui as gui
-import open3d.visualization.rendering as rendering
+# import open3d.visualization.gui as gui
+# import open3d.visualization.rendering as rendering
 import random
 import string
 import time
 import torch
-import torch.nn.functional as F
-from pytorch3d import ops
-from pytorch3d import transforms
+# import torch.nn.functional as F
+# from pytorch3d import ops
+# from pytorch3d import transforms
+from scipy.spatial.transform.rotation import Rotation as Rot
 
 
 class TrackingMeter():
@@ -61,7 +62,8 @@ def generate_random_keypoints(batch_size, model_keypoints):
     K = model_keypoints.shape[0]
     N = model_keypoints.shape[-1]
 
-    rotation = transforms.random_rotations(n=batch_size)
+    rotation = torch.from_numpy(Rot.random(batch_size).as_matrix())
+    # rotation = transforms.random_rotations(n=batch_size)
     translation = torch.rand(batch_size, 3, 1)
 
     shape = torch.rand(batch_size, K, 1)
