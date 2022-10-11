@@ -3,6 +3,9 @@ import teaserpp_python
 import numpy as np
 import torch
 import copy
+import sys
+
+sys.path.append("../..")
 from c3po.baselines.teaser_utils.helpers import *
 
 
@@ -27,7 +30,7 @@ def pos_tensor_to_o3d(pos, estimate_normals=True):
     return object
 
 
-def teaser_fpfh_icp(source_points, target_points, voxel_size=0.15, visualize=False):
+def teaser_fpfh_icp(source_points, target_points, voxel_size=0.05, visualize=False):
     """
     source_points   : torch.tensor of shape (3, n)
     target_points   : torch.tensor of shape (3, m)
@@ -91,7 +94,7 @@ def teaser_fpfh_icp(source_points, target_points, voxel_size=0.15, visualize=Fal
     # robust global registration using TEASER++
     noise_bound = voxel_size
     teaser_solver = get_teaser_solver(noise_bound)
-    teaser_solver.solve(src_corr, src_corr)
+    teaser_solver.solve(src_corr, tar_corr)
     solution = teaser_solver.getSolution()
     R_teaser = solution.rotation
     t_teaser = solution.translation

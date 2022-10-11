@@ -218,4 +218,4 @@ if __name__ == "__main__":
 
     evaluate(class_name=class_name,
              model_id=model_id,
-             visualize=True)
+             visualize=False)
