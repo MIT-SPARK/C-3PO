@@ -7,27 +7,7 @@ import sys
 
 sys.path.append("../..")
 from c3po.baselines.teaser_utils.helpers import *
-
-
-#ToDo: This function is copied from c3po.utils.general.
-# - from c3po.utils.general import pos_tensor_to_o3d
-# - note: this to make sure that we can use this from the fcgf environment
-def pos_tensor_to_o3d(pos, estimate_normals=True):
-    """
-    inputs:
-    pos: torch.tensor of shape (3, N)
-
-    output:
-    open3d PointCloud
-    """
-    pos_o3d = o3d.utility.Vector3dVector(pos.transpose(0, 1).to('cpu').numpy())
-
-    object = o3d.geometry.PointCloud()
-    object.points = pos_o3d
-    if estimate_normals:
-        object.estimate_normals()
-
-    return object
+from c3po.utils.general import pos_tensor_to_o3d
 
 
 def teaser_fpfh_icp(source_points, target_points, voxel_size=0.05, visualize=False):
