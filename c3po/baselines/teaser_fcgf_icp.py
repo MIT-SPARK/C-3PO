@@ -6,6 +6,7 @@ import torch
 import copy
 from urllib.request import urlretrieve
 import sys
+from pathlib import Path
 
 sys.path.append("../..")
 from c3po.baselines.fcgf.util.misc import extract_features
@@ -13,11 +14,7 @@ from c3po.baselines.fcgf.model.resunet import ResUNetBN2C
 from c3po.baselines.teaser_utils.helpers import find_correspondences, get_teaser_solver, Rt2T
 from c3po.utils.general import pos_tensor_to_o3d
 
-if not os.path.isfile('fcgf/ResUNetBN2C-16feat-3conv.pth'):
-  print('Downloading weights...')
-  urlretrieve(
-      "https://node1.chrischoy.org/data/publications/fcgf/2019-09-18_14-15-59.pth",
-      'fcgf/ResUNetBN2C-16feat-3conv.pth')
+FCGF_HOME = Path(__file__).parent / 'fcgf'
 
 def teaser_fcgf_icp(source_points, target_points, voxel_size=0.025, model=None, visualize=False):
   """
@@ -29,7 +26,7 @@ def teaser_fcgf_icp(source_points, target_points, voxel_size=0.025, model=None, 
   source_feat   : torch.tensor of shape (d, l)
   target_feat   : torch.tensor of shape (d, k)
   """
-  # setup device
+  # # setup device
   device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
   # visualize
@@ -42,7 +39,13 @@ def teaser_fcgf_icp(source_points, target_points, voxel_size=0.025, model=None, 
 
   # load pre-trained model
   if model is None:
-      checkpoint = torch.load('./fcgf/ResUNetBN2C-16feat-3conv.pth')
+      if not os.path.isfile(FCGF_HOME / 'ResUNetBN2C-16feat-3conv.pth'):
+          print('Downloading weights...')
+          urlretrieve(
+              "https://node1.chrischoy.org/data/publications/fcgf/2019-09-18_14-15-59.pth",
+              FCGF_HOME / 'ResUNetBN2C-16feat-3conv.pth')
+
+      checkpoint = torch.load(FCGF_HOME / 'ResUNetBN2C-16feat-3conv.pth')
       model = ResUNetBN2C(1, 16, normalize_feature=True, conv1_kernel_size=3, D=3)
       model.load_state_dict(checkpoint['state_dict'])
       model.eval()
@@ -56,8 +59,11 @@ def teaser_fcgf_icp(source_points, target_points, voxel_size=0.025, model=None, 
 
 
   # extracting features
-  src = source_points.transpose(-1, -2).numpy()     # (n, 3) np.array
-  tar = target_points.transpose(-1, -2).numpy()     # (m, 3) np.array
+  # src = source_points.transpose(-1, -2).to('cpu').numpy()
+  # tar = target_points.transpose(-1, -2).to('cpu').numpy()
+  src = source_points.transpose(-1, -2)
+  tar = target_points.transpose(-1, -2)
+
   src_down, src_feature = extract_features(
       model,
       xyz=src,
@@ -76,8 +82,8 @@ def teaser_fcgf_icp(source_points, target_points, voxel_size=0.025, model=None, 
 
   # visualize
   if visualize:
-      src_ = pos_tensor_to_o3d(torch.from_numpy(src_down), estimate_normals=False)
-      tar_ = pos_tensor_to_o3d(torch.from_numpy(tar_down), estimate_normals=False)
+      src_ = pos_tensor_to_o3d(src_down, estimate_normals=False)
+      tar_ = pos_tensor_to_o3d(tar_down, estimate_normals=False)
       src_.paint_uniform_color([0.0, 0.0, 1.0])  # show src_ in blue
       tar_.paint_uniform_color([1.0, 0.0, 0.0])  # show tar_ in red
       o3d.visualization.draw_geometries([src_, tar_])  # plot src_ and tar_
@@ -97,11 +103,11 @@ def teaser_fcgf_icp(source_points, target_points, voxel_size=0.025, model=None, 
 
   if visualize:
       num_corrs = src_corr.shape[1]
-      print(f'FPFH generates {num_corrs} putative correspondences.')
+      print(f'FCGH generates {num_corrs} putative correspondences.')
 
   # visualize the point clouds together with feature correspondences
   if visualize:
-      points = np.concatenate((src_corr.T, tar_corr.T), axis=0)
+      points = np.concatenate((src_corr.T.to('cpu').detach().numpy(), tar_corr.T.to('cpu').detach().numpy()), axis=0)
       lines = []
       for i in range(num_corrs):
           lines.append([i, i + num_corrs])
@@ -116,15 +122,15 @@ def teaser_fcgf_icp(source_points, target_points, voxel_size=0.025, model=None, 
   # robust global registration using TEASER++
   noise_bound = voxel_size
   teaser_solver = get_teaser_solver(noise_bound)
-  teaser_solver.solve(src_corr, tar_corr)
+  teaser_solver.solve(src_corr.to('cpu').detach().numpy(), tar_corr.to('cpu').detach().numpy())
   solution = teaser_solver.getSolution()
   R_teaser = solution.rotation
   t_teaser = solution.translation
   T_teaser = Rt2T(R_teaser, t_teaser)
 
   # local refinement using ICP
-  src_down_ = pos_tensor_to_o3d(torch.from_numpy(src_down), estimate_normals=False)
-  tar_down_ = pos_tensor_to_o3d(torch.from_numpy(tar_down), estimate_normals=False)
+  src_down_ = pos_tensor_to_o3d(src_down.to('cpu').detach(), estimate_normals=False)
+  tar_down_ = pos_tensor_to_o3d(tar_down.to('cpu').detach(), estimate_normals=False)
   icp_sol = o3d.pipelines.registration.registration_icp(
       src_down_, tar_down_, noise_bound, T_teaser,
       o3d.pipelines.registration.TransformationEstimationPointToPoint(),
@@ -189,7 +195,7 @@ class TEASER_FCGF_ICP():
             tar_new = tar[:, torch.logical_not(idx)]
 
             # teaser + fpfh + icp
-            R_batch, t_batch = teaser_fcgf_icp(source_points=src.squeeze(0),
+            R_batch, t_batch = teaser_fcgf_icp(source_points=src,
                                                target_points=tar_new,
                                                voxel_size=vox_size,
                                                model=model,

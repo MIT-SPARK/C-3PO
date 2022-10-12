@@ -75,9 +75,13 @@ def extract_features(model,
     feats.append(np.ones((len(xyz), 1)))
 
   feats = np.hstack(feats)
+  feats = torch.from_numpy(feats)
+  feats = feats.to(device=device)
 
   # Voxelize xyz and feats
-  coords = np.floor(xyz / voxel_size)
+  coords = torch.floor(xyz / voxel_size)
+  if not coords.is_contiguous():
+    coords = coords.contiguous()
   coords, inds = ME.utils.sparse_quantize(coords, return_index=True)
   # Convert to batched coords compatible with ME
   coords = ME.utils.batched_coordinates([coords])
@@ -85,8 +89,10 @@ def extract_features(model,
 
   feats = feats[inds]
 
-  feats = torch.tensor(feats, dtype=torch.float32)
-  coords = torch.tensor(coords, dtype=torch.int32)
+  feats = feats.clone().detach().to(dtype=torch.float32)
+  coords = coords.clone().detach().to(dtype=torch.int32)
+  # feats = torch.from_numpy(feats).to(dtype=torch.float32)
+  # coords = torch.from_numpy(coords).to(dtype=torch.int32)
 
   stensor = ME.SparseTensor(feats, coordinates=coords, device=device)
 
