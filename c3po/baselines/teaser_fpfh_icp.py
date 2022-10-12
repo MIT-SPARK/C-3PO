@@ -1,6 +1,6 @@
-import open3d as o3d
-import teaserpp_python
-import numpy as np
+# import open3d as o3d
+# import teaserpp_python
+# import numpy as np
 import torch
 import copy
 import sys
@@ -30,10 +30,10 @@ def teaser_fpfh_icp(source_points, target_points, voxel_size=0.05, visualize=Fal
         o3d.visualization.draw_geometries([src_, tar_])     # plot src_ and tar_
 
     # point cloud downsampling
-    # src_down = src_.voxel_down_sample(voxel_size=voxel_size)
-    # tar_down = tar_.voxel_down_sample(voxel_size=voxel_size)
-    src_down = src_
-    tar_down = tar_
+    src_down = src_.voxel_down_sample(voxel_size=voxel_size)
+    tar_down = tar_.voxel_down_sample(voxel_size=voxel_size)
+    # src_down = src_
+    # tar_down = tar_
     if visualize:
         src_down.paint_uniform_color([0.0, 0.0, 1.0])  # show src_down in blue
         tar_down.paint_uniform_color([1.0, 0.0, 0.0])  # show tar_down in red
@@ -153,8 +153,8 @@ class TEASER_FPFH_ICP():
 if __name__ == "__main__":
 
     # Load and visualize two point clouds from 3DMatch dataset
-    src = o3d.io.read_point_cloud('./data/cloud_bin_0.ply')
-    tar = o3d.io.read_point_cloud('./data/cloud_bin_4.ply')
+    src = o3d.io.read_point_cloud('test_data/cloud_bin_0.ply')
+    tar = o3d.io.read_point_cloud('test_data/cloud_bin_4.ply')
 
     # Convert o3d PointCloud to torch.tensors
     source_points = torch.from_numpy(np.asarray(src.points).T)

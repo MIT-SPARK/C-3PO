@@ -2,7 +2,8 @@
 import torch
 import MinkowskiEngine as ME
 import MinkowskiEngine.MinkowskiFunctional as MEF
-from model.common import get_norm
+
+from c3po.baselines.fcgf.model.common import get_norm
 
 
 class SimpleNet(ME.MinkowskiNetwork):

@@ -1,5 +1,6 @@
 import numpy as np
 import open3d as o3d
+import torch
 
 from c3po.utils.general import pos_tensor_to_o3d
 

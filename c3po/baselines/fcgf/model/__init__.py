@@ -1,6 +1,6 @@
 import logging
-import model.simpleunet as simpleunets
-import model.resunet as resunets
+import c3po.baselines.fcgf.model.simpleunet as simpleunets
+import c3po.baselines.fcgf.model.resunet as resunets
 
 MODELS = []
 

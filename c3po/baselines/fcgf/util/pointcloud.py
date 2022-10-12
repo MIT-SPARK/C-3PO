@@ -3,7 +3,7 @@ import numpy as np
 import math
 
 import open3d as o3d
-from lib.eval import find_nn_cpu
+from c3po.baselines.fcgf.liby.eval import find_nn_cpu
 
 
 def make_open3d_point_cloud(xyz, color=None):

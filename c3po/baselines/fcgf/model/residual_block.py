@@ -1,6 +1,6 @@
 import torch.nn as nn
 
-from model.common import get_norm
+from c3po.baselines.fcgf.model.common import get_norm
 
 import MinkowskiEngine as ME
 import MinkowskiEngine.MinkowskiFunctional as MEF

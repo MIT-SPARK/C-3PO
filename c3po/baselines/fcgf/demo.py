@@ -40,7 +40,6 @@ def demo(config):
       device=device,
       skip_check=True)
 
-  breakpoint()
   vis_pcd = o3d.geometry.PointCloud()
   vis_pcd.points = o3d.utility.Vector3dVector(xyz_down)
 
