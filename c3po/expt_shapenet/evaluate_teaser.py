@@ -246,6 +246,7 @@ if __name__ == "__main__":
                         help="The ShapeNet object's class name.",
                         type=str)
     parser.add_argument("--detector",
+                        default='none',
                         help="The pre-trained keypoint detector type (point_transformer or none)",
                         type=str)
     args = parser.parse_args()
