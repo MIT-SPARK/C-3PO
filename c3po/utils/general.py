@@ -16,6 +16,7 @@ import torch
 # import torch.nn.functional as F
 # from pytorch3d import ops
 # from pytorch3d import transforms
+from scipy.spatial.transform import rotation
 from scipy.spatial.transform.rotation import Rotation as Rot
 
 
