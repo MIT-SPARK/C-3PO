@@ -10,14 +10,14 @@ import sys
 import torch
 from enum import Enum
 from pytorch3d import transforms, ops
-import random 
+import random
 
 sys.path.append("../../")
 
 from c3po.models.modelgen import ModelFromShape
 from c3po.utils.general import pos_tensor_to_o3d
 from c3po.utils.visualization_utils import display_two_pcs, visualize_model_n_keypoints, \
-    visualize_torch_model_n_keypoints
+    visualize_torch_model_n_keypoints, display_results
 import c3po.utils.general as gu
 
 
@@ -1467,22 +1467,8 @@ class SE3PointCloudAll(torch.utils.data.Dataset):
 
         """
         self.objects = OBJECT_CATEGORIES
-
-        self.class_id = class_id
-        self.model_id = model_id
         self.num_of_points = num_of_points
         self.len = dataset_len
-
-        # get model
-        self.model_mesh, _, self.keypoints_xyz = get_model_and_keypoints(class_id, model_id)
-        center = self.model_mesh.get_center()
-        self.model_mesh.translate(-center)
-
-        self.keypoints_xyz = self.keypoints_xyz - center
-        self.keypoints_xyz = torch.from_numpy(self.keypoints_xyz).transpose(0, 1).unsqueeze(0).to(torch.float)
-
-        # size of the model
-        self.diameter = np.linalg.norm(np.asarray(self.model_mesh.get_max_bound()) - np.asarray(self.model_mesh.get_min_bound()))
 
     def __len__(self):
 
@@ -1497,65 +1483,140 @@ class SE3PointCloudAll(torch.utils.data.Dataset):
         """
 
         # randomly choose an object category name
+        class_name = random.choice(self.objects)
+        class_id = CLASS_ID[class_name]
+        model_id = CLASS_MODEL_ID[class_name]
+
+        model_mesh, _, kp = get_model_and_keypoints(class_id, model_id)
+        center = model_mesh.get_center()
+        model_mesh.translate(-center)
+        kp = kp - center
+        kp1 = torch.from_numpy(kp).transpose(0, 1).unsqueeze(0).to(torch.float)
+
+        # diameter = np.linalg.norm(np.asarray(model_mesh.get_max_bound()) - np.asarray(model_mesh.get_min_bound()))
 
         R = transforms.random_rotation()
         t = torch.rand(3, 1)
 
-        model_pcd = self.model_mesh.sample_points_uniformly(number_of_points=self.num_of_points)
-        model_pcd_torch = torch.from_numpy(np.asarray(model_pcd.points)).transpose(0, 1)  # (3, m)
-        model_pcd_torch = model_pcd_torch.to(torch.float)
+        pc1_pcd = model_mesh.sample_points_uniformly(number_of_points=self.num_of_points)
+        pc1 = torch.from_numpy(np.asarray(pc1_pcd.points)).transpose(0, 1)
+        pc1 = pc1.to(torch.float)
 
-        return R @ model_pcd_torch + t, R @ self.keypoints_xyz.squeeze(0) + t, R, t
+        pc2 = R @ pc1 + t
+        kp2 = R @ kp1 + t
 
-    def _get_cad_models(self):
+        return (pc1, pc2, kp1, kp2, R, t)
+
+
+class DepthPCAll(torch.utils.data.Dataset):
+    """
+    Randomly generates ShapeNet object point clouds and their SE3 transformed depth rendering.
+    pc2 is depth point cloud.
+    This doesn't do zero padding for depth point clouds.
+
+    Returns a batch of
+        pc1, pc2, kp1, kp2, rotation, translation
+
+    """
+    def __init__(self, num_of_points1=1000, radius_multiple=torch.tensor([1.2, 3.0]),
+                 num_of_points2=10000, dataset_len=10000, rotate_about_z=False):
         """
-        Returns a sampled point cloud of the ShapeNetcore model with self.num_of_points points.
+        class_id        : str   : class id of a ShapeNetCore object
+        model_id        : str   : model id of a ShapeNetCore object
+        num_of_points   : int   : max. number of points the depth point cloud will contain
+        dataset_len     : int   : size of the dataset
 
+        """
+        self.objects = OBJECT_CATEGORIES
+        self.num_of_points_pc1 = num_of_points1
+        self.len = dataset_len
+        self.num_of_points_pc2 = num_of_points2
+        self.radius_multiple = radius_multiple
+        self.rotate_about_z = rotate_about_z
+        self.camera_location = torch.tensor([1.0, 0.0, 0.0]).unsqueeze(-1)
+        # set a camera location, with respect to the origin
+
+    def __len__(self):
+
+        return self.len
+
+    def __getitem__(self, idx):
+        """
         output:
-        cad_models  : torch.tensor of shape (1, 3, self.num_of_points)
-
+        point_cloud         : torch.tensor of shape (3, m)                  : the SE3 transformed point cloud
+        R                   : torch.tensor of shape (3, 3)                  : rotation
+        t                   : torch.tensor of shape (3, 1)                  : translation
         """
 
-        model_pcd = self.model_mesh.sample_points_uniformly(number_of_points=self.num_of_points)
-        model_pcd_torch = torch.from_numpy(np.asarray(model_pcd.points)).transpose(0, 1)  # (3, m)
-        model_pcd_torch = model_pcd_torch.to(torch.float)
+        # randomly choose an object category name
+        class_name = random.choice(self.objects)
+        class_id = CLASS_ID[class_name]
+        model_id = CLASS_MODEL_ID[class_name]
 
-        return model_pcd_torch.unsqueeze(0)
+        model_mesh, _, kp = get_model_and_keypoints(class_id, model_id)
+        center = model_mesh.get_center()
+        model_mesh.translate(-center)
+        kp = kp - center
 
-    def _get_model_keypoints(self):
-        """
-        Returns keypoints of the ShapeNetCore model annotated in the KeypointNet dataset.
+        # computing diameter
+        diameter = np.linalg.norm(np.asarray(model_mesh.get_max_bound()) - np.asarray(model_mesh.get_min_bound()))
 
-        output:
-        model_keypoints : torch.tensor of shape (1, 3, N)
+        # extracting the first data
+        kp1 = torch.from_numpy(kp).transpose(0, 1).unsqueeze(0).to(torch.float)
+        pc1_pcd = model_mesh.sample_points_uniformly(number_of_points=self.num_of_points_pc1)
+        pc1 = torch.from_numpy(np.asarray(pc1_pcd.points)).transpose(0, 1)  # (3, m)
+        pc1 = pc1.to(torch.float)
 
-        where
-        N = number of keypoints
-        """
+        # apply random rotation
+        if self.rotate_about_z:
+            R = torch.eye(3)
+            angle = 2 * self.pi * torch.rand(1)
+            c = torch.cos(angle)
+            s = torch.sin(angle)
 
-        return self.keypoints_xyz
+            # # z
+            # R[0, 0] = c
+            # R[0, 1] = -s
+            # R[1, 0] = s
+            # R[1, 1] = c
 
-    def _get_diameter(self):
-        """
-        Returns the diameter of the mid-sized object.
+            # # x
+            # R[1, 1] = c
+            # R[1, 2] = -s
+            # R[2, 1] = s
+            # R[2, 2] = c
 
-        output  :   torch.tensor of shape (1)
-        """
+            # y
+            R[0, 0] = c
+            R[0, 2] = s
+            R[2, 0] = -s
+            R[2, 2] = c
 
-        return self.diameter
+        else:
+            R = transforms.random_rotation()
 
-    def _visualize(self):
-        """
-        Visualizes the two CAD models and the corresponding keypoints
+        model_mesh = model_mesh.rotate(R=R.numpy())
 
-        """
+        # sample a point cloud from the self.model_mesh
+        pc2_pcd_ = model_mesh.sample_points_uniformly(number_of_points=self.num_of_points_pc2)
 
-        cad_models = self._get_cad_models()
-        model_keypoints = self._get_model_keypoints()
-        visualize_torch_model_n_keypoints(cad_models=cad_models, model_keypoints=model_keypoints)
+        # take a depth image from a distance of the rotated self.model_mesh from self.camera_location
+        beta = torch.rand(1, 1)
+        camera_location_factor = beta * (self.radius_multiple[1] - self.radius_multiple[0]) + self.radius_multiple[0]
+        camera_location_factor = camera_location_factor * diameter
+        radius = gu.get_radius(cam_location=camera_location_factor * self.camera_location.numpy(),
+                               object_diameter=diameter)
+        pc2_pcd = gu.get_depth_pcd(centered_pcd=pc2_pcd_, camera=self.camera_location.numpy(), radius=radius)
 
-        return 0
+        pc2 = torch.from_numpy(np.asarray(pc2_pcd.points)).transpose(0, 1)  # (3, m)
+        pc2 = pc2.to(torch.float)
 
+        # Translate by a random t
+        t = torch.rand(3, 1)
+        pc2 = pc2 + t
+        kp2 = R @ kp1 + t
+
+        return (pc1, pc2, kp1, kp2, R, t)
 
 
 if __name__ == "__main__":
@@ -1566,208 +1627,221 @@ if __name__ == "__main__":
     batch_size = 5
 
 
-    #
-    print("Test: DepthIsoPC()")
-    dataset = DepthIsoPC(class_id=class_id, model_id=model_id)
-    loader = torch.utils.data.DataLoader(dataset, batch_size=10, shuffle=False)
 
-    for i, data in enumerate(loader):
-        pc, kp, R, t, c = data
-        print(pc.shape)
-        print(kp.shape)
-        print(R.shape)
-        print(t.shape)
-        # visualize_torch_model_n_keypoints(cad_models=pc, model_keypoints=kp)
-        if i >= 2:
-            break
-    print("Test: DepthAnsoPC()")
-    dataset = DepthAnisoPC(class_id=class_id, model_id=model_id)
-    loader = torch.utils.data.DataLoader(dataset, batch_size=10, shuffle=False)
+    # ds = SE3PointCloudAll()
+    ds = DepthPCAll()
+    dl = torch.utils.data.DataLoader(ds, batch_size=1, shuffle=True)
 
-    for i, data in enumerate(loader):
-        pc, kp, R, t, c = data
-        print(pc.shape)
-        print(kp.shape)
-        print(R.shape)
-        print(t.shape)
-        # visualize_torch_model_n_keypoints(cad_models=pc, model_keypoints=kp)
-        if i >= 2:
+    for i, data in enumerate(dl):
+        pc1, pc2, kp1, kp2, R, t = data
+        display_two_pcs(pc1, pc2)
+        display_results(pc1, kp1, pc2, kp2)
+        if i >=5:
             break
 
 
+    # #
+    # print("Test: DepthIsoPC()")
+    # dataset = DepthIsoPC(class_id=class_id, model_id=model_id)
+    # loader = torch.utils.data.DataLoader(dataset, batch_size=10, shuffle=False)
     #
-    print("Test: DepthPC()")
-    dataset = DepthPC(class_id=class_id, model_id=model_id)
-    loader = torch.utils.data.DataLoader(dataset, batch_size=10, shuffle=False)
-
-    for i, data in enumerate(loader):
-        pc, kp, R, t = data
-        print(pc.shape)
-        print(kp.shape)
-        print(R.shape)
-        print(t.shape)
-        # visualize_torch_model_n_keypoints(cad_models=pc, model_keypoints=kp)
-        if i >= 2:
-            break
-
+    # for i, data in enumerate(loader):
+    #     pc, kp, R, t, c = data
+    #     print(pc.shape)
+    #     print(kp.shape)
+    #     print(R.shape)
+    #     print(t.shape)
+    #     # visualize_torch_model_n_keypoints(cad_models=pc, model_keypoints=kp)
+    #     if i >= 2:
+    #         break
+    # print("Test: DepthAnsoPC()")
+    # dataset = DepthAnisoPC(class_id=class_id, model_id=model_id)
+    # loader = torch.utils.data.DataLoader(dataset, batch_size=10, shuffle=False)
     #
-    print("Test: get_model_and_keypoints()")
-    mesh, pcd, keypoints_xyz = get_model_and_keypoints(class_id=class_id, model_id=model_id)
-    # print(keypoints_xyz)
-    # print(type(keypoints_xyz))
-    # print(type(keypoints_xyz[0]))
-
+    # for i, data in enumerate(loader):
+    #     pc, kp, R, t, c = data
+    #     print(pc.shape)
+    #     print(kp.shape)
+    #     print(R.shape)
+    #     print(t.shape)
+    #     # visualize_torch_model_n_keypoints(cad_models=pc, model_keypoints=kp)
+    #     if i >= 2:
+    #         break
     #
-    print("Test: visualize_model_n_keypoints()")
-    visualize_model_n_keypoints([mesh], keypoints_xyz=keypoints_xyz)
-
     #
-    print("Test: visualize_model()")
-    visualize_model(class_id=class_id, model_id=model_id)
-
+    # #
+    # print("Test: DepthPC()")
+    # dataset = DepthPC(class_id=class_id, model_id=model_id)
+    # loader = torch.utils.data.DataLoader(dataset, batch_size=10, shuffle=False)
     #
-    print("Test: SE3PointCloud(torch.utils.data.Dataset)")
-    dataset = SE3PointCloud(class_id=class_id, model_id=model_id)
-
-    model = dataset.model_mesh
-    length = dataset.len
-    class_id = dataset.class_id
-    model_id = dataset.model_id
-    num_of_points = dataset.num_of_points
-
-    print("Shape of keypoints_xyz: ", keypoints_xyz.shape)
-
-    diameter = dataset._get_diameter()
-    model_keypoints = dataset._get_model_keypoints()
-    cad_models = dataset._get_cad_models()
-
-
-    print("diameter: ", diameter)
-    print("shape of model keypoints: ", model_keypoints.shape)
-    print("shape of cad models: ", cad_models.shape)
-
+    # for i, data in enumerate(loader):
+    #     pc, kp, R, t = data
+    #     print(pc.shape)
+    #     print(kp.shape)
+    #     print(R.shape)
+    #     print(t.shape)
+    #     # visualize_torch_model_n_keypoints(cad_models=pc, model_keypoints=kp)
+    #     if i >= 2:
+    #         break
     #
-    print("Test: visualize_torch_model_n_keypoints()")
-    visualize_torch_model_n_keypoints(cad_models=cad_models, model_keypoints=model_keypoints)
-    dataset._visualize()
-
-
-    loader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
-
-    for i, data in enumerate(loader):
-        pc, kp, R, t = data
-        print(pc.shape)
-        print(kp.shape)
-        visualize_torch_model_n_keypoints(cad_models=pc, model_keypoints=kp)
-        if i >= 2:
-            break
-
-    dataset = FixedDepthPC(class_id=class_id, model_id=model_id)
-    model = dataset.model_mesh
-    length = dataset.len
-    class_id = dataset.class_id
-    model_id = dataset.model_id
-
-    diameter = dataset._get_diameter()
-    model_keypoints = dataset._get_model_keypoints()
-    cad_models = dataset._get_cad_models()
-
-    print("diameter: ", diameter)
-    print("shape of model keypoints: ", model_keypoints.shape)
-    print("shape of cad models: ", cad_models.shape)
-    loader = torch.utils.data.DataLoader(dataset, batch_size=10, shuffle=False)
-
-    for i, data in enumerate(loader):
-        pc, kp, R, t = data
-        print(pc.shape)
-        print(kp.shape)
-        print(R.shape)
-        print(t.shape)
-        # visualize_torch_model_n_keypoints(cad_models=pc, model_keypoints=kp)
-        if i >= 2:
-            break
-
+    # #
+    # print("Test: get_model_and_keypoints()")
+    # mesh, pcd, keypoints_xyz = get_model_and_keypoints(class_id=class_id, model_id=model_id)
+    # # print(keypoints_xyz)
+    # # print(type(keypoints_xyz))
+    # # print(type(keypoints_xyz[0]))
     #
-    print("Test: SE3nIsotropicShapePointCloud(torch.utils.data.Dataset)")
-    dataset = SE3nIsotropicShapePointCloud(class_id=class_id, model_id=model_id,
-                                           shape_scaling=torch.tensor([5.0, 20.0]))
-    model = dataset.model_mesh
-    length = dataset.len
-    class_id = dataset.class_id
-    model_id = dataset.model_id
-
-    diameter = dataset._get_diameter()
-    model_keypoints = dataset._get_model_keypoints()
-    cad_models = dataset._get_cad_models()
-
-    print("diameter: ", diameter)
-    print("shape of model keypoints: ", model_keypoints.shape)
-    print("shape of cad models: ", cad_models.shape)
-
+    # #
+    # print("Test: visualize_model_n_keypoints()")
+    # visualize_model_n_keypoints([mesh], keypoints_xyz=keypoints_xyz)
     #
-    print("Test: visualize_torch_model_n_keypoints()")
-    visualize_torch_model_n_keypoints(cad_models=cad_models, model_keypoints=model_keypoints)
-    dataset._visualize()
-
-    loader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
-
-    modelgen = ModelFromShape(cad_models=cad_models, model_keypoints=model_keypoints)
-
-    for i, data in enumerate(loader):
-        pc, kp, R, t, c = data
-        visualize_torch_model_n_keypoints(cad_models=pc, model_keypoints=kp)
-
-        # getting the model from R, t, c
-        kp_gen, pc_gen = modelgen.forward(shape=c)
-        kp_gen = R @ kp_gen + t
-        pc_gen = R @ pc_gen + t
-        display_two_pcs(pc1=pc, pc2=pc_gen)
-        display_two_pcs(pc1=kp, pc2=kp_gen)
-
-        if i >= 5:
-            break
-
+    # #
+    # print("Test: visualize_model()")
+    # visualize_model(class_id=class_id, model_id=model_id)
     #
-    print("Test: SE3nAnisotropicScalingPointCloud(torch.utils.data.Dataset)")
-    dataset = SE3nAnisotropicScalingPointCloud(class_id=class_id, model_id=model_id,
-                                           shape_scaling=torch.tensor([1.0, 2.0]),
-                                           scale_direction=ScaleAxis.X)
-
-    model = dataset.model_mesh
-    length = dataset.len
-    class_id = dataset.class_id
-    model_id = dataset.model_id
-
-    diameter = dataset._get_diameter()
-    model_keypoints = dataset._get_model_keypoints()
-    cad_models = dataset._get_cad_models()
-
-    print("diameter: ", diameter)
-    print("shape of model keypoints: ", model_keypoints.shape)
-    print("shape of cad models: ", cad_models.shape)
-
+    # #
+    # print("Test: SE3PointCloud(torch.utils.data.Dataset)")
+    # dataset = SE3PointCloud(class_id=class_id, model_id=model_id)
     #
-    print("Test: visualize_torch_model_n_keypoints()")
-    visualize_torch_model_n_keypoints(cad_models=cad_models, model_keypoints=model_keypoints)
-    dataset._visualize()
-
-
-    loader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
-
-    modelgen = ModelFromShape(cad_models=cad_models, model_keypoints=model_keypoints)
-
-    for i, data in enumerate(loader):
-        pc, kp, R, t, c = data
-        visualize_torch_model_n_keypoints(cad_models=pc, model_keypoints=kp)
-
-
-        # getting the model from R, t, c
-        kp_gen, pc_gen = modelgen.forward(shape=c)
-        kp_gen = R @ kp_gen + t
-        pc_gen = R @ pc_gen + t
-        display_two_pcs(pc1=pc, pc2=pc_gen)
-        display_two_pcs(pc1=kp, pc2=kp_gen)
-
-        if i >= 5:
-            break
+    # model = dataset.model_mesh
+    # length = dataset.len
+    # class_id = dataset.class_id
+    # model_id = dataset.model_id
+    # num_of_points = dataset.num_of_points
+    #
+    # print("Shape of keypoints_xyz: ", keypoints_xyz.shape)
+    #
+    # diameter = dataset._get_diameter()
+    # model_keypoints = dataset._get_model_keypoints()
+    # cad_models = dataset._get_cad_models()
+    #
+    #
+    # print("diameter: ", diameter)
+    # print("shape of model keypoints: ", model_keypoints.shape)
+    # print("shape of cad models: ", cad_models.shape)
+    #
+    # #
+    # print("Test: visualize_torch_model_n_keypoints()")
+    # visualize_torch_model_n_keypoints(cad_models=cad_models, model_keypoints=model_keypoints)
+    # dataset._visualize()
+    #
+    #
+    # loader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
+    #
+    # for i, data in enumerate(loader):
+    #     pc, kp, R, t = data
+    #     print(pc.shape)
+    #     print(kp.shape)
+    #     visualize_torch_model_n_keypoints(cad_models=pc, model_keypoints=kp)
+    #     if i >= 2:
+    #         break
+    #
+    # dataset = FixedDepthPC(class_id=class_id, model_id=model_id)
+    # model = dataset.model_mesh
+    # length = dataset.len
+    # class_id = dataset.class_id
+    # model_id = dataset.model_id
+    #
+    # diameter = dataset._get_diameter()
+    # model_keypoints = dataset._get_model_keypoints()
+    # cad_models = dataset._get_cad_models()
+    #
+    # print("diameter: ", diameter)
+    # print("shape of model keypoints: ", model_keypoints.shape)
+    # print("shape of cad models: ", cad_models.shape)
+    # loader = torch.utils.data.DataLoader(dataset, batch_size=10, shuffle=False)
+    #
+    # for i, data in enumerate(loader):
+    #     pc, kp, R, t = data
+    #     print(pc.shape)
+    #     print(kp.shape)
+    #     print(R.shape)
+    #     print(t.shape)
+    #     # visualize_torch_model_n_keypoints(cad_models=pc, model_keypoints=kp)
+    #     if i >= 2:
+    #         break
+    #
+    # #
+    # print("Test: SE3nIsotropicShapePointCloud(torch.utils.data.Dataset)")
+    # dataset = SE3nIsotropicShapePointCloud(class_id=class_id, model_id=model_id,
+    #                                        shape_scaling=torch.tensor([5.0, 20.0]))
+    # model = dataset.model_mesh
+    # length = dataset.len
+    # class_id = dataset.class_id
+    # model_id = dataset.model_id
+    #
+    # diameter = dataset._get_diameter()
+    # model_keypoints = dataset._get_model_keypoints()
+    # cad_models = dataset._get_cad_models()
+    #
+    # print("diameter: ", diameter)
+    # print("shape of model keypoints: ", model_keypoints.shape)
+    # print("shape of cad models: ", cad_models.shape)
+    #
+    # #
+    # print("Test: visualize_torch_model_n_keypoints()")
+    # visualize_torch_model_n_keypoints(cad_models=cad_models, model_keypoints=model_keypoints)
+    # dataset._visualize()
+    #
+    # loader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
+    #
+    # modelgen = ModelFromShape(cad_models=cad_models, model_keypoints=model_keypoints)
+    #
+    # for i, data in enumerate(loader):
+    #     pc, kp, R, t, c = data
+    #     visualize_torch_model_n_keypoints(cad_models=pc, model_keypoints=kp)
+    #
+    #     # getting the model from R, t, c
+    #     kp_gen, pc_gen = modelgen.forward(shape=c)
+    #     kp_gen = R @ kp_gen + t
+    #     pc_gen = R @ pc_gen + t
+    #     display_two_pcs(pc1=pc, pc2=pc_gen)
+    #     display_two_pcs(pc1=kp, pc2=kp_gen)
+    #
+    #     if i >= 5:
+    #         break
+    #
+    # #
+    # print("Test: SE3nAnisotropicScalingPointCloud(torch.utils.data.Dataset)")
+    # dataset = SE3nAnisotropicScalingPointCloud(class_id=class_id, model_id=model_id,
+    #                                        shape_scaling=torch.tensor([1.0, 2.0]),
+    #                                        scale_direction=ScaleAxis.X)
+    #
+    # model = dataset.model_mesh
+    # length = dataset.len
+    # class_id = dataset.class_id
+    # model_id = dataset.model_id
+    #
+    # diameter = dataset._get_diameter()
+    # model_keypoints = dataset._get_model_keypoints()
+    # cad_models = dataset._get_cad_models()
+    #
+    # print("diameter: ", diameter)
+    # print("shape of model keypoints: ", model_keypoints.shape)
+    # print("shape of cad models: ", cad_models.shape)
+    #
+    # #
+    # print("Test: visualize_torch_model_n_keypoints()")
+    # visualize_torch_model_n_keypoints(cad_models=cad_models, model_keypoints=model_keypoints)
+    # dataset._visualize()
+    #
+    #
+    # loader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
+    #
+    # modelgen = ModelFromShape(cad_models=cad_models, model_keypoints=model_keypoints)
+    #
+    # for i, data in enumerate(loader):
+    #     pc, kp, R, t, c = data
+    #     visualize_torch_model_n_keypoints(cad_models=pc, model_keypoints=kp)
+    #
+    #
+    #     # getting the model from R, t, c
+    #     kp_gen, pc_gen = modelgen.forward(shape=c)
+    #     kp_gen = R @ kp_gen + t
+    #     pc_gen = R @ pc_gen + t
+    #     display_two_pcs(pc1=pc, pc2=pc_gen)
+    #     display_two_pcs(pc1=kp, pc2=kp_gen)
+    #
+    #     if i >= 5:
+    #         break
 
