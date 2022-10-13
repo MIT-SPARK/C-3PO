@@ -11,6 +11,9 @@ import glob
 import os
 from scipy.linalg import expm, norm
 import pathlib
+from pathlib import Path
+
+BASE_DIR = Path(__file__).parent.parent
 
 from c3po.baselines.fcgf.util.pointcloud import get_matching_indices, make_open3d_point_cloud
 import c3po.baselines.fcgf.liby.transforms as t
@@ -135,7 +138,7 @@ class PairDataset(torch.utils.data.Dataset):
 
 class ThreeDMatchTestDataset(PairDataset):
   DATA_FILES = {
-      'test': './config/test_3dmatch.txt'
+      'test': BASE_DIR / 'config/test_3dmatch.txt'
   }
 
   def __init__(self,
@@ -285,9 +288,9 @@ class IndoorPairDataset(PairDataset):
 class KITTIPairDataset(PairDataset):
   AUGMENT = None
   DATA_FILES = {
-      'train': './config/train_kitti.txt',
-      'val': './config/val_kitti.txt',
-      'test': './config/test_kitti.txt'
+      'train': BASE_DIR / '/config/train_kitti.txt',
+      'val': BASE_DIR / '/config/val_kitti.txt',
+      'test': BASE_DIR / '/config/test_kitti.txt'
   }
   TEST_RANDOM_ROTATION = False
   IS_ODOMETRY = True
@@ -627,9 +630,9 @@ class KITTINMPairDataset(KITTIPairDataset):
 class ThreeDMatchPairDataset(IndoorPairDataset):
   OVERLAP_RATIO = 0.3
   DATA_FILES = {
-      'train': './config/train_3dmatch.txt',
-      'val': './config/val_3dmatch.txt',
-      'test': './config/test_3dmatch.txt'
+      'train': BASE_DIR / 'config/train_3dmatch.txt',
+      'val': BASE_DIR / 'config/val_3dmatch.txt',
+      'test': BASE_DIR / 'config/test_3dmatch.txt'
   }
 
 
