@@ -72,8 +72,8 @@ def visualize_torch_model_n_keypoints(cad_models, model_keypoints):
 
 def display_two_pcs(pc1, pc2):
     """
-    pc1 : torch.tensor of shape (3, n)
-    pc2 : torch.tensor of shape (3, m)
+    pc1 : torch.tensor of shape (B, 3, n)
+    pc2 : torch.tensor of shape (B, 3, m)
     """
     pc1 = pc1.detach()[0, ...].to('cpu')
     pc2 = pc2.detach()[0, ...].to('cpu')
