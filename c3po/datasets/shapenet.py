@@ -10,6 +10,7 @@ import sys
 import torch
 from enum import Enum
 from pytorch3d import transforms, ops
+import random 
 
 sys.path.append("../../")
 
@@ -60,6 +61,23 @@ CLASS_NAME: dict = {"02691156": 'airplane',
                     "04225987": 'skateboard',
                     "04379243": 'table',
                     "04530566": 'vessel'}
+
+CLASS_MODEL_ID: dict = {'airplane': '3db61220251b3c9de719b5362fe06bbb',
+                        'bathtub': '90b6e958b359c1592ad490d4d7fae486',
+                        'bed': '7c8eb4ab1f2c8bfa2fb46fb8b9b1ac9f',
+                        'bottle': '41a2005b595ae783be1868124d5ddbcb',
+                        'cap': '3dec0d851cba045fbf444790f25ea3db',
+                        'car': 'ad45b2d40c7801ef2074a73831d8a3a2',
+                        'chair': '1cc6f2ed3d684fa245f213b8994b4a04',
+                        'guitar': '5df08ba7af60e7bfe72db292d4e13056',
+                        'helmet': '3621cf047be0d1ae52fafb0cab311e6a',
+                        'knife': '819e16fd120732f4609e2d916fa0da27',
+                        'laptop': '519e98268bee56dddbb1de10c9529bf7',
+                        'motorcycle': '481f7a57a12517e0fe1b9fad6c90c7bf',
+                        'mug': 'f3a7f8198cc50c225f5e789acd4d1122',
+                        'skateboard': '98222a1e5f59f2098745e78dbc45802e',
+                        'table': '3f5daa8fe93b68fa87e2d08958d6900c',
+                        'vessel': '5c54100c798dd681bfeb646a8eadb57'}
 
 class ScaleAxis(Enum):
     X = 0
@@ -1429,6 +1447,115 @@ class SE3nAnisotropicScalingPointCloud(torch.utils.data.Dataset):
         visualize_torch_model_n_keypoints(cad_models=cad_models, model_keypoints=model_keypoints)
 
         return 0
+
+
+class SE3PointCloudAll(torch.utils.data.Dataset):
+    """
+    Randomly generates ShapeNet object point clouds and their SE3 transformations.
+
+    Returns a batch of
+        pc1, pc2, kp1, kp2, rotation, translation
+
+    """
+    def __init__(self, num_of_points=1000, dataset_len=10000,
+                 dir_location='../../data/learning-objects/keypointnet_datasets/'):
+        """
+        class_id        : str   : class id of a ShapeNetCore object
+        model_id        : str   : model id of a ShapeNetCore object
+        num_of_points   : int   : max. number of points the depth point cloud will contain
+        dataset_len     : int   : size of the dataset
+
+        """
+        self.objects = OBJECT_CATEGORIES
+
+        self.class_id = class_id
+        self.model_id = model_id
+        self.num_of_points = num_of_points
+        self.len = dataset_len
+
+        # get model
+        self.model_mesh, _, self.keypoints_xyz = get_model_and_keypoints(class_id, model_id)
+        center = self.model_mesh.get_center()
+        self.model_mesh.translate(-center)
+
+        self.keypoints_xyz = self.keypoints_xyz - center
+        self.keypoints_xyz = torch.from_numpy(self.keypoints_xyz).transpose(0, 1).unsqueeze(0).to(torch.float)
+
+        # size of the model
+        self.diameter = np.linalg.norm(np.asarray(self.model_mesh.get_max_bound()) - np.asarray(self.model_mesh.get_min_bound()))
+
+    def __len__(self):
+
+        return self.len
+
+    def __getitem__(self, idx):
+        """
+        output:
+        point_cloud         : torch.tensor of shape (3, m)                  : the SE3 transformed point cloud
+        R                   : torch.tensor of shape (3, 3)                  : rotation
+        t                   : torch.tensor of shape (3, 1)                  : translation
+        """
+
+        # randomly choose an object category name
+
+        R = transforms.random_rotation()
+        t = torch.rand(3, 1)
+
+        model_pcd = self.model_mesh.sample_points_uniformly(number_of_points=self.num_of_points)
+        model_pcd_torch = torch.from_numpy(np.asarray(model_pcd.points)).transpose(0, 1)  # (3, m)
+        model_pcd_torch = model_pcd_torch.to(torch.float)
+
+        return R @ model_pcd_torch + t, R @ self.keypoints_xyz.squeeze(0) + t, R, t
+
+    def _get_cad_models(self):
+        """
+        Returns a sampled point cloud of the ShapeNetcore model with self.num_of_points points.
+
+        output:
+        cad_models  : torch.tensor of shape (1, 3, self.num_of_points)
+
+        """
+
+        model_pcd = self.model_mesh.sample_points_uniformly(number_of_points=self.num_of_points)
+        model_pcd_torch = torch.from_numpy(np.asarray(model_pcd.points)).transpose(0, 1)  # (3, m)
+        model_pcd_torch = model_pcd_torch.to(torch.float)
+
+        return model_pcd_torch.unsqueeze(0)
+
+    def _get_model_keypoints(self):
+        """
+        Returns keypoints of the ShapeNetCore model annotated in the KeypointNet dataset.
+
+        output:
+        model_keypoints : torch.tensor of shape (1, 3, N)
+
+        where
+        N = number of keypoints
+        """
+
+        return self.keypoints_xyz
+
+    def _get_diameter(self):
+        """
+        Returns the diameter of the mid-sized object.
+
+        output  :   torch.tensor of shape (1)
+        """
+
+        return self.diameter
+
+    def _visualize(self):
+        """
+        Visualizes the two CAD models and the corresponding keypoints
+
+        """
+
+        cad_models = self._get_cad_models()
+        model_keypoints = self._get_model_keypoints()
+        visualize_torch_model_n_keypoints(cad_models=cad_models, model_keypoints=model_keypoints)
+
+        return 0
+
 
 
 if __name__ == "__main__":
