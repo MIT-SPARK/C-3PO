@@ -76,7 +76,7 @@ net_arg.add_argument('--best_val_metric', type=str, default='feat_match_ratio')
 # Optimizer arguments
 opt_arg = add_argument_group('Optimizer')
 opt_arg.add_argument('--optimizer', type=str, default='SGD')
-opt_arg.add_argument('--max_epoch', type=int, default=2)
+opt_arg.add_argument('--max_epoch', type=int, default=100)
 opt_arg.add_argument('--lr', type=float, default=1e-1)
 opt_arg.add_argument('--momentum', type=float, default=0.8)
 opt_arg.add_argument('--sgd_momentum', type=float, default=0.9)
@@ -122,6 +122,7 @@ data_arg.add_argument(
     help='max time difference between pairs (non inclusive)')
 data_arg.add_argument('--kitti_date', type=str, default='2011_09_26')
 
+data_arg.add_argument('--type', type=str, default='sim')
 
 def get_config():
   args = parser.parse_args()

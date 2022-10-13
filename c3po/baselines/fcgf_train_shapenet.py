@@ -37,7 +37,6 @@ def get_trainer(trainer):
     raise ValueError(f'Trainer {trainer} not found')
 
 #TODO:
-# - see what happens to trained models. How and where the script stores it.
 # - verify the extraction of feature correspondences.
 
 
@@ -72,9 +71,9 @@ def main(config):
 if __name__ == "__main__":
 
     config = get_config()
-    config.type = "sim"
     config.out_dir = config.out_dir + "/" + str(config.type)
-    config.max_epoch = 2
+    # config.type = 'sim' # 'real'
+    # config.max_epoch = 2
     # config.voxel_size = 0.025
     # config.batch_size = 4
     # config.positive_pair_search_voxel_size_multiplier = 1.5
