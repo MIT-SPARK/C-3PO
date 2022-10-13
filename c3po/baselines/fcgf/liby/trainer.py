@@ -82,11 +82,11 @@ class AlignmentTrainer:
     self.checkpoint_dir = config.out_dir
 
     ensure_dir(self.checkpoint_dir)
-    json.dump(
-        config,
-        open(os.path.join(self.checkpoint_dir, 'config.json'), 'w'),
-        indent=4,
-        sort_keys=False)
+    # json.dump(
+    #     config,
+    #     open(os.path.join(self.checkpoint_dir, 'config.json'), 'w'),
+    #     indent=4,
+    #     sort_keys=False)
 
     self.iter_size = config.iter_size
     self.batch_size = data_loader.batch_size

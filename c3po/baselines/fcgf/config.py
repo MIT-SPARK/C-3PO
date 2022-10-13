@@ -18,7 +18,7 @@ def str2bool(v):
 
 
 logging_arg = add_argument_group('Logging')
-logging_arg.add_argument('--out_dir', type=str, default=str(config_base_dir / "data/outputs"))
+logging_arg.add_argument('--out_dir', type=str, default=str(config_base_dir / "data/outputs_shapenet"))
 
 trainer_arg = add_argument_group('Trainer')
 trainer_arg.add_argument('--trainer', type=str, default='HardestContrastiveLossTrainer')
@@ -76,7 +76,7 @@ net_arg.add_argument('--best_val_metric', type=str, default='feat_match_ratio')
 # Optimizer arguments
 opt_arg = add_argument_group('Optimizer')
 opt_arg.add_argument('--optimizer', type=str, default='SGD')
-opt_arg.add_argument('--max_epoch', type=int, default=100)
+opt_arg.add_argument('--max_epoch', type=int, default=2)
 opt_arg.add_argument('--lr', type=float, default=1e-1)
 opt_arg.add_argument('--momentum', type=float, default=0.8)
 opt_arg.add_argument('--sgd_momentum', type=float, default=0.9)

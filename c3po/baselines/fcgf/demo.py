@@ -7,8 +7,10 @@ from util.visualization import get_colored_point_cloud_feature
 from util.misc import extract_features
 
 from model.resunet import ResUNetBN2C
-
 import torch
+
+import sys
+sys.path.append("../../..")
 
 if not os.path.isfile('ResUNetBN2C-16feat-3conv.pth'):
   print('Downloading weights...')
@@ -16,10 +18,10 @@ if not os.path.isfile('ResUNetBN2C-16feat-3conv.pth'):
       "https://node1.chrischoy.org/data/publications/fcgf/2019-09-18_14-15-59.pth",
       'ResUNetBN2C-16feat-3conv.pth')
 
-if not os.path.isfile('redkitchen-20.ply'):
+if not os.path.isfile('../redkitchen-20.ply'):
   print('Downloading a mesh...')
   urlretrieve("https://node1.chrischoy.org/data/publications/fcgf/redkitchen-20.ply",
-              'redkitchen-20.ply')
+              '../redkitchen-20.ply')
 
 
 def demo(config):

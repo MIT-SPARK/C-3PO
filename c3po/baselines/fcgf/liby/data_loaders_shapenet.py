@@ -21,7 +21,8 @@ class ShapeNetDataset(torch.utils.data.Dataset):
                type='sim',
                voxel_size=0.025,    # same as in config.py
                positive_pair_search_voxel_size_multiplier=1.5,   # same as in config.py
-               dataset_length=2000    # tunable parameter
+               dataset_length=2000,    # tunable parameter
+               manual_seed=False
                ):
 
     self.type = type
@@ -33,6 +34,14 @@ class ShapeNetDataset(torch.utils.data.Dataset):
         self.ds = DepthPCAll(dataset_len=dataset_length)
     elif self.type == 'sim':
         self.ds = SE3PointCloudAll(dataset_len=dataset_length)
+
+    self.randg = np.random.RandomState()
+    if manual_seed:
+        self.reset_seed()
+
+  def reset_seed(self, seed=0):
+    # logging.info(f"Resetting the data loader seed to {seed}")
+    self.randg.seed(seed)
 
   def __len__(self):
 
@@ -98,16 +107,17 @@ class ShapeNetDataset(torch.utils.data.Dataset):
     return (xyz0, xyz1, coords0, coords1, feats0, feats1, matches, trans)
 
 
-def make_data_loader(config):
+def make_data_loader(type, dataset_length, batch_size,
+                     voxel_size, positive_pair_search_voxel_size_multiplier):
 
-    ds = ShapeNetDataset(type=config.type,
-                         voxel_size=config.voxel_size,
-                         dataset_length=config.dataset_length,
-                         positive_pair_search_voxel_size_multiplier=config.positive_pair_search_voxel_size_multiplier
+    ds = ShapeNetDataset(type=type,
+                         voxel_size=voxel_size,
+                         dataset_length=dataset_length,
+                         positive_pair_search_voxel_size_multiplier=positive_pair_search_voxel_size_multiplier
                          )
 
     dl = torch.utils.data.DataLoader(ds,
-                                     batch_size=config.batch_size,
+                                     batch_size=batch_size,
                                      shuffle=True,
                                      collate_fn=collate_pair_fn
                                      )
