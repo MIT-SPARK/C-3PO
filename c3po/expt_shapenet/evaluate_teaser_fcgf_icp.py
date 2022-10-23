@@ -1,7 +1,11 @@
 import argparse
 import sys
+
+import numpy.random
 import torch
 import yaml
+import pickle
+import numpy
 
 sys.path.append('../..')
 
@@ -12,13 +16,20 @@ from c3po.baselines.teaser_fcgf_icp import TEASER_FCGF_ICP
 from c3po.utils.visualization_utils import display_two_pcs
 
 
-def eval_(class_id, model_id, hyper_param,
+def eval_(class_id, model_id, hyper_param, model=None, pre_trained_3dmatch=False,
           use_corrector=False, certification=True, visualize=False):
+
+    torch.manual_seed(0)
+    # torch.initial_seed(0)
+    numpy.random.seed(0)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     class_name = CLASS_NAME[class_id]
     save_folder = hyper_param['save_folder']
+
+    # out dict
+    out_dict = dict()
 
     # setting up the dataset and dataloader
     eval_dataset_len = hyper_param['eval_dataset_len']
@@ -34,7 +45,7 @@ def eval_(class_id, model_id, hyper_param,
     cad_models = eval_dataset._get_cad_models().to(torch.float).to(device=device)
 
     # initialize the teaser module
-    teaser = TEASER_FCGF_ICP(cad_models, visualize=visualize)
+    teaser = TEASER_FCGF_ICP(cad_models, visualize=visualize, model=model, pre_trained_3dmatch=pre_trained_3dmatch)
 
     # for the data batch evaluate icp output from ICP
     pc_err = 0.0
@@ -159,15 +170,19 @@ def eval_(class_id, model_id, hyper_param,
         print("t error: ", ave_t_err_cert.item())
         print("ADD-S (", int(hyper_param["adds_threshold"] * 100), "%): ", ave_adds_err_cert.item())
         print("ADD-S AUC (", int(hyper_param["adds_auc_threshold"] * 100), "%): ", ave_auc_cert.item())
-        print("GT-certifiable: ")
+    print("GT-certifiable: ")
+
+    out_dict['ADD-S'] = ave_adds_err.item()
+    out_dict['ADD-S AUC'] = ave_auc.item()
+    out_dict['fra_cert'] = fra_cert.item()
 
     del eval_dataset, eval_loader
     del cad_models
 
-    return None
+    return out_dict
 
 
-def evaluate(class_name, model_id, visualize=False):
+def evaluate(class_name, model_id, model=None, pre_trained_3dmatch=False, visualize=False):
 
     # getting class id
     class_id = CLASS_ID[class_name]
@@ -184,12 +199,16 @@ def evaluate(class_name, model_id, visualize=False):
     print("Analyzing Baseline for Object: ", class_name, "; Model ID:", str(model_id))
 
     # running evaluation
-    eval_(class_id=class_id,
-          model_id=model_id,
-          hyper_param=hyper_param,
-          visualize=visualize)
+    out_dict = eval_(class_id=class_id,
+                     model_id=model_id,
+                     model=model,
+                     pre_trained_3dmatch=pre_trained_3dmatch,
+                     hyper_param=hyper_param,
+                     visualize=visualize)
 
-    return None
+    out_dict['class_name'] = class_name
+
+    return out_dict
 
 
 if __name__ == "__main__":
@@ -198,11 +217,21 @@ if __name__ == "__main__":
     >> python evaluate_teaser_fcgf_icp.py --object chair 
 
     """
-
     parser = argparse.ArgumentParser()
     parser.add_argument("--object",
                         help="The ShapeNet object's class name.",
                         type=str)
+    parser.add_argument("--model",
+                        help="Specify the trained model file (.pth)",
+                        type=str,
+                        default=None)
+    parser.add_argument("--pre",
+                        type=str,
+                        default='y')
+    parser.add_argument("--folder",
+                        type=str,
+                        default=None)
+    # breakpoint()
     args = parser.parse_args()
 
     # class name: object category in shapenet
@@ -216,6 +245,23 @@ if __name__ == "__main__":
     else:
         model_id = model_class_ids[class_name]
 
-    evaluate(class_name=class_name,
-             model_id=model_id,
-             visualize=False)
+    if args.pre == 'y':
+        args.pre = True
+    elif args.pre == 'n':
+        args.pre = False
+    else:
+        raise ValueError("pre not correctly specified.")
+
+    out_dict = evaluate(class_name=class_name,
+                        model_id=model_id,
+                        model=args.model,
+                        pre_trained_3dmatch=args.pre,
+                        visualize=False)
+
+    if args.folder is not None:
+        save_file = open(args.folder + "/" + args.object + ".pkl", 'wb')
+        pickle.dump(out_dict, save_file)
+        save_file.close()
+
+
+

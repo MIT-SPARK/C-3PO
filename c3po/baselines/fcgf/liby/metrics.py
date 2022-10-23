@@ -21,6 +21,7 @@ def corr_dist(est, gth, xyz0, xyz1, weight=None, max_dist=1):
 
 def pdist(A, B, dist_type='L2'):
   if dist_type == 'L2':
+    # print("shapes: ", A.shape, B.shape)
     D2 = torch.sum((A.unsqueeze(1) - B.unsqueeze(0)).pow(2), 2)
     return torch.sqrt(D2 + 1e-7)
   elif dist_type == 'SquareL2':

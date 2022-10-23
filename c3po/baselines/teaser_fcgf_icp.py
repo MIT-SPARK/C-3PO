@@ -10,13 +10,34 @@ from pathlib import Path
 
 sys.path.append("../..")
 from c3po.baselines.fcgf.util.misc import extract_features
+from c3po.baselines.fcgf.liby.eval import find_nn_gpu
+import c3po.baselines.fcgf.util.transform_estimation as te
 from c3po.baselines.fcgf.model.resunet import ResUNetBN2C
 from c3po.baselines.teaser_utils.helpers import find_correspondences, get_teaser_solver, Rt2T
 from c3po.utils.general import pos_tensor_to_o3d
 
 FCGF_HOME = Path(__file__).parent / 'fcgf'
 
-def teaser_fcgf_icp(source_points, target_points, voxel_size=0.025, model=None, visualize=False):
+
+def find_corr(xyz0, xyz1, F0, F1, subsample_size=10000):
+    subsample = len(F0) > subsample_size
+    if subsample_size > 0 and subsample:
+        N0 = min(len(F0), subsample_size)
+        N1 = min(len(F1), subsample_size)
+        inds0 = np.random.choice(len(F0), N0, replace=False)
+        inds1 = np.random.choice(len(F1), N1, replace=False)
+        F0, F1 = F0[inds0], F1[inds1]
+
+    # Compute the nn
+    nn_inds = find_nn_gpu(F0, F1, nn_max_n=500) # self.config.nn_max_n = 500
+    if subsample_size > 0 and subsample:
+        return xyz0[inds0], xyz1[inds1[nn_inds]]
+    else:
+        return xyz0, xyz1[nn_inds]
+
+
+def teaser_fcgf_icp(source_points, target_points, voxel_size=0.025, model=None,
+                    pre_trained_3dmatch=False, visualize=False):
   """
   source_points : torch.tensor of shape (3, n)
   target_points : torch.tensor of shape (3, m)
@@ -50,9 +71,17 @@ def teaser_fcgf_icp(source_points, target_points, voxel_size=0.025, model=None, 
       model.load_state_dict(checkpoint['state_dict'])
       model.eval()
       model = model.to(device)
-  else:
+
+  elif pre_trained_3dmatch:
       checkpoint = torch.load(model)
       model = ResUNetBN2C(1, 16, normalize_feature=True, conv1_kernel_size=3, D=3)
+      model.load_state_dict(checkpoint['state_dict'])
+      model.eval()
+      model = model.to(device)
+
+  else:
+      checkpoint = torch.load(model)
+      model = ResUNetBN2C(1, 32, normalize_feature=True, conv1_kernel_size=5, D=3)
       model.load_state_dict(checkpoint['state_dict'])
       model.eval()
       model = model.to(device)
@@ -89,17 +118,26 @@ def teaser_fcgf_icp(source_points, target_points, voxel_size=0.025, model=None, 
       o3d.visualization.draw_geometries([src_, tar_])  # plot src_ and tar_
 
   # establish correspondences by nearest neighbour search in feature space
-  corrs_src, corrs_tar = find_correspondences(src_feature.to('cpu').detach().numpy(),
-                                              tar_feature.to('cpu').detach().numpy(),
-                                              mutual_filter=True)
+  # breakpoint()
+  src_corr, tar_corr = find_corr(xyz0=src_down.T,
+                                 xyz1=tar_down.T,
+                                 F0=src_feature,
+                                 F1=tar_feature)
+  # src_corr = torch.from_numpy(src_corr).to(device=device)
+  # tar_corr = torch.from_numpy(tar_corr).to(device=device)
+  # corrs_src, corrs_tar = find_correspondences(src_feature.to('cpu').detach().numpy(),
+  #                                             tar_feature.to('cpu').detach().numpy(),
+  #                                             mutual_filter=True)
+  #
+  # src_corr = src_down[:, corrs_src]  # np array of size 3 by num_corrs
+  # tar_corr = tar_down[:, corrs_tar]  # np array of size 3 by num_corrs
+  src_corr = src_corr.T
+  tar_corr = tar_corr.T
 
-  src_corr = src_down[:, corrs_src]  # np array of size 3 by num_corrs
-  tar_corr = tar_down[:, corrs_tar]  # np array of size 3 by num_corrs
-
-  #ToDo: This only makes sure that teaser doesn't compute for infinite time.
-  if src_corr.shape[1] > 3000:
-      src_corr = src_corr[:, 3000]
-      tar_corr = tar_corr[:, 3000]
+  # ToDo: This only makes sure that teaser doesn't compute for infinite time.
+  # if src_corr.shape[1] > 3000:
+  #     src_corr = src_corr[:, 3000]
+  #     tar_corr = tar_corr[:, 3000]
 
   if visualize:
       num_corrs = src_corr.shape[1]
@@ -156,7 +194,7 @@ class TEASER_FCGF_ICP():
     This code implements batch TEASER++ (with correspondences using FCGF) + ICP
     """
 
-    def __init__(self, source_points, model=None, voxel_size=0.025, visualize=False):
+    def __init__(self, source_points, model=None, pre_trained_3dmatch=False, voxel_size=0.025, visualize=False):
         """
         source_points   : torch.tensor of shape (1, 3, m)
 
@@ -167,6 +205,7 @@ class TEASER_FCGF_ICP():
         self.model = model
         self.voxel_size = voxel_size
         self.device_ = source_points.device
+        self.pre_trained_3dmatch = pre_trained_3dmatch
 
     def forward(self, target_points):
         """
@@ -183,6 +222,7 @@ class TEASER_FCGF_ICP():
         viz = self.viz
         vox_size = self.voxel_size
         model = self.model
+        pre_trained_3dmatch = self.pre_trained_3dmatch
 
         R = torch.zeros(batch_size, 3, 3).to(device=self.device_)
         t = torch.zeros(batch_size, 3, 1).to(device=self.device_)
@@ -199,6 +239,7 @@ class TEASER_FCGF_ICP():
                                                target_points=tar_new,
                                                voxel_size=vox_size,
                                                model=model,
+                                               pre_trained_3dmatch=pre_trained_3dmatch,
                                                visualize=viz)
 
             R[b, ...] = R_batch

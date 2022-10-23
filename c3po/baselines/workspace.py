@@ -41,6 +41,7 @@ def get_trainer(trainer):
 
 
 def main(config, resume=False):
+
   train_loader = make_data_loader(
       config,
       config.train_phase,
@@ -56,15 +57,10 @@ def main(config, resume=False):
   else:
     val_loader = None
 
-  ds = train_loader.dataset
-  (xyz0, xyz1, coords0, coords1, feats0, feats1, matches, trans) = ds[0]
+  # ds = train_loader.dataset
+  # (xyz0, xyz1, coords0, coords1, feats0, feats1, matches, trans) = ds[0]
   # (n, 3), (m, 3), (n, 3), (m, 3), (n, 1), (m, 1), list, (4, 4)
-
-  zzz0 = np.hstack([xyz0, np.ones((xyz0.shape[0], 1))])
-  zzz1 = np.hstack([xyz1, np.ones((xyz1.shape[0], 1))])
-  zzz2 = (trans @ zzz0.T).T
-  xyz2 = zzz2[:, :3]
-
+  # breakpoint()
 
   Trainer = get_trainer(config.trainer)
   trainer = Trainer(
@@ -77,6 +73,7 @@ def main(config, resume=False):
 
 
 if __name__ == "__main__":
+
   logger = logging.getLogger()
   config = get_config()
 

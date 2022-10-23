@@ -34,7 +34,9 @@ class AlignmentTrainer:
       data_loader,
       val_data_loader=None,
   ):
+    # num_feats = self.num_feats
     num_feats = 1  # occupancy only for 3D Match dataset. For ScanNet, use RGB 3 channels.
+    # num_feats = 32  # we will use fpfh for input features
 
     # Model initialization
     Model = load_model(config.model)
@@ -46,6 +48,7 @@ class AlignmentTrainer:
         conv1_kernel_size=config.conv1_kernel_size,
         D=3)
 
+    # breakpoint()
     if config.weights:
       checkpoint = torch.load(config.weights)
       model.load_state_dict(checkpoint['state_dict'])
@@ -67,8 +70,10 @@ class AlignmentTrainer:
       logging.warning('Warning: There\'s no CUDA support on this machine, '
                       'training is performed on CPU.')
       raise ValueError('GPU not available, but cuda flag set')
-
-    self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    elif config.use_gpu and torch.cuda.is_available():
+      self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    else:
+      self.device = 'cpu'
 
     self.optimizer = getattr(optim, config.optimizer)(
         model.parameters(),
@@ -126,11 +131,15 @@ class AlignmentTrainer:
       for k, v in val_dict.items():
         self.writer.add_scalar(f'val/{k}', v, 0)
 
+    train_loss_per_epoch = []
+
     for epoch in range(self.start_epoch, self.max_epoch + 1):
       lr = self.scheduler.get_lr()
       logging.info(f" Epoch: {epoch}, LR: {lr}")
-      self._train_epoch(epoch)
-      self._save_checkpoint(epoch)
+
+      tr_loss = self._train_epoch(epoch)
+      train_loss_per_epoch.append(tr_loss)
+      self._save_checkpoint(epoch, f'checkpoint-{epoch}')
       self.scheduler.step()
 
       if self.test_valid and epoch % self.val_epoch_freq == 0:
@@ -150,6 +159,10 @@ class AlignmentTrainer:
           logging.info(
               f'Current best val model with {self.best_val_metric}: {self.best_val} at epoch {self.best_val_epoch}'
           )
+
+      print("Train Loss of Epochs (so far): ", train_loss_per_epoch)
+
+    return train_loss_per_epoch
 
   def _save_checkpoint(self, epoch, filename='checkpoint'):
     state = {
@@ -296,6 +309,7 @@ class ContrastiveLossTrainer(AlignmentTrainer):
         data_meter.reset()
         total_timer.reset()
 
+
   def _valid_epoch(self):
     # Change the network to evaluation mode
     self.model.eval()
@@ -329,6 +343,25 @@ class ContrastiveLossTrainer(AlignmentTrainer):
 
       matching_timer.tic()
       xyz0, xyz1, T_gt = input_dict['pcd0'], input_dict['pcd1'], input_dict['T_gt']
+
+      # correcting shape of xyz0 and xyz1:
+      len0 = xyz0.shape[0]
+      len1 = xyz1.shape[0]
+      len0_ = F0.shape[0]
+      len1_ = F1.shape[0]
+      # breakpoint()
+      if len0 != len0_:
+        if len0 < len0_:
+          F0 = F0[:len0, :]
+        if len0 > len0_:
+          xyz0 = xyz0[:len0_, :]
+
+      if len1 != len1_:
+        if len1 < len1_:
+          F1 = F1[:len1, :]
+        if len1 > len1_:
+          xyz1 = xyz1[:len1_, :]
+
       xyz0_corr, xyz1_corr = self.find_corr(xyz0, xyz1, F0, F1, subsample_size=5000)
       T_est = te.est_quad_linear_robust(xyz0_corr, xyz1_corr)
 
@@ -372,6 +405,7 @@ class ContrastiveLossTrainer(AlignmentTrainer):
     }
 
   def find_corr(self, xyz0, xyz1, F0, F1, subsample_size=-1):
+    # breakpoint()
     subsample = len(F0) > subsample_size
     if subsample_size > 0 and subsample:
       N0 = min(len(F0), subsample_size)
@@ -405,6 +439,7 @@ class HardestContrastiveLossTrainer(ContrastiveLossTrainer):
     """
     Generate negative pairs
     """
+    # print("shapes: ", F0.shape, F1.shape)
     N0, N1 = len(F0), len(F1)
     N_pos_pairs = len(positive_pairs)
     hash_seed = max(N0, N1)
@@ -422,10 +457,17 @@ class HardestContrastiveLossTrainer(ContrastiveLossTrainer):
 
     pos_ind0 = sample_pos_pairs[:, 0].long()
     pos_ind1 = sample_pos_pairs[:, 1].long()
-    posF0, posF1 = F0[pos_ind0], F1[pos_ind1]
+    # print("pose ind shapes:", pos_ind0.shape, pos_ind1.shape)
+    try:
+      posF0, posF1 = F0[pos_ind0], F1[pos_ind1]
+    except (RuntimeError, TypeError, NameError, IndexError):
+      breakpoint()
 
-    D01 = pdist(posF0, subF1, dist_type='L2')
-    D10 = pdist(posF1, subF0, dist_type='L2')
+    try:
+      D01 = pdist(posF0, subF1, dist_type='L2')
+      D10 = pdist(posF1, subF0, dist_type='L2')
+    except (RuntimeError, TypeError, NameError, IndexError):
+      breakpoint()
 
     D01min, D01ind = D01.min(1)
     D10min, D10ind = D10.min(1)
@@ -449,6 +491,37 @@ class HardestContrastiveLossTrainer(ContrastiveLossTrainer):
     neg_loss1 = F.relu(self.neg_thresh - D10min[mask1]).pow(2)
     return pos_loss.mean(), (neg_loss0.mean() + neg_loss1.mean()) / 2
 
+  def _prune_pos_pairs(self, correspondences, F0, F1):
+
+    idx0 = correspondences[:, 0].long()
+    idx1 = correspondences[:, 1].long()
+
+    len0 = F0.shape[0]
+    len1 = F1.shape[1]
+
+    pos_pairs = correspondences
+    # if torch.any(idx0 >= len0):
+    #   good_corr_indices = (idx0 < len0)
+    #   try:
+    #     pos_pairs = pos_pairs[good_corr_indices, :]
+    #   except (RuntimeError, TypeError, NameError, IndexError):
+    #     breakpoint()
+    #
+    # if torch.any(idx1 >= len1):
+    #   good_corr_indices = (idx1 < len1)
+    #   try:
+    #     pos_pairs = pos_pairs[good_corr_indices, :]
+    #   except (RuntimeError, TypeError, NameError, IndexError):
+    #     breakpoint()
+    if torch.any(idx0 >= len0) or torch.any(idx1 >= len1):
+      good_corr_indices = torch.logical_and(idx0 < len0, idx1 < len1)
+      try:
+        pos_pairs = pos_pairs[good_corr_indices, :]
+      except (RuntimeError, TypeError, NameError, IndexError):
+        breakpoint()
+
+    return pos_pairs
+
   def _train_epoch(self, epoch):
     gc.collect()
     self.model.train()
@@ -469,6 +542,7 @@ class HardestContrastiveLossTrainer(ContrastiveLossTrainer):
       for iter_idx in range(iter_size):
         data_timer.tic()
         input_dict = data_loader_iter.next()
+        # breakpoint()
         data_time += data_timer.toc(average=False)
 
         sinput0 = ME.SparseTensor(
@@ -483,6 +557,12 @@ class HardestContrastiveLossTrainer(ContrastiveLossTrainer):
         F1 = self.model(sinput1).F
 
         pos_pairs = input_dict['correspondences']
+        # prune the pos_pairs according to the shape of F0 and F1
+        pos_pairs = self._prune_pos_pairs(input_dict['correspondences'], F0, F1)
+
+        if torch.any(torch.tensor(F0.shape) == 0) or torch.any(torch.tensor(F1.shape) == 0):
+          breakpoint()
+
         pos_loss, neg_loss = self.contrastive_hardest_negative_loss(
             F0,
             F1,
@@ -523,6 +603,8 @@ class HardestContrastiveLossTrainer(ContrastiveLossTrainer):
                 data_meter.avg, total_timer.avg - data_meter.avg, total_timer.avg))
         data_meter.reset()
         total_timer.reset()
+
+    return total_loss / total_num
 
 
 class TripletLossTrainer(ContrastiveLossTrainer):

@@ -264,7 +264,7 @@ class IndoorPairDataset(PairDataset):
     npts1 = len(pcd1.colors)
 
     feats_train0, feats_train1 = [], []
-
+    breakpoint()
     feats_train0.append(np.ones((npts0, 1)))
     feats_train1.append(np.ones((npts1, 1)))
 

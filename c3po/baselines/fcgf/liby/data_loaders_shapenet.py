@@ -21,7 +21,7 @@ class ShapeNetDataset(torch.utils.data.Dataset):
                type='sim',
                voxel_size=0.025,    # same as in config.py
                positive_pair_search_voxel_size_multiplier=1.5,   # same as in config.py
-               dataset_length=2000,    # tunable parameter
+               dataset_length=2048,    # tunable parameter
                manual_seed=False
                ):
 
@@ -49,12 +49,15 @@ class ShapeNetDataset(torch.utils.data.Dataset):
 
   def __getitem__(self, idx):
 
+    # breakpoint()
     pc0, pc1, _, _, R, t = self.ds[idx]
 
     xyz0 = pc0.T.numpy()
     color0 = 0.5 * torch.ones_like(pc0.T).numpy()
+    color0 += 0.001 * np.random.randn(*color0.shape)
     xyz1 = pc1.T.numpy()
     color1 = 0.5 * torch.ones_like(pc1.T).numpy()
+    color1 += 0.001 * np.random.randn(*color1.shape)
 
     xyz0 = np.ascontiguousarray(xyz0)
     xyz1 = np.ascontiguousarray(xyz1)
@@ -66,6 +69,7 @@ class ShapeNetDataset(torch.utils.data.Dataset):
     trans[:3, :3] = R
     trans[:3, 3:] = t
     trans = trans.numpy()
+    trans = trans.astype('float64')
 
     matching_search_voxel_size = self.matching_search_voxel_size
 
@@ -104,6 +108,13 @@ class ShapeNetDataset(torch.utils.data.Dataset):
     coords0 = np.floor(xyz0 / self.voxel_size)
     coords1 = np.floor(xyz1 / self.voxel_size)
 
+    xyz0 = np.ascontiguousarray(xyz0)
+    xyz1 = np.ascontiguousarray(xyz1)
+    coords0 = np.ascontiguousarray(coords0)
+    coords1 = np.ascontiguousarray(coords1)
+    feats0 = np.ascontiguousarray(feats0)
+    feats1 = np.ascontiguousarray(feats1)
+
     return (xyz0, xyz1, coords0, coords1, feats0, feats1, matches, trans)
 
 
@@ -115,6 +126,10 @@ def make_data_loader(type, dataset_length, batch_size,
                          dataset_length=dataset_length,
                          positive_pair_search_voxel_size_multiplier=positive_pair_search_voxel_size_multiplier
                          )
+    # breakpoint()
+    # from c3po.utils.visualization_utils import display_two_pcs
+    # (xyz0, xyz1, coords0, coords1, feats0, feats1, matches, trans) = ds[0]
+    # display_two_pcs(pc1=torch.from_numpy(xyz0).T.unsqueeze(0), pc2=torch.from_numpy(xyz1).T.unsqueeze(0))
 
     dl = torch.utils.data.DataLoader(ds,
                                      batch_size=batch_size,

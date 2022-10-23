@@ -14,7 +14,6 @@ from c3po.datasets.shapenet import SE3PointCloudAll, DepthPCAll
 
 def demo(config):
   device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
   checkpoint = torch.load(config.model)
   model = ResUNetBN2C(1, 32, normalize_feature=True, conv1_kernel_size=5, D=3)
   model.load_state_dict(checkpoint['state_dict'])
@@ -29,7 +28,7 @@ def demo(config):
 
   pc0, pc1, _, _, R, t = ds[0]
 
-  breakpoint( )
+  # breakpoint( )
   xyz0_down, feature0 = extract_features(
       model,
       xyz=pc0.T,

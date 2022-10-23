@@ -18,7 +18,7 @@ def str2bool(v):
 
 
 logging_arg = add_argument_group('Logging')
-logging_arg.add_argument('--out_dir', type=str, default=str(config_base_dir / "data/outputs_shapenet"))
+logging_arg.add_argument('--out_dir', type=str, default=str("fcgf/data/outputs_shapenet"))
 
 trainer_arg = add_argument_group('Trainer')
 trainer_arg.add_argument('--trainer', type=str, default='HardestContrastiveLossTrainer')
@@ -49,6 +49,8 @@ trainer_arg.add_argument('--rotation_range', type=float, default=360)
 trainer_arg.add_argument('--train_phase', type=str, default="train")
 trainer_arg.add_argument('--val_phase', type=str, default="val")
 trainer_arg.add_argument('--test_phase', type=str, default="test")
+trainer_arg.add_argument('--train_data_len_shapenet', type=int, default=2048)
+trainer_arg.add_argument('--val_data_len_shapenet', type=int, default=512)
 
 trainer_arg.add_argument('--stat_freq', type=int, default=40)
 trainer_arg.add_argument('--test_valid', type=str2bool, default=True)
@@ -97,9 +99,9 @@ misc_arg.add_argument('--weights', type=str, default=None)
 misc_arg.add_argument('--weights_dir', type=str, default=None)
 misc_arg.add_argument('--resume', type=str, default=None)
 misc_arg.add_argument('--resume_dir', type=str, default=None)
-misc_arg.add_argument('--train_num_thread', type=int, default=2)
+misc_arg.add_argument('--train_num_thread', type=int, default=1)
 misc_arg.add_argument('--val_num_thread', type=int, default=1)
-misc_arg.add_argument('--test_num_thread', type=int, default=2)
+misc_arg.add_argument('--test_num_thread', type=int, default=1)
 misc_arg.add_argument('--fast_validation', type=str2bool, default=False)
 misc_arg.add_argument(
     '--nn_max_n',
@@ -110,9 +112,9 @@ misc_arg.add_argument(
 # Dataset specific configurations
 data_arg = add_argument_group('Data')
 data_arg.add_argument('--dataset', type=str, default='ThreeDMatchPairDataset')
-data_arg.add_argument('--voxel_size', type=float, default=0.025)
+data_arg.add_argument('--voxel_size', type=float, default=0.025) #0.025
 data_arg.add_argument(
-    '--threed_match_dir', type=str, default=str(config_base_dir / "data/threedmatch"))
+    '--threed_match_dir', type=str, default=str("fcgf/data/threedmatch"))
 data_arg.add_argument(
     '--kitti_root', type=str, default="/home/chrischoy/datasets/FCGF/kitti/")
 data_arg.add_argument(
