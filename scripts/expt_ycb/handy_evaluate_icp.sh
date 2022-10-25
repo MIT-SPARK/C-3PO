@@ -1,3 +1,5 @@
+cd ../../c3po/expt_ycb
+
 FILE_NAME="./eval/eval_icp.txt"
 
 now=$(date +'%c')

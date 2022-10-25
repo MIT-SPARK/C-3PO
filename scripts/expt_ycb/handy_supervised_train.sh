@@ -1,3 +1,5 @@
+cd ../../c3po/expt_ycb
+
 ##########################################################################
 
 echo "001_chips_can supervised training:: POINT TRANSFORMER"

@@ -1,3 +1,5 @@
+cd ../../c3po/expt_shapenet
+
 #python cert_plot.py "knife" "knife"
 #python cert_plot.py "laptop" "laptop"
 

@@ -1,3 +1,5 @@
+cd ../../c3po/expt_shapenet
+
 FILE_NAME="./eval/model_eval_main.txt"
 
 now=$(date +'%c')

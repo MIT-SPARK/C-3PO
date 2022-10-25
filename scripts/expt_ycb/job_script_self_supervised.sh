@@ -1,3 +1,4 @@
+cd ../../c3po/expt_ycb
 #!/bin/bash
 #SBATCH --gres=gpu:volta:1
 #SBATCH -c 20

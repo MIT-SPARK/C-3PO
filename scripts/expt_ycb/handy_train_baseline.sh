@@ -1,3 +1,5 @@
+cd ../../c3po/expt_ycb
+
 FILE_NAME="./eval/handy_train_baseline_output.txt"
 
 now=$(date)
