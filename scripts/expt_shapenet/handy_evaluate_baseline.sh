@@ -1,3 +1,5 @@
+cd ../../c3po/expt_shapenet
+
 BASELINE_SUPERVISED_FILE="./eval/baseline_supervised_eval_main.txt"
 
 now=$(date)

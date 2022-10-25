@@ -1,4 +1,4 @@
-
+cd ../../c3po/expt_shapenet
 OBJECT_LIST='airplane bathtub bed bottle cap car chair guitar helmet knife laptop motorcycle mug skateboard table vessel'
 FILE_NAME="./eval/eval_teaser_fcgf_icp_v8.log"
 MODEL_FILE="../baselines/fcgf/data/output_shapenet/realv8/real/best_val_checkpoint.pth"

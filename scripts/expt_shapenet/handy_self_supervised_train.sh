@@ -1,4 +1,4 @@
-
+cd ../../c3po/expt_shapenet
 ##########################################################################
 
 echo "AIRPLANE:: POINT TRANSFORMER"

@@ -1,3 +1,4 @@
+cd ../../c3po/expt_shapenet
 echo "pre-training: motorcycle"
 python training.py "point_transformer" "motorcycle" "supervised"
 
