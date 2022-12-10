@@ -200,7 +200,7 @@ def evaluate_icp(class_name, model_id, detector_type,
                  global_registration='ransac', use_corrector=False, visualize=False):
 
     class_id = CLASS_ID[class_name]
-    hyper_param_file = "self_supervised_training.yml"
+    hyper_param_file = "../expt_shapenet/self_supervised_training.yml"
     stream = open(hyper_param_file, "r")
     hyper_param = yaml.load(stream=stream, Loader=yaml.FullLoader)
     hyper_param = hyper_param[detector_type]   # we only use the evaluation dataset parameters, which are the same
@@ -251,7 +251,7 @@ if __name__ == "__main__":
 
     only_categories = [class_name]
 
-    stream = open("class_model_ids.yml", "r")
+    stream = open("../expt_shapenet/class_model_ids.yml", "r")
     model_class_ids = yaml.load(stream=stream, Loader=yaml.Loader)
     if class_name not in model_class_ids:
         raise Exception('Invalid class_name')

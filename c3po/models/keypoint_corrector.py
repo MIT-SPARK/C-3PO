@@ -17,7 +17,7 @@ sys.path.append("../../")
 from c3po.utils.ddn.node import ParamDeclarativeFunction
 
 from c3po.models.point_set_registration import PointSetRegistration
-from c3po.datasets.shapenet import SE3PointCloud, SE3nIsotropicShapePointCloud, DepthPC
+from c3po.datasets.shapenet import SE3PointCloud, DepthPC
 
 from c3po.utils.visualization_utils import display_two_pcs, update_pos_tensor_to_keypoint_markers
 from c3po.utils.loss_functions import chamfer_loss, keypoints_loss

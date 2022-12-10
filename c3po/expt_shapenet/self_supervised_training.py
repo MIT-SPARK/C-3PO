@@ -473,6 +473,7 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
 
     return None
 
+
 def evaluate_model(detector_type, class_name, model_id,
                    evaluate_models=True,
                    models_to_analyze='post',

@@ -13,8 +13,8 @@ from c3po.datasets.ycb import MODEL_TO_KPT_GROUPS as MODEL_TO_KPT_GROUPS_YCB
 from c3po.datasets.shapenet import MODEL_TO_KPT_GROUPS as MODEL_TO_KPT_GROUPS_SHAPENET
 
 
-
-def evaluate(eval_loader, model, hyper_param, certification=True, degeneracy=False, device=None, normalize_adds=False):
+def evaluate(eval_loader, model, hyper_param, certification=True, degeneracy=False,
+             device=None, normalize_adds=False, log_dir=None):
     model.eval()
 
     if device==None:
@@ -61,6 +61,7 @@ def evaluate(eval_loader, model, hyper_param, certification=True, degeneracy=Fal
             print(hyper_param["adds_threshold"])
 
         for i, vdata in enumerate(eval_loader):
+            breakpoint()
             input_point_cloud, keypoints_target, R_target, t_target = vdata
             input_point_cloud = input_point_cloud.to(device)
             keypoints_target = keypoints_target.to(device)
