@@ -1,6 +1,0 @@
-[submodule "external/TEASER-plusplus"]
-	path = external/TEASER-plusplus
-	url = https://github.com/MIT-SPARK/TEASER-plusplus.git
-[submodule "external/FCGF"]
-	path = external/FCGF
-	url = https://github.com/chrischoy/FCGF.git
