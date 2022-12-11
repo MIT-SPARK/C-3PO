@@ -41,5 +41,5 @@ if __name__ == "__main__":
                    model_id=model_id,
                    visualize=True, evaluate_models=True,
                    use_corrector=False,
-                   visualize_before=True,
+                   visualize_before=False,
                    visualize_after=False)

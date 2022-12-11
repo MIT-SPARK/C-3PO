@@ -1,17 +1,22 @@
-import copy
-import csv
+# import copy
+# import csv
 import numpy as np
-import open3d as o3d
-import open3d.visualization.gui as gui
-import open3d.visualization.rendering as rendering
-import random
-import string
+# import open3d as o3d
+# import open3d.visualization.gui as gui
+# import open3d.visualization.rendering as rendering
+# import random
+# import string
+import pickle
 import sys
-import time
+# import time
 import torch
-import torch.nn.functional as F
+# import torch.nn.functional as F
 from pytorch3d import ops
 from pytorch3d import transforms
+
+from c3po.datasets.ycb import MODEL_TO_KPT_GROUPS as ycb_kp_groups
+from c3po.datasets.shapenet import MODEL_TO_KPT_GROUPS as shapenet_kp_groups
+
 
 sys.path.append('../..')
 
@@ -25,15 +30,23 @@ def is_close(keypoints, pcd, threshold=0.015):
         return True
     return False
 
+
 def is_pcd_nondegenerate(model_id, input_point_clouds, predicted_model_keypoints, model_to_kpt_groups):
-    nondeg_indicator = torch.zeros(predicted_model_keypoints.shape[0]).to(input_point_clouds.device)
-    for batch_idx in range(predicted_model_keypoints.shape[0]):
-        predicted_kpts = predicted_model_keypoints[batch_idx]
-        for group in model_to_kpt_groups[model_id]:
-            kpt_group = predicted_kpts[:,list(group)]
-            if is_close(kpt_group, input_point_clouds[batch_idx]):
-                nondeg_indicator[batch_idx] = 1
-    return nondeg_indicator.to(torch.bool)
+
+    if model_id not in [*shapenet_kp_groups.keys()] + [*ycb_kp_groups.keys()]:
+        b = input_point_clouds.shape[0]
+        nd = torch.ones(b, 1).to(dtype=torch.bool)
+
+    else:
+        nondeg_indicator = torch.zeros(predicted_model_keypoints.shape[0]).to(input_point_clouds.device)
+        for batch_idx in range(predicted_model_keypoints.shape[0]):
+            predicted_kpts = predicted_model_keypoints[batch_idx]
+            for group in model_to_kpt_groups[model_id]:
+                kpt_group = predicted_kpts[:,list(group)]
+                if is_close(kpt_group, input_point_clouds[batch_idx]):
+                    nondeg_indicator[batch_idx] = 1
+        nd = nondeg_indicator.to(torch.bool).unsqueeze(-1)
+    return nd
 
 
 def chamfer_dist(pc, pc_, pc_padding=None, max_loss=False):
@@ -73,6 +86,7 @@ def chamfer_dist(pc, pc_, pc_padding=None, max_loss=False):
 
     return loss.unsqueeze(-1)
 
+
 def translation_error(t, t_):
     """
     inputs:
@@ -83,9 +97,9 @@ def translation_error(t, t_):
     t_err: torch.tensor of shape (1, 1) or (B, 1)
     """
     if t.dim() == 2:
-        return torch.norm(t - t_, p=2)/3.0
+        return torch.norm(t - t_, p=2)
     elif t.dim() == 3:
-        return torch.norm(t-t_, p=2, dim=1)/3.0
+        return torch.norm(t-t_, p=2, dim=1)
     else:
         return ValueError
 
@@ -100,14 +114,20 @@ def rotation_error(R, R_):
     R_err: torch.tensor of shape (1, 1) or (B, 1)
     """
 
+    epsilon = 1e-8
     if R.dim() == 2:
-        return torch.arccos(0.5*(torch.trace(R.T @ R)-1))
+        error = 0.5*(torch.trace(R.T @ R_)-1)
+        err = torch.clamp(error, -1 + epsilon, 1 - epsilon)
+        return torch.arccos(err)
+
     elif R.dim() == 3:
         error = 0.5 * (torch.einsum('bii->b', torch.transpose(R, -1, -2) @ R_) - 1).unsqueeze(-1)
-        epsilon = 1e-8
-        return torch.acos(torch.clamp(error, -1 + epsilon, 1 - epsilon))
+        err = torch.clamp(error, -1 + epsilon, 1 - epsilon)
+        return torch.acos(err)
+
     else:
         return ValueError
+
 
 def rotation_euler_error(R, R_): #no clamp
     """
@@ -126,6 +146,7 @@ def rotation_euler_error(R, R_): #no clamp
     else:
         return ValueError
 
+
 def rotation_matrix_error(R, R_):
     """
     R   : torch.tensor of shape (3, 3) or (B, 3, 3)
@@ -139,6 +160,7 @@ def rotation_matrix_error(R, R_):
     ErrorMat = R @ R_.transpose(-1, -2) - torch.eye(3).to(device=device_)
 
     return (ErrorMat**2).sum(dim=(-1, -2)).unsqueeze(-1)
+
 
 def shape_error(c, c_):
     """
@@ -155,6 +177,7 @@ def shape_error(c, c_):
         return torch.norm(c - c_, p=2, dim=1)/c.shape[1]
     else:
         return ValueError
+
 
 def keypoints_error(kp, kp_):
     """
@@ -202,6 +225,33 @@ def evaluation_error(input, output):
 
     return pc_err, kp_err, R_err, t_err
     # return pc_loss
+
+
+def adds_error(templet_pc, T1, T2):
+    """
+    Args:
+        templet_pc: torch.tensor(B, 3, m) or (1, 3, m)  or (3, m)
+        T1: torch.tensor(B, 4, 4)   or (4, 4)
+        T2: torch.tensor(B, 4, 4)   or (4, 4)
+
+    Returns:
+
+    """
+    if len(templet_pc.shape) == 2:
+        templet_pc = templet_pc.unsqueeze(0)
+        T1 = T1.unsqueeze(0)
+        T2 = T2.unsqueeze(0)
+
+    pc1 = T1[:, :3, :3] @ templet_pc + T1[:, :3, 3:]
+    pc2 = T2[:, :3, :3] @ templet_pc + T2[:, :3, 3:]
+
+    err1 = chamfer_dist(pc1, pc2)
+    err2 = chamfer_dist(pc2, pc1)
+    err = err1 + err2
+    if len(templet_pc.shape) == 2:
+        err = err.squeeze(0)
+
+    return err
 
 
 # ADD-S and ADD-S (AUC)
@@ -273,4 +323,142 @@ def add_s_error(predicted_point_cloud, ground_truth_point_cloud, threshold, cert
         auc = VOCap(d.squeeze(-1), threshold=threshold)
 
     return d <= threshold, auc
+
+
+def get_auc(rec, threshold):
+
+    rec = np.sort(rec)
+    rec = np.where(rec <= threshold, rec, np.array([float("inf")]))
+    # print(rec)
+    # print(rec.shape)
+    # breakpoint()
+
+    n = rec.shape[0]
+    prec = np.cumsum(np.ones(n) / n, axis=0)
+
+    index = np.isfinite(rec)
+    rec = rec[index]
+    prec = prec[index]
+
+    if len(rec) == 0:
+        # print("returns zero: ", 0.0)
+        return np.asarray([0.0])[0]
+    else:
+        # print(prec)
+        # print(prec.shape)
+        mrec = np.zeros(rec.shape[0] + 2)
+        mrec[0] = 0
+        mrec[-1] = threshold
+        mrec[1:-1] = rec
+
+        mpre = np.zeros(prec.shape[0] + 2)
+        mpre[1:-1] = prec
+        mpre[-1] = prec[-1]
+
+        for i in range(1, mpre.shape[0]):
+            mpre[i] = max(mpre[i], mpre[i - 1])
+
+        ap = 0
+        ap = np.zeros(1)
+        for i in range(mrec.shape[0] - 1):
+            # print("mrec[i+1] ", mrec[i+1])
+            # print("mpre[i+1] ", mpre[i+1])
+            # ap += (mrec[i+1] - mrec[i]) * mpre[i+1]
+            ap += (mrec[i + 1] - mrec[i]) * mpre[i + 1] * (1 / threshold)
+
+        # print(ap)
+        # print(type(ap))
+        # print("returns ap: ", ap[0])
+        # breakpoint()
+        return ap[0]
+
+
+class EvalData:
+    def __init__(self, adds_th=0.02, adds_auc_th=0.05):
+        self.eval_store_metrics = ["adds", "oc", "nd", \
+                                   "rerr", "terr", \
+                                   "adds_oc", "adds_oc_nd", \
+                                   "adds_auc", "adds_oc_auc", "adds_oc_nd_auc", \
+                                   "adds_th_score", "adds_oc_th_score", "adds_oc_nd_th_score", \
+                                   "adds_th", "adds_auc_th"]
+
+        self.data = dict()
+        for metric in self.eval_store_metrics:
+            self.data[metric] = None
+
+        self.n = None
+        self.data['adds_th'] = adds_th
+        self.data['adds_auc_th'] = adds_auc_th
+
+    def set_adds(self, adds_):
+        self.data["adds"] = adds_
+        self.n = len(adds_)
+
+    def set_oc(self, oc_):
+        self.data["oc"] = oc_
+
+    def set_nd(self, nd_):
+        self.data["nd"] = nd_
+
+    def set_rerr(self, rerr_):
+        self.data["rerr"] = rerr_
+        self.n = len(rerr_)
+
+    def set_terr(self, terr_):
+        self.data["terr"] = terr_
+        self.n = len(terr_)
+
+    def set_adds_th(self, th_):
+        self.data["adds_th"] = th_
+
+    def set_adds_auc_th(self, th_):
+        self.data["adds_auc_th"] = th_
+
+    def complete_eval_data(self):
+
+        if self.n is None:
+            self.n = len(self.data["adds"])
+
+        # if oc or nd is None, we fill it with all ones
+        if self.data["oc"] is None:
+            self.data["oc"] = np.ones(self.n)
+
+        if self.data["nd"] is None:
+            self.data["nd"] = np.ones(self.n)
+
+        # fill adds_oc, adds_oc_nd
+        idx = np.where(self.data["oc"] == 1)
+        self.data["adds_oc"] = self.data["adds"][idx]
+
+        idx = np.where(self.data["oc"] * self.data["nd"] == 1)
+        self.data["adds_oc_nd"] = self.data["adds"][idx]
+
+        # fill adds_th_score, adds_oc_th_score, adds_oc_nd_th_score
+        self.data["adds_th_score"] = (self.data["adds"] <= self.data["adds_th"]).mean()
+        self.data["adds_oc_th_score"] = (self.data["adds_oc"] <= self.data["adds_th"]).mean()
+        self.data["adds_oc_nd_th_score"] = (self.data["adds_oc_nd"] <= self.data["adds_th"]).mean()
+
+        # fill adds_auc, adds_oc_auc, adds_oc_nd_auc
+        self.data["adds_auc"] = get_auc(self.data["adds"], self.data["adds_auc_th"])
+        self.data["adds_oc_auc"] = get_auc(self.data["adds_oc"], self.data["adds_auc_th"])
+        self.data["adds_oc_nd_auc"] = get_auc(self.data["adds_oc_nd"], self.data["adds_auc_th"])
+
+    def print(self):
+        """prints out the results"""
+
+        raise NotImplementedError
+
+    def save(self, filename):
+        """saves object as a pickle file"""
+        # breakpoint()
+        with open(filename, 'wb') as f:
+            pickle.dump(self.data, f, protocol=pickle.HIGHEST_PROTOCOL)
+
+    def load(self, filename):
+        """load object from pickle file"""
+
+        with open(filename, 'rb') as f:
+            data_dict = pickle.load(f)
+        self.data = data_dict
+        # breakpoint()
 

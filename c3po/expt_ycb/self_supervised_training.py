@@ -446,9 +446,16 @@ def evaluate_model(detector_type, model_id,
         log_info = "PRE-TRAINED MODEL:" if evaluate_pretrained else "(SELF-SUPERVISED) TRAINED MODEL:"
         print(log_info)
         print(">>" * 40)
-        eval_metrics = evaluate(eval_loader=eval_loader, model=model, hyper_param=hyper_param, certification=True,
-                 device=device, normalize_adds=False, degeneracy=degeneracy_eval)
-
+        if evaluate_trained:
+            log_dir = "eval/c3po/" + detector_type
+        elif evaluate_pretrained:
+            log_dir = "eval/KeyPoSimCor/" + detector_type
+        else:
+            raise ValueError("Incorrectly specified model type.")
+        # eval_metrics = evaluate(eval_loader=eval_loader, model=model, hyper_param=hyper_param, certification=True,
+        #          device=device, normalize_adds=False, degeneracy=degeneracy_eval)
+        evaluate(eval_loader=eval_loader, model=model, hyper_param=hyper_param,
+                 device=device, log_dir=log_dir)
     # # Visual Test
     dataset_batch_size = 1
     dataset = DepthYCB(model_id=model_id,
@@ -466,17 +473,19 @@ def evaluate_model(detector_type, model_id,
                     degeneracy_eval=degeneracy_eval)
 
     del state_dict, model
-    if average_metrics and evaluate_models:
-        eval_metrics = eval_metrics + [1]
-        averaged_metrics = averaged_metrics + np.array(eval_metrics)
-        for elt_idx in range(len(averaged_metrics)):
-            if np.isnan(averaged_metrics[elt_idx]):
-                averaged_metrics[elt_idx] = 0
-        print("NEW AVERAGED METRICS: ", averaged_metrics)
-        with open(metrics_file, 'wb+') as f:
-            pickle.dump(averaged_metrics, f)
-    elif evaluate_models:
-        return eval_metrics
-    else:
-        return None
+    # if average_metrics and evaluate_models:
+    #     eval_metrics = eval_metrics + [1]
+    #     averaged_metrics = averaged_metrics + np.array(eval_metrics)
+    #     for elt_idx in range(len(averaged_metrics)):
+    #         if np.isnan(averaged_metrics[elt_idx]):
+    #             averaged_metrics[elt_idx] = 0
+    #     print("NEW AVERAGED METRICS: ", averaged_metrics)
+    #     with open(metrics_file, 'wb+') as f:
+    #         pickle.dump(averaged_metrics, f)
+    # elif evaluate_models:
+    #     return eval_metrics
+    # else:
+    #     return None
+
+    return None
 

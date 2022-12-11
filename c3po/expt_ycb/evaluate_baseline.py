@@ -130,8 +130,11 @@ def visualize_detector(hyper_param, detector_type, model_id,
         print(">>"*40)
         print("PRE-TRAINED MODEL:")
         print(">>" * 40)
-        evaluate(eval_loader=eval_loader, model=model, hyper_param=hyper_param, certification=True,
-                     device=device)
+        log_dir = "eval/KeyPoReal/" + detector_type
+        # evaluate(eval_loader=eval_loader, model=model, hyper_param=hyper_param, certification=True,
+        #              device=device)
+        evaluate(eval_loader=eval_loader, model=model, hyper_param=hyper_param,
+                 device=device, log_dir=log_dir)
 
     # # Visual Test
     if visualize_before:
@@ -181,14 +184,12 @@ def evaluate_model(detector_type, model_ids, only_models=None,
                                visualize_after=visualize_after)
 
 
-
-
 if __name__ == "__main__":
 
     """
     usage: 
-    >> python train_baseline.py "point_transformer" "chair"
-    >> python train_baseline.py "pointnet" "chair"
+    >> python evaluate_baseline.py "point_transformer" "chair"
+    >> python evaluate_baseline.py "pointnet" "chair"
     """
 
     parser = argparse.ArgumentParser()
@@ -206,7 +207,8 @@ if __name__ == "__main__":
     stream = open("model_ids.yml", "r")
     model_ids = yaml.load(stream=stream, Loader=yaml.Loader)['model_ids']
 
-    evaluate_model(detector_type=detector_type, model_ids=model_ids, use_corrector=False, only_models=only_models, visualize=True)
+    evaluate_model(detector_type=detector_type, model_ids=model_ids, use_corrector=False, only_models=only_models,
+                   visualize=False)
 
 
 

@@ -228,8 +228,11 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
         print(">>"*40)
         print("PRE-TRAINED MODEL:")
         print(">>" * 40)
-        evaluate(eval_loader=eval_loader, model=model, hyper_param=hyper_param, certification=True,
-                     device=device)
+        log_dir = "eval/KeyPoReal/" + detector_type
+        # evaluate(eval_loader=eval_loader, model=model, hyper_param=hyper_param, certification=True,
+        #              device=device)
+        evaluate(eval_loader=eval_loader, model=model, hyper_param=hyper_param,
+                 device=device, log_dir=log_dir)
 
     # # Visual Test
     if visualize_before:

@@ -434,14 +434,20 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
             print(">>"*40)
             print("PRE-TRAINED MODEL:")
             print(">>" * 40)
-            evaluate(eval_loader=eval_loader, model=model_before, hyper_param=hyper_param, certification=True,
-                     device=device)
+            log_dir = "eval/KeyPoSimCor/" + detector_type
+            # evaluate(eval_loader=eval_loader, model=model_before, hyper_param=hyper_param, certification=True,
+            #          device=device)
+            evaluate(eval_loader=eval_loader, model=model_before, hyper_param=hyper_param,
+                     device=device, log_dir=log_dir)
         if post_:
             print(">>" * 40)
             print("(SELF-SUPERVISED) TRAINED MODEL:")
             print(">>" * 40)
-            evaluate(eval_loader=eval_loader, model=model_after, hyper_param=hyper_param, certification=True,
-                     device=device)
+            log_dir = "eval/c3po/" + detector_type
+            # evaluate(eval_loader=eval_loader, model=model_after, hyper_param=hyper_param, certification=True,
+            #          device=device)
+            evaluate(eval_loader=eval_loader, model=model_after, hyper_param=hyper_param,
+                     device=device, log_dir=log_dir)
 
     # # Visual Test
     dataset_len = 20
