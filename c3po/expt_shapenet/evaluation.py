@@ -1,6 +1,8 @@
 import os
 import pickle
 import sys
+
+import numpy as np
 import torch
 # import yaml
 from torch.utils.tensorboard import SummaryWriter
@@ -152,11 +154,11 @@ def evaluate(eval_loader, model, hyper_param, certification=True, degeneracy=Fal
                     predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted
 
             eval_data = EvalData()
-            eval_data.set_adds(adds_list)
-            eval_data.set_rerr(rerr_list)
-            eval_data.set_terr(terr_list)
-            eval_data.set_oc(oc_list)
-            eval_data.set_nd(nd_list)
+            eval_data.set_adds(np.asarray(adds_list))
+            eval_data.set_rerr(np.asarray(rerr_list))
+            eval_data.set_terr(np.asarray(terr_list))
+            eval_data.set_oc(np.asarray(oc_list))
+            eval_data.set_nd(np.asarray(nd_list))
             save_file = writer.log_dir + '/' + 'eval_data.pkl'
             eval_data.save(save_file)
 

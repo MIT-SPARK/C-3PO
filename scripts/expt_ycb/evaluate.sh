@@ -6,10 +6,27 @@ YCB_OBJECTS="001_chips_can 002_master_chef_can 003_cracker_box 004_sugar_box 005
 035_power_drill 036_wood_block 037_scissors 040_large_marker 051_large_clamp 052_extra_large_clamp 061_foam_brick"
 
 # KeyPoSim
-#for object in $SHAPENET_OBJECTS
-#do
-#  python evaluate_sim_supervised_model.py $DETECTOR_TYPE $object
-#done
+for object in $YCB_OBJECTS
+do
+  python evaluate_sim_supervised_model.py $DETECTOR_TYPE $object
+done
+echo "--------------------------------------------------------------------------"
+
+# KeyPoSimICP
+for object in $YCB_OBJECTS
+do
+  echo $object
+  python evaluate_icp.py $object "none" "nc"
+done
+echo "--------------------------------------------------------------------------"
+
+# KeyPoSimRANSACICP
+for object in $YCB_OBJECTS
+do
+  echo $object
+  python evaluate_icp.py $object "ransac" "nc"
+done
+echo "--------------------------------------------------------------------------"
 
 # KeyPoSimCor
 for object in $YCB_OBJECTS
@@ -17,6 +34,23 @@ do
   echo $object
   python evaluate_proposed_model.py $DETECTOR_TYPE $object "pre"
 done
+echo "--------------------------------------------------------------------------"
+
+# KeyPoSimCorICP
+for object in $YCB_OBJECTS
+do
+  echo $object
+  python evaluate_icp.py $object "none" "c"
+done
+echo "--------------------------------------------------------------------------"
+
+# KeyPoSimCorRANSACICP
+for object in $YCB_OBJECTS
+do
+  echo $object
+  python evaluate_icp.py $object "ransac" "c"
+done
+echo "--------------------------------------------------------------------------"
 
 # c3po
 for object in $YCB_OBJECTS
@@ -24,6 +58,7 @@ do
   echo $object
   python evaluate_proposed_model.py $DETECTOR_TYPE $object "post"
 done
+echo "--------------------------------------------------------------------------"
 
 # KeyPoReal
 for object in $YCB_OBJECTS
@@ -31,3 +66,6 @@ do
   echo $object
   python evaluate_baseline.py $DETECTOR_TYPE $object
 done
+echo "--------------------------------------------------------------------------"
+
+

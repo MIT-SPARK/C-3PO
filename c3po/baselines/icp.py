@@ -4,7 +4,7 @@ import open3d as o3d
 import numpy as np
 
 from c3po.utils.general import pos_tensor_to_o3d
-from c3po.baselines.teaser import TEASER
+# from c3po.baselines.teaser import TEASER
 from c3po.baselines.ransac import RANSAC
 
 
@@ -213,7 +213,7 @@ class wICP():
         self.cad_models = cad_models
         self.model_keypoints = model_keypoints
 
-        self.TEASER = TEASER(source_points=self.model_keypoints)
+        # self.TEASER = TEASER(source_points=self.model_keypoints)
         self.ICP = ICP(source_points=self.cad_models)
 
     def forward(self, input_point_cloud, R0, t0):

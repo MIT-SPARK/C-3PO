@@ -416,6 +416,7 @@ class EvalData:
 
     def complete_eval_data(self):
 
+        # breakpoint()
         if self.n is None:
             self.n = len(self.data["adds"])
 
@@ -426,8 +427,10 @@ class EvalData:
         if self.data["nd"] is None:
             self.data["nd"] = np.ones(self.n)
 
+        self._check_to_numpy()
+
         # fill adds_oc, adds_oc_nd
-        idx = np.where(self.data["oc"] == 1)
+        idx = np.where(self.data["oc"] == 1)[0]
         self.data["adds_oc"] = self.data["adds"][idx]
 
         idx = np.where(self.data["oc"] * self.data["nd"] == 1)
@@ -435,13 +438,44 @@ class EvalData:
 
         # fill adds_th_score, adds_oc_th_score, adds_oc_nd_th_score
         self.data["adds_th_score"] = (self.data["adds"] <= self.data["adds_th"]).mean()
-        self.data["adds_oc_th_score"] = (self.data["adds_oc"] <= self.data["adds_th"]).mean()
-        self.data["adds_oc_nd_th_score"] = (self.data["adds_oc_nd"] <= self.data["adds_th"]).mean()
-
         # fill adds_auc, adds_oc_auc, adds_oc_nd_auc
         self.data["adds_auc"] = get_auc(self.data["adds"], self.data["adds_auc_th"])
-        self.data["adds_oc_auc"] = get_auc(self.data["adds_oc"], self.data["adds_auc_th"])
-        self.data["adds_oc_nd_auc"] = get_auc(self.data["adds_oc_nd"], self.data["adds_auc_th"])
+
+        # oc
+        if len(self.data["adds_oc"]) == 0:
+            self.data["adds_oc_th_score"] = np.asarray([0.0])[0]
+            self.data["adds_oc_auc"] = np.asarray([0.0])[0]
+        else:
+            self.data["adds_oc_th_score"] = (self.data["adds_oc"] <= self.data["adds_th"]).mean()
+            self.data["adds_oc_auc"] = get_auc(self.data["adds_oc"], self.data["adds_auc_th"])
+
+        # nd
+        if len(self.data["adds_oc_nd"]) == 0:
+            self.data["adds_oc_nd_th_score"] = np.asarray([0.0])[0]
+            self.data["adds_oc_nd_auc"] = np.asarray([0.0])[0]
+        else:
+            self.data["adds_oc_nd_th_score"] = (self.data["adds_oc_nd"] <= self.data["adds_th"]).mean()
+            self.data["adds_oc_nd_auc"] = get_auc(self.data["adds_oc_nd"], self.data["adds_auc_th"])
+
+    def _check_to_numpy(self):
+
+        if isinstance(self.data["adds"], list):
+            self.data["adds"] = np.asarray(self.data["adds"])
+
+        if isinstance(self.data["rerr"], list):
+            self.data["rerr"] = np.asarray(self.data["rerr"])
+
+        if isinstance(self.data["terr"], list):
+            self.data["terr"] = np.asarray(self.data["terr"])
+
+        if isinstance(self.data["oc"], list):
+            self.data["oc"] = np.asarray(self.data["oc"])
+
+        if isinstance(self.data["nd"], list):
+            self.data["nd"] = np.asarray(self.data["nd"])
+
+
+
 
     def print(self):
         """prints out the results"""
