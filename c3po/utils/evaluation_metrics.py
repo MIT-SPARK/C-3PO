@@ -457,6 +457,49 @@ class EvalData:
             self.data["adds_oc_nd_th_score"] = (self.data["adds_oc_nd"] <= self.data["adds_th"]).mean()
             self.data["adds_oc_nd_auc"] = get_auc(self.data["adds_oc_nd"], self.data["adds_auc_th"])
 
+    def compute_oc(self):
+
+        if self.data["oc"] is None or self.data["adds_oc"] is None:
+            self.complete_eval_data()
+
+        idx = np.where(self.data["oc"] == 1)[0]
+        adds_oc = self.data["adds"][idx]
+        rerr_oc = self.data["rerr"][idx]
+        terr_oc = self.data["terr"][idx]
+
+        OC = EvalData()
+        OC.set_adds(adds_oc)
+        OC.set_rerr(rerr_oc)
+        OC.set_terr(terr_oc)
+        OC.set_adds_th(self.data["adds_th"])
+        OC.set_adds_auc_th(self.data["adds_auc_th"])
+        OC.complete_eval_data()
+
+        return OC
+
+    def compute_ocnd(self):
+
+        if self.data["oc"] is None or self.data["adds_oc"] is None:
+            self.complete_eval_data()
+
+        if self.data["nd"] is None or self.data["adds_oc_nd"] is None:
+            self.complete_eval_data()
+
+        idx = np.where(self.data["oc"] * self.data["nd"] == 1)
+        adds_ocnd = self.data["adds"][idx]
+        rerr_ocnd = self.data["rerr"][idx]
+        terr_ocnd = self.data["terr"][idx]
+
+        OCND = EvalData()
+        OCND.set_adds(adds_ocnd)
+        OCND.set_rerr(rerr_ocnd)
+        OCND.set_terr(terr_ocnd)
+        OCND.set_adds_th(self.data["adds_th"])
+        OCND.set_adds_auc_th(self.data["adds_auc_th"])
+        OCND.complete_eval_data()
+
+        return OCND
+
     def _check_to_numpy(self):
 
         if isinstance(self.data["adds"], list):
@@ -473,9 +516,6 @@ class EvalData:
 
         if isinstance(self.data["nd"], list):
             self.data["nd"] = np.asarray(self.data["nd"])
-
-
-
 
     def print(self):
         """prints out the results"""

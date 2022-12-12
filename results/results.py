@@ -73,17 +73,17 @@ slide_adds_auc_th = widgets.FloatSlider(
     min=0.01,
     max=0.20,
     step=0.005,
-    value=0.05,
+    value=0.10,
     description="ADD-S AUC Threshold"
 )
 
 
 def extract_data(my_files, my_labels, my_adds_th=0.02, my_adds_auc_th=0.05):
 
-    labels = my_labels
+    labels = []
     data = dict()
 
-    for i, label in enumerate(labels):
+    for i, label in enumerate(my_labels):
         eval_data = EvalData()
 
         # print("label: ", label)
@@ -95,6 +95,20 @@ def extract_data(my_files, my_labels, my_adds_th=0.02, my_adds_auc_th=0.05):
         #     print(eval_data.data["adds"])
         eval_data.complete_eval_data()
         data[label] = eval_data.data
+        labels.append(label)
+
+        if label == "c3po":
+            
+            eval_data_oc = eval_data.compute_oc()
+            eval_data_oc_nd = eval_data.compute_ocnd()
+            label_oc = label + " (oc)"
+            label_oc_nd = label + " (oc+nd)"
+
+            data[label_oc] = eval_data_oc.data
+            data[label_oc_nd] = eval_data_oc_nd.data
+
+            labels.append(label_oc)
+            labels.append(label_oc_nd)
 
     return data
 
@@ -116,6 +130,11 @@ def table(my_dataset, my_object, my_detector, my_adds_th, my_adds_auc_th):
             print("Error: Specified Object not in the Dataset.")
             return None
 
+        if my_detector != "point_transformer":
+            print("Error: We only trained Point Transformer on YCB, as PointNet showed "
+                  "suboptimal performance on ShapeNet.")
+            return None
+
     else:
         raise ValueError("my_dataset not specified correctly.")
 
@@ -130,6 +149,7 @@ def table(my_dataset, my_object, my_detector, my_adds_th, my_adds_auc_th):
         if os.path.isfile(_filename):
             my_baselines.append(baseline)
             my_files.append(_filename)
+
         else:
             print(_filename)
 
@@ -159,6 +179,11 @@ def plot(my_dataset, my_object, my_detector, my_metric):
 
         if my_object not in ycb_objects:
             print("Error: Specified Object not in the Dataset.")
+            return None
+
+        if my_detector != "point_transformer":
+            print("Error: We only trained Point Transformer on YCB, as PointNet showed "
+                  "suboptimal performance on ShapeNet.")
             return None
 
     else:
@@ -202,7 +227,6 @@ def plot_adds(data):
 
     sns.kdeplot(conca, bw_adjust=0.1, cumulative=True, common_norm=False)
     plt.xlabel('ADD-S')
-
     return None
 
 
