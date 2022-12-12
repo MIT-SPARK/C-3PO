@@ -250,9 +250,6 @@ def evaluate_model(detector_type, class_name, model_id,
 if __name__ == "__main__":
     """
     usage: 
-    >> python evaluate_sim_supervised_model.py "point_transformer" "chair"
-    >> python evaluate_sim_supervised_model.py "pointnet" "chair"
-    
     >> python evaluate_sim_supervised_model.py \
     --detector "pointnet" \
     --object "chair" \

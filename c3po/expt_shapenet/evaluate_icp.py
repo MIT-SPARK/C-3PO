@@ -321,10 +321,6 @@ def evaluate_icp(class_name, model_id, detector_type,
 if __name__ == "__main__":
     """
     usage: 
-    >> python evaluate_icp.py "chair" "teaser" "nc" "point_transformer"
-    >> python evaluate_icp.py "table" "ransac" "c" "pointnet"
-    >> python evaluate_icp.py "table" "none" "nc" "pointnet"
-    
     >> python evaluate_icp.py \
     --object "table" \
     --gr "none" \

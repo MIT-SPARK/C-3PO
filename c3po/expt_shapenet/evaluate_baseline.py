@@ -10,9 +10,6 @@ from c3po.expt_shapenet.train_baseline import evaluate_model
 if __name__ == "__main__":
     """
     usage: 
-    >> python evaluate_baseline.py "point_transformer" "chair"
-    >> python evaluate_baseline.py "pointnet" "chair"
-    
     >> python evaluate_baseline.py \
     --detector "pointnet" \
     --object "chair" \
