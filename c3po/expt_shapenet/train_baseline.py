@@ -3,14 +3,15 @@
 """
 
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torchvision
-import torchvision.transforms as transforms
+# import torch.nn as nn
+# import torch.nn.functional as F
+# import torchvision
+# import torchvision.transforms as transforms
 import yaml
-import argparse
+# import argparse
 import pickle
-from pytorch3d import ops
+from pathlib import Path
+# from pytorch3d import ops
 
 from torch.utils.tensorboard import SummaryWriter
 from datetime import datetime
@@ -20,9 +21,11 @@ import sys
 sys.path.append("../../")
 
 from c3po.datasets.shapenet import DepthPC, CLASS_NAME, FixedDepthPC, CLASS_ID
-from c3po.models.certifiability import confidence, confidence_kp
+# from c3po.models.certifiability import confidence, confidence_kp
+from c3po.datasets.shapenet_eval import ShapeNet
+from c3po.datasets.utils_dataset import toFormat
 
-from c3po.utils.general import TrackingMeter
+# from c3po.utils.general import TrackingMeter
 from c3po.utils.visualization_utils import display_results
 
 from c3po.utils.loss_functions import certify, self_supervised_training_loss \
@@ -177,7 +180,7 @@ def visual_test(test_loader, model, device=None):
 
 def visualize_detector(hyper_param, detector_type, class_id, model_id,
                        evaluate_models=True, use_corrector=False,
-                       visualize_before=True, visualize_after=True, device=None):
+                       visualize_before=True, visualize_after=True, device=None, dataset=None):
     """
 
     """
@@ -197,17 +200,43 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
     # validation dataset:
     eval_dataset_len = hyper_param['eval_dataset_len']
     eval_batch_size = hyper_param['eval_batch_size']
-    eval_dataset = FixedDepthPC(class_id=class_id, model_id=model_id,
-                                n=hyper_param['num_of_points_selfsupervised'],
-                                num_of_points_to_sample=hyper_param['num_of_points_to_sample'],
-                                dataset_len=eval_dataset_len,
-                                rotate_about_z=True)
-    eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=eval_batch_size, shuffle=False)
+
+    if dataset is None or dataset == "shapenet":
+        eval_dataset = FixedDepthPC(class_id=class_id, model_id=model_id,
+                                    n=hyper_param['num_of_points_selfsupervised'],
+                                    num_of_points_to_sample=hyper_param['num_of_points_to_sample'],
+                                    dataset_len=eval_dataset_len,
+                                    rotate_about_z=True)
+        eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=eval_batch_size, shuffle=False)
 
 
-    # model
-    cad_models = eval_dataset._get_cad_models().to(torch.float).to(device=device)
-    model_keypoints = eval_dataset._get_model_keypoints().to(torch.float).to(device=device)
+        # model
+        cad_models = eval_dataset._get_cad_models().to(torch.float).to(device=device)
+        model_keypoints = eval_dataset._get_model_keypoints().to(torch.float).to(device=device)
+        data_type = "shapenet"
+
+    else:
+
+        if dataset not in ["shapenet.sim.easy", "shapenet.sim.hard", "shapener.real.easy", "shapenet.real.hard"]:
+            raise ValueError("dataset not specified correctlry.")
+            # return None
+
+        base_folder = str(Path(__file__).parent.parent.parent) + '/data'
+        dataset_path = base_folder + '/' + dataset + '/' + class_name + ".pkl"
+        type = dataset.split('.')[1]
+        adv_option = dataset.split('.')[2]
+        eval_dataset = ShapeNet(type=type, object=class_name,
+                                length=50, num_points=1024, adv_option=adv_option,
+                                from_file=True,
+                                filename=dataset_path)
+        eval_dataset = toFormat(eval_dataset)
+
+        eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=eval_batch_size, shuffle=False)
+
+        # model
+        cad_models = eval_dataset._get_cad_models().to(torch.float).to(device=device)
+        model_keypoints = eval_dataset._get_model_keypoints().to(torch.float).to(device=device)
+        data_type = dataset
 
     model = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,
                           keypoint_detector=detector_type, correction_flag=use_corrector,
@@ -232,7 +261,7 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
         # evaluate(eval_loader=eval_loader, model=model, hyper_param=hyper_param, certification=True,
         #              device=device)
         evaluate(eval_loader=eval_loader, model=model, hyper_param=hyper_param,
-                 device=device, log_dir=log_dir)
+                 device=device, log_dir=log_dir, data_type=data_type)
 
     # # Visual Test
     if visualize_before:
@@ -262,7 +291,7 @@ def evaluate_model(detector_type, class_name, model_id,
                            visualize=True,
                            use_corrector=False,
                            visualize_before=True,
-                           visualize_after=True):
+                           visualize_after=True, dataset=None):
 
     if not visualize:
         visualize_before, visualize_after \
@@ -285,7 +314,8 @@ def evaluate_model(detector_type, class_name, model_id,
                        evaluate_models=evaluate_models,
                        use_corrector=use_corrector,
                        visualize_before=visualize_before,
-                       visualize_after=visualize_after)
+                       visualize_after=visualize_after,
+                       dataset=dataset)
 
 
 

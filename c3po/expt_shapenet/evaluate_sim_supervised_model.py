@@ -3,10 +3,13 @@ import os
 import sys
 import torch
 import yaml
+from pathlib import Path
 
 sys.path.append('../..')
 
 from c3po.datasets.shapenet import SE3PointCloud, DepthPC, CLASS_NAME, CLASS_ID, FixedDepthPC
+from c3po.datasets.shapenet_eval import ShapeNet
+from c3po.datasets.utils_dataset import toFormat
 from c3po.expt_shapenet.evaluation import evaluate
 from c3po.utils.visualization_utils import display_results
 from c3po.utils.loss_functions import certify
@@ -76,7 +79,7 @@ def visual_test(test_loader, model, hyper_param, device=None):
 def visualize_detector(hyper_param, detector_type, class_id, model_id,
                        evaluate_models=True, models_to_analyze='post',
                        use_corrector=False,
-                       visualize=False, device=None):
+                       visualize=False, device=None, dataset=None):
     """
 
     """
@@ -91,8 +94,6 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
     else:
         return NotImplementedError
 
-
-
     class_name = CLASS_NAME[class_id]
     save_folder = hyper_param['save_folder']
     best_model_save_location = save_folder + class_name + '/' + model_id + '/'
@@ -103,17 +104,44 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
     # validation dataset:
     eval_dataset_len = hyper_param['eval_dataset_len']
     eval_batch_size = hyper_param['eval_batch_size']
-    eval_dataset = FixedDepthPC(class_id=class_id, model_id=model_id,
-                                n=hyper_param['num_of_points_selfsupervised'],
-                                num_of_points_to_sample=hyper_param['num_of_points_to_sample'],
-                                dataset_len=eval_dataset_len,
-                                rotate_about_z=True)
-    eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=eval_batch_size, shuffle=False)
+
+    if dataset is None or dataset == "shapenet":
+
+        eval_dataset = FixedDepthPC(class_id=class_id, model_id=model_id,
+                                    n=hyper_param['num_of_points_selfsupervised'],
+                                    num_of_points_to_sample=hyper_param['num_of_points_to_sample'],
+                                    dataset_len=eval_dataset_len,
+                                    rotate_about_z=True)
+        eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=eval_batch_size, shuffle=False)
 
 
-    # model
-    cad_models = eval_dataset._get_cad_models().to(torch.float).to(device=device)
-    model_keypoints = eval_dataset._get_model_keypoints().to(torch.float).to(device=device)
+        # model
+        cad_models = eval_dataset._get_cad_models().to(torch.float).to(device=device)
+        model_keypoints = eval_dataset._get_model_keypoints().to(torch.float).to(device=device)
+        data_type = "shapenet"
+
+    else:
+
+        if dataset not in ["shapenet.sim.easy", "shapenet.sim.hard", "shapener.real.easy", "shapenet.real.hard"]:
+            raise ValueError("dataset not specified correctlry.")
+            # return None
+
+        base_folder = str(Path(__file__).parent.parent.parent) + '/data'
+        dataset_path = base_folder + '/' + dataset + '/' + class_name + ".pkl"
+        type = dataset.split('.')[1]
+        adv_option = dataset.split('.')[2]
+        eval_dataset = ShapeNet(type=type, object=class_name,
+                                length=50, num_points=1024, adv_option=adv_option,
+                                from_file=True,
+                                filename=dataset_path)
+        eval_dataset = toFormat(eval_dataset)
+
+        eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=eval_batch_size, shuffle=False)
+
+        # model
+        cad_models = eval_dataset._get_cad_models().to(torch.float).to(device=device)
+        model_keypoints = eval_dataset._get_model_keypoints().to(torch.float).to(device=device)
+        data_type = dataset
 
     if pre_:
         model_before = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,
@@ -153,7 +181,7 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
             #          device=device)
             log_dir = "eval/KeyPoSim/" + detector_type
             evaluate(eval_loader=eval_loader, model=model_before, hyper_param=hyper_param,
-                     device=device, log_dir=log_dir)
+                     device=device, log_dir=log_dir, data_type=data_type)
         if post_:
             print(">>" * 40)
             print("(SELF-SUPERVISED) TRAINED MODEL:")
@@ -197,7 +225,7 @@ def evaluate_model(detector_type, class_name, model_id,
                    evaluate_models=True,
                    models_to_analyze='post',
                    visualize=True,
-                   use_corrector=False):
+                   use_corrector=False, dataset=None):
 
     class_id = CLASS_ID[class_name]
 
@@ -215,7 +243,8 @@ def evaluate_model(detector_type, class_name, model_id,
                        hyper_param=hyper_param,
                        evaluate_models=evaluate_models,
                        models_to_analyze=models_to_analyze,
-                       visualize=visualize)
+                       visualize=visualize,
+                       dataset=dataset)
 
 
 if __name__ == "__main__":
@@ -223,18 +252,30 @@ if __name__ == "__main__":
     usage: 
     >> python evaluate_sim_supervised_model.py "point_transformer" "chair"
     >> python evaluate_sim_supervised_model.py "pointnet" "chair"
-
+    
+    >> python evaluate_sim_supervised_model.py \
+    --detector "pointnet" \
+    --object "chair" \
+    --dataset "shapenet"
     """
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("detector_type", help="specify the detector type.", type=str)
-    parser.add_argument("class_name", help="specify the ShapeNet class name.", type=str)
+    parser.add_argument("--detector",
+                        choices=["point_transformer", "pointnet"],
+                        help="specify the detector type.", type=str)
+    parser.add_argument("--object",
+                        help="specify the ShapeNet class name.", type=str)
+    parser.add_argument("--dataset",
+                        choices=["shapenet",
+                                 "shapenet.sim.easy", "shapenet.sim.hard",
+                                 "shapenet.real.easy", "shapenet.real.hard"], type=str)
     # parser.add_argument("models_to_analyze", help="pre/post, for pre-trained or post-training models.", type=str)
 
     args = parser.parse_args()
 
-    detector_type = args.detector_type
-    class_name = args.class_name
+    detector_type = args.detector
+    class_name = args.object
+    dataset = args.dataset
     # models_to_analyze = args.models_to_analyze
     # print("KP detector type: ", args.detector_type)
     # print("CAD Model class: ", args.class_name)
@@ -247,9 +288,9 @@ if __name__ == "__main__":
     else:
         model_id = model_class_ids[class_name]
 
-
     evaluate_model(detector_type=detector_type,
                    class_name=class_name,
                    model_id=model_id,
                    models_to_analyze='pre',
-                   visualize=False, evaluate_models=True, use_corrector=False)
+                   visualize=False, evaluate_models=True, use_corrector=False,
+                   dataset=dataset)

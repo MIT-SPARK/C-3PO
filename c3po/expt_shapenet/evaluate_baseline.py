@@ -12,18 +12,27 @@ if __name__ == "__main__":
     usage: 
     >> python evaluate_baseline.py "point_transformer" "chair"
     >> python evaluate_baseline.py "pointnet" "chair"
-
+    
+    >> python evaluate_baseline.py \
+    --detector "pointnet" \
+    --object "chair" \
+    --dataset "shapenet.sim.real" 
     """
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("detector_type", help="specify the detector type.", type=str)
-    parser.add_argument("class_name", help="specify the ShapeNet class name.", type=str)
+    parser.add_argument("--detector", help="specify the detector type.", type=str)
+    parser.add_argument("--object", help="specify the ShapeNet class name.", type=str)
+    parser.add_argument("--dataset",
+                        choices=["shapenet",
+                                 "shapenet.sim.easy", "shapenet.sim.hard",
+                                 "shapenet.real.easy", "shapenet.real.hard"], type=str)
     # parser.add_argument("models_to_analyze", help="pre/post, for pre-trained or post-training models.", type=str)
 
     args = parser.parse_args()
 
-    detector_type = args.detector_type
-    class_name = args.class_name
+    detector_type = args.detector
+    class_name = args.object
+    dataset = args.dataset
     # models_to_analyze = args.models_to_analyze
     # print("KP detector type: ", args.detector_type)
     # print("CAD Model class: ", args.class_name)
@@ -42,4 +51,5 @@ if __name__ == "__main__":
                    visualize=True, evaluate_models=True,
                    use_corrector=False,
                    visualize_before=False,
-                   visualize_after=False)
+                   visualize_after=False,
+                   dataset=dataset)

@@ -2,6 +2,7 @@ import argparse
 import os
 import sys
 
+from pathlib import Path
 import numpy as np
 import torch
 import yaml
@@ -10,6 +11,8 @@ from torch.utils.tensorboard import SummaryWriter
 sys.path.append('../..')
 
 from c3po.datasets.shapenet import CLASS_NAME, CLASS_ID, FixedDepthPC
+from c3po.datasets.shapenet_eval import ShapeNet
+from c3po.datasets.utils_dataset import toFormat
 from c3po.utils.loss_functions import certify
 from c3po.utils.evaluation_metrics import evaluation_error, add_s_error
 from c3po.utils.evaluation_metrics import adds_error, rotation_error, translation_error, EvalData
@@ -19,7 +22,7 @@ from c3po.expt_shapenet.proposed_model import ProposedRegressionModel as Propose
 
 
 def eval_icp(class_id, model_id, detector_type, hyper_param, global_registration='ransac',
-             use_corrector=False, certification=True, visualize=False, log_dir="runs", new_eval=True):
+             use_corrector=False, certification=True, visualize=False, log_dir="runs", new_eval=True, dataset=None):
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -31,18 +34,46 @@ def eval_icp(class_id, model_id, detector_type, hyper_param, global_registration
     # define dataset and dataloader
     eval_dataset_len = hyper_param['eval_dataset_len']
     eval_batch_size = hyper_param['eval_batch_size']
-    eval_dataset = FixedDepthPC(class_id=class_id, model_id=model_id,
-                                n=hyper_param['num_of_points_selfsupervised'],
-                                num_of_points_to_sample=hyper_param['num_of_points_to_sample'],
-                                dataset_len=eval_dataset_len,
-                                rotate_about_z=True)
-    eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=eval_batch_size, shuffle=False)
-    data_type = "shapenet"
-    object_name = class_name
 
-    # get cad models
-    cad_models = eval_dataset._get_cad_models().to(torch.float).to(device=device)
-    model_keypoints = eval_dataset._get_model_keypoints().to(torch.float).to(device=device)
+    if dataset is None or dataset == "shapenet":
+
+        eval_dataset = FixedDepthPC(class_id=class_id, model_id=model_id,
+                                    n=hyper_param['num_of_points_selfsupervised'],
+                                    num_of_points_to_sample=hyper_param['num_of_points_to_sample'],
+                                    dataset_len=eval_dataset_len,
+                                    rotate_about_z=True)
+        eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=eval_batch_size, shuffle=False)
+        data_type = "shapenet"
+        object_name = class_name
+
+        # get cad models
+        cad_models = eval_dataset._get_cad_models().to(torch.float).to(device=device)
+        model_keypoints = eval_dataset._get_model_keypoints().to(torch.float).to(device=device)
+        data_type = "shapenet"
+
+    else:
+
+        if dataset not in ["shapenet.sim.easy", "shapenet.sim.hard", "shapener.real.easy", "shapenet.real.hard"]:
+            raise ValueError("dataset not specified correctlry.")
+            # return None
+
+        base_folder = str(Path(__file__).parent.parent.parent) + '/data'
+        dataset_path = base_folder + '/' + dataset + '/' + class_name + ".pkl"
+        type = dataset.split('.')[1]
+        adv_option = dataset.split('.')[2]
+        eval_dataset = ShapeNet(type=type, object=class_name,
+                                length=50, num_points=1024, adv_option=adv_option,
+                                from_file=True,
+                                filename=dataset_path)
+        eval_dataset = toFormat(eval_dataset)
+
+        eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=eval_batch_size, shuffle=False)
+
+        # model
+        cad_models = eval_dataset._get_cad_models().to(torch.float).to(device=device)
+        model_keypoints = eval_dataset._get_model_keypoints().to(torch.float).to(device=device)
+        data_type = dataset
+        object_name = class_name
 
     # initialize the ICP model with the cad_models
     if global_registration == 'ransac':
@@ -91,6 +122,7 @@ def eval_icp(class_id, model_id, detector_type, hyper_param, global_registration
 
         if new_eval:
 
+            # breakpoint()
             log_dir = log_dir + '/' + detector_type + '/' + data_type + '/' + object_name
             writer = SummaryWriter(log_dir)
 
@@ -135,6 +167,7 @@ def eval_icp(class_id, model_id, detector_type, hyper_param, global_registration
                 rerr_list = [*rerr_list, *rerr_x]
                 terr_list = [*terr_list, *terr_x]
 
+            # breakpoint()
             eval_data = EvalData()
             eval_data.set_adds(np.asarray(adds_list))
             eval_data.set_rerr(np.asarray(rerr_list))
@@ -260,7 +293,7 @@ def eval_icp(class_id, model_id, detector_type, hyper_param, global_registration
 
 def evaluate_icp(class_name, model_id, detector_type,
                  global_registration='ransac', use_corrector=False,
-                 visualize=False, log_dir="runs"):
+                 visualize=False, log_dir="runs", dataset=None):
 
     class_id = CLASS_ID[class_name]
     hyper_param_file = "../expt_shapenet/self_supervised_training.yml"
@@ -279,7 +312,8 @@ def evaluate_icp(class_name, model_id, detector_type,
              global_registration=global_registration,
              use_corrector=use_corrector,
              visualize=visualize,
-             log_dir=log_dir)
+             log_dir=log_dir,
+             dataset=dataset)
 
     return None
 
@@ -290,23 +324,34 @@ if __name__ == "__main__":
     >> python evaluate_icp.py "chair" "teaser" "nc" "point_transformer"
     >> python evaluate_icp.py "table" "ransac" "c" "pointnet"
     >> python evaluate_icp.py "table" "none" "nc" "pointnet"
-
+    
+    >> python evaluate_icp.py \
+    --object "table" \
+    --gr "none" \
+    --c "nc" \
+    --detector "pointnet" \
+    --dataset "shapenet.sim.easy"
+    
     """
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("class_name", help="specify the ShapeNet class name.", type=str)
-    parser.add_argument("global_registration", help="either ransac or teaser or none", type=str)
-    parser.add_argument("corrector_flag", help="c for corrector, nc for no corrector", type=str)
-    parser.add_argument("detector", choices=["pointnet", "point_transformer"], type=str)
+    parser.add_argument("--object", help="specify the ShapeNet class name.", type=str)
+    parser.add_argument("--gr", choices=["ransac", "teaser", "none"], help="global registration", type=str)
+    parser.add_argument("--c", choices=["c", "nc"], help="c for corrector, nc for no corrector", type=str)
+    parser.add_argument("--detector", choices=["pointnet", "point_transformer"], type=str)
+    parser.add_argument("--dataset", choices=["shapenet",
+                                              "shapenet.sim.easy", "shapenet.sim.hard",
+                                              "shapenet.real.easy", "shapenet.real.hard"],
+                        default="shapenet", type=str)
 
     args = parser.parse_args()
 
     # class name: object category in shapenet
-    class_name = args.class_name
+    class_name = args.object
     # global_registration: ransac, teaser, or none which uses registration output assuming all the detected keypoints
-    global_registration = args.global_registration
+    global_registration = args.gr
     # correction flag: c = uses the corrector, nc = does not use the corrector, in the forward pass
-    corrector_flag = args.corrector_flag
+    corrector_flag = args.c
     if corrector_flag == 'c':
         use_corrector = True
     elif corrector_flag == 'nc':
@@ -315,6 +360,7 @@ if __name__ == "__main__":
         raise Exception("CORRECTOR FLAG INPUT INCORRECT.")
 
     detector_type = args.detector
+    dataset = args.dataset
 
     only_categories = [class_name]
 
@@ -325,17 +371,17 @@ if __name__ == "__main__":
     else:
         model_id = model_class_ids[class_name]
 
-    if args.corrector_flag == "nc":
-        if args.global_registration == "none":
+    if corrector_flag == "nc":
+        if global_registration == "none":
             log_dir = "eval/KeyPoSimICP"
-        elif args.global_registration == "ransac":
+        elif global_registration == "ransac":
             log_dir = "eval/KeyPoSimRANSACICP"
         else:
             log_dir = "runs"
-    elif args.corrector_flag == "c":
-        if args.global_registration == "none":
+    elif corrector_flag == "c":
+        if global_registration == "none":
             log_dir = "eval/KeyPoSimCorICP"
-        elif args.global_registration == "ransac":
+        elif global_registration == "ransac":
             log_dir = "eval/KeyPoSimCorRANSACICP"
         else:
             log_dir = "runs"
@@ -343,10 +389,12 @@ if __name__ == "__main__":
     else:
         raise ValueError("corrector flag, incorrectly specified.")
 
+    # breakpoint()
     evaluate_icp(class_name=class_name,
                  model_id=model_id,
                  detector_type=detector_type,
                  global_registration=global_registration,
                  use_corrector=use_corrector,
                  visualize=False,
-                 log_dir=log_dir)
+                 log_dir=log_dir,
+                 dataset=dataset)
