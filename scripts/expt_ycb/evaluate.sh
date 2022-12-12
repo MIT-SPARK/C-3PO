@@ -7,11 +7,11 @@ YCB_OBJECTS="001_chips_can 002_master_chef_can 003_cracker_box 004_sugar_box 005
 007_tuna_fish_can 008_pudding_box 009_gelatin_box 010_potted_meat_can 011_banana 019_pitcher_base 021_bleach_cleanser \
 035_power_drill 036_wood_block 037_scissors 051_large_clamp 052_extra_large_clamp 061_foam_brick"
 
-DATASES="ycb.real"
-DETECTOR_TYPE="point_transformer"
-SHAPENET_OBJECTS="008_pudding_box"
+#DATASETS="ycb.real"
+#DETECTOR_TYPE="point_transformer"
+#YCB_OBJECTS="008_pudding_box"
 
-for dset in $DATASES
+for dset in $DATASETS
 do
   echo $dset
   for detector in $DETECTOR_TYPE
@@ -20,7 +20,7 @@ do
     echo $detector
 
     # KeyPoSim
-    for object in $SHAPENET_OBJECTS
+    for object in $YCB_OBJECTS
     do
       echo $object
       python evaluate_sim_supervised_model.py \
@@ -31,7 +31,7 @@ do
     echo "--------------------------------------------------------------------------"
 
     # KeyPoSimICP
-    for object in $SHAPENET_OBJECTS
+    for object in $YCB_OBJECTS
     do
       echo $object
       python evaluate_icp.py \
@@ -44,7 +44,7 @@ do
     echo "--------------------------------------------------------------------------"
 
     # KeyPoSimRANSACICP
-    for object in $SHAPENET_OBJECTS
+    for object in $YCB_OBJECTS
     do
       echo $object
       python evaluate_icp.py \
@@ -57,7 +57,7 @@ do
     echo "--------------------------------------------------------------------------"
 
     # KeyPoSimCor
-    for object in $SHAPENET_OBJECTS
+    for object in $YCB_OBJECTS
     do
       echo $object
       python evaluate_proposed_model.py \
@@ -69,7 +69,7 @@ do
     echo "--------------------------------------------------------------------------"
 
     # KeyPoSimCorICP
-    for object in $SHAPENET_OBJECTS
+    for object in $YCB_OBJECTS
     do
       echo $object
       python evaluate_icp.py \
@@ -82,7 +82,7 @@ do
     echo "--------------------------------------------------------------------------"
 
     # KeyPoSimCorRANSACICP
-    for object in $SHAPENET_OBJECTS
+    for object in $YCB_OBJECTS
     do
       echo $object
       python evaluate_icp.py \
@@ -95,7 +95,7 @@ do
     echo "--------------------------------------------------------------------------"
 
     # c3po
-    for object in $SHAPENET_OBJECTS
+    for object in $YCB_OBJECTS
     do
       echo $object
       python evaluate_proposed_model.py \
@@ -107,7 +107,7 @@ do
     echo "--------------------------------------------------------------------------"
 
     # KeyPoReal
-    for object in $SHAPENET_OBJECTS
+    for object in $YCB_OBJECTS
     do
       echo $object
       python evaluate_baseline.py \
