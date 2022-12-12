@@ -20,7 +20,7 @@ from c3po.datasets.shapenet import MODEL_TO_KPT_GROUPS as MODEL_TO_KPT_GROUPS_SH
 
 
 def evaluate(eval_loader, model, hyper_param, certification=True, degeneracy=False,
-             device=None, normalize_adds=False, log_dir="runs/", new_eval=True):
+             device=None, normalize_adds=False, log_dir="runs/", new_eval=True, data_type=None):
     model.eval()
 
     if device==None:
@@ -28,13 +28,15 @@ def evaluate(eval_loader, model, hyper_param, certification=True, degeneracy=Fal
 
     if "model_id" in model.__dict__.keys():
         if model.model_id in YCB_OBJECTS:
-            data_type = "ycb"
+            if data_type is None:
+                data_type = "ycb"
             object_name = model.model_id
         else:
             raise ValueError("model_id not correct.")
     elif "class_name" in model.__dict__.keys():
         if model.class_name in SHAPENET_OBJECTS:
-            data_type = "shapenet"
+            if data_type is None:
+                data_type = "shapenet"
             object_name = model.class_name
         else:
             raise ValueError("class_name not correct.")
@@ -115,12 +117,12 @@ def evaluate(eval_loader, model, hyper_param, certification=True, degeneracy=Fal
 
                 # if degeneracy:
                 # if ycb
-                if data_type == "ycb":
+                if "ycb" in data_type:
                     nondeg = is_pcd_nondegenerate(model.model_id, input_point_cloud, predicted_keypoints,
                                                   MODEL_TO_KPT_GROUPS_YCB)
                     # deg = nondeg < 1
                 # if shapenet
-                elif data_type == "shapenet":
+                elif "shapenet" in data_type:
                     nondeg = is_pcd_nondegenerate(model.class_name, input_point_cloud, predicted_model_keypoints,
                                                   MODEL_TO_KPT_GROUPS_SHAPENET)
                     # deg = nondeg < 1
@@ -133,6 +135,8 @@ def evaluate(eval_loader, model, hyper_param, certification=True, degeneracy=Fal
                 T_gt[:, :3, 3:] = t_target
                 T_est[:, :3, :3] = R_predicted
                 T_est[:, :3, 3:] = t_predicted
+
+                # breakpoint()
 
                 adds_ = adds_error(model.cad_models, T_gt, T_est)
                 rerr_ = rotation_error(R_predicted, R_target)

@@ -4,19 +4,19 @@ It uses registration during supervised training. It uses registration plus corre
 
 """
 
-import argparse
+# import argparse
 import numpy as np
 import os
 import pickle
 import sys
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torchvision
-import torchvision.transforms as transforms
+# import torch.nn as nn
+# import torch.nn.functional as F
+# import torchvision
+# import torchvision.transforms as transforms
 import yaml
 from datetime import datetime
-from pytorch3d import ops
+# from pytorch3d import ops
 from torch.utils.tensorboard import SummaryWriter
 
 sys.path.append("../../")
@@ -24,7 +24,9 @@ sys.path.append("../../")
 # model and datasets
 from c3po.expt_ycb.proposed_model import ProposedRegressionModel as ProposedModel
 from c3po.datasets.ycb import DepthYCB, DepthYCBAugment, MODEL_TO_KPT_GROUPS as MODEL_TO_KPT_GROUPS_YCB
-from c3po.models.certifiability import confidence, confidence_kp
+from c3po.datasets.ycb_eval import YCB
+from c3po.datasets.utils_dataset import toFormat
+# from c3po.models.certifiability import confidence, confidence_kp
 
 from c3po.utils.general import TrackingMeter
 from c3po.utils.visualization_utils import display_results, temp_expt_1_viz, viz_rgb_pcd
@@ -354,13 +356,15 @@ def visual_test(test_loader, model, device=None, hyper_param=None, degeneracy_ev
         if i >= 20:
             break
 
+
 def evaluate_model(detector_type, model_id,
                    evaluate_models=True,
                    visualize=True,
                    use_corrector=True,
                    models_to_analyze='post',
                    degeneracy_eval=False,
-                   average_metrics=False):
+                   average_metrics=False,
+                   dataset=None):
     if models_to_analyze == 'pre':
         evaluate_pretrained = True
         evaluate_trained = False
@@ -410,17 +414,31 @@ def evaluate_model(detector_type, model_id,
 
     # Evaluation
     # test dataset:
-    eval_dataset = DepthYCB(model_id=model_id,
-                            split='test',
-                            only_load_nondegenerate_pcds= hyper_param['only_load_nondegenerate_pcds'],
-                            num_of_points=hyper_param['num_of_points_to_sample'])
-    eval_batch_size = len(eval_dataset) if hyper_param['only_load_nondegenerate_pcds'] else hyper_param['eval_batch_size'][model_id]
+    if dataset is None or dataset == "ycb":
+        eval_dataset = DepthYCB(model_id=model_id,
+                                split='test',
+                                only_load_nondegenerate_pcds= hyper_param['only_load_nondegenerate_pcds'],
+                                num_of_points=hyper_param['num_of_points_to_sample'])
+        eval_batch_size = len(eval_dataset) if hyper_param['only_load_nondegenerate_pcds'] else hyper_param['eval_batch_size'][model_id]
 
-    eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=eval_batch_size, shuffle=False, pin_memory=True)
+        eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=eval_batch_size, shuffle=False, pin_memory=True)
+        data_type = "ycb"
+    else:
 
+        type = dataset.split('.')[1]
+        eval_dataset = YCB(type=type, object=model_id, length=50, num_points=1024, split="test")
+        eval_dataset = toFormat(eval_dataset)
+
+        eval_batch_size = len(eval_dataset) if hyper_param['only_load_nondegenerate_pcds'] else \
+        hyper_param['eval_batch_size'][model_id]
+
+        eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=eval_batch_size, shuffle=False,
+                                                  pin_memory=True)
+        data_type = dataset
 
     # model
     cad_models = eval_dataset._get_cad_models().to(torch.float).to(device=device)
+    # breakpoint()
     model_keypoints = eval_dataset._get_model_keypoints().to(torch.float).to(device=device)
 
     model = ProposedModel(model_id=model_id, model_keypoints=model_keypoints, cad_models=cad_models,
@@ -455,7 +473,7 @@ def evaluate_model(detector_type, model_id,
         # eval_metrics = evaluate(eval_loader=eval_loader, model=model, hyper_param=hyper_param, certification=True,
         #          device=device, normalize_adds=False, degeneracy=degeneracy_eval)
         evaluate(eval_loader=eval_loader, model=model, hyper_param=hyper_param,
-                 device=device, log_dir=log_dir)
+                 device=device, log_dir=log_dir, data_type=data_type)
     # # Visual Test
     dataset_batch_size = 1
     dataset = DepthYCB(model_id=model_id,

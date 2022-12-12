@@ -98,7 +98,7 @@ def extract_data(my_files, my_labels, my_adds_th=0.02, my_adds_auc_th=0.05):
         labels.append(label)
 
         if label == "c3po":
-            
+
             eval_data_oc = eval_data.compute_oc()
             eval_data_oc_nd = eval_data.compute_ocnd()
             label_oc = label + " (oc)"

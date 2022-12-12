@@ -237,6 +237,7 @@ def adds_error(templet_pc, T1, T2):
     Returns:
 
     """
+    # breakpoint()
     if len(templet_pc.shape) == 2:
         templet_pc = templet_pc.unsqueeze(0)
         T1 = T1.unsqueeze(0)

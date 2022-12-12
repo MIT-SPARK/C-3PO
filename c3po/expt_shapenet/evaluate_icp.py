@@ -287,9 +287,9 @@ def evaluate_icp(class_name, model_id, detector_type,
 if __name__ == "__main__":
     """
     usage: 
-    >> python evaluate_icp.py "chair" "teaser" "nc"
-    >> python evaluate_icp.py "table" "ransac" "c"
-    >> python evaluate_icp.py "table" "none" "nc"
+    >> python evaluate_icp.py "chair" "teaser" "nc" "point_transformer"
+    >> python evaluate_icp.py "table" "ransac" "c" "pointnet"
+    >> python evaluate_icp.py "table" "none" "nc" "pointnet"
 
     """
 
@@ -297,6 +297,7 @@ if __name__ == "__main__":
     parser.add_argument("class_name", help="specify the ShapeNet class name.", type=str)
     parser.add_argument("global_registration", help="either ransac or teaser or none", type=str)
     parser.add_argument("corrector_flag", help="c for corrector, nc for no corrector", type=str)
+    parser.add_argument("detector", choices=["pointnet", "point_transformer"], type=str)
 
     args = parser.parse_args()
 
@@ -312,6 +313,8 @@ if __name__ == "__main__":
         use_corrector = False
     else:
         raise Exception("CORRECTOR FLAG INPUT INCORRECT.")
+
+    detector_type = args.detector
 
     only_categories = [class_name]
 
@@ -342,7 +345,7 @@ if __name__ == "__main__":
 
     evaluate_icp(class_name=class_name,
                  model_id=model_id,
-                 detector_type='point_transformer',
+                 detector_type=detector_type,
                  global_registration=global_registration,
                  use_corrector=use_corrector,
                  visualize=False,
