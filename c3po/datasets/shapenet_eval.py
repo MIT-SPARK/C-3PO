@@ -521,28 +521,28 @@ class ShapeNet(torch.utils.data.Dataset):
             with open(self.filename, 'rb') as f:
                 self.data_ = pickle.load(f)
 
+        # else:
+        if self.type == 'real':
+
+            self.ds_ = DepthPC(class_name=self.class_name,
+                               dataset_len=self.length,
+                               num_of_points=self.num_points)
+
+        elif self.type == 'sim':
+            self.ds_ = SE3PointCloud(class_name=self.class_name,
+                                     dataset_len=self.length,
+                                     num_of_points=self.num_points)
         else:
-            if self.type == 'real':
+            raise ValueError
 
-                self.ds_ = DepthPC(class_name=self.class_name,
-                                   dataset_len=self.length,
-                                   num_of_points=self.num_points)
-
-            elif self.type == 'sim':
-                self.ds_ = SE3PointCloud(class_name=self.class_name,
-                                         dataset_len=self.length,
-                                         num_of_points=self.num_points)
-            else:
-                raise ValueError
-
-            if self.adv_option == 'hard':
-                self.ds = self.ds_
-            elif self.adv_option == 'easy':
-                self.ds = PointRegistrationEasy(self.ds_)
-            elif self.adv_option == 'medium':
-                self.ds = PointRegistrationMedium(self.ds_)
-            else:
-                raise ValueError
+        if self.adv_option == 'hard':
+            self.ds = self.ds_
+        elif self.adv_option == 'easy':
+            self.ds = PointRegistrationEasy(self.ds_)
+        elif self.adv_option == 'medium':
+            self.ds = PointRegistrationMedium(self.ds_)
+        else:
+            raise ValueError
 
     def __len__(self):
         return self.ds.__len__()

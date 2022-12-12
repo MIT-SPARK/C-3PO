@@ -18,8 +18,10 @@ from torch.utils.tensorboard import SummaryWriter
 sys.path.append("../../")
 
 from c3po.datasets.ycb import DepthYCB
-from c3po.models.certifiability import confidence, confidence_kp
-from c3po.utils.general import TrackingMeter
+from c3po.datasets.ycb_eval import YCB
+from c3po.datasets.utils_dataset import toFormat
+# from c3po.models.certifiability import confidence, confidence_kp
+# from c3po.utils.general import TrackingMeter
 from c3po.utils.visualization_utils import display_results
 from c3po.utils.loss_functions import certify, self_supervised_training_loss \
     as self_supervised_loss, self_supervised_validation_loss as validation_loss
@@ -83,7 +85,7 @@ def visual_test(test_loader, model, device=None, hyper_param=None):
 
 def visualize_detector(hyper_param, detector_type, model_id,
                        evaluate_models=True, use_corrector=False,
-                       visualize_before=True, visualize_after=True, device=None):
+                       visualize_before=True, visualize_after=True, device=None, dataset=None):
     """
 
     """
@@ -98,14 +100,28 @@ def visualize_detector(hyper_param, detector_type, model_id,
     # Evaluation
     # validation dataset:
     eval_batch_size = hyper_param['eval_batch_size'][model_id]
-    eval_dataset = DepthYCB(model_id=model_id,
-                            split='test',
-                            only_load_nondegenerate_pcds= hyper_param['only_load_nondegenerate_pcds'],
-                            num_of_points=hyper_param['num_of_points_to_sample'])
-    eval_batch_size = len(eval_dataset) if hyper_param['only_load_nondegenerate_pcds'] else hyper_param['eval_batch_size'][model_id]
 
-    eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=eval_batch_size, shuffle=False)
+    if dataset is None or dataset == "ycb":
+        eval_dataset = DepthYCB(model_id=model_id,
+                                split='test',
+                                only_load_nondegenerate_pcds= hyper_param['only_load_nondegenerate_pcds'],
+                                num_of_points=hyper_param['num_of_points_to_sample'])
+        eval_batch_size = len(eval_dataset) if hyper_param['only_load_nondegenerate_pcds'] else hyper_param['eval_batch_size'][model_id]
 
+        eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=eval_batch_size, shuffle=False)
+        data_type = "ycb"
+    else:
+
+        type = dataset.split('.')[1]
+        eval_dataset = YCB(type=type, object=model_id, length=50, num_points=1024, split="test")
+        eval_dataset = toFormat(eval_dataset)
+
+        eval_batch_size = len(eval_dataset) if hyper_param['only_load_nondegenerate_pcds'] else \
+            hyper_param['eval_batch_size'][model_id]
+
+        eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=eval_batch_size, shuffle=False,
+                                                  pin_memory=True)
+        data_type = dataset
 
     # model
     cad_models = eval_dataset._get_cad_models().to(torch.float).to(device=device)
@@ -134,7 +150,7 @@ def visualize_detector(hyper_param, detector_type, model_id,
         # evaluate(eval_loader=eval_loader, model=model, hyper_param=hyper_param, certification=True,
         #              device=device)
         evaluate(eval_loader=eval_loader, model=model, hyper_param=hyper_param,
-                 device=device, log_dir=log_dir)
+                 device=device, log_dir=log_dir, data_type=data_type)
 
     # # Visual Test
     if visualize_before:
@@ -159,7 +175,7 @@ def evaluate_model(detector_type, model_ids, only_models=None,
                            visualize=True,
                            use_corrector=False,
                            visualize_before=True,
-                           visualize_after=True):
+                           visualize_after=True, dataset=None):
 
     if not visualize:
         visualize_before, visualize_after \
@@ -181,34 +197,42 @@ def evaluate_model(detector_type, model_ids, only_models=None,
                                evaluate_models=evaluate_models,
                                use_corrector=use_corrector,
                                visualize_before=visualize_before,
-                               visualize_after=visualize_after)
+                               visualize_after=visualize_after,
+                               dataset=dataset)
 
 
 if __name__ == "__main__":
 
     """
     usage: 
-    >> python evaluate_baseline.py "point_transformer" "chair"
-    >> python evaluate_baseline.py "pointnet" "chair"
+    >> python evaluate_baseline.py \
+    --detector "point_transformer" \
+    --object "001_chips_can" \
+    --dataset "ycb.real" 
+    
     """
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("detector_type", help="specify the detector type.", type=str)
-    parser.add_argument("model_id", help="specify the ycb model id.", type=str)
+    parser.add_argument("--detector", help="specify the detector type.", type=str)
+    parser.add_argument("--object", help="specify the ycb model id.", type=str)
+    parser.add_argument("--dataset",
+                        choices=["ycb", "ycb.sim", "ycb.real"], type=str)
 
     args = parser.parse_args()
 
     # print("KP detector type: ", args.detector_type)
     # print("CAD Model class: ", args.model_id)
-    detector_type = args.detector_type
-    model_id = args.model_id
+    detector_type = args.detector
+    model_id = args.object
+    dataset = args.dataset
+
     only_models = [model_id]
 
     stream = open("model_ids.yml", "r")
     model_ids = yaml.load(stream=stream, Loader=yaml.Loader)['model_ids']
 
     evaluate_model(detector_type=detector_type, model_ids=model_ids, use_corrector=False, only_models=only_models,
-                   visualize=False)
+                   visualize=False, dataset=dataset)
 
 
 

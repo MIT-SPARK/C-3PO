@@ -432,7 +432,7 @@ def evaluate_model(detector_type, model_id,
         eval_batch_size = len(eval_dataset) if hyper_param['only_load_nondegenerate_pcds'] else \
         hyper_param['eval_batch_size'][model_id]
 
-        eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=eval_batch_size, shuffle=False,
+        eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=50, shuffle=False,
                                                   pin_memory=True)
         data_type = dataset
 

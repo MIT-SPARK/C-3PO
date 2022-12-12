@@ -12,6 +12,8 @@ from c3po.utils.visualization_utils import display_two_pcs
 from c3po.expt_ycb.self_supervised_training import evaluate_model
 from c3po.expt_ycb.proposed_model import ProposedRegressionModel as ProposedModel
 from c3po.datasets.ycb import DepthYCB
+from c3po.datasets.ycb_eval import YCB
+from c3po.datasets.utils_dataset import toFormat
 from c3po.expt_shapenet.evaluation import evaluate
 from c3po.expt_shapenet.self_supervised_training import visual_test
 
@@ -22,7 +24,9 @@ def evaluate_model(detector_type, model_id,
                    use_corrector=True,
                    models_to_analyze='post',
                    degeneracy_eval=False,
-                   average_metrics=False):
+                   average_metrics=False,
+                   dataset=None):
+
     if models_to_analyze == 'pre':
         evaluate_pretrained = True
         evaluate_trained = False
@@ -72,14 +76,27 @@ def evaluate_model(detector_type, model_id,
 
     # Evaluation
     # test dataset:
-    eval_dataset = DepthYCB(model_id=model_id,
-                            split='test',
-                            only_load_nondegenerate_pcds= hyper_param['only_load_nondegenerate_pcds'],
-                            num_of_points=hyper_param['num_of_points_to_sample'])
-    eval_batch_size = len(eval_dataset) if hyper_param['only_load_nondegenerate_pcds'] else hyper_param['eval_batch_size'][model_id]
+    if dataset is None or dataset == "ycb":
+        eval_dataset = DepthYCB(model_id=model_id,
+                                split='test',
+                                only_load_nondegenerate_pcds= hyper_param['only_load_nondegenerate_pcds'],
+                                num_of_points=hyper_param['num_of_points_to_sample'])
+        eval_batch_size = len(eval_dataset) if hyper_param['only_load_nondegenerate_pcds'] else hyper_param['eval_batch_size'][model_id]
 
-    eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=eval_batch_size, shuffle=False, pin_memory=True)
+        eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=eval_batch_size, shuffle=False, pin_memory=True)
+        data_type = "ycb"
+    else:
 
+        type = dataset.split('.')[1]
+        eval_dataset = YCB(type=type, object=model_id, length=50, num_points=1024, split="test")
+        eval_dataset = toFormat(eval_dataset)
+
+        eval_batch_size = len(eval_dataset) if hyper_param['only_load_nondegenerate_pcds'] else \
+            hyper_param['eval_batch_size'][model_id]
+
+        eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=eval_batch_size, shuffle=False,
+                                                  pin_memory=True)
+        data_type = dataset
 
     # model
     cad_models = eval_dataset._get_cad_models().to(torch.float).to(device=device)
@@ -118,7 +135,7 @@ def evaluate_model(detector_type, model_id,
         # eval_metrics = evaluate(eval_loader=eval_loader, model=model, hyper_param=hyper_param, certification=True,
         #          device=device, normalize_adds=False, degeneracy=degeneracy_eval)
         evaluate(eval_loader=eval_loader, model=model, hyper_param=hyper_param,
-                 device=device, log_dir=log_dir)
+                 device=device, log_dir=log_dir, data_type=data_type)
     # # Visual Test
     dataset_batch_size = 1
     dataset = DepthYCB(model_id=model_id,
@@ -155,22 +172,26 @@ def evaluate_model(detector_type, model_id,
 if __name__ == "__main__":
 
     """
-    usage: 
-    >> python evaluate_sim_supervised_model.py "point_transformer" "021_bleach_cleanser"
-    >> python evaluate_sim_supervised_model.py "point_transformer" "021_bleach_cleanser"
+    usage:  
+    >> python evaluate_sim_supervised_model.py \
+    --detector "point_transformer" \
+    --object "021_bleach_cleanser" \
+    --dataset "ycb.real" 
 
     """
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("detector_type", help="specify the detector type.", type=str)
-    parser.add_argument("model_id", help="specify the ycb model id.", type=str)
+    parser.add_argument("--detector", help="specify the detector type.", type=str)
+    parser.add_argument("--object", help="specify the ycb model id.", type=str)
+    parser.add_argument("--dataset", choices=["ycb", "ycb.sim", "ycb.real"], type=str)
 
     args = parser.parse_args()
 
-    print("KP detector type: ", args.detector_type)
-    print("CAD Model class: ", args.model_id)
-    detector_type = args.detector_type
-    model_id = args.model_id
+    print("KP detector type: ", args.detector)
+    print("CAD Model class: ", args.object)
+    detector_type = args.detector
+    model_id = args.object
+    dataset = args.dataset
 
     # keeping for code monkey param happiness
     with open("model_ids.yml", 'r') as stream:
@@ -185,4 +206,5 @@ if __name__ == "__main__":
                    use_corrector=False,
                    models_to_analyze="pre",
                    degeneracy_eval=False,
-                   average_metrics=False)
+                   average_metrics=False,
+                   dataset=dataset)

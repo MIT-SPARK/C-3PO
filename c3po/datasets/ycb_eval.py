@@ -329,7 +329,7 @@ class DepthYCB(torch.utils.data.Dataset):
             print("ONLY LOADING NONDEGENERATE VIEWPOINTS USING KEYPOINT GROUPS")
             self.filter_degenerate(MODEL_TO_KPT_GROUPS)
 
-        print("dataset len", self.len)
+        # print("dataset len", self.len)
 
     def filter_degenerate(self, model_to_groups):
         """
@@ -501,7 +501,7 @@ class DepthYCBAugment(torch.utils.data.Dataset):
         else:
             self.split_filenames = np.load(self.pcd_data_root + split + '_split.npy')
         self.len = self.split_filenames.shape[0]
-        print("dataset len", self.len)
+        # print("dataset len", self.len)
 
         # get model
         self.model_mesh, _, self.keypoints_xyz = get_model_and_keypoints(model_id)
@@ -624,7 +624,7 @@ class MixedDepthYCBAugment(torch.utils.data.Dataset):
             self.pcd_data_root = os.path.join(DATASET_PATH + model_id, "clouds/data_augmentation/")
         self.split_filenames = np.load(self.pcd_data_root + split + '_split.npy')
         self.len = self.split_filenames.shape[0]
-        print("dataset len", self.len)
+        # print("dataset len", self.len)
 
         # get model
         self.model_mesh, _, self.keypoints_xyz = get_model_and_keypoints(model_id)
@@ -807,7 +807,8 @@ class YCB(torch.utils.data.Dataset):
                 raise ValueError
 
     def __len__(self):
-        return self.ds.__len__()
+        # return self.ds.__len__()
+        return self.length
 
     def __getitem__(self, item):
 

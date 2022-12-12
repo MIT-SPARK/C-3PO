@@ -327,7 +327,7 @@ class TransitionDown(nn.Module):
             y = torch.max(features, dim=2)[0]  # y: (B, M, out_channels)
         else:
             # 3a: Local Mean Pooling
-            print("running ycb experiment")
+            # print("running ycb experiment")
             y = torch.mean(features, dim=2)  # y: (B, M, out_channels)
 
         return y, p_out

@@ -168,7 +168,7 @@ def evaluate(eval_loader, model, hyper_param, certification=True, degeneracy=Fal
 
         else:
             for i, vdata in enumerate(eval_loader):
-                breakpoint()
+                # breakpoint()
                 input_point_cloud, keypoints_target, R_target, t_target = vdata
                 input_point_cloud = input_point_cloud.to(device)
                 keypoints_target = keypoints_target.to(device)

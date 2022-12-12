@@ -1,152 +1,118 @@
 cd ../../c3po/expt_shapenet/
 
-DETECTOR_TYPE="point_transformer"
+#DATASETS="shapenet shapenet.sim.easy shapenet.sim.hard shapenet.real.easy shapenet.real.hard"
+DATASETS="shapenet.sim.easy shapenet.sim.hard shapenet.real.easy shapenet.real.hard"
+DETECTOR_TYPE="point_transformer pointnet"
 SHAPENET_OBJECTS='airplane bathtub bed bottle cap car chair guitar helmet knife laptop motorcycle mug skateboard table vessel'
 
 
-# KeyPoSim
-for object in $SHAPENET_OBJECTS
+for dset in $DATASETS
 do
-  echo $object
-  python evaluate_sim_supervised_model.py $DETECTOR_TYPE $object
-done
-echo "--------------------------------------------------------------------------"
+  echo $dset
+  for detector in $DETECTOR_TYPE
+  do
 
-# KeyPoSimICP
-for object in $SHAPENET_OBJECTS
-do
-  echo $object
-  python evaluate_icp.py $object "none" "nc" $DETECTOR_TYPE
-done
-echo "--------------------------------------------------------------------------"
+    echo $detector
 
-# KeyPoSimRANSACICP
-for object in $SHAPENET_OBJECTS
-do
-  echo $object
-  python evaluate_icp.py $object "ransac" "nc" $DETECTOR_TYPE
-done
-echo "--------------------------------------------------------------------------"
+    # KeyPoSim
+    for object in $SHAPENET_OBJECTS
+    do
+      echo $object
+      python evaluate_sim_supervised_model.py \
+      --detector $detector \
+      --object $object \
+      --dataset $dset
+    done
+    echo "--------------------------------------------------------------------------"
 
-# KeyPoSimCor
-for object in $SHAPENET_OBJECTS
-do
-  echo $object
-  python evaluate_proposed_model.py \
-  --detector $DETECTOR_TYPE \
-  --object $object \
-  --model "pre" \
-  --dataset "shapenet"
-done
-echo "--------------------------------------------------------------------------"
+    # KeyPoSimICP
+    for object in $SHAPENET_OBJECTS
+    do
+      echo $object
+      python evaluate_icp.py \
+      --object $object \
+      --gr "none" \
+      --c "nc" \
+      --detector $detector \
+      --dataset $dset
+    done
+    echo "--------------------------------------------------------------------------"
 
-# KeyPoSimCorICP
-for object in $SHAPENET_OBJECTS
-do
-  echo $object
-  python evaluate_icp.py $object "none" "c" $DETECTOR_TYPE
-done
-echo "--------------------------------------------------------------------------"
+    # KeyPoSimRANSACICP
+    for object in $SHAPENET_OBJECTS
+    do
+      echo $object
+      python evaluate_icp.py \
+      --object $object \
+      --gr "ransac" \
+      --c "nc" \
+      --detector $detector \
+      --dataset $dset
+    done
+    echo "--------------------------------------------------------------------------"
 
-# KeyPoSimCorRANSACICP
-for object in $SHAPENET_OBJECTS
-do
-  echo $object
-  python evaluate_icp.py $object "ransac" "c" $DETECTOR_TYPE
-done
-echo "--------------------------------------------------------------------------"
+    # KeyPoSimCor
+    for object in $SHAPENET_OBJECTS
+    do
+      echo $object
+      python evaluate_proposed_model.py \
+      --detector $detector \
+      --object $object \
+      --model "pre" \
+      --dataset $dset
+    done
+    echo "--------------------------------------------------------------------------"
 
-# c3po
-for object in $SHAPENET_OBJECTS
-do
-  echo $object
-  python evaluate_proposed_model.py \
-  --detector $DETECTOR_TYPE \
-  --object $object \
-  --model "post" \
-  --dataset "shapenet"
-done
-echo "--------------------------------------------------------------------------"
+    # KeyPoSimCorICP
+    for object in $SHAPENET_OBJECTS
+    do
+      echo $object
+      python evaluate_icp.py \
+      --object $object \
+      --gr "none" \
+      --c "c" \
+      --detector $detector \
+      --dataset $dset
+    done
+    echo "--------------------------------------------------------------------------"
 
-# KeyPoReal
-for object in $SHAPENET_OBJECTS
-do
-  echo $object
-  python evaluate_baseline.py $DETECTOR_TYPE $object
-done
-echo "--------------------------------------------------------------------------"
+    # KeyPoSimCorRANSACICP
+    for object in $SHAPENET_OBJECTS
+    do
+      echo $object
+      python evaluate_icp.py \
+      --object $object \
+      --gr "ransac" \
+      --c "c" \
+      --detector $detector \
+      --dataset $dset
+    done
+    echo "--------------------------------------------------------------------------"
 
-echo "--------------------------------------------------------------------------"
-DETECTOR_TYPE="pointnet"
+    # c3po
+    for object in $SHAPENET_OBJECTS
+    do
+      echo $object
+      python evaluate_proposed_model.py \
+      --detector $detector \
+      --object $object \
+      --model "post" \
+      --dataset $dset
+    done
+    echo "--------------------------------------------------------------------------"
 
-# KeyPoSim
-for object in $SHAPENET_OBJECTS
-do
-  echo $object
-  python evaluate_sim_supervised_model.py $DETECTOR_TYPE $object
-done
-echo "--------------------------------------------------------------------------"
+    # KeyPoReal
+    for object in $SHAPENET_OBJECTS
+    do
+      echo $object
+      python evaluate_baseline.py \
+      --detector $detector \
+      --object $object \
+      --dataset $dset
+    done
+    echo "--------------------------------------------------------------------------"
 
-# KeyPoSimICP
-for object in $SHAPENET_OBJECTS
-do
-  echo $object
-  python evaluate_icp.py $object "none" "nc" $DETECTOR_TYPE
-done
-echo "--------------------------------------------------------------------------"
 
-# KeyPoSimRANSACICP
-for object in $SHAPENET_OBJECTS
-do
-  echo $object
-  python evaluate_icp.py $object "ransac" "nc" $DETECTOR_TYPE
-done
-echo "--------------------------------------------------------------------------"
 
-# KeyPoSimCor
-for object in $SHAPENET_OBJECTS
-do
-  echo $object
-  python evaluate_proposed_model.py \
-  --detector $DETECTOR_TYPE \
-  --object $object \
-  --model "pre" \
-  --dataset "shapenet"
+  done
 done
-echo "--------------------------------------------------------------------------"
-
-# KeyPoSimCorICP
-for object in $SHAPENET_OBJECTS
-do
-  echo $object
-  python evaluate_icp.py $object "none" "c" $DETECTOR_TYPE
-done
-echo "--------------------------------------------------------------------------"
-
-# KeyPoSimCorRANSACICP
-for object in $SHAPENET_OBJECTS
-do
-  echo $object
-  python evaluate_icp.py $object "ransac" "c" $DETECTOR_TYPE
-done
-echo "--------------------------------------------------------------------------"
-
-# c3po
-for object in $SHAPENET_OBJECTS
-do
-  echo $object
-  python evaluate_proposed_model.py \
-  --detector $DETECTOR_TYPE \
-  --object $object \
-  --model "post" \
-  --dataset "shapenet"
-done
-echo "--------------------------------------------------------------------------"
-
-# KeyPoReal
-for object in $SHAPENET_OBJECTS
-do
-  echo $object
-  python evaluate_baseline.py $DETECTOR_TYPE $object
-done
-echo "--------------------------------------------------------------------------"

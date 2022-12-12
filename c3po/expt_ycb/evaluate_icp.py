@@ -10,6 +10,8 @@ from torch.utils.tensorboard import SummaryWriter
 sys.path.append('../..')
 
 from c3po.datasets.ycb import DepthYCB
+from c3po.datasets.ycb_eval import YCB
+from c3po.datasets.utils_dataset import toFormat
 from c3po.utils.loss_functions import certify
 from c3po.utils.evaluation_metrics import evaluation_error, add_s_error
 from c3po.utils.evaluation_metrics import adds_error, rotation_error, translation_error, EvalData
@@ -19,25 +21,41 @@ from c3po.expt_ycb.proposed_model import ProposedRegressionModel as ProposedMode
 
 
 def eval_icp(model_id, detector_type, hyper_param, global_registration='ransac',
-             use_corrector=False, certification=True, visualize=False, log_dir="runs", new_eval=True):
+             use_corrector=False, certification=True, visualize=False, log_dir="runs", new_eval=True, dataset=None):
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
+    # breakpoint()
     save_folder = hyper_param['save_folder']
     best_model_save_location = save_folder + '/' + model_id + '/'
     best_pre_model_save_file = best_model_save_location + '_best_supervised_kp_' + detector_type + '_data_augment.pth'
 
     # define dataset and dataloader
     # validation dataset:
-    eval_dataset = DepthYCB(model_id=model_id,
-                            split='test',
-                            only_load_nondegenerate_pcds=hyper_param['only_load_nondegenerate_pcds'],
-                            num_of_points=hyper_param['num_of_points_to_sample'])
-    eval_batch_size = len(eval_dataset) if hyper_param['only_load_nondegenerate_pcds'] else hyper_param['eval_batch_size'][model_id]
+    if dataset is None or dataset == "ycb":
+        eval_dataset = DepthYCB(model_id=model_id,
+                                split='test',
+                                only_load_nondegenerate_pcds=hyper_param['only_load_nondegenerate_pcds'],
+                                num_of_points=hyper_param['num_of_points_to_sample'])
+        eval_batch_size = len(eval_dataset) if hyper_param['only_load_nondegenerate_pcds'] else hyper_param['eval_batch_size'][model_id]
 
-    eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=eval_batch_size, shuffle=False)
-    data_type = "ycb"
-    object_name = model_id
+        eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=eval_batch_size, shuffle=False)
+        data_type = "ycb"
+        object_name = model_id
+
+    else:
+
+        type = dataset.split('.')[1]
+        eval_dataset = YCB(type=type, object=model_id, length=50, num_points=1024, split="test")
+        eval_dataset = toFormat(eval_dataset)
+
+        eval_batch_size = len(eval_dataset) if hyper_param['only_load_nondegenerate_pcds'] else \
+            hyper_param['eval_batch_size'][model_id]
+
+        eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=50, shuffle=False,
+                                                  pin_memory=True)
+        data_type = dataset
+        object_name = model_id
+        # breakpoint()
 
     # get cad models
     cad_models = eval_dataset._get_cad_models().to(torch.float).to(device=device)
@@ -265,7 +283,7 @@ def eval_icp(model_id, detector_type, hyper_param, global_registration='ransac',
 
 
 def evaluate_icp(model_ids, only_models, detector_type, global_registration='ransac',
-                 use_corrector=False, visualize=False, log_dir="runs"):
+                 use_corrector=False, visualize=False, log_dir="runs", dataset=None):
     for model_id in model_ids:
         if model_id in only_models:
             hyper_param_file = "self_supervised_training.yml"
@@ -283,7 +301,8 @@ def evaluate_icp(model_ids, only_models, detector_type, global_registration='ran
                      global_registration=global_registration,
                      use_corrector=use_corrector,
                      visualize=visualize,
-                     log_dir=log_dir)
+                     log_dir=log_dir,
+                     dataset=dataset)
 
     return None
 
@@ -291,23 +310,25 @@ def evaluate_icp(model_ids, only_models, detector_type, global_registration='ran
 if __name__ == "__main__":
     """
     usage: 
-    >> python evaluate_icp.py "chair" "teaser" "nc"
-    >> python evaluate_icp.py "table" "ransac" "c"
-    >> python evaluate_icp.py "table" "none" "nc"
+    >> python evaluate_icp.py --object "011_banana" --gr "none" --c "nc" --dataset "ycb.real"
+    >> python evaluate_icp.py --object "021_bleach_cleanser" --gr "ransac" --c "c" --dataset "ycb.real"  
 
     """
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("model_id", help="specify the ycb model id.", type=str)
-    parser.add_argument("global_registration", help="either ransac or teaser or none", type=str)
-    parser.add_argument("corrector_flag", help="c for corrector, nc for no corrector", type=str)
+    parser.add_argument("--object", help="specify the ycb model id.", type=str)
+    parser.add_argument("--gr", help="either ransac or teaser or none", type=str)
+    parser.add_argument("--c", help="c for corrector, nc for no corrector", type=str)
+    parser.add_argument("--detector", choices=["point_transformer"], default="point_transformer", type=str)
+    parser.add_argument("--dataset",
+                        choices=["ycb", "ycb.sim", "ycb.real"], type=str)
 
     args = parser.parse_args()
 
     # global_registration: ransac, teaser, or none which uses registration output assuming all the detected keypoints
-    global_registration = args.global_registration
+    global_registration = args.gr
     # correction flag: c = uses the corrector, nc = does not use the corrector, in the forward pass
-    corrector_flag = args.corrector_flag
+    corrector_flag = args.c
     if corrector_flag == 'c':
         use_corrector = True
     elif corrector_flag == 'nc':
@@ -315,33 +336,36 @@ if __name__ == "__main__":
     else:
         print("CORRECTOR FLAG INPUT INCORRECT.")
 
-    only_models = [args.model_id]
+    dataset = args.dataset
+    detector_type = args.detector
+    only_models = [args.object]
 
     stream = open("model_ids.yml", "r")
     model_ids = yaml.load(stream=stream, Loader=yaml.Loader)['model_ids']
 
-    if args.corrector_flag == "nc":
-        if args.global_registration == "none":
+    if corrector_flag == "nc":
+        if global_registration == "none":
             log_dir = "eval/KeyPoSimICP"
-        elif args.global_registration == "ransac":
+        elif global_registration == "ransac":
             log_dir = "eval/KeyPoSimRANSACICP"
         else:
             log_dir = "runs"
-    elif args.corrector_flag == "c":
-        if args.global_registration == "none":
+    elif corrector_flag == "c":
+        if global_registration == "none":
             log_dir = "eval/KeyPoSimCorICP"
-        elif args.global_registration == "ransac":
+        elif global_registration == "ransac":
             log_dir = "eval/KeyPoSimCorRANSACICP"
         else:
             log_dir = "runs"
-
     else:
         raise ValueError("corrector flag, incorrectly specified.")
 
+    # breakpoint()
     evaluate_icp(model_ids=model_ids,
                  only_models=only_models,
                  detector_type='point_transformer',
                  global_registration=global_registration,
                  use_corrector=use_corrector,
                  visualize=False,
-                 log_dir=log_dir)
+                 log_dir=log_dir,
+                 dataset=dataset)
