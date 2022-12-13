@@ -522,6 +522,9 @@ class ShapeNet(torch.utils.data.Dataset):
         self.from_file = from_file
         self.filename = filename
 
+        # new
+        self.from_file = False
+        
         if self.from_file:
             with open(self.filename, 'rb') as f:
                 self.data_ = pickle.load(f)
