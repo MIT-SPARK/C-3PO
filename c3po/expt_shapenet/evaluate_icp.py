@@ -53,7 +53,7 @@ def eval_icp(class_id, model_id, detector_type, hyper_param, global_registration
 
     else:
 
-        if dataset not in ["shapenet.sim.easy", "shapenet.sim.hard", "shapener.real.easy", "shapenet.real.hard"]:
+        if dataset not in ["shapenet.sim.easy", "shapenet.sim.hard", "shapenet.real.easy", "shapenet.real.hard"]:
             raise ValueError("dataset not specified correctlry.")
             # return None
 

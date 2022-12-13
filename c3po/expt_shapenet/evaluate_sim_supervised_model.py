@@ -122,7 +122,7 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
 
     else:
 
-        if dataset not in ["shapenet.sim.easy", "shapenet.sim.hard", "shapener.real.easy", "shapenet.real.hard"]:
+        if dataset not in ["shapenet.sim.easy", "shapenet.sim.hard", "shapenet.real.easy", "shapenet.real.hard"]:
             raise ValueError("dataset not specified correctlry.")
             # return None
 
