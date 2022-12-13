@@ -493,6 +493,11 @@ class DepthPC(torch.utils.data.Dataset):
         return keypoints
 
 
+from c3po.datasets.shapenet import SE3PointCloud as FixedSE3PointCloud
+from c3po.datasets.shapenet import FixedDepthPC
+from c3po.datasets.utils_dataset import fromFormat
+
+
 class ShapeNet(torch.utils.data.Dataset):
     def __init__(self, type, object, length, num_points, adv_option='hard', from_file=False, filename=None):
 
@@ -524,14 +529,26 @@ class ShapeNet(torch.utils.data.Dataset):
         # else:
         if self.type == 'real':
 
-            self.ds_ = DepthPC(class_name=self.class_name,
-                               dataset_len=self.length,
-                               num_of_points=self.num_points)
+            # new
+            # self.ds_ = DepthPC(class_name=self.class_name,
+            #                    dataset_len=self.length,
+            #                    num_of_points=self.num_points)
+            self.ds_ = FixedDepthPC(class_id=CLASS_ID[self.class_name],
+                                    model_id=CLASS_MODEL_ID[self.class_name])
+            self.ds_ = fromFormat(self.ds_)
 
         elif self.type == 'sim':
-            self.ds_ = SE3PointCloud(class_name=self.class_name,
-                                     dataset_len=self.length,
-                                     num_of_points=self.num_points)
+
+            # new
+            # self.ds_ = SE3PointCloud(class_name=self.class_name,
+            #                          dataset_len=self.length,
+            #                          num_of_points=self.num_points)
+            self.ds_ = FixedSE3PointCloud(class_id=CLASS_ID[self.class_name],
+                                          model_id=CLASS_MODEL_ID[self.class_name],
+                                          num_of_points=self.num_points,
+                                          dataset_len=self.length)
+            self.ds_ = fromFormat(self.ds_)
+
         else:
             raise ValueError
 
