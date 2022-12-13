@@ -11,7 +11,13 @@ from c3po.datasets.ycb import MODEL_IDS as ycb_objects
 from c3po.utils.evaluation_metrics import EvalData
 
 # datasets = ["shapenet.real.hard", "ycb.real"]
-datasets = ["shapenet", "ycb"]
+shapenet_datasets =["shapenet",
+                    "shapenet.sim.easy", "shapenet.sim.hard",
+                    "shapenet.real.easy", "shapenet.real.hard"]
+ycb_datasets = ["ycb", "ycb.sim", "ycb.real"]
+
+# datasets = ["shapenet", "ycb"]
+datasets = shapenet_datasets + ycb_datasets
 
 # baselines = ["deepgmr",
 #              "equipose",
@@ -36,8 +42,10 @@ detector_types = ["point_transformer", "pointnet"]
 
 
 dd_dataset = widgets.Dropdown(
-    options=["shapenet", "ycb"],
-    value="shapenet",
+    # options=["shapenet", "ycb"],
+    options=datasets,
+    # value="shapenet",
+    value=datasets[0],
     description="Dataset"
 )
 
@@ -116,14 +124,16 @@ def extract_data(my_files, my_labels, my_adds_th=0.02, my_adds_auc_th=0.05):
 def table(my_dataset, my_object, my_detector, my_adds_th, my_adds_auc_th):
 
     #
-    if my_dataset == "shapenet":
+    if "shapenet" in my_dataset:
+    # if my_dataset == "shapenet":
         base_folder = "../c3po/expt_shapenet"
 
         if my_object not in shapenet_objects:
             print("Error: Specified Object not in the Dataset.")
             return None
 
-    elif my_dataset == "ycb":
+    elif "ycb" in my_dataset:
+    # elif my_dataset == "ycb":
         base_folder = "../c3po/expt_ycb"
 
         if my_object not in ycb_objects:
@@ -167,14 +177,16 @@ def table(my_dataset, my_object, my_detector, my_adds_th, my_adds_auc_th):
 def plot(my_dataset, my_object, my_detector, my_metric):
 
     #
-    if my_dataset == "shapenet":
+    if "shapenet" in my_dataset:
+    # if my_dataset == "shapenet":
         base_folder = "../c3po/expt_shapenet"
 
         if my_object not in shapenet_objects:
             print("Error: Specified Object not in the Dataset.")
             return None
 
-    elif my_dataset == "ycb":
+    elif "ycb" in my_dataset:
+    # elif my_dataset == "ycb":
         base_folder = "../c3po/expt_ycb"
 
         if my_object not in ycb_objects:
