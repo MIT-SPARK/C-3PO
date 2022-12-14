@@ -86,7 +86,7 @@ slide_adds_auc_th = widgets.FloatSlider(
 )
 
 
-def extract_data(my_files, my_labels, my_adds_th=0.02, my_adds_auc_th=0.05):
+def extract_data(my_files, my_labels, my_adds_th=0.05, my_adds_auc_th=0.10):
 
     labels = []
     data = dict()
