@@ -1049,6 +1049,7 @@ class MixedFixedDepthPC(torch.utils.data.Dataset):
 
         return 0
 
+
 class SE3PointCloud(torch.utils.data.Dataset):
     """
     Given class_id, model_id, and number of points generates various point clouds and SE3 transformations
