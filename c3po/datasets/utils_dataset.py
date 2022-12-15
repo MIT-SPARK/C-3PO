@@ -21,7 +21,7 @@ class RandomTransformSE3:
         x = torch.randn(1, 6)
         x = x / x.norm(p=2, dim=1, keepdim=True) * amp
 
-        return x[:, :3]
+        return x
 
     def apply_transform(self, p0, x):
         # p0: [N, 3]
