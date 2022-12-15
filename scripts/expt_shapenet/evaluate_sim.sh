@@ -1,11 +1,8 @@
 cd ../../c3po/expt_shapenet/
 
-#DATASETS="shapenet shapenet.sim.easy shapenet.sim.hard shapenet.real.easy shapenet.real.hard"
-#DATASETS="shapenet.sim.easy shapenet.sim.hard shapenet.real.easy shapenet.real.hard"
-#DATASETS="shapenet.real.hard shapenet.real.easy"
-DATASETS="shapenet.real.easy shapenet.sim.easy"
-#DETECTOR_TYPE="point_transformer pointnet"
-DETECTOR_TYPE="pointnet"
+#DATASETS="shapenet.sim.easy shapenet.sim.hard"
+DATASETS="shapenet.sim.easy"
+DETECTOR_TYPE="point_transformer pointnet"
 SHAPENET_OBJECTS='airplane bathtub bed bottle cap car chair guitar helmet knife laptop motorcycle mug skateboard table vessel'
 
 
@@ -92,28 +89,28 @@ do
     done
     echo "--------------------------------------------------------------------------"
 
-    # c3po
-    for object in $SHAPENET_OBJECTS
-    do
-      echo $object
-      python evaluate_proposed_model.py \
-      --detector $detector \
-      --object $object \
-      --model "post" \
-      --dataset $dset
-    done
-    echo "--------------------------------------------------------------------------"
-
-    # KeyPoReal
-    for object in $SHAPENET_OBJECTS
-    do
-      echo $object
-      python evaluate_baseline.py \
-      --detector $detector \
-      --object $object \
-      --dataset $dset
-    done
-    echo "--------------------------------------------------------------------------"
+#    # c3po
+#    for object in $SHAPENET_OBJECTS
+#    do
+#      echo $object
+#      python evaluate_proposed_model.py \
+#      --detector $detector \
+#      --object $object \
+#      --model "post" \
+#      --dataset $dset
+#    done
+#    echo "--------------------------------------------------------------------------"
+#
+#    # KeyPoReal
+#    for object in $SHAPENET_OBJECTS
+#    do
+#      echo $object
+#      python evaluate_baseline.py \
+#      --detector $detector \
+#      --object $object \
+#      --dataset $dset
+#    done
+#    echo "--------------------------------------------------------------------------"
 
   done
 done
