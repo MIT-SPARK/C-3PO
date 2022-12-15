@@ -56,7 +56,8 @@ class RandomTransformSE3:
 
     # functions for exp map
     def exp(self, x):
-        w = x.view(-1, 3)
+        x_ = x.view(-1, 6)
+        w, v = x_[:, 0:3], x_[:, 3:6]
         t = w.norm(p=2, dim=1).view(-1, 1, 1)  # norm of rotation
         W = self.mat_so3(w)
         S = W.bmm(W)
@@ -64,8 +65,9 @@ class RandomTransformSE3:
 
         # Rodrigues' rotation formula.
         R = I + self.sinc1(t) * W + self.sinc2(t) * S
+        V = I + self.sinc2(t) * W + self.sinc3(t) * S
 
-        p = torch.rand((1, 3, 1))
+        p = V.bmm(v.contiguous().view(-1, 3, 1))
 
         z = torch.Tensor([0, 0, 0, 1]).view(1, 1, 4).repeat(w.size(0), 1, 1).to(x)
         Rp = torch.cat((R, p), dim=2)
