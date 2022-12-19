@@ -5,11 +5,12 @@ import numpy as np
 import open3d as o3d
 import os
 import pickle
-import pytorch3d
+# import pytorch3d
 import sys
 import torch
 from enum import Enum
-from pytorch3d import transforms, ops
+# from pytorch3d import transforms, ops
+from scipy.spatial.transform import Rotation as Rot
 import random
 
 sys.path.append("../../")
@@ -265,7 +266,9 @@ class DepthPC(torch.utils.data.Dataset):
             R[2, 2] = c
 
         else:
-            R = transforms.random_rotation()
+            # R = transforms.random_rotation()
+            R = torch.from_numpy(Rot.random().as_matrix()).to(dtype=torch.float32)
+
         model_mesh = model_mesh.rotate(R=R.numpy())
 
         # Sample a point cloud from the self.model_mesh
@@ -680,7 +683,8 @@ class SE3PointCloud(torch.utils.data.Dataset):
         t                   : torch.tensor of shape (3, 1)                  : translation
         """
 
-        R = transforms.random_rotation()
+        # R = transforms.random_rotation()
+        R = torch.from_numpy(Rot.random().as_matrix()).to(dtype=torch.float32)
         t = torch.rand(3, 1)
 
         model_pcd = self.model_mesh.sample_points_uniformly(number_of_points=self.num_of_points)
@@ -785,7 +789,8 @@ class SE3PointCloudAll(torch.utils.data.Dataset):
 
         # diameter = np.linalg.norm(np.asarray(model_mesh.get_max_bound()) - np.asarray(model_mesh.get_min_bound()))
 
-        R = transforms.random_rotation()
+        # R = transforms.random_rotation()
+        R = torch.from_numpy(Rot.random().as_matrix()).to(dtype=torch.float32)
         t = torch.rand(3, 1)
 
         pc1_pcd = model_mesh.sample_points_uniformly(number_of_points=self.num_of_points)
@@ -883,7 +888,8 @@ class DepthPCAll(torch.utils.data.Dataset):
             R[2, 2] = c
 
         else:
-            R = transforms.random_rotation()
+            # R = transforms.random_rotation()
+            R = torch.from_numpy(Rot.random().as_matrix()).to(dtype=torch.float32)
 
         model_mesh = model_mesh.rotate(R=R.numpy())
 
