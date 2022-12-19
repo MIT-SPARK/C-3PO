@@ -9,18 +9,22 @@ import pickle
 import sys
 import torch
 from enum import Enum
+from tqdm import tqdm
 # from pytorch3d import transforms, ops
 from scipy.spatial.transform import Rotation as Rot
 import random
+from pathlib import Path
 
 sys.path.append("../../")
 
-from c3po.models.modelgen import ModelFromShape
-from c3po.utils.general import pos_tensor_to_o3d
+# from c3po.models.modelgen import ModelFromShape
+# from c3po.utils.general import pos_tensor_to_o3d
 from c3po.utils.visualization_utils import display_two_pcs, visualize_model_n_keypoints, \
     visualize_torch_model_n_keypoints, display_results
 import c3po.utils.general as gu
+from c3po.datasets.utils_dataset import PointRegistrationMedium, PointRegistrationEasy, fromFormat
 
+BASE_DIR = Path(__file__).parent.parent
 
 ANNOTATIONS_FOLDER: str = '../../data/KeypointNet/KeypointNet/annotations/'
 PCD_FOLDER_NAME: str = '../../data/KeypointNet/KeypointNet/pcds/'
@@ -914,6 +918,102 @@ class DepthPCAll(torch.utils.data.Dataset):
 
         return (pc1, pc2, kp1, kp2, R, t)
 
+
+class ShapeNet(torch.utils.data.Dataset):
+    def __init__(self, type, object, length, num_points, adv_option='hard', from_file=False, filename=None):
+
+        assert adv_option in ['hard', 'medium', 'easy']
+        # hard: c3po rotation errors
+        # easy: lk rotation errors
+        # medium: deepgmr rotation errors
+
+        assert type in ['sim', 'real']
+        # sim: full point clouds
+        # real: depth point clouds
+
+        assert object in OBJECT_CATEGORIES + ['all']
+        # object: category name in ShapeNet
+
+        self.type = type
+        self.class_name = object
+        self.length = length
+        self.num_points = num_points
+
+        self.adv_option = adv_option
+        self.from_file = from_file
+        self.filename = filename
+
+        # new
+        self.from_file = False
+
+        if self.from_file:
+            with open(self.filename, 'rb') as f:
+                self.data_ = pickle.load(f)
+
+        # else:
+        if self.type == 'real':
+
+            # new
+            # self.ds_ = DepthPC(class_name=self.class_name,
+            #                    dataset_len=self.length,
+            #                    num_of_points=self.num_points)
+            self.ds_ = FixedDepthPC(class_id=CLASS_ID[self.class_name],
+                                    model_id=CLASS_MODEL_ID[self.class_name])
+            self.ds_ = fromFormat(self.ds_)
+
+        elif self.type == 'sim':
+
+            # new
+            # self.ds_ = SE3PointCloud(class_name=self.class_name,
+            #                          dataset_len=self.length,
+            #                          num_of_points=self.num_points)
+            self.ds_ = SE3PointCloud(class_id=CLASS_ID[self.class_name],
+                                     model_id=CLASS_MODEL_ID[self.class_name],
+                                     num_of_points=self.num_points,
+                                     dataset_len=self.length)
+            self.ds_ = fromFormat(self.ds_)
+
+        else:
+            raise ValueError
+
+        if self.adv_option == 'hard':
+            self.ds = self.ds_
+        elif self.adv_option == 'easy':
+            self.ds = PointRegistrationEasy(self.ds_)
+        elif self.adv_option == 'medium':
+            self.ds = PointRegistrationMedium(self.ds_)
+        else:
+            raise ValueError
+
+    def __len__(self):
+        return self.ds.__len__()
+
+    def __getitem__(self, item):
+
+        if self.from_file:
+            pc1, pc2, kp1, kp2, R, t = self.data_[item]
+        else:
+            pc1, pc2, kp1, kp2, R, t = self.ds[item]
+
+        return (pc1, pc2, kp1, kp2, R, t)
+
+    def save_dataset(self, filename):
+
+        data_ = []
+        for i in tqdm(range(self.ds.__len__())):
+            data = self.ds[i]
+            data_.append(data)
+
+        with open(filename, 'wb') as f:
+            pickle.dump(data_, f, protocol=pickle.HIGHEST_PROTOCOL)
+
+    def _get_cad_models(self):
+
+        return self.ds_.cad_models
+
+    def _get_model_keypoints(self):
+
+        return self.ds_.model_keypoints
 
 if __name__ == "__main__":
 
