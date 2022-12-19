@@ -1,4 +1,4 @@
-cd c3po/expt_ycb
+cd ../../c3po/expt_ycb
 
 echo "001_chips_can self-supervised training:: POINT TRANSFORMER"
 python training.py "point_transformer" "001_chips_can" "self_supervised"
