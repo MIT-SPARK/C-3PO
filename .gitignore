@@ -16,7 +16,7 @@ c3po/expt_corrector_compute_time_analysis_analysis/runs
 third_party/
 
 # Output of preprocessing scripts
-*.pkl
+#*.pkl
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
