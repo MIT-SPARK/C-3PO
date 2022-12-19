@@ -10,19 +10,10 @@ from c3po.datasets.shapenet import OBJECT_CATEGORIES as shapenet_objects
 from c3po.datasets.ycb import MODEL_IDS as ycb_objects
 from c3po.utils.evaluation_metrics import EvalData
 
-# datasets = ["shapenet.real.hard", "ycb.real"]
-shapenet_datasets =["shapenet",
-                    "shapenet.sim.easy", "shapenet.sim.hard",
-                    "shapenet.real.easy", "shapenet.real.hard"]
-ycb_datasets = ["ycb", "ycb.sim", "ycb.real"]
+shapenet_datasets =["shapenet.sim.easy", "shapenet.sim.hard", "shapenet.real.hard"]
+ycb_datasets = ["ycb.sim", "ycb.real"]
 
-# datasets = ["shapenet", "ycb"]
 datasets = shapenet_datasets + ycb_datasets
-
-# baselines = ["deepgmr",
-#              "equipose",
-#              "fpfh",
-#              "pointnetlk"]
 
 baselines = ["KeyPoSim",
              "KeyPoSimICP",
@@ -33,18 +24,23 @@ baselines = ["KeyPoSim",
              "c3po",
              "KeyPoReal"]
 
+baseline_display_name = {
+             "KeyPoSim": "KeyPo (sim)",
+             "KeyPoSimICP": "KeyPo (sim) + ICP",
+             "KeyPoSimRANSACICP": "KeyPo (sim) + RANSAC + ICP",
+             "KeyPoSimCor": "KeyPo (sim) + Corr.",
+             "KeyPoSimCorICP": "KeyPo (sim) + Corr. + ICP",
+             "KeyPoSimCorRANSACICP": "KeyPo (sim) + Corr. + RANSAC + ICP",
+             "c3po": "C-3PO",
+             "KeyPoReal": "KeyPo (real)"
+}
+
+sim_omit_methods = ["c3po", "KeyPoReal"]
+
 detector_types = ["point_transformer", "pointnet"]
 
-# baseline_folders = ["deepgmr/eval/",
-#                     "EquiPose/equi-pose/runs",
-#                     "fpfh_teaser/runs",
-#                     "PointNetLK_Revisited/runs"]
-
-
 dd_dataset = widgets.Dropdown(
-    # options=["shapenet", "ycb"],
     options=datasets,
-    # value="shapenet",
     value=datasets[0],
     description="Dataset"
 )
@@ -105,7 +101,7 @@ def extract_data(my_files, my_labels, my_adds_th=0.05, my_adds_auc_th=0.10):
         data[label] = eval_data.data
         labels.append(label)
 
-        if label == "c3po":
+        if label == baseline_display_name["c3po"]:
 
             eval_data_oc = eval_data.compute_oc()
             eval_data_oc_nd = eval_data.compute_ocnd()
@@ -149,15 +145,21 @@ def table(my_dataset, my_object, my_detector, my_adds_th, my_adds_auc_th):
         raise ValueError("my_dataset not specified correctly.")
 
     #
+    if "sim" in my_dataset:
+        baselines_to_plot = [x for x in baselines if x not in sim_omit_methods]
+    else:
+        baselines_to_plot = baselines
+
+    #
     my_baselines = []
     my_files = []
 
-    for baseline in baselines:
+    for baseline in baselines_to_plot:
         _filename = base_folder + '/eval/' + baseline + '/' + my_detector + '/' + my_dataset + '/' \
                     + my_object + '/eval_data.pkl'
 
         if os.path.isfile(_filename):
-            my_baselines.append(baseline)
+            my_baselines.append(baseline_display_name[baseline])
             my_files.append(_filename)
 
         else:
@@ -202,14 +204,20 @@ def plot(my_dataset, my_object, my_detector, my_metric):
         raise ValueError("my_dataset not specified correctly.")
 
     #
+    if "sim" in my_dataset:
+        baselines_to_plot = [x for x in baselines if x not in sim_omit_methods]
+    else:
+        baselines_to_plot = baselines
+
+    #
     my_baselines = []
     my_files = []
 
-    for baseline in baselines:
+    for baseline in baselines_to_plot:
         _filename = base_folder + '/eval/' + baseline + '/' + my_detector + '/' + my_dataset + '/' \
                     + my_object + '/eval_data.pkl'
         if os.path.isfile(_filename):
-            my_baselines.append(baseline)
+            my_baselines.append(baseline_display_name[baseline])
             my_files.append(_filename)
 
     #
