@@ -1,7 +1,6 @@
 cd ../../c3po/expt_shapenet/
 
-#DATASETS="shapenet.sim.easy shapenet.sim.hard"
-DATASETS="shapenet.sim.easy"
+DATASETS="shapenet.sim.easy shapenet.sim.hard"
 DETECTOR_TYPE="point_transformer pointnet"
 SHAPENET_OBJECTS='airplane bathtub bed bottle cap car chair guitar helmet knife laptop motorcycle mug skateboard table vessel'
 
