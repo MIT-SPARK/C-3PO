@@ -1,5 +1,7 @@
 cd ../../c3po/expt_shapenet
 
+# note: cert_plot will use data saved during self-supervised training, to plot fraction certifiable vs training iteration.
+
 #python cert_plot.py "knife" "knife"
 #python cert_plot.py "laptop" "laptop"
 
