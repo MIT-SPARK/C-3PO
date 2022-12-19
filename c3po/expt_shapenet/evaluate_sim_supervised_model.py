@@ -8,7 +8,7 @@ from pathlib import Path
 sys.path.append('../..')
 
 from c3po.datasets.shapenet import SE3PointCloud, DepthPC, CLASS_NAME, CLASS_ID, FixedDepthPC
-from c3po.datasets.shapenet_eval import ShapeNet
+from c3po.datasets.shapenet import ShapeNet
 from c3po.datasets.utils_dataset import toFormat
 from c3po.expt_shapenet.evaluation import evaluate
 from c3po.utils.visualization_utils import display_results

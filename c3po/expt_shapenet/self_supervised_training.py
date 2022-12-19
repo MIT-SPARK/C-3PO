@@ -17,7 +17,7 @@ from torch.utils.tensorboard import SummaryWriter
 sys.path.append("../../")
 
 from c3po.datasets.shapenet import DepthPC, CLASS_NAME, FixedDepthPC, CLASS_ID
-from c3po.datasets.shapenet_eval import ShapeNet
+from c3po.datasets.shapenet import ShapeNet
 from c3po.datasets.utils_dataset import toFormat
 from c3po.utils.general import TrackingMeter
 from c3po.utils.visualization_utils import display_results

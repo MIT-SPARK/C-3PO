@@ -11,7 +11,7 @@ from torch.utils.tensorboard import SummaryWriter
 sys.path.append('../..')
 
 from c3po.datasets.shapenet import CLASS_NAME, CLASS_ID, FixedDepthPC
-from c3po.datasets.shapenet_eval import ShapeNet
+from c3po.datasets.shapenet import ShapeNet
 from c3po.datasets.utils_dataset import toFormat
 from c3po.utils.loss_functions import certify
 from c3po.utils.evaluation_metrics import evaluation_error, add_s_error
