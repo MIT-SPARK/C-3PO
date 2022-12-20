@@ -1,24 +1,26 @@
-import copy
-import csv
-import json
+# import copy
+# import csv
+# import json
 import numpy as np
 import open3d as o3d
 import os
-import pytorch3d
+import pickle
+from tqdm import tqdm
+# import pytorch3d
 import sys
 import torch
 from pytorch3d import transforms, ops
+from scipy.spatial.transform import Rotation as Rot
 from pathlib import Path
+
+sys.path.append("../..")
+from c3po.utils.visualization_utils import visualize_model_n_keypoints, visualize_torch_model_n_keypoints
+from c3po.datasets.utils_dataset import PointRegistrationMedium, PointRegistrationEasy
+
 
 BASE_DIR = Path(__file__).parent
 
 DATASET_PATH: str = str(BASE_DIR) + '/' + '../../data/ycb/models/ycb/'
-sys.path.append("../../")
-
-from c3po.models.modelgen import ModelFromShape
-from c3po.utils.general import pos_tensor_to_o3d
-from c3po.utils.visualization_utils import visualize_model_n_keypoints, visualize_torch_model_n_keypoints
-import c3po.utils.general as gu
 
 MODEL_TO_KPT_GROUPS = {
     "003_cracker_box": [set([0,1,3,4]), set([0,1,2,5]), set([1,2,3,7]), set([0,2,3,6]), \
@@ -118,7 +120,6 @@ class SE3PointCloudYCB(torch.utils.data.Dataset):
         # size of the model
         self.diameter = np.linalg.norm(np.asarray(self.model_mesh.get_max_bound()) - np.asarray(self.model_mesh.get_min_bound()))
 
-
     def __len__(self):
         return self.len
 
@@ -130,7 +131,8 @@ class SE3PointCloudYCB(torch.utils.data.Dataset):
         t                   : torch.tensor of shape (3, 1)                  : translation
         """
 
-        R = transforms.random_rotation()
+        # R = transforms.random_rotation()
+        R = torch.from_numpy(Rot.random().as_matrix()).to(dtype=torch.float32)
         t = torch.rand(3, 1)
 
         model_pcd = self.model_mesh.sample_points_uniformly(number_of_points=self.num_of_points)
@@ -188,6 +190,7 @@ class SE3PointCloudYCB(torch.utils.data.Dataset):
 
         return 0
 
+
 class SE3PointCloudYCBAugment(torch.utils.data.Dataset):
     """
     Given model_id, and number of points generates various point clouds and SE3 transformations
@@ -220,7 +223,6 @@ class SE3PointCloudYCBAugment(torch.utils.data.Dataset):
         # size of the model
         self.diameter = np.linalg.norm(np.asarray(self.model_mesh.get_max_bound()) - np.asarray(self.model_mesh.get_min_bound()))
 
-
     def __len__(self):
         return self.len
 
@@ -232,7 +234,8 @@ class SE3PointCloudYCBAugment(torch.utils.data.Dataset):
         t                   : torch.tensor of shape (3, 1)                  : translation
         """
 
-        R = transforms.random_rotation()
+        R = torch.from_numpy(Rot.random().as_matrix()).to(dtype=torch.float32)
+        # R = transforms.random_rotation()
         t = torch.rand(3, 1)
 
         model_pcd = self.model_mesh.sample_points_uniformly(number_of_points=self.num_of_points)
@@ -294,6 +297,7 @@ class SE3PointCloudYCBAugment(torch.utils.data.Dataset):
 
         return 0
 
+
 class DepthYCB(torch.utils.data.Dataset):
     """
     Given model_id and split, get real depth images from YCB dataset.
@@ -328,7 +332,6 @@ class DepthYCB(torch.utils.data.Dataset):
             self.filter_degenerate(MODEL_TO_KPT_GROUPS)
 
         print("dataset len", self.len)
-
 
     def filter_degenerate(self, model_to_groups):
         """
@@ -474,6 +477,7 @@ class DepthYCB(torch.utils.data.Dataset):
 
         return 0
 
+
 class DepthYCBAugment(torch.utils.data.Dataset):
     """
     Given model_id and split, get real depth images from YCB dataset.
@@ -507,7 +511,6 @@ class DepthYCBAugment(torch.utils.data.Dataset):
 
         # size of the model
         self.diameter = np.linalg.norm(np.asarray(self.model_mesh.get_max_bound()) - np.asarray(self.model_mesh.get_min_bound()))
-
 
     def __len__(self):
 
@@ -594,6 +597,7 @@ class DepthYCBAugment(torch.utils.data.Dataset):
         visualize_torch_model_n_keypoints(cad_models=cad_models, model_keypoints=model_keypoints)
 
         return 0
+
 
 class MixedDepthYCBAugment(torch.utils.data.Dataset):
     """
@@ -723,6 +727,117 @@ class MixedDepthYCBAugment(torch.utils.data.Dataset):
         visualize_torch_model_n_keypoints(cad_models=cad_models, model_keypoints=model_keypoints)
 
         return 0
+
+
+class wrapperYCB(torch.utils.data.Dataset):
+    def __init__(self, ycb_dataset):
+        self.ds = ycb_dataset
+        self.pc0 = self.ds._get_cad_models().squeeze(0)
+        self.kp0 = self.ds._get_model_keypoints().squeeze(0)
+
+    def __len__(self):
+        return len(self.ds)
+
+    def __getitem__(self, item):
+
+        pc1, kp1, R, t = self.ds[item]
+
+        return (self.pc0, pc1, self.kp0, kp1, R, t)
+
+    def _get_cad_model(self):
+        return self.pc0.unsqueeze(0)
+
+    def _get_model_keypoints(self):
+        return self.kp0.unsqueeze(0)
+
+
+class YCB(torch.utils.data.Dataset):
+    def __init__(self, type, object, length, num_points, split, adv_option='hard', from_file=False, filename=None):
+
+        assert adv_option in ['hard', 'medium', 'easy']
+        # hard: c3po rotation errors
+        # easy: lk rotation errors
+        # medium: deepgmr rotation errors
+
+        assert type in ['sim', 'real']
+        # sim: full point clouds
+        # real: depth point clouds
+
+        assert object in MODEL_IDS
+        # object: category name in ShapeNet
+
+        assert split in ['train', 'test', 'val']
+        # train/test/val
+
+        self.type = type
+        self.class_name = object
+        self.length = length
+        self.num_points = num_points
+        self.split = split
+
+        self.adv_option = adv_option
+        self.from_file = from_file
+        self.filename = filename
+
+        if self.from_file:
+            with open(self.filename, 'rb') as f:
+                self.data_ = pickle.load(f)
+
+        else:
+            if self.type == 'real':
+
+                ds_ = DepthYCBAugment(model_id=self.class_name,
+                                      split=self.split,
+                                      num_of_points=self.num_points)
+
+            elif self.type == 'sim':
+                ds_ = SE3PointCloudYCBAugment(model_id=self.class_name,
+                                              num_of_points=self.num_points,
+                                              dataset_len=self.length)
+            else:
+                raise ValueError
+
+            self.ds_ = wrapperYCB(ds_)
+
+            if self.adv_option == 'hard':
+                self.ds = self.ds_
+            elif self.adv_option == 'easy':
+                self.ds = PointRegistrationEasy(self.ds_)
+            elif self.adv_option == 'medium':
+                self.ds = PointRegistrationMedium(self.ds_)
+            else:
+                raise ValueError
+
+    def __len__(self):
+        # return self.ds.__len__()
+        return self.length
+
+    def __getitem__(self, item):
+
+        if self.from_file:
+            pc1, pc2, kp1, kp2, R, t = self.data_[item]
+        else:
+            pc1, pc2, kp1, kp2, R, t = self.ds[item]
+
+        return (pc1, pc2, kp1, kp2, R, t)
+
+    def save_dataset(self, filename):
+
+        data_ = []
+        for i in tqdm(range(self.ds.__len__())):
+            data = self.ds[i]
+            data_.append(data)
+
+        with open(filename, 'wb') as f:
+            pickle.dump(data_, f, protocol=pickle.HIGHEST_PROTOCOL)
+
+    def _get_cad_models(self):
+
+        return self.ds_._get_cad_model()
+
+    def _get_model_keypoints(self):
+
+        return self.ds_._get_model_keypoints()
 
 
 if __name__ == "__main__":

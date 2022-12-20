@@ -10,7 +10,7 @@ from torch.utils.tensorboard import SummaryWriter
 sys.path.append('../..')
 
 from c3po.datasets.ycb import DepthYCB
-from c3po.datasets.ycb_eval import YCB
+from c3po.datasets.ycb import YCB
 from c3po.datasets.utils_dataset import toFormat
 from c3po.utils.loss_functions import certify
 from c3po.utils.evaluation_metrics import evaluation_error, add_s_error

@@ -24,7 +24,7 @@ sys.path.append("../../")
 # model and datasets
 from c3po.expt_ycb.proposed_model import ProposedRegressionModel as ProposedModel
 from c3po.datasets.ycb import DepthYCB, DepthYCBAugment, MODEL_TO_KPT_GROUPS as MODEL_TO_KPT_GROUPS_YCB
-from c3po.datasets.ycb_eval import YCB
+from c3po.datasets.ycb import YCB
 from c3po.datasets.utils_dataset import toFormat
 # from c3po.models.certifiability import confidence, confidence_kp
 

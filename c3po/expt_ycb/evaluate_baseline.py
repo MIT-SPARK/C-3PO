@@ -18,7 +18,7 @@ from torch.utils.tensorboard import SummaryWriter
 sys.path.append("../../")
 
 from c3po.datasets.ycb import DepthYCB
-from c3po.datasets.ycb_eval import YCB
+from c3po.datasets.ycb import YCB
 from c3po.datasets.utils_dataset import toFormat
 # from c3po.models.certifiability import confidence, confidence_kp
 # from c3po.utils.general import TrackingMeter

@@ -12,7 +12,7 @@ from c3po.utils.visualization_utils import display_two_pcs
 from c3po.expt_ycb.self_supervised_training import evaluate_model
 from c3po.expt_ycb.proposed_model import ProposedRegressionModel as ProposedModel
 from c3po.datasets.ycb import DepthYCB
-from c3po.datasets.ycb_eval import YCB
+from c3po.datasets.ycb import YCB
 from c3po.datasets.utils_dataset import toFormat
 from c3po.expt_shapenet.evaluation import evaluate
 from c3po.expt_shapenet.self_supervised_training import visual_test
