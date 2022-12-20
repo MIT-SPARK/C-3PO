@@ -24,11 +24,11 @@ from c3po.utils.visualization_utils import display_two_pcs, visualize_model_n_ke
 import c3po.utils.general as gu
 from c3po.datasets.utils_dataset import PointRegistrationMedium, PointRegistrationEasy, fromFormat
 
-BASE_DIR = Path(__file__).parent.parent
+BASE_DIR = Path(__file__).parent
 
-ANNOTATIONS_FOLDER: str = '../../data/KeypointNet/KeypointNet/annotations/'
-PCD_FOLDER_NAME: str = '../../data/KeypointNet/KeypointNet/pcds/'
-MESH_FOLDER_NAME: str = '../../data/KeypointNet/ShapeNetCore.v2.ply/'
+ANNOTATIONS_FOLDER: str = str(BASE_DIR) + '/' + '../../data/KeypointNet/KeypointNet/annotations/'
+PCD_FOLDER_NAME: str = str(BASE_DIR) + '/' + '../../data/KeypointNet/KeypointNet/pcds/'
+MESH_FOLDER_NAME: str = str(BASE_DIR) + '/' + '../../data/KeypointNet/ShapeNetCore.v2.ply/'
 OBJECT_CATEGORIES: list = ['airplane', 'bathtub', 'bed', 'bottle',
                            'cap', 'car', 'chair', 'guitar',
                            'helmet', 'knife', 'laptop', 'motorcycle',

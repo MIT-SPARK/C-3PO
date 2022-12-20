@@ -8,8 +8,11 @@ import pytorch3d
 import sys
 import torch
 from pytorch3d import transforms, ops
+from pathlib import Path
 
-DATASET_PATH: str = '../../data/ycb/models/ycb/'
+BASE_DIR = Path(__file__).parent
+
+DATASET_PATH: str = str(BASE_DIR) + '/' + '../../data/ycb/models/ycb/'
 sys.path.append("../../")
 
 from c3po.models.modelgen import ModelFromShape
@@ -49,7 +52,7 @@ MODEL_IDS = ["001_chips_can", "002_master_chef_can", "003_cracker_box", "004_sug
              "040_large_marker", "051_large_clamp", "052_extra_large_clamp", "061_foam_brick"]
 
 
-def get_model_and_keypoints(model_id):
+def get_model_and_keypoints(model_id, dataset_path=DATASET_PATH):
     """
     Given class_id and model_id this function outputs the colored mesh, pcd, and keypoints from the KeypointNet dataset.
 
@@ -62,11 +65,11 @@ def get_model_and_keypoints(model_id):
     keypoints   : o3d.utils.Vector3dVector(nx3)
     """
 
-    object_mesh_file = DATASET_PATH + model_id + '/poisson/nontextured.ply'
+    object_mesh_file = dataset_path + model_id + '/poisson/nontextured.ply'
     mesh = o3d.io.read_triangle_mesh(filename=object_mesh_file)
     mesh.compute_vertex_normals() #how long does this take
     pcd = None
-    kpt_filename = os.path.join(DATASET_PATH + model_id, "kpts_xyz.npy")
+    kpt_filename = os.path.join(dataset_path + model_id, "kpts_xyz.npy")
     keypoints_xyz = np.load(kpt_filename)
 
     return mesh, pcd, keypoints_xyz
