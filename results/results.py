@@ -3,12 +3,16 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import ipywidgets as widgets
+import open3d as o3d
+from open3d.web_visualizer import draw
 
 import sys
 sys.path.append("../")
 from c3po.datasets.shapenet import OBJECT_CATEGORIES as shapenet_objects
 from c3po.datasets.ycb import MODEL_IDS as ycb_objects
 from c3po.utils.evaluation_metrics import EvalData
+from c3po.datasets.shapenet import SE3PointCloud, CLASS_ID, CLASS_MODEL_ID
+from c3po.datasets.ycb import SE3PointCloudYCB
 
 shapenet_datasets =["shapenet.sim.easy", "shapenet.sim.hard", "shapenet.real.hard"]
 ycb_datasets = ["ycb.sim", "ycb.real"]
@@ -231,6 +235,82 @@ def plot(my_dataset, my_object, my_detector, my_metric):
         plot_terr(data)
     else:
         raise ValueError("my_metric not correctly specified.")
+
+    return None
+
+
+def table_certifiable(my_dataset, my_object, my_detector):
+
+    #
+    if "shapenet" in my_dataset:
+        # if my_dataset == "shapenet":
+        base_folder = "../c3po/expt_shapenet"
+
+        if my_object not in shapenet_objects:
+            print("Error: Specified Object not in the Dataset.")
+            return None
+
+    elif "ycb" in my_dataset:
+        # elif my_dataset == "ycb":
+        base_folder = "../c3po/expt_ycb"
+
+        if my_object not in ycb_objects:
+            print("Error: Specified Object not in the Dataset.")
+            return None
+
+        if my_detector != "point_transformer":
+            print("Error: We only trained Point Transformer on YCB, as PointNet showed "
+                  "suboptimal performance on ShapeNet.")
+            return None
+
+    else:
+        raise ValueError("my_dataset not specified correctly.")
+
+    #
+    if "sim" in my_dataset:
+        baselines_to_plot = [x for x in baselines if x not in sim_omit_methods]
+    else:
+        baselines_to_plot = baselines
+
+    #
+    if "real" not in my_dataset:
+        print("Error: this table is only available for C-3PO on shapenet.real.hard or ycb.real")
+        return None
+
+    #
+    my_baselines = []
+    my_files = []
+
+    for baseline in baselines_to_plot:
+        _filename = base_folder + '/eval/' + baseline + '/' + my_detector + '/' + my_dataset + '/' \
+                    + my_object + '/eval_data.pkl'
+
+        if os.path.isfile(_filename):
+            my_baselines.append(baseline_display_name[baseline])
+            my_files.append(_filename)
+
+        else:
+            print(_filename)
+
+    #
+    data = extract_data(my_files, my_baselines)
+
+    oc = data[baseline_display_name['c3po']]['oc']
+    nd = data[baseline_display_name['c3po']]['nd']
+    oc_nd = oc * nd
+
+    percent_all = 100
+    percent_oc = 100 * oc.sum() / len(oc)
+    percent_oc_nd = 100 * oc_nd.sum() / len(oc_nd)
+
+    table_data = dict()
+    table_data['all'] = {'percent': percent_all}
+    table_data['oc'] = {'percent': percent_oc}
+    table_data['oc + nd'] = {'percent': percent_oc_nd}
+
+    df = pd.DataFrame(table_data, index=["percent"])
+    df = df.transpose()
+    display(df)
 
     return None
 
