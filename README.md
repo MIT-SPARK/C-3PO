@@ -73,12 +73,14 @@ jupyter notebook data_analysis.ipynb
 ### Keypoint Corrector Analysis
 
 #### Description 
-This experiment aims to show the effectiveness of our keypoint corrector module. It uses ShapeNet dataset models. For each input point cloud, we perturb 80% of the the keypoints with varying amounts of noise and then pass the input through the corrector module and then the registration module. Averaged ADD-S errors for 100 iterations of the corrector forward pass per noise variance parameter are saved for plot generation. 
+This experiment aims to show the effectiveness of our keypoint corrector module. It uses ShapeNet dataset models. 
+For each input point cloud, we perturb 80% of the the keypoints with varying amounts of noise and then pass the 
+input through the corrector module and then the registration module. Averaged ADD-S errors for 100 iterations of 
+the corrector forward pass per noise variance parameter are saved for plot generation. 
 
-#### Replication 
-To replicate our results do the following. 
-
-Run experiments and save performance metrics for plot generation.
+#### Replication
+[//]: # (To replicate our results do the following. )
+To run experiments and save performance metrics for plot generation.
 ```bash
 cd scripts/expt_keypoint_corrector_analysis
 bash analyze.sh
@@ -104,8 +106,7 @@ jupyter notebook results.ipynb
 This experiment shows the success of the proposed self-supervised training on a dataset of simulated depth point clouds using ShapeNet models. We are able to generate data across various object categories in ShapeNet and show the power of our proposed model in matching a supervised baseline, without using any annotation on the generated training data.
 
 #### Replication
-
-The proposed model requires one to specify the object category and the architecture used for the keypoint detector. We show how to train and evaluate the proposed model for **object**: *chair* and **keypoint detector**: *point transformer*. 
+[//]: # (The proposed model requires one to specify the object category and the architecture used for the keypoint detector. We show how to train and evaluate the proposed model for **object**: *chair* and **keypoint detector**: *point transformer*. )
 
 Trained models are saved in the repository. Evaluate and visualize the results with:
 ```bash
@@ -126,7 +127,7 @@ For training models see instructions [here](docs/training-models.md).
 This experiment shows that the proposed self-supervised training method also works on a real-world dataset comprised of RGB-D images. We see that the proposed model -- after self-supervised training -- is able to match or exceed the performance of a supervised baseline, without using any annotations for training.
 
 #### Replication
-The proposed model requires one to specify the object category and the architecture used for the keypoint detector. We show how to train and evaluate the proposed model for **object**: *002\_master\_chef\_can* and **keypoint detector**: *point transformer*. 
+[//]: # (The proposed model requires one to specify the object category and the architecture used for the keypoint detector. We show how to train and evaluate the proposed model for **object**: *002\_master\_chef\_can* and **keypoint detector**: *point transformer*. )
 
 Trained models are saved in the repository. Evaluate and visualize the results with:
 ```bash
@@ -138,6 +139,33 @@ cd results/expt_shapenet_ycb
 jupyter notebook results.ipynb
 ```
 For training models see instructions [here](docs/training-models.md).
+
+
+### Categoryless Self-Supervised Training Experiment
+
+#### Description
+The proposed self-supervised training works even when the unannotated data does not have category labels.
+This experiment validates it. 
+
+#### Replication
+
+
+### Corrector Compute Time Analysis
+We implement a constant step size batch gradient descent to solve the corrector optimization problem in the forward pass. 
+We show that this results in faster forward compute time, in training. The analysis here validates it.
+
+To analyze compute time --time to solve the corrector optimization problem-- per data point in a batch,
+as a function of the batch size, run:
+```bash
+cd scripts/expt_corrector_compute_time_analysis
+bash analyze.sh
+```
+
+To plot the results, run:
+```bash
+cd results/expt_corrector_compute_time_analysis
+bash plot.sh
+```
 
 
 ## License

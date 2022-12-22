@@ -10,6 +10,7 @@ import sys
 import time
 import torch
 import yaml
+from tqdm import tqdm
 from matplotlib import colors as mcolors
 
 sys.path.append("../../")
@@ -23,6 +24,8 @@ from c3po.utils.ddn.node import ParamDeclarativeFunction
 
 
 EXPT_NAME = "corrector_time_analysis"
+DEFAULT_OBJECT = "chair"
+
 
 class Experiment:
     def __init__(self, class_id, model_id, num_points, batch_range,
@@ -98,9 +101,9 @@ class Experiment:
         time_taken = 0.0
 
         # experiment loop
-        for i, data in enumerate(dataset_loader):
+        for i, data in enumerate(tqdm(dataset_loader)):
             # This runs for self.num_iterations
-            print("Algo: ",  algo, " :: Batch size: ", batch_size, ":: Iteration: ", i)
+            # print("Algo: ",  algo, " :: Batch size: ", batch_size, ":: Iteration: ", i)
 
             # extracting data
             input_point_cloud, keypoints_true, rotation_true, translation_true = data
@@ -146,25 +149,26 @@ class Experiment:
         for b in self.batch_range:
 
             print("Analyzing Compute Times for Batch Size: ", b)
-
+            print("Analyzing Corrector w Batch-GD (torch) ")
             time_taken_torch = self._single_loop(batch_size=b, algo='torch')
             time_algo_torch.append(time_taken_torch)
 
+            print("Analyzing Corrector w Trust-Region Method (scipy)")
             time_taken_scipy = self._single_loop(batch_size=b, algo='scipy')
             time_algo_scipy.append(time_taken_scipy)
 
             # saving the experiment and data
-            location = './runs/' + str(self.class_id) + '/' + str(self.model_id) + '/'
-            if not os.path.isdir(location):
-                os.makedirs(location)
-
-            filemane = self.name + 'batch_size_' + str(b) + '.pickle'
-
-            file = open(location + filemane, 'wb')
-            data = {'time_algo_torch': time_taken_torch,
-                    'time_algo_scipy': time_taken_scipy}
-            pickle.dump(data, file)
-            file.close()
+            # location = './runs/' + str(self.class_id) + '/' + str(self.model_id) + '/'
+            # if not os.path.isdir(location):
+            #     os.makedirs(location)
+            #
+            # filemane = self.name + 'batch_size_' + str(b) + '.pickle'
+            #
+            # file = open(location + filemane, 'wb')
+            # data = {'time_algo_torch': time_taken_torch,
+            #         'time_algo_scipy': time_taken_scipy}
+            # pickle.dump(data, file)
+            # file.close()
 
         return time_algo_torch, time_algo_scipy
 
@@ -226,39 +230,9 @@ def run_experiments_on(class_id, model_id):
     expt.execute_n_save()
 
 
-def analyze_results(class_id, model_id):
-
-    location = './runs/' + str(class_id) + '/' + str(model_id) + '/'
-    filemane = EXPT_NAME + '_.pickle'
-    file = open(location + filemane, 'rb')
-    parameters, data = pickle.load(file)
-
-    # print(data)
-    # print(data['time_algo_torch'])
-    # print(data['time_algo_scipy'])
-    # print(parameters['batch_range'])
-    batch_range = np.asarray(parameters['batch_range'][0:-1])
-    time_algo_torch = np.asarray(data['time_algo_torch'][0:-1]) / 1000000
-    time_algo_scipy = np.asarray(data['time_algo_scipy'][0:-1]) / 1000000
-
-    fig = plt.figure()
-    plt.plot(batch_range, time_algo_torch, 'o--',
-             label='batch gradient descent', color='orangered')
-    plt.plot(batch_range, time_algo_scipy, 'o--',
-             label='non batch: trust region', color='grey')
-    plt.xlabel("Batch size")
-    plt.ylabel("Compute time per input (sec)")
-    plt.legend(loc='upper left')
-    plt.xlim([batch_range[0], batch_range[-1]])
-    # plt.show()
-    filename = 'plot.pdf'
-    fig.savefig(location + filename)
-    plt.close(fig)
-
-
 if __name__ == "__main__":
 
-    class_name = 'chair'
+    class_name = DEFAULT_OBJECT
 
     stream = open("class_model_ids.yml", "r")
     model_class_ids = yaml.load(stream=stream, Loader=yaml.Loader)
@@ -267,5 +241,4 @@ if __name__ == "__main__":
     model_id = model_class_ids[class_name]
 
     run_experiments_on(class_id, model_id)
-    analyze_results(class_id, model_id)
 
