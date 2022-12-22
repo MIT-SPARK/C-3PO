@@ -8,9 +8,9 @@ sys.path.append("../../")
 
 from c3po.datasets.shapenet import CLASS_ID
 
-from c3po.expt_fully_self_supervised.full_self_supervised_training import train_detector \
+from c3po.expt_categoryless.full_self_supervised_training import train_detector \
     as train_detector_shapenet
-from c3po.expt_fully_self_supervised.full_self_supervised_training_ycb import train_detector \
+from c3po.expt_categoryless.full_self_supervised_training_ycb import train_detector \
     as train_detector_ycb
 
 def train_kp_detectors(detector_type, model_id, class_name=None, use_corrector=True, dataset="shapenet"):

@@ -24,7 +24,7 @@ from c3po.utils.loss_functions import certify, self_supervised_training_loss \
 # evaluation metrics
 from c3po.utils.evaluation_metrics import add_s_error
 from c3po.expt_shapenet.proposed_model import ProposedRegressionModel as ProposedModel
-from c3po.expt_fully_self_supervised.evaluation import evaluate
+from c3po.expt_categoryless.evaluation import evaluate
 
 # Train
 def self_supervised_train_one_epoch(training_loader, model, optimizer, device, hyper_param):

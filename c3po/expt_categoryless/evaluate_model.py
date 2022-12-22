@@ -5,8 +5,8 @@ import yaml
 
 sys.path.append('../..')
 
-from c3po.expt_fully_self_supervised.full_self_supervised_training import visualize_kp_detectors
-from c3po.expt_fully_self_supervised.full_self_supervised_training_ycb import visualize_kp_detectors \
+from c3po.expt_categoryless.full_self_supervised_training import visualize_kp_detectors
+from c3po.expt_categoryless.full_self_supervised_training_ycb import visualize_kp_detectors \
     as visualize_kp_detectors_ycb
 
 if __name__ == "__main__":

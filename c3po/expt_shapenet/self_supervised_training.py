@@ -522,7 +522,7 @@ def evaluate_model(detector_type, class_name, model_id,
     class_id = CLASS_ID[class_name]
 
     if cross:
-        hyper_param_file = "../expt_fully_self_supervised/full_self_supervised_training.yml"
+        hyper_param_file = "../expt_categoryless/full_self_supervised_training.yml"
     else:
         hyper_param_file = "self_supervised_training.yml"
     stream = open(hyper_param_file, "r")
