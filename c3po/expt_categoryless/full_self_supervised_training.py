@@ -369,6 +369,7 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
 
     # Evaluation
     # validation dataset:
+    data_class_name = CLASS_NAME[dataset_class_id]
     eval_dataset_len = hyper_param['eval_dataset_len']
     eval_batch_size = hyper_param['eval_batch_size']
     eval_dataset = MixedFixedDepthPC(class_id=dataset_class_id,
@@ -425,14 +426,16 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
             print(">>"*40)
             print("PRE-TRAINED MODEL:")
             print(">>" * 40)
+            log_dir = 'eval/shapenet/' + str(detector_type) + '/pre/' + str(class_name) + '/' + str(data_class_name)
             evaluate(eval_loader=eval_loader, model=model_before, hyper_param=hyper_param, certification=True,
                      device=device)
         if post_:
             print(">>" * 40)
             print("(SELF-SUPERVISED) TRAINED MODEL:")
             print(">>" * 40)
+            log_dir='eval/shapenet/' + str(detector_type) + '/post/' + str(class_name) + '/' + str(data_class_name)
             evaluate(eval_loader=eval_loader, model=model_after, hyper_param=hyper_param, certification=True,
-                     device=device)
+                     device=device, log_dir=log_dir)
 
     # # Visual Test
     dataset_len = 20
