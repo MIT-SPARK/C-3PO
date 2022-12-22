@@ -1,45 +1,15 @@
-# C-3PO: Self-Supervised and Certifiable 3D Object Pose Estimator
+# Overview
 
-**Authors:** [Rajat Talak](https://www.rajattalak.com/), Lisa Peng, [Luca Carlone](https://lucacarlone.mit.edu/)
+Authors: Rajat Talak and Lisa Peng
 
-
-
-**C-3PO** is an open-source implementation of our work titled "*Correct and Certify: A New Approach to Self-Supervised 3D Object Perception*" (see [paper](#paper)).
-It solves the certifiable object pose estimation problem, where -- given a partial point cloud of an object -- the goal is to estimate the object pose, fit a CAD model to the sensor data, and provide certification guarantees. 
-
-
-
-**C-3PO** uses a semantic keypoint-based pose estimation model, that is initially trained in simulation, 
-and augments it with a self-supervised training procedure on the real-data. It implements:
-
-1. **A Corrector Module** *that corrects errors in the detected keypoints (blue: detected keypoints, red: corrected keypoints)* 
-
-<p align="center">
-	<img src="docs/media/correct.gif" width="300" >
-</p>
-
-2. **A Certificate of Correctness** *that flags if the pose output produced by the model is correct or not (red: corrected keypoints, green: ground-truth)* 
-
-<p align="center">
-	<img src="docs/media/cert.gif" width="300" >
-</p>
-
-3. and **A Certificate of Non-Degeneracy** *that flags if the input partial point cloud admits more than one correct pose, for a solution* 
-
-   | Degenerate Case                                       | Non-Degenerate Case                                       |
-   |-------------------------------------------------------|-----------------------------------------------------------|
-   | <img align="center" src="docs/media/cert_and_degen.gif" width="90%"> | <img align="center" src="docs/media/cert_and_nondegen.gif" width="80%" > |
-   | *Input exhibits multiple solutions possible*          | *Input exhibits a unique solution*                        |
-
-
-**C-3PO** provides implementation of our proposed model in the [paper](#paper) and the code to reproduce the experimental results.
-Our experiments rely on the processed [ShapeNet](https://shapenet.org/), [KeypointNet](https://github.com/qq456cvb/KeypointNet), and [YCB](https://www.ycbbenchmarks.com/object-models/) datasets. 
-We provide these processed datasets for you to be able to reproduce and verify our results (see [datassets](#Datasets)). 
-
+This is an open-source implementation of our work titled: "*Correct and Certify: A New Approach to Self-Supervised 3D Object Perception*".
+This repo helps reproduce the experimental results reported in the paper and provides trained models for use.
+It solves the certifiable object pose estimation problem, where -- given a partial point cloud of an object -- the goal 
+is to estimate the object pose, fit a CAD model to the sensor data, and provide certification guarantees.
 
 ## Paper 
 
-R. Talak, L. Peng, L. Carlone, "Correct and Certify: A New Approach to Self-Supervised 3D-Object Perception,". [arXiv:2206.11215](https://arxiv.org/abs/2206.11215) [cs.CV], Jun. 2022.
+### R. Talak, L. Peng, L. Carlone, "Correct and Certify: A New Approach to Self-Supervised 3D-Object Perception,". [arXiv:2206.11215](https://arxiv.org/abs/2206.11215) [cs.CV], Jun. 2022.
 
 **Abstract:** We consider a certifiable object pose estimation problem, where -- given a partial point cloud of an object -- the goal is to estimate the object pose, fit a CAD model to the sensor data, and provide certification guarantees. We solve this problem by combining (i) a novel self-supervised training approach, and (ii) a certification procedure, that not only verifies whether the output produced by the model is correct or not (i.e. *certifiability*), but also flags uniqueness of the produced solution (i.e. *strong certifiability*). We use a semantic keypoint-based pose estimation model, that is initially trained in simulation and does not perform well on real-data due to the domain gap. Our self-supervised training procedure uses a *corrector* and a *certification* module to improve the detector. The corrector module corrects the detected keypoints to compensate for the domain gap, and is implemented as a declarative layer, for which we develop a simple differentiation rule. The certification module declares whether the corrected output produced by the model is certifiable (i.e. correct) or not. At each iteration, the approach optimizes over the loss induced only by the certifiable input-output pairs. As training progresses, we see that the fraction of outputs that are certifiable increases, eventually reaching near 100% in many cases. We conduct extensive experiments to evaluate the performance of the corrector, the certification, and the proposed self-supervised training using the ShapeNet and YCB datasets, and show the proposed approach achieves performance comparable to fully supervised baselines while not using any annotation for supervision on real data. 
 
@@ -61,52 +31,15 @@ R. Talak, L. Peng, L. Carlone, "Correct and Certify: A New Approach to Self-Supe
 ```
 
 
-## Overview and Quick Links
-
-- [Installation](#Installation)
-- [Experiments](#Experiments)
-	- [Keypoint Corrector Analysis](#keypoint-corrector-analysis)
-	- [The ShapeNet Experiment](#the-shapeNet-experiment)
-	- [The YCB Experiment](#the-ycb-experiment)
-- [Datasets](#Datasets)
-- [License and Acknowledgement](#License)
-
-
 ## Installation 
 
-##### Step 1: Clone C-3PO
-
+Clone the repository and install a conda environment from the yml file:
 ```bash
 git clone https://github.com/MIT-SPARK/C-3PO.git 
 cd C-3PO/
-```
-
-##### Step 2: Set up conda environment
-
-There are two ways to set up the virtual environment. Either, install from the yml file provided, as shown below:
-
-```bash
 conda env create -f environment.yml
-```
-
-This is tested for python 3.9 and cuda 10.2. For any other version of python and cuda, you may try manual installation 
-using instructions [here](./docs/manually-creating-conda-environment.md).
-
-##### Step 3: Activate the conda environment
-
-```bash
 conda activate c3po
 ```
-
-##### Step 4: Install C-3PO (Optional)
-
-```bash
-python setup.py develop
-```
-##### Step 5: Verify Installation
-Verify that the following libraries are installed: `pytorch`, `pytorch-geometric`, `open3d`, `pytorch3d`, `matplotlib`, `pandas`, `tensorboard`, `cudatoolkit`, `scipy`, `yaml`,`fvcore`, `iopath`, `bottler`. 
-
-
 
 
 ## Experiments
