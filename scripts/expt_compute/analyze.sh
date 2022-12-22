@@ -1,3 +1,3 @@
-cd ../../c3po/expt_corrector_compute_time_analysis
+cd ../../c3po/expt_compute
 
 python analyze.py
