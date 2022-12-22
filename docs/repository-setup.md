@@ -48,7 +48,7 @@ Follow the steps below to download and save the relevant dataset.
 
 We provide trained models for you to either use or reproduce our results. 
 Download these from Google Drive 
-[here](https://drive.google.com/file/d/1bOyMsT0xTZDhX8L-PjA41KdSz5ZLlgXj/view?usp=sharing) 
+[here](https://drive.google.com/file/d/1i4U13nJLZv_LseDYNTKukGB23t9dJI9t/view?usp=sharing) 
 and unzip the file. The unziped folder 
 has the structure:
 
@@ -71,5 +71,5 @@ c3po
 
 Place contents of folder c3po/expt_corrector in 
 C-3PO/c3po/expt_corrector, in the repo; and similarly for
-c3po/expt_shapenet, c3po/expt_ycb, c3po/expt_categoryless, and c3po/expt_time.
+c3po/expt_shapenet, c3po/expt_ycb, c3po/expt_categoryless, and c3po/expt_compute.
 

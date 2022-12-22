@@ -1,3 +1,4 @@
+cd ../../c3po/expt_categoryless
 
 echo "002_master_chef_can:: POINT TRANSFORMER"
 python training.py "point_transformer" "002_master_chef_can" "" "ycb"

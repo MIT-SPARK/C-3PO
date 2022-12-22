@@ -1,3 +1,5 @@
+cd ../../c3po/expt_categoryless
+
 FILE_NAME="./eval/model_eval_main_temp.txt"
 
 now=$(date +'%c')

@@ -1,3 +1,4 @@
+cd ../../c3po/expt_categoryless
 
 echo "BOTTLE:: POINT TRANSFORMER"
 python training.py "point_transformer" "bottle" "" "shapenet"
