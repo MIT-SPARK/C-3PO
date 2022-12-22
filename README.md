@@ -8,8 +8,8 @@ This repository helps reproduce the experimental results reported in the paper a
 
 ## Paper 
 
-Our work solves the certifiable object pose estimation problem, where -- given a partial point cloud of an object -- the goal 
-is to estimate the object pose, fit a CAD model to the sensor data, and provide certification guarantees.
+Our work solves the certifiable object pose estimation problem. In it, given a partial point cloud of an object, the goal 
+is to estimate the object pose and provide certification guarantees.
 
 #### R. Talak, L. Peng, L. Carlone, Correct and Certify: A New Approach to Self-Supervised 3D-Object Perception, June 2022 [[arXiv](https://arxiv.org/abs/2206.11215)]
 
@@ -82,13 +82,13 @@ the corrector forward pass per noise variance parameter are saved for plot gener
 [//]: # (To replicate our results do the following. )
 To run experiments and save performance metrics for plot generation.
 ```bash
-cd scripts/expt_keypoint_corrector_analysis
+cd scripts/expt_corrector
 bash analyze.sh
 ```
 
 Generate plots from saved data: 
 ```bash
-cd results/expt_keypoint_corrector_analysis
+cd results/expt_corrector
 jupyter notebook results.ipynb
 ```
 
@@ -103,7 +103,9 @@ jupyter notebook results.ipynb
 ### The ShapeNet Experiment
 
 #### Description 
-This experiment shows the success of the proposed self-supervised training on a dataset of simulated depth point clouds using ShapeNet models. We are able to generate data across various object categories in ShapeNet and show the power of our proposed model in matching a supervised baseline, without using any annotation on the generated training data.
+This experiment shows the success of the proposed self-supervised training on a dataset of simulated depth point clouds 
+using ShapeNet models. We are able to generate data across various object categories in ShapeNet and show the power 
+of our proposed model in matching a supervised baseline, without using any annotation on the generated training data.
 
 #### Replication
 [//]: # (The proposed model requires one to specify the object category and the architecture used for the keypoint detector. We show how to train and evaluate the proposed model for **object**: *chair* and **keypoint detector**: *point transformer*. )
@@ -124,7 +126,9 @@ For training models see instructions [here](docs/training-models.md).
 ### The YCB Experiment 
 
 #### Description 
-This experiment shows that the proposed self-supervised training method also works on a real-world dataset comprised of RGB-D images. We see that the proposed model -- after self-supervised training -- is able to match or exceed the performance of a supervised baseline, without using any annotations for training.
+This experiment shows that the proposed self-supervised training method also works on a real-world dataset comprised of 
+RGB-D images. We see that the proposed model -- after self-supervised training -- is able to match or exceed the 
+performance of a supervised baseline, without using any annotations for training.
 
 #### Replication
 [//]: # (The proposed model requires one to specify the object category and the architecture used for the keypoint detector. We show how to train and evaluate the proposed model for **object**: *002\_master\_chef\_can* and **keypoint detector**: *point transformer*. )
@@ -157,13 +161,13 @@ We show that this results in faster forward compute time, in training. The analy
 To analyze compute time --time to solve the corrector optimization problem-- per data point in a batch,
 as a function of the batch size, run:
 ```bash
-cd scripts/expt_corrector_compute_time_analysis
+cd scripts/expt_compute
 bash analyze.sh
 ```
 
 To plot the results, run:
 ```bash
-cd results/expt_corrector_compute_time_analysis
+cd results/expt_compute
 bash plot.sh
 ```
 
@@ -173,4 +177,5 @@ Our C-3PO project is released under MIT license.
 
 
 ## Acknowledgement
-This work was partially funded by ARL DCIST CRA W911NF-17-2-0181, ONR RAIDER N00014-18-1-2828, and NSF CAREER award "Certifiable Perception for Autonomous Cyber-Physical Systems".
+This work was partially funded by ARL DCIST CRA W911NF-17-2-0181, ONR RAIDER N00014-18-1-2828, and NSF CAREER award 
+"Certifiable Perception for Autonomous Cyber-Physical Systems".
