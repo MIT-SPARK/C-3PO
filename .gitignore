@@ -7,9 +7,6 @@ data
 c3po/data/
 
 # Temporary experimental data
-c3po/expt_keypoint_corrector_analysis/expt_with_reg_se3pc
-c3po/expt_keypoint_corrector_analysis/expt_with_reg_depthpc
-c3po/expt_pace_compute_time/runs
 c3po/expt_corrector_compute_time_analysis_analysis/runs
 
 # Dependencies

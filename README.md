@@ -46,100 +46,121 @@ conda activate c3po
 
 ### Keypoint Corrector Analysis
 
-**Description.** This experiment aims to show the effectiveness of our keypoint corrector module. It uses ShapeNet dataset models. For each input point cloud, we perturb 80% of the the keypoints with varying amounts of noise and then pass the input through the corrector module and then the registration module. Averaged ADD-S errors for 100 iterations of the corrector forward pass per noise variance parameter are saved for plot generation. 
+#### Description 
+This experiment aims to show the effectiveness of our keypoint corrector module. It uses ShapeNet dataset models. For each input point cloud, we perturb 80% of the the keypoints with varying amounts of noise and then pass the input through the corrector module and then the registration module. Averaged ADD-S errors for 100 iterations of the corrector forward pass per noise variance parameter are saved for plot generation. 
 
-|<img src="docs/media/table-adds.jpg" width="100%">|<img src="docs/media/vessel-adds.jpg" width="100%">|<img src="docs/media/skateboard-adds.jpg" width="100%">|
-|:---:|:---:|:---:|
-| corrector results on table model | corrector results on vessel model | corrector results on skateboard model |
+#### Replication 
+To replicate our results do the following. 
 
-**Replication.** To replicate our results do the following. 
+Run experiments and save performance metrics for plot generation.
+```bash
+cd scripts/expt_keypoint_corrector_analysis/
+bash analyze.sh
+```
 
-1. Move to the experiment directory:
-    ```bash
-   cd c3po/expt_keypoint_corrector_analysis/
-   ```
-   
-2. Run the experiment and save performance metrics for plot generation.
-    ```bash
-    python expt_with_reg_depthpc.py
-    ```
+Generate plots from saved data: 
+```bash
+cd results/expt_keypoint_corrector_analysis/
+jupyter notebook results.ipynb
+```
 
-3. Generate plots from the saved pickle file. To generate plots for, say, the ShapeNet object "chair" run:
-    ```bash
-   python expt_with_reg_depthpc_analyze.py "chair" 
-   ```
+[//]: # (|<img src="docs/media/table-adds.jpg" width="100%">|<img src="docs/media/vessel-adds.jpg" width="100%">|<img src="docs/media/skateboard-adds.jpg" width="100%">|)
 
+[//]: # (|:---:|:---:|:---:|)
+
+[//]: # (| corrector results on table model | corrector results on vessel model | corrector results on skateboard model |)
+
+[//]: # ()
 
 ### The ShapeNet Experiment
 
-**Description.** This experiment shows the success of the proposed self-supervised training on a dataset of simulated depth point clouds using ShapeNet models. We are able to generate data across various object categories in ShapeNet and show the power of our proposed model in matching a supervised baseline, without using any annotation on the generated training data.
+#### Description 
+This experiment shows the success of the proposed self-supervised training on a dataset of simulated depth point clouds using ShapeNet models. We are able to generate data across various object categories in ShapeNet and show the power of our proposed model in matching a supervised baseline, without using any annotation on the generated training data.
 
-**Replication.** The proposed model requires one to specify the object category and the architecture used for the keypoint detector. We show how to train and evaluate the proposed model for **object**: *chair* and **keypoint detector**: *point transformer*. 
+#### Replication
 
-1. Move to the ShapeNet experiment directory:
-    ```bash 
-       cd c3po/expt_shapenet/
-    ```
+The proposed model requires one to specify the object category and the architecture used for the keypoint detector. We show how to train and evaluate the proposed model for **object**: *chair* and **keypoint detector**: *point transformer*. 
 
-2. Trained models are saved in the repo. To evaluate the trained models, run:
-    ```bash
-       python evaluate_proposed_model.py "point_transformer" "chair" "post" 
-    ```
-   *Note: argument "post" asks it to evaluate the model that is trained (self-supervised) on the real-data. Changing it to "pre" will evaluate the simulation-trained model on real-world data.*
+**Evaluate.** Trained models are saved in the repo. Evaluate and visualize the results with:
+```bash
+cd scripts/expt_shapenet
+bash evaluate_real.sh
+bash evaluate_sim.sh
 
+cd ../../
+cd results/expt_shapenet_ycb
+jupyter notebook results.ipynb
+```
 
-2. To run self-supervised training: 
-   ```bash
-      python training.py "point_transformer" "chair" "self_supervised"
-   ```
-    *Note: this will overwrite the trained and saved model.*
+**Self-Supervised Training.** To train the models run:
+```bash
+cd scripts/expt_shapenet
+bash self_supervised_train.sh
+```
+This trains models for all objects in the ShapeNet dataset.
+If you want to train a model for a specific object, say chair, then run:
+```bash
+cd c3po/expt_shapenet
+python training.py "point_transformer" "chair" "self_supervised"
+```
+Note that running self-supervised training will overwrite the trained and saved models.
 
-
-3. To run the supervised training on simulated data:
-    ```bash
-       python training.py "point_transformer" "chair" "supervised"
-    ```
-   *Note: this will overwrite the trained and saved model.* 
+**Pre-training on Simulated Data** To run supervised training on simulated data: 
+```bash
+cd scripts/expt_shapenet
+bash supervised_train.sh
+```
+This trains models for all objects in the ShapeNet dataset.
+If you want to train a model for a specific object, say bottle, then run:
+```bash
+cd c3po/expt_shapenet
+python training.py "point_transformer" "bottle" "supervised"
+```
 
 
 
 ### The YCB Experiment 
 
-**Description.** This experiment shows that the proposed self-supervised training method also works on a real-world dataset comprised of RGB-D images. We see that the proposed model -- after self-supervised training -- is able to match or exceed the performance of a supervised baseline, without using any annotations for training.
+#### Description 
+This experiment shows that the proposed self-supervised training method also works on a real-world dataset comprised of RGB-D images. We see that the proposed model -- after self-supervised training -- is able to match or exceed the performance of a supervised baseline, without using any annotations for training.
 
-**Replication** The proposed model requires one to specify the object category and the architecture used for the keypoint detector. We show how to train and evaluate the proposed model for **object**: *002\_master\_chef\_can* and **keypoint detector**: *point transformer*. 
+#### Replication
+The proposed model requires one to specify the object category and the architecture used for the keypoint detector. We show how to train and evaluate the proposed model for **object**: *002\_master\_chef\_can* and **keypoint detector**: *point transformer*. 
 
+**Evaluate.** Trained models are saved in the repo. Evaluate and visualize the results with:
+```bash
+cd scripts/expt_ycb
+bash evaluate.sh
 
-1. Move to the YCB experiment directory:
+cd ../../
+cd results/expt_shapenet_ycb
+jupyter notebook results.ipynb
+```
 
-	```bash
-	cd c3po/expt_ycb/
-	```
-	
-2. Trained models are saved in the repo. To evaluate the trained models, run:
+**Self-Supervised Training.** To train the models run:
+```bash
+cd scripts/expt_ycb
+bash self_supervised_train.sh
+```
+This trains models for all objects in the YCB dataset.
+If you want to train a model for a specific object, say 004_sugar_box, then run:
+```bash
+cd c3po/expt_ycb
+python training.py "point_transformer" "004_sugar_box" "self_supervised"
+```
+Note that running self-supervised training will overwrite the trained and saved models.
 
-	```bash
-	python evaluate_proposed_model.py "point_transformer" "002_master_chef_can" "post"
-	```
-	
-	*Note: argument "post" asks it to evaluate the model that is trained (self-supervised) on the real-data. Changing it to "pre" will evaluate the simulation-trained model on real-world data.*
-
-3. To run self-supervised training:
-
-	```bash
-	python training.py "point_transformer" "002_master_chef_can" "self_supervised"
-	```
-	
-	*Note: this will overwrite the trained and saved model.*
-
-4. To run the supervised training on simulated data:
-	
-	```bash
-	python training.py "point_transformer" "002_master_chef_can" "supervised"
-	```
-	
-	*Note: this will overwrite the trained and saved model.*
-
+**Pre-training on Simulated Data** To run supervised training on simulated data: 
+```bash
+cd scripts/expt_ycb
+bash supervised_train.sh
+```
+This trains models for all objects in the ShapeNet dataset.
+If you want to train a model for a specific object, say 021_bleach_cleanser, then run:
+```bash
+cd c3po/expt_ycb
+python training.py "point_transformer" "021_bleach_cleanser" "supervised"
+```
 
 
 ## Datasets
