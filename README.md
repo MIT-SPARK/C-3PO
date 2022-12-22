@@ -1,8 +1,8 @@
-# Overview
+# Certifiable 3D Object Pose Estimation 
 
 Authors: Rajat Talak and Lisa Peng
 
-This is an open-source implementation of our work titled: "*Correct and Certify: A New Approach to Self-Supervised 3D Object Perception*".
+Certifiable 3D Object Pose Estimation (C-3PO) is an open-source implementation of our work titled: "*Correct and Certify: A New Approach to Self-Supervised 3D Object Perception*".
 This repo helps reproduce the experimental results reported in the paper and provides trained models for use.
 It solves the certifiable object pose estimation problem, where -- given a partial point cloud of an object -- the goal 
 is to estimate the object pose, fit a CAD model to the sensor data, and provide certification guarantees.
