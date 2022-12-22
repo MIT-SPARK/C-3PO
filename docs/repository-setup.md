@@ -55,7 +55,7 @@ has the structure:
 ```
 c3po
 │   
-└───expt_keypoint_corrector_analysis
+└───expt_corrector
 │   │    
 │   └───runs
 │       └───...
@@ -69,7 +69,7 @@ c3po
     └───...
 ``` 
 
-Place contents of folder c3po/expt_keypoint_corrector_analysis in 
-C-3PO/c3po/expt_keypoint_corrector_analysis, in the repo; and similarly for
-c3po/expt_shapenet and c3po/expt_ycb.
+Place contents of folder c3po/expt_corrector in 
+C-3PO/c3po/expt_corrector, in the repo; and similarly for
+c3po/expt_shapenet, c3po/expt_ycb, c3po/expt_categoryless, and c3po/expt_time.
 
