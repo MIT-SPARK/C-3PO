@@ -109,7 +109,7 @@ venv.bak/
 
 #
 /c3po/expt_corrector_compute_time_analysis_analysis/runs/
-/c3po/expt_keypoint_corrector_analysis/runs/
+/c3po/expt_corrector/runs/
 /c3po/expt_shapenet/airplane/
 /c3po/expt_shapenet/bathtub/
 /c3po/expt_shapenet/bed/
