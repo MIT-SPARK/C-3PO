@@ -47,8 +47,11 @@ Follow the steps below to download and save the relevant dataset.
 ## Pre-trained Models
 
 We provide trained models for you to either use or reproduce our results. 
-Download these from Google Drive [here]() and unzip the file. The unziped folder 
+Download these from Google Drive 
+[here](https://drive.google.com/file/d/1bOyMsT0xTZDhX8L-PjA41KdSz5ZLlgXj/view?usp=sharing) 
+and unzip the file. The unziped folder 
 has the structure:
+
 ```
 c3po
 │   
@@ -65,6 +68,7 @@ c3po
     │  
     └───...
 ``` 
+
 Place contents of folder c3po/expt_keypoint_corrector_analysis in 
 C-3PO/c3po/expt_keypoint_corrector_analysis, in the repo; and similarly for
 c3po/expt_shapenet and c3po/expt_ycb.

@@ -2,18 +2,34 @@
 
 Authors: Rajat Talak and Lisa Peng
 
-Certifiable 3D Object Pose Estimation (C-3PO) is an open-source implementation of our work titled: "*Correct and Certify: A New Approach to Self-Supervised 3D Object Perception*".
-This repo helps reproduce the experimental results reported in the paper and provides trained models for use.
-It solves the certifiable object pose estimation problem, where -- given a partial point cloud of an object -- the goal 
+Certifiable 3D Object Pose Estimation (C-3PO) is an open-source implementation of our paper: 
+"*Correct and Certify: A New Approach to Self-Supervised 3D Object Perception*".
+This repository helps reproduce the experimental results reported in the paper and provides trained models for use.
+
+Our work solves the certifiable object pose estimation problem, where -- given a partial point cloud of an object -- the goal 
 is to estimate the object pose, fit a CAD model to the sensor data, and provide certification guarantees.
 
 ## Paper 
 
-### R. Talak, L. Peng, L. Carlone, "Correct and Certify: A New Approach to Self-Supervised 3D-Object Perception," June 2022 [[arXiv](https://arxiv.org/abs/2206.11215)]
+### R. Talak, L. Peng, L. Carlone, Correct and Certify: A New Approach to Self-Supervised 3D-Object Perception, June 2022 [[arXiv](https://arxiv.org/abs/2206.11215)]
 
-**Abstract:** We consider a certifiable object pose estimation problem, where -- given a partial point cloud of an object -- the goal is to estimate the object pose, fit a CAD model to the sensor data, and provide certification guarantees. We solve this problem by combining (i) a novel self-supervised training approach, and (ii) a certification procedure, that not only verifies whether the output produced by the model is correct or not (i.e. *certifiability*), but also flags uniqueness of the produced solution (i.e. *strong certifiability*). We use a semantic keypoint-based pose estimation model, that is initially trained in simulation and does not perform well on real-data due to the domain gap. Our self-supervised training procedure uses a *corrector* and a *certification* module to improve the detector. The corrector module corrects the detected keypoints to compensate for the domain gap, and is implemented as a declarative layer, for which we develop a simple differentiation rule. The certification module declares whether the corrected output produced by the model is certifiable (i.e. correct) or not. At each iteration, the approach optimizes over the loss induced only by the certifiable input-output pairs. As training progresses, we see that the fraction of outputs that are certifiable increases, eventually reaching near 100% in many cases. We conduct extensive experiments to evaluate the performance of the corrector, the certification, and the proposed self-supervised training using the ShapeNet and YCB datasets, and show the proposed approach achieves performance comparable to fully supervised baselines while not using any annotation for supervision on real data. 
+**Abstract:** We consider a certifiable object pose estimation problem, where -- given a partial point cloud of an 
+object -- the goal is to estimate the object pose, fit a CAD model to the sensor data, and provide certification 
+guarantees. We solve this problem by combining (i) a novel self-supervised training approach, and (ii) a certification 
+procedure, that not only verifies whether the output produced by the model is correct or not (i.e. *certifiability*), 
+but also flags uniqueness of the produced solution (i.e. *strong certifiability*). We use a semantic keypoint-based 
+pose estimation model, that is initially trained in simulation and does not perform well on real-data due to the 
+domain gap. Our self-supervised training procedure uses a *corrector* and a *certification* module to improve the 
+detector. The corrector module corrects the detected keypoints to compensate for the domain gap, and is implemented 
+as a declarative layer, for which we develop a simple differentiation rule. The certification module declares 
+whether the corrected output produced by the model is certifiable (i.e. correct) or not. At each iteration, the 
+approach optimizes over the loss induced only by the certifiable input-output pairs. As training progresses, we see 
+that the fraction of outputs that are certifiable increases, eventually reaching near 100% in many cases. We conduct 
+extensive experiments to evaluate the performance of the corrector, the certification, and the proposed self-supervised 
+training using the ShapeNet and YCB datasets, and show the proposed approach achieves performance comparable to fully 
+supervised baselines while not using any annotation for supervision on real data. 
 
-**Citation** If you find our project useful, do not hesitate, to cite our paper.
+If you find this repository useful, do cite our work:
 
 ```bibtex
 @article{Talak22arxiv-correctAndCertify,
