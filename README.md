@@ -56,7 +56,7 @@ cd C-3PO/
 conda env create -f environment.yml
 conda activate c3po
 ```
-Setup the repository with dataset and downloaded pre-trained models. See instructions [here]()
+Setup the repository with dataset and downloaded pre-trained models. See instructions [here](docs/repository-setup.md)
 
 ## Experiments
 
