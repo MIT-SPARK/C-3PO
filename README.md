@@ -6,12 +6,12 @@ Certifiable 3D Object Pose Estimation (C-3PO) is an open-source implementation o
 "*Correct and Certify: A New Approach to Self-Supervised 3D Object Perception*".
 This repository helps reproduce the experimental results reported in the paper and provides trained models for use.
 
+## Paper 
+
 Our work solves the certifiable object pose estimation problem, where -- given a partial point cloud of an object -- the goal 
 is to estimate the object pose, fit a CAD model to the sensor data, and provide certification guarantees.
 
-## Paper 
-
-### R. Talak, L. Peng, L. Carlone, Correct and Certify: A New Approach to Self-Supervised 3D-Object Perception, June 2022 [[arXiv](https://arxiv.org/abs/2206.11215)]
+#### R. Talak, L. Peng, L. Carlone, Correct and Certify: A New Approach to Self-Supervised 3D-Object Perception, June 2022 [[arXiv](https://arxiv.org/abs/2206.11215)]
 
 **Abstract:** We consider a certifiable object pose estimation problem, where -- given a partial point cloud of an 
 object -- the goal is to estimate the object pose, fit a CAD model to the sensor data, and provide certification 
@@ -60,6 +60,16 @@ Setup the repository with dataset and downloaded pre-trained models. See instruc
 
 ## Experiments
 
+### Data Analysis
+This analysis is to show the distribution of pose transformation error --namely, rotation and translation error-- 
+induced in the pose estimation dataset. The performance of several baselines critically depend on this distribution.
+
+To see this distribution:
+```bash
+cd results/data_analysis
+jupyter notebook data_analysis.ipynb
+```
+
 ### Keypoint Corrector Analysis
 
 #### Description 
@@ -70,13 +80,13 @@ To replicate our results do the following.
 
 Run experiments and save performance metrics for plot generation.
 ```bash
-cd scripts/expt_keypoint_corrector_analysis/
+cd scripts/expt_keypoint_corrector_analysis
 bash analyze.sh
 ```
 
 Generate plots from saved data: 
 ```bash
-cd results/expt_keypoint_corrector_analysis/
+cd results/expt_keypoint_corrector_analysis
 jupyter notebook results.ipynb
 ```
 
