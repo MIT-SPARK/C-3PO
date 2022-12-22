@@ -211,7 +211,7 @@ def run_experiments_on(class_id, model_id):
 
     # batch range
     # batch_range = [1, 5, 10]
-    batch_range = [1, 5, 10, 25, 50, 75, 100, 150, 200]
+    batch_range = [1, 5, 10, 25, 50, 75, 100, 150]
     # batch_range = [1, 5, 10, 100, 500]
 
     print("-" * 40)
