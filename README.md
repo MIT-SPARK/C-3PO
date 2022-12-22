@@ -9,7 +9,7 @@ is to estimate the object pose, fit a CAD model to the sensor data, and provide 
 
 ## Paper 
 
-### R. Talak, L. Peng, L. Carlone, "Correct and Certify: A New Approach to Self-Supervised 3D-Object Perception,". [arXiv:2206.11215](https://arxiv.org/abs/2206.11215) [cs.CV], Jun. 2022.
+### R. Talak, L. Peng, L. Carlone, "Correct and Certify: A New Approach to Self-Supervised 3D-Object Perception," June 2022 [[arXiv](https://arxiv.org/abs/2206.11215)]
 
 **Abstract:** We consider a certifiable object pose estimation problem, where -- given a partial point cloud of an object -- the goal is to estimate the object pose, fit a CAD model to the sensor data, and provide certification guarantees. We solve this problem by combining (i) a novel self-supervised training approach, and (ii) a certification procedure, that not only verifies whether the output produced by the model is correct or not (i.e. *certifiability*), but also flags uniqueness of the produced solution (i.e. *strong certifiability*). We use a semantic keypoint-based pose estimation model, that is initially trained in simulation and does not perform well on real-data due to the domain gap. Our self-supervised training procedure uses a *corrector* and a *certification* module to improve the detector. The corrector module corrects the detected keypoints to compensate for the domain gap, and is implemented as a declarative layer, for which we develop a simple differentiation rule. The certification module declares whether the corrected output produced by the model is certifiable (i.e. correct) or not. At each iteration, the approach optimizes over the loss induced only by the certifiable input-output pairs. As training progresses, we see that the fraction of outputs that are certifiable increases, eventually reaching near 100% in many cases. We conduct extensive experiments to evaluate the performance of the corrector, the certification, and the proposed self-supervised training using the ShapeNet and YCB datasets, and show the proposed approach achieves performance comparable to fully supervised baselines while not using any annotation for supervision on real data. 
 
@@ -40,7 +40,7 @@ cd C-3PO/
 conda env create -f environment.yml
 conda activate c3po
 ```
-
+Setup the repository with dataset and downloaded pre-trained models. See instructions [here]()
 
 ## Experiments
 
@@ -81,7 +81,7 @@ This experiment shows the success of the proposed self-supervised training on a 
 
 The proposed model requires one to specify the object category and the architecture used for the keypoint detector. We show how to train and evaluate the proposed model for **object**: *chair* and **keypoint detector**: *point transformer*. 
 
-**Evaluate.** Trained models are saved in the repo. Evaluate and visualize the results with:
+Trained models are saved in the repository. Evaluate and visualize the results with:
 ```bash
 cd scripts/expt_shapenet
 bash evaluate_real.sh
@@ -91,32 +91,7 @@ cd ../../
 cd results/expt_shapenet_ycb
 jupyter notebook results.ipynb
 ```
-
-**Self-Supervised Training.** To train the models run:
-```bash
-cd scripts/expt_shapenet
-bash self_supervised_train.sh
-```
-This trains models for all objects in the ShapeNet dataset.
-If you want to train a model for a specific object, say chair, then run:
-```bash
-cd c3po/expt_shapenet
-python training.py "point_transformer" "chair" "self_supervised"
-```
-Note that running self-supervised training will overwrite the trained and saved models.
-
-**Pre-training on Simulated Data** To run supervised training on simulated data: 
-```bash
-cd scripts/expt_shapenet
-bash supervised_train.sh
-```
-This trains models for all objects in the ShapeNet dataset.
-If you want to train a model for a specific object, say bottle, then run:
-```bash
-cd c3po/expt_shapenet
-python training.py "point_transformer" "bottle" "supervised"
-```
-
+For training models see instructions [here](docs/training-models.md).
 
 
 ### The YCB Experiment 
@@ -127,7 +102,7 @@ This experiment shows that the proposed self-supervised training method also wor
 #### Replication
 The proposed model requires one to specify the object category and the architecture used for the keypoint detector. We show how to train and evaluate the proposed model for **object**: *002\_master\_chef\_can* and **keypoint detector**: *point transformer*. 
 
-**Evaluate.** Trained models are saved in the repo. Evaluate and visualize the results with:
+Trained models are saved in the repository. Evaluate and visualize the results with:
 ```bash
 cd scripts/expt_ycb
 bash evaluate.sh
@@ -136,71 +111,7 @@ cd ../../
 cd results/expt_shapenet_ycb
 jupyter notebook results.ipynb
 ```
-
-**Self-Supervised Training.** To train the models run:
-```bash
-cd scripts/expt_ycb
-bash self_supervised_train.sh
-```
-This trains models for all objects in the YCB dataset.
-If you want to train a model for a specific object, say 004_sugar_box, then run:
-```bash
-cd c3po/expt_ycb
-python training.py "point_transformer" "004_sugar_box" "self_supervised"
-```
-Note that running self-supervised training will overwrite the trained and saved models.
-
-**Pre-training on Simulated Data** To run supervised training on simulated data: 
-```bash
-cd scripts/expt_ycb
-bash supervised_train.sh
-```
-This trains models for all objects in the ShapeNet dataset.
-If you want to train a model for a specific object, say 021_bleach_cleanser, then run:
-```bash
-cd c3po/expt_ycb
-python training.py "point_transformer" "021_bleach_cleanser" "supervised"
-```
-
-
-## Datasets
-
-Our experiments rely on  the [ShapeNet](https://shapenet.org/), [KeypointNet](https://github.com/qq456cvb/KeypointNet), and the [YCB](https://www.ycbbenchmarks.com/object-models/) datasets. Please view ShapeNet's terms of use [here](https://shapenet.org/terms). 
-
-There's no need to download the datasets seperately. Our experiments use a processed version of these datasets. Follow the steps below to download and save the relevant dataset. 
-
-1. Download our processed dataset files on Google Drive [here](https://drive.google.com/drive/folders/1EYa8B0dID1vk9bze93pzil8rVj2-fYb5?usp=sharing) and move all the files to the same directory this README is in (the C3PO repo). We've provided the dataset as a zip archive split into 1GB chunks of the format ```c3po-data.z**```.
-
-2. Combine the archives into one zip file: 
-	```bash 
-	zip -F c3po-data.zip --out data.zip
-	```
-
-3. Unzip the file:
-	```bash
-	unzip data.zip
-	```
-
-4. Verify your directory structure looks as follows:
-
-	```
-	C3PO
-	│   README.md
-	│   c3po   
-	│   setup.py
-	└───data
-	│   │   learning-objects
-	│   |   └───...
-	│   │
-	│   │   KeypointNet
-	│   |   └───...
-	│   │
-	│   └───ycb
-	│       │   models
-	│       └───...
-	│   
-	└───...
-	```
+For training models see instructions [here](docs/training-models.md).
 
 
 ## License
