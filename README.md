@@ -80,17 +80,19 @@ the corrector forward pass per noise variance parameter are saved for plot gener
 
 #### Replication
 [//]: # (To replicate our results do the following. )
-To run experiments and save performance metrics for plot generation.
+To generate plots from the saved data: 
+```bash
+cd results/expt_corrector
+jupyter notebook results.ipynb
+```
+
+To re-run the experiment and save performance metrics for plot generation:
 ```bash
 cd scripts/expt_corrector
 bash analyze.sh
 ```
 
-Generate plots from saved data: 
-```bash
-cd results/expt_corrector
-jupyter notebook results.ipynb
-```
+
 
 [//]: # (|<img src="docs/media/table-adds.jpg" width="100%">|<img src="docs/media/vessel-adds.jpg" width="100%">|<img src="docs/media/skateboard-adds.jpg" width="100%">|)
 
@@ -110,16 +112,19 @@ of our proposed model in matching a supervised baseline, without using any annot
 #### Replication
 [//]: # (The proposed model requires one to specify the object category and the architecture used for the keypoint detector. We show how to train and evaluate the proposed model for **object**: *chair* and **keypoint detector**: *point transformer*. )
 
-Trained models are saved in the repository. Evaluate and visualize the results with:
+Trained and evaluated models are saved in the repository. Visualize the results by:
 ```bash
-cd scripts/expt_shapenet
-bash evaluate_real.sh
-bash evaluate_sim.sh
-
-cd ../../
 cd results/expt_shapenet_ycb
 jupyter notebook results.ipynb
 ```
+
+Evaluate the trained models with:
+```bash
+cd scripts/expt_shapenet
+bash evaluate_real.sh
+bash evaluate_sim.sh 
+```
+
 For training models see instructions [here](docs/training-models.md).
 
 
@@ -133,14 +138,16 @@ performance of a supervised baseline, without using any annotations for training
 #### Replication
 [//]: # (The proposed model requires one to specify the object category and the architecture used for the keypoint detector. We show how to train and evaluate the proposed model for **object**: *002\_master\_chef\_can* and **keypoint detector**: *point transformer*. )
 
-Trained models are saved in the repository. Evaluate and visualize the results with:
+Trained and evaluated models are saved in the repository. Visualize the results by:
+```bash
+cd results/expt_shapenet_ycb
+jupyter notebook results.ipynb
+```
+
+Evaluate the trained models with:
 ```bash
 cd scripts/expt_ycb
 bash evaluate.sh
-
-cd ../../
-cd results/expt_shapenet_ycb
-jupyter notebook results.ipynb
 ```
 For training models see instructions [here](docs/training-models.md).
 
@@ -152,23 +159,37 @@ The proposed self-supervised training works even when the unannotated data does 
 This experiment validates it. 
 
 #### Replication
+Trained and evaluated models are saved in the repository. Visualize the results by: 
+```bash
+cd results/expt_categoryless
+jupyter notebook results.ipynb
+```
+
+Evaluate the trained models with:
+```bash
+cd scripts/expt_categoryless
+bash evaluate_shapenet.sh
+bash evaluate_ycb.sh
+```
+
+For training models see instructions [here](docs/training-models.md).
 
 
 ### Corrector Compute Time Analysis
 We implement a constant step size batch gradient descent to solve the corrector optimization problem in the forward pass. 
 We show that this results in faster forward compute time, in training. The analysis here validates it.
 
-To analyze compute time --time to solve the corrector optimization problem-- per data point in a batch,
-as a function of the batch size, run:
-```bash
-cd scripts/expt_compute
-bash analyze.sh
-```
-
 To plot the results, run:
 ```bash
 cd results/expt_compute
 bash plot.sh
+```
+
+To analyze (again, for yourself) the compute time --i.e. the time to solve the corrector optimization problem-- per data point in a batch,
+as a function of the batch size, run:
+```bash
+cd scripts/expt_compute
+bash analyze.sh
 ```
 
 

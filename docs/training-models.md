@@ -54,3 +54,12 @@ If you want to train a model for a specific object, say 021_bleach_cleanser, the
 cd c3po/expt_ycb
 python training.py "point_transformer" "021_bleach_cleanser" "supervised"
 ```
+
+### Categoryless Self-Supervised Training Experiment
+
+To train the models, run:
+```bash
+cd scripts/expt_categoryless
+bash train_shapenet.sh
+bash train_ycb.sh
+```
