@@ -51,7 +51,7 @@ If you find this repository useful, do cite our work:
 
 Clone the repository and install a conda environment from the yml file:
 ```bash
-git clone https://github.com/MIT-SPARK/C-3PO.git 
+git clone --depth 1 https://github.com/MIT-SPARK/C-3PO.git 
 cd C-3PO/
 conda env create -f environment.yml
 conda activate c3po
