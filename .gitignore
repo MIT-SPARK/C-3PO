@@ -161,3 +161,6 @@ venv.bak/
 /c3po/expt_categoryless/skateboard/
 /c3po/expt_categoryless/table/
 /c3po/expt_compute/runs/
+/c3po/extra/
+/results/data_analysis/rerr.png
+/results/data_analysis/terr.png
