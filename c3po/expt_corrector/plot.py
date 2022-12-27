@@ -156,7 +156,7 @@ def certification(data, epsilon, delta, num_iterations=100, full_batch=False):
     return certi_naive, certi_corrector
 
 
-def expt_wrapper(class_id, model_id, use_adds_metric=True):
+def expt_wrapper(class_id, model_id, show_plots=True):
 
     _dir_name =  str(BASE_DIR) + "/runs/" + class_id + '/' + model_id + '_wchamfer' + '/'
     for file in os.listdir(_dir_name):
@@ -190,10 +190,10 @@ def expt_wrapper(class_id, model_id, use_adds_metric=True):
         # CALCULATE CERTIFIABILITY METRICS DYNAMICALLY, NOT SAVED DURING EXPERIMENTS
         epsilon = .99
         delta = .7
-        fig_save_folder = '/'.join(name.split('/')[:-1] + ['eps' + str(epsilon)[2:]])
-        if not os.path.exists(fig_save_folder):
-            os.makedirs(fig_save_folder)
-        fig_save_prefix = fig_save_folder + '/' + name.split('/')[-1]
+        # fig_save_folder = '/'.join(name.split('/')[:-1] + ['eps' + str(epsilon)[2:]])
+        # if not os.path.exists(fig_save_folder):
+        #     os.makedirs(fig_save_folder)
+        # fig_save_prefix = fig_save_folder + '/' + name.split('/')[-1]
         # print("figures will be saved at filepath:", fig_save_prefix)
         certi_naive, certi_corrector = certification(data, epsilon=epsilon, delta=delta, full_batch=True)
         certi_naive = certi_naive.to('cpu')
@@ -276,20 +276,25 @@ def expt_wrapper(class_id, model_id, use_adds_metric=True):
         chamfer_metric_naive_certi_var = torch.sqrt(chamfer_metric_naive_certi_var).T
         chamfer_metric_corrected_certi_var = torch.sqrt(chamfer_metric_corrected_certi_var).T
 
+        #
+        if not os.path.exists('./runs'):
+            os.makedirs('./runs')
+
         # plotting chamfer metric
+        object_ = CLASS_NAME[class_id]
         # if use_adds_metric:
         fig = plt.figure()
         plt.errorbar(x=kp_noise_var_range, y=chamfer_metric_naive_mean, yerr=chamfer_metric_naive_var,
                      fmt='-x', color='black', ecolor='gray', elinewidth=1, capsize=3, label='naive')
         plt.errorbar(x=kp_noise_var_range, y=chamfer_metric_naive_certi_mean, yerr=chamfer_metric_naive_certi_var,
                      fmt='--o', color='grey', ecolor='lightgray', elinewidth=3, capsize=0,
-                     label='naive + certification')
+                     label='naive + oc = 1')
         plt.errorbar(x=kp_noise_var_range, y=chamfer_metric_corrected_mean, yerr=chamfer_metric_corrected_var,
                      fmt='-x', color='red',
                      ecolor='salmon', elinewidth=1, capsize=3, label='corrector')
         plt.errorbar(x=kp_noise_var_range, y=chamfer_metric_corrected_certi_mean,
                      yerr=chamfer_metric_corrected_certi_var, fmt='--o',
-                     color='orangered', ecolor='salmon', elinewidth=3, capsize=0, label='corrector + certification')
+                     color='orangered', ecolor='salmon', elinewidth=3, capsize=0, label='corrector + oc = 1')
         # alternate colors
         # plt.errorbar(x=kp_noise_var_range, y=chamfer_metric_naive_mean, yerr=chamfer_metric_naive_var,
         #              fmt='-', color='red', ecolor='red', elinewidth=1, capsize=3, label='naive')
@@ -304,11 +309,12 @@ def expt_wrapper(class_id, model_id, use_adds_metric=True):
         # plt.title(title)
         plt.xlabel('Noise variance parameter $\sigma$')
         plt.ylabel('Normalized ADD-S')
-        plt.show()
+        if show_plots:
+            plt.show()
         # timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         # rand_string = generate_filename()
-        # filename = fig_save_folder + '/' + 'chamfer_metric_plot.jpg'
-        # fig.savefig(filename)
+        filename = './runs/' + object_ + '-adds.jpg'
+        fig.savefig(filename)
         plt.close(fig)
 
         # plotting rotation errors
@@ -317,22 +323,23 @@ def expt_wrapper(class_id, model_id, use_adds_metric=True):
                      ecolor='gray',
                      elinewidth=1, capsize=3, label='naive')
         plt.errorbar(x=kp_noise_var_range, y=Rerr_naive_certi_mean, yerr=Rerr_naive_certi_var, fmt='--o', color='grey',
-                     ecolor='lightgray', elinewidth=3, capsize=0, label='naive + certification')
+                     ecolor='lightgray', elinewidth=3, capsize=0, label='naive + oc = 1')
         plt.errorbar(x=kp_noise_var_range, y=Rerr_corrector_mean, yerr=Rerr_corrector_var, fmt='-x', color='red',
                      ecolor='salmon', elinewidth=1, capsize=3, label='corrector')
         plt.errorbar(x=kp_noise_var_range, y=Rerr_corrector_certi_mean, yerr=Rerr_corrector_certi_var, fmt='--o',
-                     color='orangered', ecolor='salmon', elinewidth=3, capsize=0, label='corrector + certification')
+                     color='orangered', ecolor='salmon', elinewidth=3, capsize=0, label='corrector + oc = 1')
 
         plt.legend(loc='upper left')
         # title = 'CAD model: ' + cad_model_name + ', Noise: ' + kp_noise_type + f' with fra={kp_noise_fra:.2f}'
         # plt.title(title)
         plt.xlabel('Noise variance parameter $\sigma$')
         plt.ylabel('Rotation error')
-        plt.show()
+        if show_plots:
+            plt.show()
         # timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         # rand_string = generate_filename()
-        # filename = fig_save_folder + '/' + 'rotation_error_plot.jpg'
-        # fig.savefig(filename)
+        filename = './runs/' + object_ + '-rerr.jpg'
+        fig.savefig(filename)
         plt.close(fig)
 
         # Plotting translation errors
@@ -341,22 +348,23 @@ def expt_wrapper(class_id, model_id, use_adds_metric=True):
                      ecolor='gray',
                      elinewidth=1, capsize=3, label='naive')
         plt.errorbar(x=kp_noise_var_range, y=terr_naive_certi_mean, yerr=terr_naive_certi_var, fmt='--o', color='grey',
-                     ecolor='lightgray', elinewidth=3, capsize=0, label='naive + certification')
+                     ecolor='lightgray', elinewidth=3, capsize=0, label='naive + oc = 1')
         plt.errorbar(x=kp_noise_var_range, y=terr_corrector_mean, yerr=terr_corrector_var, fmt='-x', color='red',
                      ecolor='salmon', elinewidth=1, capsize=3, label='corrector')
         plt.errorbar(x=kp_noise_var_range, y=terr_corrector_certi_mean, yerr=terr_corrector_certi_var, fmt='--o',
-                     color='salmon', ecolor='orangered', elinewidth=3, capsize=0, label='corrector + certification')
+                     color='salmon', ecolor='orangered', elinewidth=3, capsize=0, label='corrector + oc = 1')
 
         plt.legend(loc='upper left')
         # title = 'CAD model: ' + cad_model_name + ', Noise: ' + kp_noise_type + f' with fra={kp_noise_fra:.2f}'
         # plt.title(title)
         plt.xlabel('Noise variance parameter $\sigma$')
         plt.ylabel('Translation error')
-        plt.show()
+        if show_plots:
+            plt.show()
         # timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         # rand_string = generate_filename()
-        # filename = fig_save_folder + '/' + 'translation_error_plot.jpg'
-        # fig.savefig(filename)
+        filename = './runs/' + object_ + '-terr.jpg'
+        fig.savefig(filename)
         plt.close(fig)
 
         # Plotting fraction not certified
@@ -373,18 +381,19 @@ def expt_wrapper(class_id, model_id, use_adds_metric=True):
         #              fmt='o', color='red', ecolor='orangered', elinewidth=1, capsize=3)
         plt.legend(loc='upper left')
         plt.xlabel('Noise variance parameter $\sigma$')
-        plt.ylabel('Fraction not certifiable')
+        plt.ylabel('Fraction not obs. correct (oc = 0)')
         # title = 'CAD model: ' + cad_model_name + ', Noise: ' + kp_noise_type + f' with fra={kp_noise_fra:.2f}'
         # plt.title(title)
-        plt.show()
+        if show_plots:
+            plt.show()
         # timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         # rand_string = generate_filename()
-        # filename = fig_save_folder + '/' + 'fraction_not_certifiable_plot.jpg'
-        # fig.savefig(filename)
+        filename = './runs/' + object_ + '-cert.jpg'
+        fig.savefig(filename)
         plt.close(fig)
 
 
-def plot(class_name):
+def plot(class_name, show_plots=True):
 
     class_id = CLASS_ID[class_name]
 
@@ -395,7 +404,7 @@ def plot(class_name):
     else:
         model_id = model_class_ids[class_name]
 
-    expt_wrapper(class_id=class_id, model_id=model_id, use_adds_metric=True)
+    expt_wrapper(class_id=class_id, model_id=model_id, show_plots=show_plots)
 
 
 if __name__ == '__main__':
