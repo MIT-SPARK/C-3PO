@@ -362,6 +362,76 @@ def plot_terr(data):
     return None
 
 
+def pointnet_vs_pt_latex():
+
+    # extract data
+    my_dataset = "shapenet.real.hard"
+    my_detectors = ["point_transformer", "pointnet"]
+    base_folder = "../../c3po/expt_shapenet"
+    #
+
+    data = dict()
+    for object_ in shapenet_objects:
+
+        my_baselines = []
+        my_files = []
+        data[object_] = dict()
+
+        for detector_ in my_detectors:
+            _filename = base_folder + '/eval/c3po/' + detector_ + '/' + my_dataset + '/' \
+                        + object_ + '/eval_data.pkl'
+
+            if os.path.isfile(_filename):
+                my_baselines.append(detector_)
+                my_files.append(_filename)
+
+            else:
+                print(_filename)
+
+        #
+        d = extract_data(my_files, my_baselines, my_adds_th=0.05, my_adds_auc_th=0.10)
+
+        for key in d.keys():
+            # print(key)
+            data[object_][key] = dict()
+            data[object_][key]['ADD-S'] = 100 * d[key]['adds_th_score']
+            data[object_][key]['ADD-S AUC'] = 100 * d[key]['adds_auc']
+            data[object_][key]['oc'] = 100 * d[key]['oc'].sum() / len(d[key]['oc'])
+
+    # creating and saving latex table
+    lines = []
+    lines.append("\\begin{tabular}{|l|rrr|l|}")
+    lines.append("\\toprule")
+    lines.append("Object & ADD-S & ADD-S AUC & \\% oc=1 & keypoint detector \\\\")
+    lines.append("\\midrule")
+
+    for idx, obj_ in enumerate(data.keys()):
+        adds_pt = data[obj_]['point_transformer']['ADD-S']
+        auc_pt = data[obj_]['point_transformer']['ADD-S AUC']
+        oc_pt = data[obj_]['point_transformer']['oc']
+        adds_pn = data[obj_]['pointnet']['ADD-S']
+        auc_pn = data[obj_]['pointnet']['ADD-S AUC']
+        oc_pn = data[obj_]['pointnet']['oc']
+
+        lines.append(f"\\multirow{{2}}{{*}}{{{obj_}}}")
+        lines.append(f"& {adds_pt:.2f} & {auc_pt:.2f} & {oc_pt:.2f} & Point Transformer \\\\")
+        lines.append(f"& {adds_pn:.2f} & {auc_pn:.2f} & {oc_pn:.2f} & PointNet++ \\\\")
+
+        if idx == len(data.keys()) - 1:
+            lines.append("\\bottomrule")
+        else:
+            lines.append("\\midrule")
+
+    lines.append("\\end{tabular}")
+
+    # saving
+    filename_ = "runs/pn_vs_pt.tex"
+    with open(filename_, "w") as f:
+        f.write('\n'.join(lines))
+
+    return data
+
+
 if __name__ == "__main__":
 
     my_dataset = "shapenet"
