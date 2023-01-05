@@ -114,8 +114,8 @@ def update_pos_tensor_to_keypoint_markers(vis, keypoints, keypoint_markers):
         keypoint_markers[i].translate(keypoints[i], relative=False)
         vis.update_geometry(keypoint_markers[i])
         vis.poll_events()
-        vis.update_renderer()
-    print("FINISHED UPDATING KEYPOINT MARKERS IN CORRECTOR")
+        # vis.update_renderer()
+    # print("FINISHED UPDATING KEYPOINT MARKERS IN CORRECTOR")
     return keypoint_markers
 
 def display_results(input_point_cloud, detected_keypoints, target_point_cloud, target_keypoints=None, render_text=False):

@@ -2,6 +2,9 @@
 This implements the keypoint correction with registration
 
 """
+import copy
+import pickle
+
 import numpy as np
 import open3d as o3d
 import os
@@ -23,7 +26,13 @@ from c3po.utils.visualization_utils import display_two_pcs, update_pos_tensor_to
 from c3po.utils.loss_functions import chamfer_loss, keypoints_loss
 from c3po.utils.evaluation_metrics import shape_error, translation_error, rotation_euler_error
 
+from c3po.utils.visualization_utils import visualize_model_n_keypoints
+from c3po.utils.general import pos_tensor_to_o3d
 from c3po.models.modelgen import ModelFromShape
+
+from c3po.utils.loss_functions import certify
+from c3po.utils.evaluation_metrics import is_pcd_nondegenerate
+from c3po.datasets.shapenet import MODEL_TO_KPT_GROUPS as MODEL_TO_KPT_GROUPS_SHAPENET
 
 
 def registration_eval(R, R_, t, t_):
@@ -58,7 +67,8 @@ def keypoint_perturbation(keypoints_true, var=0.8, fra=0.2):
 
 
 class kp_corrector_reg:
-    def __init__(self, cad_models, model_keypoints, theta=50.0, kappa=10.0, algo='torch', animation_update=False, vis=None):
+    def __init__(self, cad_models, model_keypoints, theta=50.0, kappa=10.0, algo='torch',
+                 animation_update=False, vis=None, model_mesh=None, class_name=None, hyper_param=None):
         super().__init__()
         """
         cad_models      : torch.tensor of shape (1, 3, m)
@@ -73,8 +83,50 @@ class kp_corrector_reg:
         self.device_ = model_keypoints.device
         self.animation_update = animation_update
         self.vis = vis
+        self.model_mesh = model_mesh
+        self.mesh_ = copy.deepcopy(model_mesh)
+        self.class_name = class_name
+        self.hyper_param = hyper_param
 
-        self.markers = None
+        if self.vis:
+            point_cloud = cad_models[0, ...]
+            keypoints = model_keypoints[0, ...].cpu()
+
+            point_cloud = pos_tensor_to_o3d(pos=point_cloud)
+            point_cloud = point_cloud.paint_uniform_color([0.0, 0.0, 1])
+            point_cloud.estimate_normals()
+            keypoints = keypoints.transpose(0, 1).numpy()
+
+            d = 0
+            for model in [point_cloud]:
+                max_bound = model.get_max_bound()
+                min_bound = model.get_min_bound()
+                d = max(np.linalg.norm(max_bound - min_bound, ord=2), d)
+
+            keypoint_radius = 0.01 * d
+
+            keypoint_markers = []
+            for xyz in keypoints:
+                new_mesh = o3d.geometry.TriangleMesh.create_sphere(radius=keypoint_radius)
+                new_mesh.translate(xyz)
+                new_mesh.paint_uniform_color([0.8, 0.0, 0.0])
+                keypoint_markers.append(new_mesh)
+
+            self.markers = keypoint_markers
+            # breakpoint()
+            # o3d.visualization.draw_geometries_with_animation_callback()
+            self.vis = o3d.visualization.Visualizer()
+            self.vis.create_window()
+            self.vis.add_geometry(self.mesh_)
+            # self.vis.add_geometry(point_cloud)
+            # breakpoint()
+            for marker_ in self.markers:
+                self.vis.add_geometry(marker_)
+            self.vis.run()
+            # self.vis.poll_events()
+            # self.vis.update_renderer()
+        else:
+            self.markers = None
 
         self.point_set_registration_fn = PointSetRegistration(source_points=self.model_keypoints)
 
@@ -192,6 +244,7 @@ class kp_corrector_reg:
         outputs:
         correction          : torch.tensor of shape (B, 3, N)
         """
+        # breakpoint()
         def _get_objective_jacobian(fun, x):
 
             torch.set_grad_enabled(True)
@@ -214,6 +267,19 @@ class kp_corrector_reg:
         # tol = tol
         # lr = lr
 
+        if self.vis is not None and self.animation_update and self.markers is not None:
+            pc = pos_tensor_to_o3d(pos=input_point_cloud[0, ...])
+            pc = pc.paint_uniform_color([1.0, 1.0, 1.0])
+            pc.estimate_normals()
+            self.vis.add_geometry(pc)
+
+            data = dict()
+            data['input_pc'] = input_point_cloud
+            data['cad_model'] = self.cad_models
+            # data['mesh_model'] = self.model_mesh
+            data['model_keypoints'] = self.model_keypoints
+            data['class_name'] = self.class_name
+
         iter = 0
         obj_ = f(correction)
         flag = torch.ones_like(obj_).to(dtype=torch.bool)
@@ -223,8 +289,47 @@ class kp_corrector_reg:
 
             iter += 1
             if self.vis is not None and self.animation_update and self.markers is not None:
-                self.markers = update_pos_tensor_to_keypoint_markers(self.vis, detected_keypoints + correction, self.markers)
-                print("ATTEMPTED TO UPDATE VIS")
+
+                # if iter in [0, 1, 2, 5, 10, 20]:
+                print("Corrector iteration: ", iter)
+                kp = detected_keypoints + correction
+                self.markers = update_pos_tensor_to_keypoint_markers(self.vis, kp.detach(),
+                                                                     self.markers)
+
+                R, t = self.point_set_registration_fn.forward(detected_keypoints + correction)
+                self.vis.remove_geometry(self.mesh_)
+                self.mesh_ = copy.deepcopy(self.model_mesh)
+                self.mesh_ = self.mesh_.rotate(R[0, ...].detach().to('cpu').numpy())
+                self.mesh_ = self.mesh_.translate(t[0, ...].detach().to('cpu').numpy(), relative=False)
+
+                self.vis.add_geometry(self.mesh_)
+                self.vis.poll_events()
+                # self.vis.update_renderer()
+
+                predicted_point_cloud = R @ self.cad_models + t
+                predicted_model_keypoints = R @ self.model_keypoints + t
+                predicted_keypoints = kp
+                certi = certify(input_point_cloud=input_point_cloud,
+                                predicted_point_cloud=predicted_point_cloud,
+                                corrected_keypoints=predicted_keypoints,
+                                predicted_model_keypoints=predicted_model_keypoints,
+                                epsilon=self.hyper_param['epsilon'])
+
+                nondeg = is_pcd_nondegenerate(self.class_name, input_point_cloud, predicted_model_keypoints,
+                                              MODEL_TO_KPT_GROUPS_SHAPENET)
+                print("obs. correct: ", certi)
+                print("non-degenerate: ", nondeg)
+                # print("ATTEMPTED TO UPDATE VIS")
+                # time.sleep(1)
+
+                data[iter] = {
+                    'R': R,
+                    't': t,
+                    'oc': certi,
+                    'nd': nondeg,
+                    'corrected_kp': kp
+                }
+
             obj = obj_
 
             dfdcorrection = _get_objective_jacobian(f, correction)
@@ -238,6 +343,10 @@ class kp_corrector_reg:
                 flag = (obj-obj_).abs() > tol
                 # flag_idx = flag.nonzero()
                 flag = flag.unsqueeze(-1).repeat(1, 3, N)
+
+        if self.vis:
+            with open('eval/vis_' + self.class_name + '.pkl', 'wb') as fp:
+                pickle.dump(data, fp)
 
         return correction
 

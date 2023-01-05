@@ -28,6 +28,9 @@ from c3po.utils.loss_functions import certify, self_supervised_training_loss as 
 from c3po.utils.evaluation_metrics import add_s_error
 from c3po.expt_shapenet.evaluation import evaluate
 from c3po.expt_shapenet.proposed_model import ProposedRegressionModel as ProposedModel
+from c3po.datasets.shapenet import get_model_and_keypoints
+from c3po.datasets.visualization import DepthPCVis
+
 
 # Train
 def self_supervised_train_one_epoch(training_loader, model, optimizer, device, hyper_param):
@@ -308,6 +311,10 @@ def visual_test(test_loader, model, hyper_param, device=None):
         R_target = R_target.to(device)
         t_target = t_target.to(device)
 
+        #
+        print("R ground-truth: ", R_target)
+        print("t ground-truth: ", t_target)
+
         # Make predictions for this batch
         model.eval()
         predicted_point_cloud, predicted_keypoints, R_predicted, t_predicted, _, predicted_model_keypoints \
@@ -334,15 +341,15 @@ def visual_test(test_loader, model, hyper_param, device=None):
         pc_t = pc_t.clone().detach().to('cpu')
         kp = keypoints_target.clone().detach().to('cpu')
         kp_p = predicted_keypoints.clone().detach().to('cpu')
-        print("DISPLAY: INPUT PC")
-        display_results(input_point_cloud=pc, detected_keypoints=None, target_point_cloud=None,
-                        target_keypoints=kp)
-        print("DISPLAY: INPUT AND PREDICTED PC")
-        display_results(input_point_cloud=pc, detected_keypoints=kp_p, target_point_cloud=pc_p,
-                        target_keypoints=kp)
-        print("DISPLAY: TRUE AND PREDICTED PC")
-        display_results(input_point_cloud=pc_t, detected_keypoints=kp_p, target_point_cloud=pc_p,
-                        target_keypoints=kp)
+        # print("DISPLAY: INPUT PC")
+        # display_results(input_point_cloud=pc, detected_keypoints=None, target_point_cloud=None,
+        #                 target_keypoints=kp)
+        # print("DISPLAY: INPUT AND PREDICTED PC")
+        # display_results(input_point_cloud=pc, detected_keypoints=kp_p, target_point_cloud=pc_p,
+        #                 target_keypoints=kp)
+        # print("DISPLAY: TRUE AND PREDICTED PC")
+        # display_results(input_point_cloud=pc_t, detected_keypoints=kp_p, target_point_cloud=pc_p,
+        #                 target_keypoints=kp)
 
         del pc, pc_p, kp, kp_p, pc_t
         del input_point_cloud, keypoints_target, R_target, t_target, \
@@ -360,6 +367,10 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
     """
 
     """
+    if visualize:
+        model_mesh, _, _ = get_model_and_keypoints(class_id, model_id)
+    else:
+        model_mesh = None
 
     if device==None:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -433,7 +444,10 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
     if pre_:
         model_before = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,
                                      keypoint_detector=detector_type, correction_flag=use_corrector,
-                                     need_predicted_keypoints=True).to(device)
+                                     need_predicted_keypoints=True,
+                                     viz_keypoint_correction=visualize,
+                                     mesh_model=model_mesh,
+                                     hyper_param=hyper_param).to(device)
 
         if not os.path.isfile(best_pre_model_save_file):
             print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")
@@ -447,7 +461,10 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
     if post_:
         model_after = ProposedModel(class_name=class_name, model_keypoints=model_keypoints, cad_models=cad_models,
                                     keypoint_detector=detector_type, correction_flag=use_corrector,
-                                    need_predicted_keypoints=True).to(device)
+                                    need_predicted_keypoints=True,
+                                    viz_keypoint_correction=visualize,
+                                    mesh_model=model_mesh,
+                                    hyper_param=hyper_param).to(device)
 
         if not os.path.isfile(best_post_model_save_file):
             print("ERROR: CAN'T LOAD PRETRAINED REGRESSION MODEL, PATH DOESN'T EXIST")
@@ -480,9 +497,10 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
                      device=device, log_dir=log_dir, data_type=data_type)
 
     # # Visual Test
-    dataset_len = 20
+    dataset_len = 1
     dataset_batch_size = 1
-    dataset = DepthPC(class_id=class_id,
+    # dataset = eval_dataset
+    dataset = DepthPCVis(class_id=class_id,
                       model_id=model_id,
                       n=hyper_param['num_of_points_selfsupervised'],
                       num_of_points_to_sample=hyper_param['num_of_points_to_sample'],
