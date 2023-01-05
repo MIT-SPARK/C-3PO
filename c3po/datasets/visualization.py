@@ -8,19 +8,29 @@ from scipy.spatial.transform import Rotation as Rot
 import sys
 
 sys.path.append("../../")
-from c3po.utils.visualization_utils import display_two_pcs, visualize_model_n_keypoints, \
-    visualize_torch_model_n_keypoints, display_results
-
-from c3po.datasets.shapenet import get_model_and_keypoints
+from c3po.utils.visualization_utils import visualize_torch_model_n_keypoints
+from c3po.datasets.shapenet import get_model_and_keypoints, CLASS_NAME
 import c3po.utils.general as gu
 
 VISPOSE = {
-    'cap':  (torch.tensor([[[-0.7497,  0.0000, -0.6618],
+    'cap':  (torch.tensor([[[-0.2698,  0.0000,  0.9629],
                             [ 0.0000,  1.0000,  0.0000],
-                            [ 0.6618,  0.0000, -0.7497]]]),
-             torch.tensor([[[0.4728],
-                            [0.0693],
-                            [0.6590]]]))
+                            [-0.9629,  0.0000, -0.2698]]]),
+             torch.tensor([[[0.3701],
+                            [0.5303],
+                            [0.7668]]])),
+    'chair': (torch.tensor([[[-0.9510,  0.0000, -0.3092],
+                             [ 0.0000,  1.0000,  0.0000],
+                             [ 0.3092,  0.0000, -0.9510]]]),
+              torch.tensor([[[0.0151],
+                             [0.9925],
+                             [0.5638]]])),
+    'table': (torch.tensor([[[-0.0198,  0.0000, -0.9998],
+                             [ 0.0000,  1.0000,  0.0000],
+                             [ 0.9998,  0.0000, -0.0198]]]),
+              torch.tensor([[[0.2354],
+                             [0.7552],
+                             [0.6496]]]))
 }
 
 
@@ -83,33 +93,42 @@ class DepthPCVis(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         # Randomly rotate the self.model_mesh
         model_mesh = copy.deepcopy(self.model_mesh)
-        if self.rotate_about_z:
-            R = torch.eye(3)
-            angle = 2 * self.pi * torch.rand(1)
-            c = torch.cos(angle)
-            s = torch.sin(angle)
 
-            # # z
-            # R[0, 0] = c
-            # R[0, 1] = -s
-            # R[1, 0] = s
-            # R[1, 1] = c
-
-            # # x
-            # R[1, 1] = c
-            # R[1, 2] = -s
-            # R[2, 1] = s
-            # R[2, 2] = c
-
-            # y
-            R[0, 0] = c
-            R[0, 2] = s
-            R[2, 0] = -s
-            R[2, 2] = c
-
+        if CLASS_NAME[self.class_id] in VISPOSE.keys():
+            R, t = VISPOSE[CLASS_NAME[self.class_id]]
+            R = R.squeeze(0)
+            t = t.squeeze(0)
         else:
-            # R = transforms.random_rotation()
-            R = torch.from_numpy(Rot.random().as_matrix()).to(dtype=torch.float32)
+            if self.rotate_about_z:
+                R = torch.eye(3)
+                angle = 2 * self.pi * torch.rand(1)
+                c = torch.cos(angle)
+                s = torch.sin(angle)
+
+                # # z
+                # R[0, 0] = c
+                # R[0, 1] = -s
+                # R[1, 0] = s
+                # R[1, 1] = c
+
+                # # x
+                # R[1, 1] = c
+                # R[1, 2] = -s
+                # R[2, 1] = s
+                # R[2, 2] = c
+
+                # y
+                R[0, 0] = c
+                R[0, 2] = s
+                R[2, 0] = -s
+                R[2, 2] = c
+
+            else:
+                # R = transforms.random_rotation()
+                R = torch.from_numpy(Rot.random().as_matrix()).to(dtype=torch.float32)
+
+            # Translate by a random t
+            t = torch.rand(3, 1)
 
         model_mesh = model_mesh.rotate(R=R.numpy())
 
@@ -128,9 +147,6 @@ class DepthPCVis(torch.utils.data.Dataset):
         depth_pcd_torch = depth_pcd_torch.to(torch.float)
 
         keypoints_xyz = R @ self.keypoints_xyz
-
-        # Translate by a random t
-        t = torch.rand(3, 1)
 
         depth_pcd_torch = depth_pcd_torch + t
         keypoints_xyz = keypoints_xyz + t

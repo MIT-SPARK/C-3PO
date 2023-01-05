@@ -274,10 +274,10 @@ class kp_corrector_reg:
             self.vis.add_geometry(pc)
 
             data = dict()
-            data['input_pc'] = input_point_cloud
-            data['cad_model'] = self.cad_models
+            data['input_pc'] = input_point_cloud.detach().to('cpu').numpy()
+            data['cad_model'] = self.cad_models.detach().to('cpu').numpy()
             # data['mesh_model'] = self.model_mesh
-            data['model_keypoints'] = self.model_keypoints
+            data['model_keypoints'] = self.model_keypoints.detach().to('cpu').numpy()
             data['class_name'] = self.class_name
 
         iter = 0
@@ -323,11 +323,11 @@ class kp_corrector_reg:
                 # time.sleep(1)
 
                 data[iter] = {
-                    'R': R,
-                    't': t,
-                    'oc': certi,
-                    'nd': nondeg,
-                    'corrected_kp': kp
+                    'R': R.detach().to('cpu').numpy(),
+                    't': t.detach().to('cpu').numpy(),
+                    'oc': certi.detach().to('cpu').numpy(),
+                    'nd': nondeg.detach().to('cpu').numpy(),
+                    'corrected_kp': kp.detach().to('cpu').numpy()
                 }
 
             obj = obj_

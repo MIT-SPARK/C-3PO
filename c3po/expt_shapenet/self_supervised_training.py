@@ -30,7 +30,8 @@ from c3po.expt_shapenet.evaluation import evaluate
 from c3po.expt_shapenet.proposed_model import ProposedRegressionModel as ProposedModel
 from c3po.datasets.shapenet import get_model_and_keypoints
 from c3po.datasets.visualization import DepthPCVis
-
+from c3po.utils.evaluation_metrics import is_pcd_nondegenerate
+from c3po.datasets.shapenet import MODEL_TO_KPT_GROUPS as MODEL_TO_KPT_GROUPS_SHAPENET
 
 # Train
 def self_supervised_train_one_epoch(training_loader, model, optimizer, device, hyper_param):
@@ -327,14 +328,22 @@ def visual_test(test_loader, model, hyper_param, device=None):
                         predicted_model_keypoints=predicted_model_keypoints,
                         epsilon=hyper_param['epsilon'])
 
-        print("Certifiable: ", certi)
+        print("Observably Correct: ", certi)
 
+        # non-degeneracy
+        nondeg = is_pcd_nondegenerate(model.class_name, input_point_cloud, predicted_model_keypoints,
+                                      MODEL_TO_KPT_GROUPS_SHAPENET)
+        print("Non-degenerate: ", nondeg)
+
+        print("")
         # add-s
         pc_t = R_target @ cad_models + t_target
         add_s = add_s_error(predicted_point_cloud=predicted_point_cloud,
                             ground_truth_point_cloud=pc_t,
                             threshold=hyper_param['adds_threshold'])
         print("ADD-S: ", add_s)
+        if add_s[0][0]:
+            print("*********************")
 
         pc = input_point_cloud.clone().detach().to('cpu')
         pc_p = predicted_point_cloud.clone().detach().to('cpu')
@@ -369,6 +378,7 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
     """
     if visualize:
         model_mesh, _, _ = get_model_and_keypoints(class_id, model_id)
+        hyper_param['epsilon'] = 0.99
     else:
         model_mesh = None
 
@@ -498,14 +508,15 @@ def visualize_detector(hyper_param, detector_type, class_id, model_id,
 
     # # Visual Test
     dataset_len = 1
+    # breakpoint()
     dataset_batch_size = 1
     # dataset = eval_dataset
     dataset = DepthPCVis(class_id=class_id,
-                      model_id=model_id,
-                      n=hyper_param['num_of_points_selfsupervised'],
-                      num_of_points_to_sample=hyper_param['num_of_points_to_sample'],
-                      dataset_len=dataset_len,
-                      rotate_about_z=True)
+                         model_id=model_id,
+                         n=hyper_param['num_of_points_selfsupervised'],
+                         num_of_points_to_sample=hyper_param['num_of_points_to_sample'],
+                         dataset_len=dataset_len,
+                         rotate_about_z=True)
     loader = torch.utils.data.DataLoader(dataset, batch_size=dataset_batch_size, shuffle=False)
 
     if visualize and pre_:
