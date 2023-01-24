@@ -53,7 +53,7 @@ def plot_cert_at_train(model_class_ids, only_categories):
         class_id = CLASS_ID[key]
         class_name = CLASS_NAME[class_id]
 
-        fig_save_file_name = base_folder + "cert_plot_" + class_name + ".jpg"
+        fig_save_file_name = base_folder + "cert_plot_" + class_name + ".png"
         only_categories = [only_categories[0]]
         only_one=True
     else:
@@ -64,7 +64,7 @@ def plot_cert_at_train(model_class_ids, only_categories):
 
             fig_save_file_name = fig_save_file_name + "_" + class_name
 
-        fig_save_file_name = fig_save_file_name + ".jpg"
+        fig_save_file_name = fig_save_file_name + ".png"
 
     plot_dict = dict()
     index = 0
@@ -80,15 +80,20 @@ def plot_cert_at_train(model_class_ids, only_categories):
                 x = cert_at_train(detector_type=detector, class_name=class_name, model_id=model_id)
                 # if detector == "point_transformer":
                 #     print(x)
-                x = x.val
+                if not isinstance(x, list):
+                    x = x.val
+                    # breakpoint()
                 # print(x)
                 # print("x[0]", x[0])
+                # breakpoint()
 
                 if isinstance(x[0], list):
                     x_flat = [u for sublist in x for u in sublist]
                 else:
                     x_flat = x
                 # print(x_flat)
+                x_flat = x_flat[:300]
+
                 len_max = max(len_max, len(x_flat))
                 plot_dict[detector] = 100 * torch.tensor(x_flat)
 
@@ -98,13 +103,14 @@ def plot_cert_at_train(model_class_ids, only_categories):
                     z = z * torch.tensor([float("inf")])
                     plot_dict[detector] = torch.cat([plot_dict[detector], z])
 
+            plt.rcParams.update({'font.size': 15})
             if index == 0:
                 fig = plt.figure()
                 iter_range = torch.arange(len_max)
-                plt.plot(iter_range, plot_dict["pointnet"], '-', label=key + ': pointnet', color='grey')
-                plt.plot(iter_range, plot_dict["point_transformer"], '-', label=key + ': point transformer', color='orangered')
+                plt.plot(iter_range, plot_dict["pointnet"], '-', label=key + ': pointnet', color='grey', linewidth=1.0)
+                plt.plot(iter_range, plot_dict["point_transformer"], '-', label=key + ': point transformer', color='orangered', linewidth=1.0)
                 plt.xlabel('Number of SGD iterations')
-                plt.ylabel('Percent certifiable')
+                plt.ylabel('% Obs. Correct')
                 if only_one:
                     plt.legend(loc="lower right")
                     plt.show()
@@ -113,8 +119,8 @@ def plot_cert_at_train(model_class_ids, only_categories):
             if index == 1:
                 # fig = plt.figure()
                 # iter_range = torch.arange(len_max)
-                plt.plot(iter_range, plot_dict["pointnet"], '--', label=key + ': pointnet', color='grey')
-                plt.plot(iter_range, plot_dict["point_transformer"], '--', label=key + ': point transformer', color='orangered')
+                plt.plot(iter_range, plot_dict["pointnet"], ':', label=key + ': pointnet', color='grey', linewidth=1.0)
+                plt.plot(iter_range, plot_dict["point_transformer"], ':', label=key + ': point transformer', color='orangered', linewidth=1.0)
                 # plt.xlabel('number of SGD iterations')
                 # plt.ylabel('% certifiable')
                 plt.legend(loc="lower right")
