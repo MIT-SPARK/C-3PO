@@ -2,8 +2,8 @@
 
 Authors: Rajat Talak and Lisa Peng
 
-Certifiable 3D Object Pose Estimation (C-3PO) is an open-source implementation of our paper: 
-"*Correct and Certify: A New Approach to Self-Supervised 3D Object Perception*".
+This is an open-source implementation of our paper: 
+"*Certifiable 3D Object Pose Estimation: Foundations, Learning Models, and Self-Training*".
 This repository helps reproduce the experimental results reported in the paper and provides trained models for use.
 
 ## Paper 
@@ -11,37 +11,49 @@ This repository helps reproduce the experimental results reported in the paper a
 Our work solves the certifiable object pose estimation problem. In it, given a partial point cloud of an object, the goal 
 is to estimate the object pose and provide certification guarantees.
 
-#### R. Talak, L. Peng, L. Carlone, Correct and Certify: A New Approach to Self-Supervised 3D-Object Perception, June 2022 [[arXiv](https://arxiv.org/abs/2206.11215)]
+#### R. Talak, L. Peng, L. Carlone, Certifiable 3D Object Pose Estimation: Foundations, Learning Models, and Self-Training, January 2023 [[arXiv](https://arxiv.org/abs/2206.11215)]
 
-**Abstract:** We consider a certifiable object pose estimation problem, where -- given a partial point cloud of an 
-object -- the goal is to estimate the object pose, fit a CAD model to the sensor data, and provide certification 
-guarantees. We solve this problem by combining (i) a novel self-supervised training approach, and (ii) a certification 
-procedure, that not only verifies whether the output produced by the model is correct or not (i.e. *certifiability*), 
-but also flags uniqueness of the produced solution (i.e. *strong certifiability*). We use a semantic keypoint-based 
-pose estimation model, that is initially trained in simulation and does not perform well on real-data due to the 
-domain gap. Our self-supervised training procedure uses a *corrector* and a *certification* module to improve the 
-detector. The corrector module corrects the detected keypoints to compensate for the domain gap, and is implemented 
-as a declarative layer, for which we develop a simple differentiation rule. The certification module declares 
-whether the corrected output produced by the model is certifiable (i.e. correct) or not. At each iteration, the 
-approach optimizes over the loss induced only by the certifiable input-output pairs. As training progresses, we see 
-that the fraction of outputs that are certifiable increases, eventually reaching near 100% in many cases. We conduct 
-extensive experiments to evaluate the performance of the corrector, the certification, and the proposed self-supervised 
-training using the ShapeNet and YCB datasets, and show the proposed approach achieves performance comparable to fully 
-supervised baselines while not using any annotation for supervision on real data. 
+**Abstract:** We consider a *certifiable* object pose estimation problem, where 
+---given a partial point cloud of an object--- the goal is to not only estimate the object pose, but 
+also to provide a certificate of correctness for the resulting estimate.
+Our first contribution is a general theory of certification for end-to-end perception models. 
+In particular, we introduce the notion of $\zeta$-*correctness*, which bounds the  distance between an 
+estimate and the ground truth.
+We then show that $\zeta$-*correctness* can be assessed by implementing two certificates: 
+(i) a certificate of *observable correctness*, 
+that asserts if the model output is consistent with the input data and prior information, 
+(ii) a certificate of *non-degeneracy*, that asserts whether the input data is sufficient to compute a unique estimate.
+Our second contribution is to apply this theory and design a new learning-based certifiable pose estimator.
+In particular, we propose C-3PO, a semantic-keypoint-based pose estimation model, augmented with the two certificates, 
+to solve the certifiable pose estimation problem.
+C-3PO also includes a *keypoint corrector*, implemented as a differentiable optimization 
+layer, that can correct large detection errors (\eg due to the sim-to-real gap). 
+Our third contribution is a novel self-supervised training approach that uses our 
+certificate of observable correctness to provide the supervisory signal to C-3PO during training.
+In it, the model trains only on the observably correct input-output pairs produced in each batch and at each 
+iteration. As training progresses, we see that the observably correct input-output pairs grow, 
+eventually reaching near 100% in many cases. 
+We conduct extensive experiments to evaluate the performance of the corrector, 
+the certification, and the proposed self-supervised training using the ShapeNet and YCB datasets. 
+The experiments show that (i) standard semantic-keypoint-based methods (which constitute the backbone of C-3PO) 
+outperform more recent alternatives in challenging problem instances, (ii) C-3PO further improves performance 
+and significantly outperforms all the baselines, (iii) C-3PO's certificates are able to discern correct pose estimates.
+We release the implementation and an interactive visualization of all the results presented 
+in this paper at: https://github.com/MIT-SPARK/C-3PO and https://github.com/MIT-SPARK/pose-baselines.
 
 If you find this repository useful, do cite our work:
 
 ```bibtex
-@article{Talak22arxiv-correctAndCertify,
-  title = {Correct and {{Certify}}: {{A New Approach}} to {{Self-Supervised 3D-Object Perception}}},
+@article{Talak23arxiv-c3po,
+  title = {Certifiable 3D Object Pose Estimation: Foundations, Learning Models, and Self-Training},
   author = {Talak, Rajat and Peng, Lisa and Carlone, Luca},
-  year = {2022},
-  month = {Jun.},
+  year = {2023},
+  month = {Jan.},
   journal = {arXiv preprint arXiv: 2206.11215},
   eprint = {2206.11215},
   note = {\linkToPdf{https://arxiv.org/pdf/2206.11215.pdf}},
   pdf={https://arxiv.org/pdf/2206.11215.pdf},
-  Year = {2022}
+  Year = {2023}
 }
 
 ```
@@ -152,7 +164,7 @@ bash evaluate.sh
 For training models see instructions [here](docs/training-models.md).
 
 
-### Categoryless Self-Supervised Training Experiment
+### Learning without Object Category Labels 
 
 #### Description
 The proposed self-supervised training works even when the unannotated data does not have category labels.
